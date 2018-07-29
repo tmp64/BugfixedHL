@@ -170,6 +170,18 @@ CALL "$(ProjectDir)PreBuild.bat" "$(ProjectDir)..\" "$(ProjectDir)..\..\"
     <ClCompile Include="..\..\pm_shared\pm_debug.c" />
     <ClCompile Include="..\..\pm_shared\pm_math.c" />
     <ClCompile Include="..\..\pm_shared\pm_shared.c" />
+    <ClCompile Include="..\aghudcountdown.cpp" />
+    <ClCompile Include="..\aghudctf.cpp" />
+    <ClCompile Include="..\aghudglobal.cpp" />
+    <ClCompile Include="..\aghudlocation.cpp" />
+    <ClCompile Include="..\aghudlongjump.cpp" />
+    <ClCompile Include="..\aghudnextmap.cpp" />
+    <ClCompile Include="..\aghudplayerid.cpp" />
+    <ClCompile Include="..\aghudsettings.cpp" />
+    <ClCompile Include="..\aghudsuddendeath.cpp" />
+    <ClCompile Include="..\aghudtimeout.cpp" />
+    <ClCompile Include="..\aghudvote.cpp" />
+    <ClCompile Include="..\aglocation.cpp" />
     <ClCompile Include="..\ammo.cpp" />
     <ClCompile Include="..\ammohistory.cpp" />
     <ClCompile Include="..\ammo_secondary.cpp" />
@@ -193,6 +205,7 @@ CALL "$(ProjectDir)PreBuild.bat" "$(ProjectDir)..\" "$(ProjectDir)..\..\"
     <ClCompile Include="..\hud.cpp" />
     <ClCompile Include="..\hud_msg.cpp" />
     <ClCompile Include="..\hud_redraw.cpp" />
+    <ClCompile Include="..\hud_scores.cpp" />
     <ClCompile Include="..\hud_servers.cpp" />
     <ClCompile Include="..\hud_spectator.cpp" />
     <ClCompile Include="..\hud_timer.cpp" />
@@ -238,7 +251,6 @@ CALL "$(ProjectDir)PreBuild.bat" "$(ProjectDir)..\" "$(ProjectDir)..\..\"
     <ResourceCompile Include="client.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\common\itrackeruser.h" />
     <ClInclude Include="..\..\dlls\com_utils.h" />
     <ClInclude Include="..\..\dlls\memory.h" />
     <ClInclude Include="..\..\dlls\path.h" />
@@ -255,6 +267,18 @@ CALL "$(ProjectDir)PreBuild.bat" "$(ProjectDir)..\" "$(ProjectDir)..\..\"
     <ClInclude Include="..\..\pm_shared\pm_materials.h" />
     <ClInclude Include="..\..\pm_shared\pm_movevars.h" />
     <ClInclude Include="..\..\pm_shared\pm_shared.h" />
+    <ClInclude Include="..\aghudcountdown.h" />
+    <ClInclude Include="..\aghudctf.h" />
+    <ClInclude Include="..\aghudglobal.h" />
+    <ClInclude Include="..\aghudlocation.h" />
+    <ClInclude Include="..\aghudlongjump.h" />
+    <ClInclude Include="..\aghudnextmap.h" />
+    <ClInclude Include="..\aghudplayerid.h" />
+    <ClInclude Include="..\aghudsettings.h" />
+    <ClInclude Include="..\aghudsuddendeath.h" />
+    <ClInclude Include="..\aghudtimeout.h" />
+    <ClInclude Include="..\aghudvote.h" />
+    <ClInclude Include="..\aglocation.h" />
     <ClInclude Include="..\ammo.h" />
     <ClInclude Include="..\ammohistory.h" />
     <ClInclude Include="..\camera.h" />
@@ -281,9 +305,7 @@ CALL "$(ProjectDir)PreBuild.bat" "$(ProjectDir)..\" "$(ProjectDir)..\..\"
     <ClInclude Include="..\StudioModelRenderer.h" />
     <ClInclude Include="..\studio_util.h" />
     <ClInclude Include="..\svc_messages.h" />
-    <ClInclude Include="..\util.h" />
     <ClInclude Include="..\util_vector.h" />
-    <ClInclude Include="..\version.h" />
     <ClInclude Include="..\vgui_ConsolePanel.h" />
     <ClInclude Include="..\vgui_ControlConfigPanel.h" />
     <ClInclude Include="..\vgui_int.h" />

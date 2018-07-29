@@ -106,6 +106,10 @@ uint32_t g_pEngineClConnectionlessPacketOffset = 0;
 size_t g_CL_Parse_VoiceDataPlace = 0;
 uint8_t g_CL_Parse_VoiceDataPlaceBackup[5];
 
+/* Client CRC fix variables */
+size_t g_TfcFolderName = 0;
+uint8_t g_TfcFolderNamePlaceBackup[4];
+
 /* GameUI fix variables */
 int g_iLinesCounter = 0;
 ThisCallIntInt g_pFunctionReplacedByCounter;
@@ -117,20 +121,47 @@ size_t *g_pSystem = 0;
 CGameConsole003 **g_pGameConsole003 = 0;
 size_t g_PanelColorOffset = 0;
 
-/* Fullscreen toggle variables */
+/* Videomode types */
+#define SDL_WINDOWPOS_CENTERED_MASK        0x2FFF0000u
+#define SDL_WINDOWPOS_CENTERED_DISPLAY(X)  (SDL_WINDOWPOS_CENTERED_MASK|(X))
+#define SDL_WINDOWPOS_CENTERED             SDL_WINDOWPOS_CENTERED_DISPLAY(0)
+#define SDL_WINDOWPOS_ISCENTERED(X)        (((X)&0xFFFF0000) == SDL_WINDOWPOS_CENTERED_MASK)
 enum SDL_WindowFlags
 {
 	SDL_WINDOW_FULLSCREEN = 0x00000001,
 	SDL_WINDOW_FULLSCREEN_DESKTOP = (SDL_WINDOW_FULLSCREEN | 0x00001000),
 };
+struct SDL_DisplayMode
+{
+	uint32_t format;
+	int w;
+	int h;
+	int refresh_rate;
+	void* driverdata;
+};
 typedef int(*SDL_SetWindowFullscreen_t)(void *window, uint32_t flags);
+typedef int(*SDL_GetWindowDisplayMode_t)(void *window, const SDL_DisplayMode *mode);
+typedef int(*SDL_SetWindowDisplayMode_t)(void *window, const SDL_DisplayMode *mode);
+typedef int(*SDL_GetCurrentDisplayMode_t)(int displayIndex, SDL_DisplayMode *mode);
+typedef void(*SDL_GetWindowPosition_t)(void* window, int *x, int *y);
+typedef void(*SDL_SetWindowPosition_t)(void* window, int x, int y);
+typedef const char*(*SDL_GetError_t)(void);
+
+/* Videomode variables */
 bool g_bGotVideoModeData = false;
 HWND g_hWnd = NULL;
 size_t g_pVideoAbstraction = NULL;
 bool g_bNewerBuild = false;
 void **g_pSDL_Window = NULL;
 SDL_SetWindowFullscreen_t g_pSDL_SetWindowFullscreen = NULL;
+SDL_GetWindowDisplayMode_t g_pSDL_GetWindowDisplayMode = NULL;
+SDL_SetWindowDisplayMode_t g_pSDL_SetWindowDisplayMode = NULL;
+SDL_GetCurrentDisplayMode_t g_pSDL_GetCurrentDisplayMode = NULL;
+SDL_GetWindowPosition_t g_pSDL_GetWindowPosition = NULL;
+SDL_SetWindowPosition_t g_pSDL_SetWindowPosition = NULL;
+SDL_GetError_t g_pSDL_GetError = NULL;
 bool g_bLockedFullscreen = false;
+int m_iDisplayFrequency;
 
 #define ThreadQuerySetWin32StartAddress 9
 typedef NTSTATUS NTAPI NtQueryInformationThreadProto(HANDLE ThreadHandle, THREADINFOCLASS ThreadInformationClass, PVOID ThreadInformation, ULONG ThreadInformationLength, PULONG ReturnLength);
@@ -207,7 +238,7 @@ size_t ConvertHexString(const char *srcHexString, unsigned char *outBuffer, size
 }
 size_t MemoryFindForward(size_t start, size_t end, const unsigned char *pattern, const unsigned char *mask, size_t pattern_len)
 {
-	// Ensure start is lower then the end
+	// Ensure start is lower than the end
 	if (start > end)
 	{
 		size_t reverse = end;
@@ -268,7 +299,7 @@ size_t MemoryFindForward(size_t start, size_t end, const char *pattern, const ch
 }
 size_t MemoryFindBackward(size_t start, size_t end, const unsigned char *pattern, const unsigned char *mask, size_t pattern_len)
 {
-	// Ensure start is higher then the end
+	// Ensure start is higher than the end
 	if (start < end)
 	{
 		size_t reverse = end;
@@ -855,7 +886,7 @@ void PatchFpsBugPlace(void)
 		}
 		else
 		{
-			strncat(g_szPatchErrors, "Engine patch: offset of FPS bug place not found.\n", sizeof(g_szPatchErrors) - strlen(g_szPatchErrors) - 1);
+			//strncat(g_szPatchErrors, "Engine patch: offset of FPS bug place not found.\n", sizeof(g_szPatchErrors) - strlen(g_szPatchErrors) - 1);
 		}
 	}
 	else
@@ -1036,6 +1067,35 @@ void PatchCL_Parse_VoiceData(void)
 	}
 }
 
+void PatchClientCrcForAg(void)
+{
+	if (!g_TfcFolderName)
+	{
+		// Find "tfc" string that is used for CRC check
+		const char data1[] = "74666300 76616C766500";
+		const char mask1[] = "FFFFFFFF FFFFFFFFFFFF";
+		size_t addr1 = MemoryFindForward(g_EngineModuleBase, g_EngineModuleEnd, data1, mask1);
+		if (!addr1 || MemoryFindForward(addr1 + 1, g_EngineModuleEnd, data1, mask1))
+		{
+			strncat(g_szPatchErrors, "Engine patch: client CRC fix place not found.\n", sizeof(g_szPatchErrors) - strlen(g_szPatchErrors) - 1);
+			return;
+		}
+
+		g_TfcFolderName = addr1;
+
+		// Patch client CRC: place "ag" instead of "tfc"
+		const char data2[] = "61670000";
+		ConvertHexString(data2, g_TfcFolderNamePlaceBackup, sizeof(g_TfcFolderNamePlaceBackup));
+		ExchangeMemoryBytes((size_t *)(g_TfcFolderName), (size_t *)g_TfcFolderNamePlaceBackup, 4);
+	}
+	else
+	{
+		// Restore "tfc" string
+		ExchangeMemoryBytes((size_t *)(g_TfcFolderName), (size_t *)g_TfcFolderNamePlaceBackup, 4);
+		g_TfcFolderName = 0;
+	}
+}
+
 void FindColorOffset(void)
 {
 	if (!g_PanelColorOffset)
@@ -1078,6 +1138,7 @@ void FindColorOffset(void)
 	}
 }
 
+// Videomode changing code
 BOOL __stdcall EnumWindowsCallback(HWND hWnd, LPARAM lParam)
 {
 	DWORD windowPID;
@@ -1104,7 +1165,7 @@ void __CmdFunc_ToggleFullScreen(void)
 	bool *windowed = (bool *)(g_pVideoAbstraction + 440);
 
 	int argi = -1;
-	int argc = gEngfuncs.Cmd_Argc();
+	const int argc = gEngfuncs.Cmd_Argc();
 	if (argc > 1)
 	{
 		char *args = gEngfuncs.Cmd_Argv(1);
@@ -1163,11 +1224,11 @@ void __CmdFunc_ToggleFullScreen(void)
 
 	gHUD.m_scrinfo.iSize = sizeof(gHUD.m_scrinfo);
 	GetScreenInfo(&gHUD.m_scrinfo);
-	int width = ScreenWidth;
-	int height = ScreenHeight;
+	const int width = ScreenWidth;
+	const int height = ScreenHeight;
 
 	bool success;
-	if (argi == 1 || argi == 2 || argi == -1 && *windowed)
+	if (argi == 1 || argi == 2 || (argi == -1 && *windowed))
 	{
 		if (!g_bNewerBuild)
 		{
@@ -1180,12 +1241,8 @@ void __CmdFunc_ToggleFullScreen(void)
 				dm.dmPelsHeight = height;
 				dm.dmBitsPerPel = 32;
 				dm.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT | DM_BITSPERPEL | DM_DISPLAYFREQUENCY;
-				char *freq;
-				if (gEngfuncs.CheckParm("-freq", &freq))
-				{
-					dm.dmDisplayFrequency = atoi(freq);
-					dm.dmFields |= DM_DISPLAYFREQUENCY;
-				}
+				dm.dmDisplayFrequency = m_iDisplayFrequency;
+				dm.dmFields |= DM_DISPLAYFREQUENCY;
 				success = ChangeDisplaySettings(&dm, 0) == DISP_CHANGE_SUCCESSFUL;
 				if (!success)
 				{
@@ -1221,6 +1278,11 @@ void __CmdFunc_ToggleFullScreen(void)
 		}
 		else
 		{
+			// Zero position if centered
+			int x, y;
+			g_pSDL_GetWindowPosition(*g_pSDL_Window, &x, &y);
+			if (SDL_WINDOWPOS_ISCENTERED(x) && SDL_WINDOWPOS_ISCENTERED(y))
+				g_pSDL_SetWindowPosition(*g_pSDL_Window, 0, 0);
 			if (argi != 2)
 			{
 				if (!*windowed)
@@ -1263,9 +1325,125 @@ void __CmdFunc_ToggleFullScreen(void)
 		else
 		{
 			g_pSDL_SetWindowFullscreen(*g_pSDL_Window, 0);
+			// Position to the desktop center
+			int x, y;
+			g_pSDL_GetWindowPosition(*g_pSDL_Window, &x, &y);
+			if (x <= 0 && y <= 0)
+				g_pSDL_SetWindowPosition(*g_pSDL_Window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 		}
 
 		*windowed = true;
+	}
+}
+void __CmdFunc_RefreshRate(void)
+{
+	if (!g_bGotVideoModeData)
+	{
+		gEngfuncs.Con_Printf("RefreshRate feature works only in OpenGL or D3D mode.\n");
+		return;
+	}
+	if (!g_bNewerBuild)
+	{
+		gEngfuncs.Con_Printf("RefreshRate feature works only on new builds (SDL).\n");
+		return;
+	}
+
+	bool *windowed = (bool *)(g_pVideoAbstraction + 440);
+
+	int argc = gEngfuncs.Cmd_Argc();
+	if (argc > 1)
+	{
+		// Parse new refresh rate
+		char *args = gEngfuncs.Cmd_Argv(1);
+		const int refreshrate = atoi(args);
+		if (refreshrate == 0 || m_iDisplayFrequency == refreshrate)
+			return;
+		m_iDisplayFrequency = refreshrate;
+
+		SDL_DisplayMode mode{};
+		auto res = g_pSDL_GetWindowDisplayMode(*g_pSDL_Window, &mode);
+		if (res < 0)
+		{
+			auto s = g_pSDL_GetError();
+			ConsolePrint("Failed to get display mode.\n");
+			ConsolePrint(s);
+			ConsolePrint("\n");
+		}
+		mode.refresh_rate = m_iDisplayFrequency;
+		res = g_pSDL_SetWindowDisplayMode(*g_pSDL_Window, &mode);
+		if (res < 0)
+		{
+			auto s = g_pSDL_GetError();
+			ConsolePrint("Failed to set display mode.\n");
+			ConsolePrint(s);
+			ConsolePrint("\n");
+		}
+
+		if (*windowed)
+			return;
+
+		g_pSDL_SetWindowFullscreen(*g_pSDL_Window, 0);
+		g_pSDL_SetWindowFullscreen(*g_pSDL_Window, SDL_WINDOW_FULLSCREEN);
+	}
+	else
+	{
+		SDL_DisplayMode mode{};
+		auto res = g_pSDL_GetCurrentDisplayMode(0, &mode);
+		if (res < 0)
+		{
+			auto s = g_pSDL_GetError();
+			ConsolePrint("Failed to get display mode.\n");
+			ConsolePrint(s);
+			ConsolePrint("\n");
+		}
+		char buf[512];
+		sprintf(buf, "Current display mode: w: %i, h: %i, rr: %i\n", mode.w, mode.h, mode.refresh_rate);
+		ConsolePrint(buf);
+	}
+}
+void SetRefreshRate()
+{
+	if (!g_bNewerBuild)
+		return;
+
+	bool *windowed = (bool *)(g_pVideoAbstraction + 440);
+
+	if (*windowed || m_iDisplayFrequency == 0)
+		return;
+
+	SDL_DisplayMode mode{};
+	auto res = g_pSDL_GetCurrentDisplayMode(0, &mode);
+	if (res < 0)
+	{
+		auto s = g_pSDL_GetError();
+		ConsolePrint("Failed to get display mode.\n");
+		ConsolePrint(s);
+		ConsolePrint("\n");
+	}
+
+	if (m_iDisplayFrequency != mode.refresh_rate)
+	{
+		SDL_DisplayMode mode{};
+		auto res = g_pSDL_GetWindowDisplayMode(*g_pSDL_Window, &mode);
+		if (res < 0)
+		{
+			auto s = g_pSDL_GetError();
+			ConsolePrint("Failed to get display mode.\n");
+			ConsolePrint(s);
+			ConsolePrint("\n");
+		}
+		mode.refresh_rate = m_iDisplayFrequency;
+		res = g_pSDL_SetWindowDisplayMode(*g_pSDL_Window, &mode);
+		if (res < 0)
+		{
+			auto s = g_pSDL_GetError();
+			ConsolePrint("Failed to set display mode.\n");
+			ConsolePrint(s);
+			ConsolePrint("\n");
+		}
+
+		g_pSDL_SetWindowFullscreen(*g_pSDL_Window, 0);
+		g_pSDL_SetWindowFullscreen(*g_pSDL_Window, SDL_WINDOW_FULLSCREEN);
 	}
 }
 void FindVideoModeData()
@@ -1325,6 +1503,12 @@ void FindVideoModeData()
 		// Get SDL functions
 		HMODULE hSdl2 = GetModuleHandle("SDL2.dll");
 		g_pSDL_SetWindowFullscreen = (SDL_SetWindowFullscreen_t)GetProcAddress(hSdl2, "SDL_SetWindowFullscreen");
+		g_pSDL_GetWindowDisplayMode = (SDL_GetWindowDisplayMode_t)GetProcAddress(hSdl2, "SDL_GetWindowDisplayMode");
+		g_pSDL_SetWindowDisplayMode = (SDL_SetWindowDisplayMode_t)GetProcAddress(hSdl2, "SDL_SetWindowDisplayMode");
+		g_pSDL_GetCurrentDisplayMode = (SDL_GetCurrentDisplayMode_t)GetProcAddress(hSdl2, "SDL_GetCurrentDisplayMode");
+		g_pSDL_GetWindowPosition = (SDL_GetWindowPosition_t)GetProcAddress(hSdl2, "SDL_GetWindowPosition");
+		g_pSDL_SetWindowPosition = (SDL_SetWindowPosition_t)GetProcAddress(hSdl2, "SDL_SetWindowPosition");
+		g_pSDL_GetError = (SDL_GetError_t)GetProcAddress(hSdl2, "SDL_GetError");
 
 		// Find SDL_Window pointer
 		const char data4[] = "8B0D 5C053C02 8B4510 A3";
@@ -1376,6 +1560,7 @@ void PatchEngine(void)
 	PatchFpsBugPlace();
 	PatchConnectionlessPacketHandler();
 	PatchCL_Parse_VoiceData();
+	PatchClientCrcForAg();
 
 	FindVideoModeData();
 }
@@ -1402,6 +1587,7 @@ void UnPatchEngine(void)
 	}
 
 	PatchCL_Parse_VoiceData();
+	PatchClientCrcForAg();
 	PatchConnectionlessPacketHandler();
 	PatchFpsBugPlace();
 
@@ -1476,6 +1662,16 @@ void MemoryPatcherInit(void)
 
 	HOOK_COMMAND("togglefullscreen", ToggleFullScreen);
 	HOOK_COMMAND("fs", ToggleFullScreen);	// shortcut
+	HOOK_COMMAND("r_refreshrate", RefreshRate);
+	HOOK_COMMAND("rr", RefreshRate);		// shortcut
+
+	// Get desired frequency from param
+	char *freq;
+
+	if (gEngfuncs.CheckParm("-freq", &freq))
+	{
+		m_iDisplayFrequency = atoi(freq);
+	}
 
 	// Patch GameUI
 	PatchGameUi();
@@ -1547,7 +1743,7 @@ void SetAffinity(void)
 	}
 }
 
-// Output patch status
+// Output patch status and sets refresh rate
 void MemoryPatcherHudFrame(void)
 {
 	if (g_ServerBrowserBase == 0)
@@ -1568,6 +1764,8 @@ void MemoryPatcherHudFrame(void)
 	}
 
 	g_bPatchStatusPrinted = true;
+
+	SetRefreshRate();
 }
 
 // Set console output color

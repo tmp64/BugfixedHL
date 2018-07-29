@@ -28,6 +28,7 @@
 #include "wrect.h"
 #include "cl_dll.h"
 #include "ammo.h"
+#include <eiface.h>
 
 #define DHN_DRAWZERO	1
 #define DHN_2DIGITS		2
@@ -525,6 +526,8 @@ public:
 	void Think(void);
 	int Draw(float flTime);
 
+	int MsgFunc_Timer(const char *pszName, int iSize, void *pbuf);
+
 	void DoResync(void);
 	void ReadDemoTimerBuffer(int type, const unsigned char *buffer);
 	void CustomTimerCommand(void);
@@ -537,7 +540,13 @@ public:
 	};
 
 	int GetAgVersion(void) { return m_eAgVersion; }
+	float GetHudNextmap(void) { return m_pCvarHudNextmap->value; }
 	const char* GetNextmap(void) { return m_szNextmap; }
+	void SetNextmap(const char *nextmap)
+	{
+		strncpy(m_szNextmap, nextmap, HLARRAYSIZE(m_szNextmap) - 1);
+		m_szNextmap[HLARRAYSIZE(m_szNextmap) - 1] = 0;
+	}
 
 private:
 
@@ -553,7 +562,9 @@ private:
 	float	m_flDemoSyncTime;
 	bool	m_bDemoSyncTimeValid;
 	float	m_flNextSyncTime;
-	float	m_flEndtime;
+	bool	m_flSynced;
+	float	m_flEndTime;
+	float	m_flEffectiveTime;
 	bool	m_bDelayTimeleftReading;
 	float	m_flCustomTimerStart[MAX_CUSTOM_TIMERS];
 	float	m_flCustomTimerEnd[MAX_CUSTOM_TIMERS];
@@ -565,6 +576,7 @@ private:
 	bool	m_bNeedWriteNextmap;
 
 	cvar_t *m_pCvarHudTimer;
+	cvar_t *m_pCvarHudTimerSync;
 	cvar_t *m_pCvarHudNextmap;
 	cvar_t *m_pCvarMpTimelimit;
 	cvar_t *m_pCvarMpTimeleft;
@@ -576,6 +588,32 @@ private:
 	int		m_iReceivedSize;
 	int		m_iReceivedPackets;
 	int		m_iReceivedPacketsCount;
+};
+
+//
+//-----------------------------------------------------
+//
+
+struct HudScoresData
+{
+	char szScore[64];
+	int r, g, b;
+};
+
+class CHudScores : public CHudBase
+{
+public:
+	int Init(void);
+	int VidInit(void);
+	int Draw(float flTime);
+
+private:
+	HudScoresData m_ScoresData[MAX_PLAYERS] = {};
+	int m_iLines = 0;
+	int m_iOverLay = 0;
+	float m_flScoreBoardLastUpdated = 0;
+	cvar_t* m_pCvarHudScores = NULL;
+	cvar_t* m_pCvarHudScoresPos = NULL;
 };
 
 //
@@ -639,6 +677,18 @@ struct CharWidths
 	}
 };
 
+#include "aghudglobal.h"
+#include "aghudcountdown.h"
+#include "aghudctf.h"
+#include "aghudlocation.h"
+#include "aghudlongjump.h"
+#include "aghudnextmap.h"
+#include "aghudplayerid.h"
+#include "aghudsettings.h"
+#include "aghudsuddendeath.h"
+#include "aghudtimeout.h"
+#include "aghudvote.h"
+
 class CHud
 {
 private:
@@ -685,6 +735,7 @@ public:
 	cvar_t	*m_pCvarShowSteamId;
 	cvar_t	*m_pCvarShowKd;
 	cvar_t	*m_pCvarColorText;
+	cvar_t	*m_pCvarRDynamicEntLight;
 
 	int m_iFontHeight;
 	int DrawHudNumber(int x, int y, int iFlags, int iNumber, int r, int g, int b );
@@ -733,6 +784,19 @@ public:
 	CHudTextMessage		m_TextMessage;
 	CHudStatusIcons		m_StatusIcons;
 	CHudTimer			m_Timer;
+	CHudScores			m_Scores;
+
+	AgHudGlobal			m_Global;
+	AgHudCountdown		m_Countdown;
+	AgHudCTF			m_CTF;
+	AgHudLocation		m_Location;
+	AgHudLongjump		m_Longjump;
+	AgHudNextmap		m_Nextmap;
+	AgHudPlayerId		m_PlayerId;
+	AgHudSettings		m_Settings;
+	AgHudSuddenDeath	m_SuddenDeath;
+	AgHudTimeout		m_Timeout;
+	AgHudVote			m_Vote;
 
 	void Init( void );
 	void VidInit( void );

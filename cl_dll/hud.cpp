@@ -389,6 +389,7 @@ void CHud :: Init( void )
 	m_pCvarShowSteamId = CVAR_CREATE( "hud_showsteamidinscore", "1", FCVAR_ARCHIVE );	// controls whether or not to show SteamId in scoreboard table
 	m_pCvarShowKd = CVAR_CREATE("hud_showkdinscore", "1", FCVAR_ARCHIVE);	// controls whether or not to show K/D ratio in scoreboard table
 	m_pCvarColorText = CVAR_CREATE( "hud_colortext", "1", FCVAR_ARCHIVE );
+	m_pCvarRDynamicEntLight = CVAR_CREATE("r_dynamic_ent_light", "1", FCVAR_ARCHIVE);
 
 	cl_lw = gEngfuncs.pfnGetCvarPointer( "cl_lw" );
 
@@ -432,6 +433,23 @@ void CHud :: Init( void )
 	m_TextMessage.Init();
 	m_StatusIcons.Init();
 	m_Timer.Init();
+	m_Scores.Init();
+
+	if (g_iIsAg)
+	{
+		m_Global.Init();
+		m_Countdown.Init();
+		m_CTF.Init();
+		m_Location.Init();
+		m_Longjump.Init();
+		m_Nextmap.Init();
+		m_PlayerId.Init();
+		m_Settings.Init();
+		m_SuddenDeath.Init();
+		m_Timeout.Init();
+		m_Vote.Init();
+	}
+
 	GetClientVoiceMgr()->Init(&g_VoiceStatusHelper, (vgui::Panel**)&gViewPort);
 
 	m_Menu.Init();
@@ -574,6 +592,23 @@ void CHud :: VidInit( void )
 	m_TextMessage.VidInit();
 	m_StatusIcons.VidInit();
 	m_Timer.VidInit();
+	m_Scores.VidInit();
+
+	if (g_iIsAg)
+	{
+		m_Global.VidInit();
+		m_Countdown.VidInit();
+		m_CTF.VidInit();
+		m_Location.VidInit();
+		m_Longjump.VidInit();
+		m_Nextmap.VidInit();
+		m_PlayerId.VidInit();
+		m_Settings.VidInit();
+		m_SuddenDeath.VidInit();
+		m_Timeout.VidInit();
+		m_Vote.VidInit();
+	}
+
 	GetClientVoiceMgr()->VidInit();
 }
 
@@ -823,7 +858,7 @@ void CHud::GetHudColor( int hudPart, int value, int &r, int &g, int &b )
 	if (hudPart == 0) { ParseColor(m_pCvarColor->string, m_hudColor); c = &m_hudColor; }
 	else if (value >= 90) { ParseColor(m_pCvarColor1->string, m_hudColor1); c = &m_hudColor1; }
 	else if (value >= 50 && value <= 90) { ParseColor(m_pCvarColor2->string, m_hudColor2); c = &m_hudColor2; }
-	else if (value > 25 && value < 50 || hudPart == 2) { ParseColor(m_pCvarColor3->string, m_hudColor3); c = &m_hudColor3; }
+	else if ((value > 25 && value < 50) || hudPart == 2) { ParseColor(m_pCvarColor3->string, m_hudColor3); c = &m_hudColor3; }
 	else { r = 255; g = 0; b = 0; return; }	// UnpackRGB(r, g, b, RGB_REDISH);
 	r = c->r;
 	g = c->g;
