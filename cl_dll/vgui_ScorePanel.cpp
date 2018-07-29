@@ -983,12 +983,8 @@ void ScorePanel::FillGrid()
 				case COLUMN_KD:
 					if (gHUD.m_pCvarShowKd->value)
 					{
-						if (g_PlayerExtraInfo[m_iSortedRows[row]].deaths == 0) strcpy(sz, "-");
-						else
-						{
-							double kd = (float)g_PlayerExtraInfo[m_iSortedRows[row]].frags / (float)g_PlayerExtraInfo[m_iSortedRows[row]].deaths;
-							sprintf(sz, "%.2f", kd);
-						}
+						double kd = (double)g_PlayerExtraInfo[m_iSortedRows[row]].frags / (double)(g_PlayerExtraInfo[m_iSortedRows[row]].deaths + 1);
+						sprintf(sz, "%.2f", kd);
 					}
 					break;
 				case COLUMN_KILLS:
