@@ -29,6 +29,8 @@
 #include "..\game_shared\vgui_helpers.h"
 #include "..\game_shared\vgui_loadtga.h"
 #include "vgui_SpectatorPanel.h"
+#include "CHudTextMessage.h"
+#include "CHudTimer.h"
 
 hud_player_info_t	g_PlayerInfoList[MAX_PLAYERS + 1];	// player info from the engine
 extra_player_info_t	g_PlayerExtraInfo[MAX_PLAYERS + 1];	// additional player info sent directly to the client dll
@@ -456,7 +458,7 @@ void ScorePanel::Update()
 
 	// Set next map
 	char temp[MAX_MAP_NAME + 10];
-	const char* nextmap = gHUD.m_Timer.GetNextmap();
+	const char* nextmap = gHUD.m_Timer->GetNextmap();
 	if (nextmap[0])
 	{
 		sprintf_s(temp, sizeof(temp), "nextmap: %s", nextmap);
@@ -1089,7 +1091,7 @@ void ScorePanel::mousePressed(MouseCode code, Panel* panel)
 					sprintf( string1, CHudTextMessage::BufferedLocaliseTextString( "#Unmuted" ), pl_info->name );
 					sprintf( string, "%c** %s\n", HUD_PRINTTALK, string1 );
 
-					gHUD.m_TextMessage.MsgFunc_TextMsg(NULL, strlen(string)+1, string );
+					gHUD.m_TextMessage->MsgFunc_TextMsg(NULL, strlen(string)+1, string );
 				}
 				else
 				{
@@ -1103,7 +1105,7 @@ void ScorePanel::mousePressed(MouseCode code, Panel* panel)
 					sprintf( string2, CHudTextMessage::BufferedLocaliseTextString( "#No_longer_hear_that_player" ) );
 					sprintf( string, "%c** %s %s\n", HUD_PRINTTALK, string1, string2 );
 
-					gHUD.m_TextMessage.MsgFunc_TextMsg(NULL, strlen(string)+1, string );
+					gHUD.m_TextMessage->MsgFunc_TextMsg(NULL, strlen(string)+1, string );
 				}
 			}
 		}
