@@ -98,11 +98,7 @@ void CClientVGUI::Initialize( CreateInterfaceFn* pFactories, int iNumFactories )
 
 	g_pViewport->Initialize( pFactories, iNumFactories );
 	
-	vgui2::Frame* pFrame = new vgui2::Frame(g_pViewport, "MyFrame");
-	pFrame->SetScheme("ClientScheme.res");
-	pFrame->SetSize(100, 100);
-	pFrame->SetTitle("My First Frame", true);
-	pFrame->Activate();
+	
 #endif
 }
 
@@ -110,6 +106,19 @@ void CClientVGUI::Start()
 {
 #if USE_VGUI2
 	g_pViewport->Start();
+	vgui2::Frame* pFrame = new vgui2::Frame(g_pViewport, "MyFrame");
+	pFrame->SetProportional(false);
+	pFrame->SetTitleBarVisible(true);
+	pFrame->SetMinimizeButtonVisible(false);
+	pFrame->SetMaximizeButtonVisible(false);
+	pFrame->SetCloseButtonVisible(false);
+	pFrame->SetSizeable(false);
+	pFrame->SetMoveable(false);
+	pFrame->SetVisible(true);
+	pFrame->SetScheme(vgui2::scheme()->LoadSchemeFromFile("ui/resource/SourceScheme.res", "SourceScheme"));
+	pFrame->SetSize(100, 100);
+	pFrame->SetTitle("My First Frame", true);
+	pFrame->Activate();
 #endif
 }
 
