@@ -68,16 +68,20 @@ CALL "$(ProjectDir)PreBuild.bat" "$(ProjectDir)..\" "$(ProjectDir)..\..\"
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\utils\vgui\include;..\..\engine;..\..\common;..\..\pm_shared;..\..\dlls;..\jpeg;..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_DEBUG;WIN32;_WINDOWS;CLIENT_DLL;CLIENT_WEAPONS;_CRT_SECURE_NO_WARNINGS;PCRE_STATIC;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\utils\vgui\include;..\..\engine;..\..\common;..\..\pm_shared;..\..\dlls;..\jpeg;..\;..\..\vgui2;..\..\public;..\..\public\math;..\..\source_sdk\public;..\..\source_sdk\public\tier1;..\..\source_sdk\public\html;..\..\source_sdk\common;..\..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;WIN32;_WINDOWS;CLIENT_DLL;CLIENT_WEAPONS;_CRT_SECURE_NO_WARNINGS;PCRE_STATIC;HAVE_CONFIG_H;USE_VGUI2;NO_MALLOC_OVERRIDE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <AdditionalOptions>/Zc:threadSafeInit-</AdditionalOptions>
       <BrowseInformation>true</BrowseInformation>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <CompileAs>
+      </CompileAs>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>dbghelp.lib;psapi.lib;winmm.lib;wsock32.lib;../../utils/vgui/lib/win32_vc6/vgui.lib;../dinput/dinput8.lib;../dinput/dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>dbghelp.lib;psapi.lib;winmm.lib;wsock32.lib;../../utils/vgui/lib/win32_vc6/vgui.lib;../dinput/dinput8.lib;../dinput/dxguid.lib;..\lib\public\tier0.lib;..\lib\public\vstdlib.lib;..\..\source_sdk\tier1\Debug\tier1.lib;..\..\source_sdk\vgui2\controls\Debug\vgui2_controls.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)client.dll</OutputFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
@@ -110,15 +114,15 @@ CALL "$(ProjectDir)PreBuild.bat" "$(ProjectDir)..\" "$(ProjectDir)..\..\"
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>..\..\utils\vgui\include;..\..\engine;..\..\common;..\..\pm_shared;..\..\dlls;..\jpeg;..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;CLIENT_DLL;CLIENT_WEAPONS;_CRT_SECURE_NO_WARNINGS;PCRE_STATIC;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\utils\vgui\include;..\..\engine;..\..\common;..\..\pm_shared;..\..\dlls;..\jpeg;..\;..\..\vgui2;..\..\public;..\..\public\math;..\..\source_sdk\public;..\..\source_sdk\public\tier1;..\..\source_sdk\public\html;..\..\source_sdk\common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;CLIENT_DLL;CLIENT_WEAPONS;_CRT_SECURE_NO_WARNINGS;PCRE_STATIC;HAVE_CONFIG_H;USE_VGUI2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <AdditionalOptions>/Zc:threadSafeInit-</AdditionalOptions>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>dbghelp.lib;psapi.lib;winmm.lib;wsock32.lib;../../utils/vgui/lib/win32_vc6/vgui.lib;../dinput/dinput8.lib;../dinput/dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>dbghelp.lib;psapi.lib;winmm.lib;wsock32.lib;../../utils/vgui/lib/win32_vc6/vgui.lib;../dinput/dinput8.lib;../dinput/dxguid.lib;..\lib\public\tier0.lib;..\lib\public\vstdlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)client.dll</OutputFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
@@ -131,7 +135,6 @@ CALL "$(ProjectDir)PreBuild.bat" "$(ProjectDir)..\" "$(ProjectDir)..\..\"
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\common\interface.cpp" />
     <ClCompile Include="..\..\dlls\com_utils.cpp" />
     <ClCompile Include="..\..\dlls\crossbow.cpp" />
     <ClCompile Include="..\..\dlls\crowbar.cpp" />
@@ -168,6 +171,13 @@ CALL "$(ProjectDir)PreBuild.bat" "$(ProjectDir)..\" "$(ProjectDir)..\..\"
     <ClCompile Include="..\..\pm_shared\pm_debug.c" />
     <ClCompile Include="..\..\pm_shared\pm_math.c" />
     <ClCompile Include="..\..\pm_shared\pm_shared.c" />
+    <ClCompile Include="..\..\public\interface.cpp" />
+    <ClCompile Include="..\..\public\math\interpolation.cpp" />
+    <ClCompile Include="..\..\public\math\mathlib.cpp" />
+    <ClCompile Include="..\..\source_sdk\common\randoverride.cpp" />
+    <ClCompile Include="..\..\source_sdk\public\FileSystem_Helpers.cpp" />
+    <ClCompile Include="..\..\source_sdk\public\tier0\memoverride.cpp" />
+    <ClCompile Include="..\..\source_sdk\public\vgui_controls\vgui_controls.cpp" />
     <ClCompile Include="..\aghudcountdown.cpp" />
     <ClCompile Include="..\aghudctf.cpp" />
     <ClCompile Include="..\aghudglobal.cpp" />
@@ -232,6 +242,12 @@ CALL "$(ProjectDir)PreBuild.bat" "$(ProjectDir)..\" "$(ProjectDir)..\..\"
     <ClCompile Include="..\CHudTrain.cpp" />
     <ClCompile Include="..\tri.cpp" />
     <ClCompile Include="..\util.cpp" />
+    <ClCompile Include="..\vgui2\CBackGroundPanel.cpp" />
+    <ClCompile Include="..\vgui2\CBaseViewport.cpp" />
+    <ClCompile Include="..\vgui2\CClientMOTD.cpp" />
+    <ClCompile Include="..\vgui2\CClientVGUI.cpp" />
+    <ClCompile Include="..\vgui2\CHudViewport.cpp" />
+    <ClCompile Include="..\vgui2\KeyValuesCompat.cpp" />
     <ClCompile Include="..\vgui_ClassMenu.cpp" />
     <ClCompile Include="..\vgui_ConsolePanel.cpp" />
     <ClCompile Include="..\vgui_ControlConfigPanel.cpp" />
@@ -266,6 +282,129 @@ CALL "$(ProjectDir)PreBuild.bat" "$(ProjectDir)..\" "$(ProjectDir)..\..\"
     <ClInclude Include="..\..\pm_shared\pm_materials.h" />
     <ClInclude Include="..\..\pm_shared\pm_movevars.h" />
     <ClInclude Include="..\..\pm_shared\pm_shared.h" />
+    <ClInclude Include="..\..\public\archtypes.h" />
+    <ClInclude Include="..\..\public\FileSystem.h" />
+    <ClInclude Include="..\..\public\interface.h" />
+    <ClInclude Include="..\..\public\keydefs.h" />
+    <ClInclude Include="..\..\public\math\interpolation.h" />
+    <ClInclude Include="..\..\public\math\mathlib.h" />
+    <ClInclude Include="..\..\public\math\Matrix3x4.h" />
+    <ClInclude Include="..\..\public\math\vector.h" />
+    <ClInclude Include="..\..\public\particleman.h" />
+    <ClInclude Include="..\..\public\pman_particlemem.h" />
+    <ClInclude Include="..\..\public\pman_triangleffect.h" />
+    <ClInclude Include="..\..\source_sdk\common\ifilesystemopendialog.h" />
+    <ClInclude Include="..\..\source_sdk\public\basetypes.h" />
+    <ClInclude Include="..\..\source_sdk\public\commonmacros.h" />
+    <ClInclude Include="..\..\source_sdk\public\coordsize.h" />
+    <ClInclude Include="..\..\source_sdk\public\datamap.h" />
+    <ClInclude Include="..\..\source_sdk\public\FileSystem_Helpers.h" />
+    <ClInclude Include="..\..\source_sdk\public\ICVar.h" />
+    <ClInclude Include="..\..\source_sdk\public\mathlib.h" />
+    <ClInclude Include="..\..\source_sdk\public\OfflineMode.h" />
+    <ClInclude Include="..\..\source_sdk\public\SDK_Color.h" />
+    <ClInclude Include="..\..\source_sdk\public\tier0\basetypes.h" />
+    <ClInclude Include="..\..\source_sdk\public\tier0\commonmacros.h" />
+    <ClInclude Include="..\..\source_sdk\public\tier0\dbg.h" />
+    <ClInclude Include="..\..\source_sdk\public\tier0\dbgflag.h" />
+    <ClInclude Include="..\..\source_sdk\public\tier0\eventmasks.h" />
+    <ClInclude Include="..\..\source_sdk\public\tier0\eventmodes.h" />
+    <ClInclude Include="..\..\source_sdk\public\tier0\fasttimer.h" />
+    <ClInclude Include="..\..\source_sdk\public\tier0\ia32detect.h" />
+    <ClInclude Include="..\..\source_sdk\public\tier0\icommandline.h" />
+    <ClInclude Include="..\..\source_sdk\public\tier0\ioctlcodes.h" />
+    <ClInclude Include="..\..\source_sdk\public\tier0\k8performancecounters.h" />
+    <ClInclude Include="..\..\source_sdk\public\tier0\l2cache.h" />
+    <ClInclude Include="..\..\source_sdk\public\tier0\mem.h" />
+    <ClInclude Include="..\..\source_sdk\public\tier0\memalloc.h" />
+    <ClInclude Include="..\..\source_sdk\public\tier0\memdbgoff.h" />
+    <ClInclude Include="..\..\source_sdk\public\tier0\memdbgon.h" />
+    <ClInclude Include="..\..\source_sdk\public\tier0\minidump.h" />
+    <ClInclude Include="..\..\source_sdk\public\tier0\p4performancecounters.h" />
+    <ClInclude Include="..\..\source_sdk\public\tier0\p5p6performancecounters.h" />
+    <ClInclude Include="..\..\source_sdk\public\tier0\platform.h" />
+    <ClInclude Include="..\..\source_sdk\public\tier0\pmelib.h" />
+    <ClInclude Include="..\..\source_sdk\public\tier0\protected_things.h" />
+    <ClInclude Include="..\..\source_sdk\public\tier0\testthread.h" />
+    <ClInclude Include="..\..\source_sdk\public\tier0\threadtools.h" />
+    <ClInclude Include="..\..\source_sdk\public\tier0\tslist.h" />
+    <ClInclude Include="..\..\source_sdk\public\tier0\validator.h" />
+    <ClInclude Include="..\..\source_sdk\public\tier0\valobject.h" />
+    <ClInclude Include="..\..\source_sdk\public\tier0\valve_off.h" />
+    <ClInclude Include="..\..\source_sdk\public\tier0\valve_on.h" />
+    <ClInclude Include="..\..\source_sdk\public\tier0\vcrmode.h" />
+    <ClInclude Include="..\..\source_sdk\public\tier0\vcr_shared.h" />
+    <ClInclude Include="..\..\source_sdk\public\tier0\vprof.h" />
+    <ClInclude Include="..\..\source_sdk\public\tier0\wchartypes.h" />
+    <ClInclude Include="..\..\source_sdk\public\tier0\xbox_codeline_defines.h" />
+    <ClInclude Include="..\..\source_sdk\public\Vector.h" />
+    <ClInclude Include="..\..\source_sdk\public\Vector2D.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\AnimatingImagePanel.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\AnimationController.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\BitmapImagePanel.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\BuildGroup.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\BuildModeDialog.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\Button.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\CheckButton.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\CheckButtonList.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\ComboBox.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\Controls.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\DialogManager.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\DirectorySelectDialog.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\Divider.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\EditablePanel.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\ExpandButton.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\FileOpenDialog.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\FocusNavGroup.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\Frame.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\GraphPanel.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\HTML.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\Image.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\ImageList.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\ImagePanel.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\InputDialog.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\KeyBindingHelpDialog.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\KeyBindingMap.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\KeyBoardEditorDialog.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\Label.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\ListPanel.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\ListViewPanel.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\Menu.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\MenuBar.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\MenuButton.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\MenuItem.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\MessageBox.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\MessageMap.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\Panel.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\PanelAnimationVar.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\PanelListPanel.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\pch_vgui_controls.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\PHandle.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\ProgressBar.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\ProgressBox.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\PropertyDialog.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\PropertyPage.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\PropertySheet.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\QueryBox.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\RadioButton.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\RichText.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\ScrollBar.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\ScrollBarSlider.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\SectionedListPanel.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\Slider.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\Splitter.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\TextEntry.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\TextImage.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\ToggleButton.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\Tooltip.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\ToolWindow.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\TreeView.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\TreeViewListControl.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\URLLabel.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\WizardPanel.h" />
+    <ClInclude Include="..\..\source_sdk\public\vgui_controls\WizardSubPanel.h" />
+    <ClInclude Include="..\..\source_sdk\public\winlite.h" />
+    <ClInclude Include="..\..\source_sdk\public\worldsize.h" />
     <ClInclude Include="..\aghudcountdown.h" />
     <ClInclude Include="..\aghudctf.h" />
     <ClInclude Include="..\aghudglobal.h" />
@@ -321,6 +460,16 @@ CALL "$(ProjectDir)PreBuild.bat" "$(ProjectDir)..\" "$(ProjectDir)..\..\"
     <ClInclude Include="..\studio_util.h" />
     <ClInclude Include="..\svc_messages.h" />
     <ClInclude Include="..\util_vector.h" />
+    <ClInclude Include="..\vgui2\CBackGroundPanel.h" />
+    <ClInclude Include="..\vgui2\CBaseViewport.h" />
+    <ClInclude Include="..\vgui2\CClientMOTD.h" />
+    <ClInclude Include="..\vgui2\CClientVGUI.h" />
+    <ClInclude Include="..\vgui2\CHudViewport.h" />
+    <ClInclude Include="..\vgui2\IViewport.h" />
+    <ClInclude Include="..\vgui2\IViewportPanel.h" />
+    <ClInclude Include="..\vgui2\KeyValuesCompat.h" />
+    <ClInclude Include="..\vgui2\VGUI2Paths.h" />
+    <ClInclude Include="..\vgui2\ViewportPanelNames.h" />
     <ClInclude Include="..\vgui_ConsolePanel.h" />
     <ClInclude Include="..\vgui_ControlConfigPanel.h" />
     <ClInclude Include="..\vgui_int.h" />

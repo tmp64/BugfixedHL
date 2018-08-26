@@ -1,0 +1,26 @@
+add_sources(
+	Cursor.h
+	Dar.h
+	IBorder.h
+	IClientPanel.h
+	IHTML.h
+	IImage.h
+	IInput.h
+	IInputInternal.h
+	ILocalize.h
+	IPanel.h
+	IScheme.h
+	ISurface.h
+	ISurfaceV28.h
+	ISurfaceV29.h
+	ISystem.h
+	IVGui.h
+	IVguiMatInfo.h
+	IVguiMatInfoVar.h
+	IVguiV06.h
+	KeyCode.h
+	MouseCode.h
+	Point.h
+	VGUI2.h
+)
+

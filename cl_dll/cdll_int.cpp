@@ -443,3 +443,10 @@ void DLLEXPORT HUD_DirectorMessage( int iSize, void *pbuf )
 }
 
 
+/**
+*	This function is never called, but it has to exist in order for the engine to load stuff from the client. - Solokiller
+*/
+extern "C" DLLEXPORT void* ClientFactory()
+{
+	return nullptr;
+}
