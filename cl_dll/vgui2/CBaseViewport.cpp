@@ -30,7 +30,7 @@ CBaseViewport::CBaseViewport()
 	SetKeyBoardInputEnabled( false );
 	SetMouseInputEnabled( false );
 
-	vgui2::HScheme scheme = vgui2::scheme()->LoadSchemeFromFile( UI_CLIENTSCHEME_FILENAME, "ClientScheme" );
+	vgui2::HScheme scheme = vgui2::scheme()->LoadSchemeFromFile(UI_CLIENTSCHEME_FILENAME, "GameScheme");
 
 	SetScheme( scheme );
 	SetProportional( true );
@@ -415,11 +415,7 @@ void CBaseViewport::ReloadScheme( const char* pszFromFile )
 
 	if( pszFromFile != nullptr )
 	{
-		// "resource/ClientScheme.res"
-		vgui2::HScheme scheme = vgui2::scheme()->LoadSchemeFromFile( pszFromFile, "HudScheme" );
-
-		//TODO: only used by CStrike & CZero. - Solokiller
-		vgui2::scheme()->LoadSchemeFromFile( UI_TUTORSCHEME_FILENAME, "TutorScheme" );
+		vgui2::HScheme scheme = vgui2::scheme()->LoadSchemeFromFile(pszFromFile, "GameScheme");
 
 		SetScheme( scheme );
 		SetProportional( true );

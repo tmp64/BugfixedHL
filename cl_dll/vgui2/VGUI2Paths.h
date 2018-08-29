@@ -10,7 +10,7 @@
 /**
 *	Base directory for UI files.
 */
-#define UI_BASE_DIR "ui"
+#define UI_BASE_DIR ""
 
 /**
 *	Resource files.
@@ -25,7 +25,7 @@
 /**
 *	Scheme used by default.
 */
-#define UI_CLIENTSCHEME_FILENAME ( UI_RESOURCE_DIR "/ClientScheme.res" )
+#define UI_CLIENTSCHEME_FILENAME ( UI_RESOURCE_DIR "/GameScheme.res" )
 
 /**
 *	Scheme used for CZero tutor elements.
