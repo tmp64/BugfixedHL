@@ -32,39 +32,44 @@ typedef float vec_t;				// needed before including progdefs.h
 // 2DVector - used for many pathfinding and many other 
 // operations that are treated as planar rather than 3d.
 //=========================================================
-class Vector2D
+// Vector2D conflicts with Source SDK's Vector2D.
+// It doesn't seem to be used anywhere though, so I put it in a separate namespace
+namespace HL1
 {
-public:
-	inline Vector2D(void)									{ }
-	inline Vector2D(float X, float Y)						{ x = X; y = Y; }
-	inline Vector2D operator+(const Vector2D& v)	const	{ return Vector2D(x+v.x, y+v.y);	}
-	inline Vector2D operator-(const Vector2D& v)	const	{ return Vector2D(x-v.x, y-v.y);	}
-	inline Vector2D operator*(float fl)				const	{ return Vector2D(x*fl, y*fl);	}
-	inline Vector2D operator/(float fl)				const	{ return Vector2D(x/fl, y/fl);	}
-	
-	inline float Length(void)						const	{ return (float)sqrt(x*x + y*y );		}
-
-	inline Vector2D Normalize ( void ) const
+	class Vector2D
 	{
-		Vector2D vec2;
+	public:
+		inline Vector2D(void) { }
+		inline Vector2D(float X, float Y) { x = X; y = Y; }
+		inline Vector2D operator+(const Vector2D& v)	const { return Vector2D(x + v.x, y + v.y); }
+		inline Vector2D operator-(const Vector2D& v)	const { return Vector2D(x - v.x, y - v.y); }
+		inline Vector2D operator*(float fl)				const { return Vector2D(x*fl, y*fl); }
+		inline Vector2D operator/(float fl)				const { return Vector2D(x / fl, y / fl); }
 
-		float flLen = Length();
-		if ( flLen == 0 )
+		inline float Length(void)						const { return (float)sqrt(x*x + y * y); }
+
+		inline Vector2D Normalize(void) const
 		{
-			return Vector2D( (float)0, (float)0 );
-		}
-		else
-		{
-			flLen = 1 / flLen;
-			return Vector2D( x * flLen, y * flLen );
-		}
-	}
+			Vector2D vec2;
 
-	vec_t	x, y;
-};
+			float flLen = Length();
+			if (flLen == 0)
+			{
+				return Vector2D((float)0, (float)0);
+			}
+			else
+			{
+				flLen = 1 / flLen;
+				return Vector2D(x * flLen, y * flLen);
+			}
+		}
 
-inline float DotProduct(const Vector2D& a, const Vector2D& b) { return( a.x*b.x + a.y*b.y ); }
-inline Vector2D operator*(float fl, const Vector2D& v)	{ return v * fl; }
+		vec_t	x, y;
+	};
+
+	inline float DotProduct(const Vector2D& a, const Vector2D& b) { return(a.x*b.x + a.y*b.y); }
+	inline Vector2D operator*(float fl, const Vector2D& v) { return v * fl; }
+}
 
 //=========================================================
 // 3D Vector
@@ -102,9 +107,9 @@ public:
 		return Vector(x * flLen, y * flLen, z * flLen);
 	}
 
-	inline Vector2D Make2D ( void ) const
+	inline HL1::Vector2D Make2D ( void ) const
 	{
-		Vector2D	Vec2;
+		HL1::Vector2D Vec2;
 
 		Vec2.x = x;
 		Vec2.y = y;

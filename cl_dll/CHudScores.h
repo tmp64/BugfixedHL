@@ -3,6 +3,8 @@
 
 #include "CHudBase.h"
 
+class CScorePanel;
+
 struct HudScoresData
 {
 	char szScore[64];
@@ -23,6 +25,8 @@ private:
 	float m_flScoreBoardLastUpdated = 0;
 	cvar_t* m_pCvarHudScores = nullptr;
 	cvar_t* m_pCvarHudScoresPos = nullptr;
+
+	CScorePanel *m_pScorePanel = nullptr;
 };
 
 #endif

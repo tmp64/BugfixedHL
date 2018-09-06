@@ -10,7 +10,7 @@
 /**
 *	Base directory for UI files.
 */
-#define UI_BASE_DIR ""
+#define UI_BASE_DIR "ui"
 
 /**
 *	Resource files.

@@ -21,9 +21,11 @@
 #include "CHudScores.h"
 #include "hud.h"
 #include "cl_util.h"
-#include "vgui_TeamFortressViewport.h"
-#include "vgui_ScorePanel.h"
+//#include "vgui_TeamFortressViewport.h"
+//#include "vgui_ScorePanel.h"
 
+#include "vgui2/CBaseViewport.h"
+#include "CScorePanel.h"
 
 int CHudScores::Init(void)
 {
@@ -42,6 +44,9 @@ int CHudScores::VidInit(void)
 	m_iOverLay = 0;
 	m_flScoreBoardLastUpdated = 0;
 
+	m_pScorePanel = new CScorePanel(g_pViewport);
+	m_pScorePanel->ShowPanel(true);
+
 	return 1;
 }
 
@@ -54,6 +59,8 @@ int CHudScores::Draw (float flTime)
 	if (gEngfuncs.GetMaxClients() <= 1)
 		return 1;
 
+	// VGUI1 code conflicts with VGUI2 
+#if 0
 	if (gViewPort && gViewPort->m_pScoreBoard)
 	{
 		// Update the Scoreboard
@@ -118,6 +125,7 @@ int CHudScores::Draw (float flTime)
 			ypos += gHUD.m_scrinfo.iCharHeight * 0.9;
 		}
 	}
+#endif
 
 	return 1;
 }

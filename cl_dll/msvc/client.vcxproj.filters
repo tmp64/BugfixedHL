@@ -412,6 +412,9 @@
     <ClCompile Include="..\vgui2\CBackGroundPanel.cpp">
       <Filter>vgui2</Filter>
     </ClCompile>
+    <ClCompile Include="..\CScorePanel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\ammo.h">
@@ -1058,6 +1061,12 @@
     </ClInclude>
     <ClInclude Include="..\vgui2\ViewportPanelNames.h">
       <Filter>vgui2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CScorePanel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CGameInfo.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -198,6 +198,7 @@ CALL "$(ProjectDir)PreBuild.bat" "$(ProjectDir)..\" "$(ProjectDir)..\..\"
     <ClCompile Include="..\CHudBase.cpp" />
     <ClCompile Include="..\com_weapons.cpp" />
     <ClCompile Include="..\CHudDeathNotice.cpp" />
+    <ClCompile Include="..\CScorePanel.cpp" />
     <ClCompile Include="..\demo.cpp" />
     <ClCompile Include="..\entity.cpp" />
     <ClCompile Include="..\events.cpp" />
@@ -420,6 +421,7 @@ CALL "$(ProjectDir)PreBuild.bat" "$(ProjectDir)..\" "$(ProjectDir)..\..\"
     <ClInclude Include="..\ammo.h" />
     <ClInclude Include="..\ammohistory.h" />
     <ClInclude Include="..\camera.h" />
+    <ClInclude Include="..\CGameInfo.h" />
     <ClInclude Include="..\CHudAmmo.h" />
     <ClInclude Include="..\CHudAmmoSecondary.h" />
     <ClInclude Include="..\CHudBase.h" />
@@ -439,6 +441,7 @@ CALL "$(ProjectDir)PreBuild.bat" "$(ProjectDir)..\" "$(ProjectDir)..\..\"
     <ClInclude Include="..\cl_dll.h" />
     <ClInclude Include="..\cl_util.h" />
     <ClInclude Include="..\com_weapons.h" />
+    <ClInclude Include="..\CScorePanel.h" />
     <ClInclude Include="..\demo.h" />
     <ClInclude Include="..\eventscripts.h" />
     <ClInclude Include="..\ev_hldm.h" />

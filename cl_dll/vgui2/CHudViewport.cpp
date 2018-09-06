@@ -1,5 +1,6 @@
 #include <vgui/IInputInternal.h>
 #include "vgui2/CClientMOTD.h"
+#include "CScorePanel.h"
 
 #include "CHudViewport.h"
 
@@ -24,9 +25,13 @@ IViewportPanel* CHudViewport::CreatePanelByName( const char* pszName )
 {
 	IViewportPanel* pPanel = nullptr;
 
-	if( Q_strcmp( VIEWPORT_PANEL_MOTD, pszName ) == 0 )
+	if (Q_strcmp( VIEWPORT_PANEL_MOTD, pszName ) == 0)
 	{
 		pPanel = new CClientMOTD( this );
+	}
+	else if (Q_strcmp(VIEWPORT_PANEL_SCORE, pszName) == 0)
+	{
+		pPanel = new CScorePanel(this);
 	}
 
 	return pPanel;
