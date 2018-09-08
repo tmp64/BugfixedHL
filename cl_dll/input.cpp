@@ -540,6 +540,11 @@ void IN_ScoreDown(void)
 void IN_ScoreUp(void)
 {
 	KeyUp(&in_score);
+	// VGUI1 call is required for mouse to work in game (why, valve?)
+	if (gViewPort)
+	{
+		gViewPort->HideScoreBoard();
+	}
 	if (gHUD.m_Scores->m_pScorePanel) gHUD.m_Scores->HideScoreBoard();
 }
 

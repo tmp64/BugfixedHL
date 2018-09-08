@@ -24,7 +24,7 @@
 //#include "vgui_TeamFortressViewport.h"
 //#include "vgui_ScorePanel.h"
 
-#include "vgui2/CHudViewport.h"
+#include "vgui2/CBaseViewport.h"
 #include "CScorePanel.h"
 
 int CHudScores::Init(void)
@@ -48,8 +48,6 @@ int CHudScores::VidInit(void)
 	{
 		m_pScorePanel = dynamic_cast<CScorePanel *>(g_pViewport->CreatePanelByName(VIEWPORT_PANEL_SCORE));
 		//g_pViewport->AddNewPanel(m_pScorePanel);
-
-		//m_pScorePanel->ShowPanel(true);
 	}
 
 	return 1;
