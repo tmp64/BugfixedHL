@@ -190,6 +190,7 @@ CALL "$(ProjectDir)PreBuild.bat" "$(ProjectDir)..\" "$(ProjectDir)..\..\"
     <ClCompile Include="..\aghudtimeout.cpp" />
     <ClCompile Include="..\aghudvote.cpp" />
     <ClCompile Include="..\aglocation.cpp" />
+    <ClCompile Include="..\CGameInfo.cpp" />
     <ClCompile Include="..\CHudAmmo.cpp" />
     <ClCompile Include="..\ammohistory.cpp" />
     <ClCompile Include="..\CHudAmmoSecondary.cpp" />

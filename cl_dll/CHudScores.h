@@ -14,9 +14,13 @@ struct HudScoresData
 class CHudScores : public CHudBase
 {
 public:
+	CScorePanel * m_pScorePanel = nullptr;
+
 	int Init(void);
 	int VidInit(void);
 	int Draw(float flTime);
+	void ShowScoreBoard();
+	void HideScoreBoard();
 
 private:
 	HudScoresData m_ScoresData[MAX_PLAYERS] = {};
@@ -25,8 +29,6 @@ private:
 	float m_flScoreBoardLastUpdated = 0;
 	cvar_t* m_pCvarHudScores = nullptr;
 	cvar_t* m_pCvarHudScoresPos = nullptr;
-
-	CScorePanel *m_pScorePanel = nullptr;
 };
 
 #endif

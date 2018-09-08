@@ -1,4 +1,5 @@
 #include "CScorePanel.h"
+#include "CGameInfo.h"
 #include "vgui2/CClientVGUI.h"
 #include "vgui2/VGUI2Paths.h"
 #include "vgui2/CBaseViewport.h"
@@ -6,8 +7,17 @@
 #include <vgui_controls/SectionedListPanel.h>
 #include <KeyValues.h>
 #include <vgui_controls/BuildModeDialog.h>
+#include <string>
+#include <locale>
+#include <codecvt>
+#include <set>
+#include "hud.h"
+#include "cl_util.h"
 
-CScorePanel::CScorePanel(IViewport *pParent) : BaseClass(nullptr, "ClientMOTD"),
+//--------------------------------------------------------------
+// Constructor & destructor
+//--------------------------------------------------------------
+CScorePanel::CScorePanel(IViewport *pParent) : BaseClass(nullptr, "ScorePanel"),
 												m_pViewport(pParent)
 {
 	SetTitle("", true);
@@ -30,70 +40,16 @@ CScorePanel::CScorePanel(IViewport *pParent) : BaseClass(nullptr, "ClientMOTD"),
 	InvalidateLayout();
 	SetVisible(false);
 
-	/*int wide, tall;
-	GetSize(wide, tall);
-	m_pPlayerList->SetSize(wide, tall);*/
-
-	// Header
-	m_pPlayerList->AddSection(m_pHeader, "", StaticPlayerSortFunc);
-	m_pPlayerList->SetSectionAlwaysVisible(m_pHeader);
-	m_pPlayerList->AddColumnToSection(m_pHeader, "name", "#PlayerName", vgui2::SectionedListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), NAME_WIDTH));
-	m_pPlayerList->AddColumnToSection(m_pHeader, "frags", "#PlayerScore", vgui2::SectionedListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), SCORE_WIDTH));
-	m_pPlayerList->AddColumnToSection(m_pHeader, "deaths", "#PlayerDeath", vgui2::SectionedListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), DEATH_WIDTH));
-	m_pPlayerList->AddColumnToSection(m_pHeader, "ping", "#PlayerPing", vgui2::SectionedListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), PING_WIDTH));
-
-	for (int section = 1; section < 3; section++)
-	{
-		m_pPlayerList->AddSection(section, "", StaticPlayerSortFunc);
-		m_pPlayerList->SetSectionAlwaysVisible(section);
-		m_pPlayerList->AddColumnToSection(section, "name", "barney", vgui2::SectionedListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), NAME_WIDTH));
-		m_pPlayerList->AddColumnToSection(section, "frags", "", vgui2::SectionedListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), SCORE_WIDTH));
-		m_pPlayerList->AddColumnToSection(section, "deaths", "", vgui2::SectionedListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), DEATH_WIDTH));
-		m_pPlayerList->AddColumnToSection(section, "ping", "", vgui2::SectionedListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), PING_WIDTH));
-
-		{
-			KeyValues *playerData = new KeyValues("data");
-			playerData->SetString("name", "Test 1");
-			playerData->SetInt("frags", 10);
-			playerData->SetInt("deaths", 3);
-			playerData->SetInt("ping", 61);
-			int item = m_pPlayerList->AddItem(section, playerData);
-			m_pPlayerList->SetItemFgColor(item, SDK_Color(255, 0, 0, 255));
-			playerData->deleteThis();
-			m_pPlayerList->SetSelectedItem(item);
-		}
-
-		{
-			KeyValues *playerData = new KeyValues("data");
-			playerData->SetString("name", "Test 2");
-			playerData->SetInt("frags", 11);
-			playerData->SetInt("deaths", 4);
-			playerData->SetInt("ping", 31);
-			int item = m_pPlayerList->AddItem(section, playerData);
-			m_pPlayerList->SetItemFgColor(item, SDK_Color(0, 255, 0, 255));
-			playerData->deleteThis();
-		}
-
-		{
-			KeyValues *playerData = new KeyValues("data");
-			playerData->SetString("name", "Test 3");
-			playerData->SetInt("frags", 37);
-			playerData->SetInt("deaths", 1);
-			playerData->SetInt("ping", 100);
-			int item = m_pPlayerList->AddItem(section, playerData);
-			m_pPlayerList->SetItemFgColor(item, SDK_Color(0, 0, 255, 255));
-			playerData->deleteThis();
-
-		}
-	}
-
-	ActivateBuildMode();
+	//ActivateBuildMode();
 }
 
 CScorePanel::~CScorePanel()
 {
 }
 
+//--------------------------------------------------------------
+// VGUI overrides and etc
+//--------------------------------------------------------------
 void CScorePanel::Reset()
 {
 	//m_pPlayerList->DeleteAllItems();
@@ -134,6 +90,108 @@ void CScorePanel::ShowPanel(bool state)
 	}
 }
 
+//--------------------------------------------------------------
+// Scoreboard update methods
+//--------------------------------------------------------------
+void CScorePanel::FullUpdate()
+{
+	m_pPlayerList->DeleteAllItems();
+	m_pPlayerList->RemoveAllSections();
+	memset(m_pTeamInfo, 0, sizeof(m_pTeamInfo));
+
+	UpdateServerName();
+	AddHeader();
+	RecalcTeams();
+}
+
+void CScorePanel::RecalcTeams()
+{
+	ConPrintf("Sorting scoreboard\n");
+	// Fill team info from player info
+	// FIXME: Use overriden values in g_TeamInfo if need to
+	for (int i = 1; i <= MAX_PLAYERS; i++)
+	{
+		GetPlayerInfo(i, &g_PlayerInfoList[i]);
+		if (!g_PlayerInfoList[i].name) continue; // Player is not connected
+		int team = g_PlayerExtraInfo[i].teamnumber;
+		if (!m_pTeamInfo[team].name[0]) strncpy(m_pTeamInfo[team].name, g_PlayerExtraInfo[i].teamname, MAX_TEAM_NAME);
+		m_pTeamInfo[team].name[MAX_TEAM_NAME - 1] = '\0';
+		m_pTeamInfo[team].players++;
+		m_pTeamInfo[team].kills += g_PlayerExtraInfo[i].frags;
+		m_pTeamInfo[team].deaths += g_PlayerExtraInfo[i].deaths;
+	}
+
+	// Sort teams
+	auto cmp = [this](int lhs, int rhs)
+	{
+		// Comapre kills
+		if (m_pTeamInfo[lhs].kills > m_pTeamInfo[rhs].kills) return true;
+		else if (m_pTeamInfo[lhs].kills < m_pTeamInfo[rhs].kills) return false;
+
+		// Comapre deaths if kills are equal
+		if (m_pTeamInfo[lhs].deaths < m_pTeamInfo[rhs].deaths) return true;
+		else if (m_pTeamInfo[lhs].deaths > m_pTeamInfo[rhs].deaths) return false;
+
+		// Comapre idx if everything is equal
+		return lhs > rhs;
+	};
+	std::set<int, decltype(cmp)> set(cmp);
+
+	for (int i = 1; i <= MAX_TEAMS; i++) if (m_pTeamInfo[i].players > 0) set.insert(i);
+
+	// Create sections in right order
+	for (int team : set)
+	{
+		char buf[16];
+		m_pPlayerList->AddSection(team, "", StaticPlayerSortFunc);
+		m_pPlayerList->AddColumnToSection(team, "name", m_pTeamInfo[team].name, vgui2::SectionedListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), NAME_WIDTH));
+		snprintf(buf, sizeof(buf), "%d", m_pTeamInfo[team].kills);
+		m_pPlayerList->AddColumnToSection(team, "frags", buf, vgui2::SectionedListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), SCORE_WIDTH));
+		snprintf(buf, sizeof(buf), "%d", m_pTeamInfo[team].deaths);
+		m_pPlayerList->AddColumnToSection(team, "deaths", buf, vgui2::SectionedListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), DEATH_WIDTH));
+		m_pPlayerList->AddColumnToSection(team, "ping", "", vgui2::SectionedListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), PING_WIDTH));
+	}
+
+	// Add players to sections
+	for (int i = 1; i <= MAX_PLAYERS; i++)
+	{
+		if (!g_PlayerInfoList[i].name) continue; // Player is not connected
+		int team = g_PlayerExtraInfo[i].teamnumber;
+		KeyValues *playerData = new KeyValues("data");
+		playerData->SetString("name", g_PlayerInfoList[i].name);
+		playerData->SetInt("frags", g_PlayerExtraInfo[i].frags);
+		playerData->SetInt("deaths", g_PlayerExtraInfo[i].deaths);
+		playerData->SetInt("ping", g_PlayerInfoList[i].ping);
+		int item = m_pPlayerList->AddItem(team, playerData);
+		m_pPlayerList->SetItemFgColor(item, SDK_Color(255, 0, 0, 255));
+		playerData->deleteThis();
+	}
+}
+
+void CScorePanel::UpdateServerName()
+{
+	// TODO: Find a better way to convert UTF-8 -> wchar_t *
+	if (gGameInfo.GetServerName())
+	{
+		std::wstring_convert<std::codecvt_utf8 <wchar_t>, wchar_t> convert;
+		std::wstring dest = convert.from_bytes(gGameInfo.GetServerName());
+		m_pServerNameLabel->SetText(dest.c_str());
+	}
+}
+
+void CScorePanel::AddHeader()
+{
+	m_pPlayerList->AddSection(m_pHeader, "", StaticPlayerSortFunc);
+	m_pPlayerList->SetSectionAlwaysVisible(m_pHeader);
+	m_pPlayerList->AddColumnToSection(m_pHeader, "name", "#PlayerName", vgui2::SectionedListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), NAME_WIDTH));
+	m_pPlayerList->AddColumnToSection(m_pHeader, "frags", "#PlayerScore", vgui2::SectionedListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), SCORE_WIDTH));
+	m_pPlayerList->AddColumnToSection(m_pHeader, "deaths", "#PlayerDeath", vgui2::SectionedListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), DEATH_WIDTH));
+	m_pPlayerList->AddColumnToSection(m_pHeader, "ping", "#PlayerPing", vgui2::SectionedListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), PING_WIDTH));
+}
+
+//--------------------------------------------------------------
+// Sorting functions
+//--------------------------------------------------------------
 bool CScorePanel::StaticPlayerSortFunc(vgui2::SectionedListPanel *list, int itemID1, int itemID2)
 {
 	KeyValues *it1 = list->GetItemData(itemID1);

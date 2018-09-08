@@ -12,6 +12,7 @@
 // Quake is a trademark of Id Software, Inc., (c) 1996 Id Software, Inc. All
 // rights reserved.
 #include "hud.h"
+#include "CHudScores.h"
 #include "cl_util.h"
 #include "camera.h"
 extern "C"
@@ -533,19 +534,13 @@ void IN_Impulse (void)
 void IN_ScoreDown(void)
 {
 	KeyDown(&in_score);
-	if ( gViewPort )
-	{
-		gViewPort->ShowScoreBoard();
-	}
+	if (gHUD.m_Scores->m_pScorePanel) gHUD.m_Scores->ShowScoreBoard();
 }
 
 void IN_ScoreUp(void)
 {
 	KeyUp(&in_score);
-	if ( gViewPort )
-	{
-		gViewPort->HideScoreBoard();
-	}
+	if (gHUD.m_Scores->m_pScorePanel) gHUD.m_Scores->HideScoreBoard();
 }
 
 void IN_MLookUp (void)

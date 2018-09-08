@@ -57,6 +57,7 @@
 
 #include "CHudTextMessage.h"
 #include "CHudSpectator.h"
+#include "CGameInfo.h"
 
 extern int g_iVisibleMouse;
 class CCommandMenu;
@@ -2290,11 +2291,10 @@ int TeamFortressViewport::MsgFunc_RandomPC( const char *pszName, int iSize, void
 int TeamFortressViewport::MsgFunc_ServerName( const char *pszName, int iSize, void *pbuf )
 {
 	BEGIN_READ( pbuf, iSize );
-
 	strncpy( m_szServerName, READ_STRING(), MAX_SERVERNAME_LENGTH );
-
 	m_szServerName[MAX_SERVERNAME_LENGTH - 1] = 0;
-
+	gGameInfo.m_pServerName = m_szServerName;
+	gGameInfo.UpdateScoreboard();
 	return 1;
 }
 
@@ -2320,6 +2320,7 @@ int TeamFortressViewport::MsgFunc_ScoreInfo( const char *pszName, int iSize, voi
 
 		UpdateOnPlayerInfo();
 	}
+	gGameInfo.UpdateScoreboard();
 
 	return 1;
 }
@@ -2374,6 +2375,7 @@ int TeamFortressViewport::MsgFunc_TeamInfo( const char *pszName, int iSize, void
 
 	// rebuild the list of teams
 	m_pScoreBoard->RebuildTeams();
+	gGameInfo.UpdateScoreboard();
 
 	return 1;
 }

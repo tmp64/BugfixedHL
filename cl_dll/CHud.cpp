@@ -970,3 +970,16 @@ void CenterPrint( const char *string )
 	else
 		gEngfuncs.pfnCenterPrint(RemoveColorCodes(string));
 }
+
+void ConPrintf(const char *fmt, ...)
+{
+	static char str[1024];
+	va_list args;
+	va_start(args, fmt);
+
+	vsnprintf(str, sizeof(str), fmt, args);
+	str[sizeof(str) - 1] = '\0';
+	ConsolePrint(str);
+
+	va_end(args);
+}

@@ -1,6 +1,7 @@
 #ifndef CSCOREPANEL_H
 #define CSCOREPANEL_H
 
+#include <cdll_dll.h>
 #include <vgui_controls/Frame.h>
 #include "vgui2/IViewportPanel.h"
 #include "vgui2/ViewportPanelNames.h"
@@ -19,19 +20,6 @@ class CScorePanel : public vgui2::Frame, public IViewportPanel
 public:
 	DECLARE_CLASS_SIMPLE(CScorePanel, vgui2::Frame);
 
-	// Screw that, we have SectionedListPanel
-	/*struct Column
-	{
-		enum class Type
-		{
-			PlayerName, SteamId, Kills, Deaths, Ping
-		};
-
-		Type type;			// Defines data that will be displayed in the column
-		double width;		// Width in 'em's (width times m_pFontSize)
-		const char *header;	// Will be displayed in the header
-	};*/
-
 	// column widths at 640
 	enum { NAME_WIDTH = 160, SCORE_WIDTH = 60, DEATH_WIDTH = 60, PING_WIDTH = 80, VOICE_WIDTH = 0, FRIENDS_WIDTH = 0 };
 	// total = 340
@@ -39,6 +27,8 @@ public:
 public:
 	CScorePanel(IViewport *pParent);
 	virtual ~CScorePanel();
+
+	void FullUpdate();
 
 	//IViewportPanel overrides
 	const char *GetName() override
@@ -81,6 +71,14 @@ public:
 	}
 
 private:
+	struct team_info_t
+	{
+		char name[MAX_TEAM_NAME] = { 0 };
+		int kills = 0;	// Calculated kills
+		int deaths = 0;	// Calculated deaths
+		int players = 0;// Number of players
+	};
+
 	IViewport *m_pViewport;
 	vgui2::SectionedListPanel *m_pPlayerList = nullptr;
 	vgui2::Label *m_pServerNameLabel = nullptr;
@@ -88,6 +86,15 @@ private:
 	vgui2::Label *m_pPlayerCountLabel = nullptr;
 
 	int m_pHeader = 0;
+
+	team_info_t m_pTeamInfo[MAX_TEAMS + 1];
+
+	void RecalcTeams();
+	void RecreatePlayers();
+	void UpdateServerName();
+	void UpdateMapName();
+	void UpdatePlayerCount();
+	void AddHeader();
 
 	static bool StaticPlayerSortFunc(vgui2::SectionedListPanel *list, int itemID1, int itemID2);
 };
