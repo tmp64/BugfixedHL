@@ -19,6 +19,7 @@ public:
 	int Init(void);
 	int VidInit(void);
 	int Draw(float flTime);
+	void Think();
 	void ShowScoreBoard();
 	void HideScoreBoard();
 

@@ -49,22 +49,13 @@ int CHudScores::VidInit(void)
 		m_pScorePanel = dynamic_cast<CScorePanel *>(g_pViewport->CreatePanelByName(VIEWPORT_PANEL_SCORE));
 		//g_pViewport->AddNewPanel(m_pScorePanel);
 	}
+	m_pScorePanel->ShowPanel(false);
 
 	return 1;
 }
 
 int CHudScores::Draw (float flTime)
 {
-	// No Scoreboard in single-player
-	if (gEngfuncs.GetMaxClients() <= 1)
-		return 1;
-
-	if (m_pScorePanel && m_pScorePanel->IsVisible() && m_flScoreBoardLastUpdated < gHUD.m_flTime)
-	{
-		m_pScorePanel->FullUpdate();
-		m_flScoreBoardLastUpdated = gHUD.m_flTime + 0.5;
-	}
-
 	// VGUI1 code conflicts with VGUI2 
 #if 0
 	if (gViewPort && gViewPort->m_pScoreBoard)
@@ -134,6 +125,19 @@ int CHudScores::Draw (float flTime)
 #endif
 
 	return 1;
+}
+
+void CHudScores::Think()
+{
+	// No Scoreboard in single-player
+	if (gEngfuncs.GetMaxClients() <= 1)
+		return;
+
+	if (m_pScorePanel && m_pScorePanel->IsVisible() && m_flScoreBoardLastUpdated < gHUD.m_flTime)
+	{
+		m_pScorePanel->FullUpdate();
+		m_flScoreBoardLastUpdated = gHUD.m_flTime + 0.5;
+	}
 }
 
 void CHudScores::ShowScoreBoard()
