@@ -119,7 +119,7 @@ void CScorePanel::RecalcItems()
 	m_iPlayerCount = 0;
 	memset(m_pTeamInfo, 0, sizeof(m_pTeamInfo));
 	AddHeader();
-	DebugPrintf("CScoreBoard::RecalItems: Full resorting\n");
+	DebugPrintf("CScorePanel::RecalItems: Full resorting\n");
 	// Fill team info from player info
 	// FIXME: Use overriden values in g_TeamInfo if need to
 	for (int i = 1; i <= MAX_PLAYERS; i++)
@@ -167,7 +167,7 @@ void CScorePanel::RecalcItems()
 		m_pPlayerList->AddColumnToSection(team, "deaths", buf, vgui2::SectionedListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), DEATH_WIDTH));
 		m_pPlayerList->AddColumnToSection(team, "ping", "", vgui2::SectionedListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), PING_WIDTH));
 		m_pPlayerList->SetSectionFgColor(team, gGameInfo.GetTeamColor(team));
-		DebugPrintf("CScoreBoard::RecalItems Team '%s' is %d\n", m_pTeamInfo[team].name, team);
+		DebugPrintf("CScorePanel::RecalItems Team '%s' is %d\n", m_pTeamInfo[team].name, team);
 	}
 
 	// Add players to sections
