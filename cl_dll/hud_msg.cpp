@@ -20,6 +20,7 @@
 #include "cl_util.h"
 #include "parsemsg.h"
 #include "r_efx.h"
+#include "CHudStatusIcons.h"
 
 #define MAX_CLIENTS 32
 
@@ -33,14 +34,7 @@ int CHud :: MsgFunc_ResetHUD(const char *pszName, int iSize, void *pbuf )
 	ASSERT( iSize == 0 );
 
 	// clear all hud data
-	HUDLIST *pList = m_pHudList;
-
-	while ( pList )
-	{
-		if ( pList->p )
-			pList->p->Reset();
-		pList = pList->pNext;
-	}
+	for (CHudBase *i : m_HudList) i->Reset();
 
 	// reset sensitivity
 	m_flMouseSensitivity = 0;
@@ -61,14 +55,7 @@ void CHud :: MsgFunc_ViewMode( const char *pszName, int iSize, void *pbuf )
 void CHud :: MsgFunc_InitHUD( const char *pszName, int iSize, void *pbuf )
 {
 	// prepare all hud data
-	HUDLIST *pList = m_pHudList;
-
-	while (pList)
-	{
-		if ( pList->p )
-			pList->p->InitHUDData();
-		pList = pList->pNext;
-	}
+	for (CHudBase *i : m_HudList) i->InitHUDData();
 
 	//Probably not a good place to put this.
 	pBeam = pBeam2 = NULL;
@@ -118,9 +105,9 @@ int CHud :: MsgFunc_Concuss( const char *pszName, int iSize, void *pbuf )
 		float a = 255 * gHUD.GetHudTransparency();
 		gHUD.GetHudColor(0, 0, r, g, b);
 		ScaleColors(r, g, b, a);
-		this->m_StatusIcons.EnableIcon("dmg_concuss", r, g, b);
+		this->m_StatusIcons->EnableIcon("dmg_concuss", r, g, b);
 	}
 	else
-		this->m_StatusIcons.DisableIcon("dmg_concuss");
+		this->m_StatusIcons->DisableIcon("dmg_concuss");
 	return 1;
 }

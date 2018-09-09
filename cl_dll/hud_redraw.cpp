@@ -44,15 +44,12 @@ extern cvar_t *sensitivity;
 void CHud::Think(void)
 {
 	int newfov;
-	HUDLIST *pList = m_pHudList;
 
 	ResultsThink();
 
-	while (pList)
+	for (CHudBase *i : m_HudList)
 	{
-		if (pList->p->m_iFlags & HUD_ACTIVE)
-			pList->p->Think();
-		pList = pList->pNext;
+		if (i->m_iFlags & HUD_ACTIVE) i->Think();
 	}
 
 	newfov = HUD_GetFOV();
@@ -77,12 +74,6 @@ void CHud::Think(void)
 	{  
 		// set a new sensitivity that is proportional to the change from the FOV default
 		m_flMouseSensitivity = sensitivity->value * ((float)newfov / (float)default_fov->value) * CVAR_GET_FLOAT("zoom_sensitivity_ratio");
-	}
-
-	// think about default fov
-	if ( m_iFOV == 0 )
-	{  // only let players adjust up in fov,  and only if they are not overriden by something else
-		m_iFOV = max( default_fov->value, 90 );  
 	}
 
 	// Refresh bunnyhop
@@ -149,22 +140,18 @@ int CHud :: Redraw( float flTime, int intermission )
 
 	if ( m_pCvarDraw->value )
 	{
-		HUDLIST *pList = m_pHudList;
-
-		while (pList)
+		for (CHudBase *i : m_HudList)
 		{
-			if ( !intermission )
+			if (!intermission)
 			{
-				if ( (pList->p->m_iFlags & HUD_ACTIVE) && !(m_iHideHUDDisplay & HIDEHUD_ALL) )
-					pList->p->Draw(flTime);
+				if ((i->m_iFlags & HUD_ACTIVE) && !(m_iHideHUDDisplay & HIDEHUD_ALL))
+					i->Draw(flTime);
 			}
 			else
 			{  // it's an intermission,  so only draw hud elements that are set to draw during intermissions
-				if ( pList->p->m_iFlags & HUD_INTERMISSION )
-					pList->p->Draw( flTime );
+				if (i->m_iFlags & HUD_INTERMISSION)
+					i->Draw(flTime);
 			}
-
-			pList = pList->pNext;
 		}
 	}
 

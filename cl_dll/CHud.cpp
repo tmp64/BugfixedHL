@@ -33,6 +33,26 @@
 #include "vgui_scorepanel.h"
 #include "appversion.h"
 
+//-----------------------------------------------------
+// HUD elements
+//-----------------------------------------------------
+#include "CHudSpectator.h"
+#include "CHudAmmo.h"
+#include "CHudAmmoSecondary.h"
+#include "CHudHealth.h"
+#include "CHudGeiger.h"
+#include "CHudTrain.h"
+#include "CHudStatusBar.h"
+#include "CHudDeathNotice.h"
+#include "CHudMenu.h"
+#include "CHudSayText.h"
+#include "CHudBattery.h"
+#include "CHudFlashlight.h"
+#include "CHudTextMessage.h"
+#include "CHudMessage.h"
+#include "CHudTimer.h"
+#include "CHudScores.h"
+#include "CHudStatusIcons.h"
 
 float g_ColorBlue[3]	= { 0.6f, 0.8f, 1.0f };
 float g_ColorRed[3]		= { 1.0f, 0.25f, 0.25f };
@@ -223,7 +243,7 @@ void __CmdFunc_ForceColors(void)
 
 void __CmdFunc_CustomTimer(void)
 {
-	gHUD.m_Timer.CustomTimerCommand();
+	gHUD.m_Timer->CustomTimerCommand();
 }
 
 // TFFree Command Menu Message Handlers
@@ -398,17 +418,8 @@ void CHud :: Init( void )
 	m_pSpriteList = NULL;
 
 	// Clear any old HUD list
-	if ( m_pHudList )
-	{
-		HUDLIST *pList;
-		while ( m_pHudList )
-		{
-			pList = m_pHudList;
-			m_pHudList = m_pHudList->pNext;
-			free( pList );
-		}
-		m_pHudList = NULL;
-	}
+	for (CHudBase *i : m_HudList) if (i->m_isDeletable) delete i;
+	m_HudList.clear();
 
 	// In case we get messages before the first update -- time will be valid
 	m_flTime = 1.0;
@@ -418,22 +429,22 @@ void CHud :: Init( void )
 	m_hudColor2.Set(255, 160, 0);
 	m_hudColor3.Set(255, 96, 0);
 
-	m_Ammo.Init();
-	m_Health.Init();
-	m_SayText.Init();
-	m_Spectator.Init();
-	m_Geiger.Init();
-	m_Train.Init();
-	m_Battery.Init();
-	m_Flash.Init();
-	m_Message.Init();
-	m_StatusBar.Init();
-	m_DeathNotice.Init();
-	m_AmmoSecondary.Init();
-	m_TextMessage.Init();
-	m_StatusIcons.Init();
-	m_Timer.Init();
-	m_Scores.Init();
+	HUD_ELEM_INIT(Ammo);
+	HUD_ELEM_INIT(Health);
+	HUD_ELEM_INIT(SayText);
+	HUD_ELEM_INIT(Spectator);
+	HUD_ELEM_INIT(Geiger);
+	HUD_ELEM_INIT(Train);
+	HUD_ELEM_INIT(Battery);
+	HUD_ELEM_INIT_FULL(CHudFlashlight, m_Flash);
+	HUD_ELEM_INIT(Message);
+	HUD_ELEM_INIT(StatusBar);
+	HUD_ELEM_INIT(DeathNotice);
+	HUD_ELEM_INIT(AmmoSecondary);
+	HUD_ELEM_INIT(TextMessage);
+	HUD_ELEM_INIT(StatusIcons);
+	HUD_ELEM_INIT(Timer);
+	HUD_ELEM_INIT(Scores);
 
 	if (g_iIsAg)
 	{
@@ -451,33 +462,24 @@ void CHud :: Init( void )
 	}
 
 	GetClientVoiceMgr()->Init(&g_VoiceStatusHelper, (vgui::Panel**)&gViewPort);
-
-	m_Menu.Init();
-	
+	HUD_ELEM_INIT(Menu);
 	ServersInit();
-
 	MsgFunc_ResetHUD(0, 0, NULL );
 }
 
+// CHud constructor
+CHud::CHud() : m_iSpriteCount(0)
+{
+	
+}
+
 // CHud destructor
-// cleans up memory allocated for m_rg* arrays
+// frees allocated dynamic memory
 CHud :: ~CHud()
 {
 	delete [] m_rghSprites;
 	delete [] m_rgrcRects;
 	delete [] m_rgszSpriteNames;
-
-	if ( m_pHudList )
-	{
-		HUDLIST *pList;
-		while ( m_pHudList )
-		{
-			pList = m_pHudList;
-			m_pHudList = m_pHudList->pNext;
-			free( pList );
-		}
-		m_pHudList = NULL;
-	}
 
 	CharWidths* cur = m_CharWidths.next;
 	CharWidths* next;
@@ -576,23 +578,23 @@ void CHud :: VidInit( void )
 
 	m_iFontHeight = m_rgrcRects[m_HUD_number_0].bottom - m_rgrcRects[m_HUD_number_0].top;
 
-	m_Ammo.VidInit();
-	m_Health.VidInit();
-	m_Spectator.VidInit();
-	m_Geiger.VidInit();
-	m_Train.VidInit();
-	m_Battery.VidInit();
-	m_Flash.VidInit();
-	m_Message.VidInit();
-	m_StatusBar.VidInit();
-	m_DeathNotice.VidInit();
-	m_SayText.VidInit();
-	m_Menu.VidInit();
-	m_AmmoSecondary.VidInit();
-	m_TextMessage.VidInit();
-	m_StatusIcons.VidInit();
-	m_Timer.VidInit();
-	m_Scores.VidInit();
+	m_Ammo->VidInit();
+	m_Health->VidInit();
+	m_Spectator->VidInit();
+	m_Geiger->VidInit();
+	m_Train->VidInit();
+	m_Battery->VidInit();
+	m_Flash->VidInit();
+	m_Message->VidInit();
+	m_StatusBar->VidInit();
+	m_DeathNotice->VidInit();
+	m_SayText->VidInit();
+	m_Menu->VidInit();
+	m_AmmoSecondary->VidInit();
+	m_TextMessage->VidInit();
+	m_StatusIcons->VidInit();
+	m_Timer->VidInit();
+	m_Scores->VidInit();
 
 	if (g_iIsAg)
 	{
@@ -795,34 +797,10 @@ int CHud::MsgFunc_SetFOV(const char *pszName,  int iSize, void *pbuf)
 }
 
 
-void CHud::AddHudElem(CHudBase *phudelem)
+void CHud::AddHudElem(CHudBase *elem)
 {
-	HUDLIST *pdl, *ptemp;
-
-//phudelem->Think();
-
-	if (!phudelem)
-		return;
-
-	pdl = (HUDLIST *)malloc(sizeof(HUDLIST));
-	if (!pdl)
-		return;
-
-	memset(pdl, 0, sizeof(HUDLIST));
-	pdl->p = phudelem;
-
-	if (!m_pHudList)
-	{
-		m_pHudList = pdl;
-		return;
-	}
-
-	ptemp = m_pHudList;
-
-	while (ptemp->pNext)
-		ptemp = ptemp->pNext;
-
-	ptemp->pNext = pdl;
+	if (!elem) return;
+	m_HudList.push_back(elem);
 }
 
 float CHud::GetSensitivity( void )
