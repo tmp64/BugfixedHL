@@ -548,6 +548,24 @@ void IN_ScoreUp(void)
 	if (gHUD.m_Scores->m_pScorePanel) gHUD.m_Scores->HideScoreBoard();
 }
 
+void IN_ScoreOldDown(void)
+{
+	KeyDown(&in_score);
+	if (gViewPort)
+	{
+		gViewPort->ShowScoreBoard();
+	}
+}
+
+void IN_ScoreOldUp(void)
+{
+	KeyUp(&in_score);
+	if (gViewPort)
+	{
+		gViewPort->HideScoreBoard();
+	}
+}
+
 void IN_MLookUp (void)
 {
 	KeyUp( &in_mlook );
@@ -1092,6 +1110,8 @@ void InitInput (void)
 	gEngfuncs.pfnAddCommand ("-score", IN_ScoreUp);
 	gEngfuncs.pfnAddCommand ("+showscores", IN_ScoreDown);
 	gEngfuncs.pfnAddCommand ("-showscores", IN_ScoreUp);
+	gEngfuncs.pfnAddCommand ("+showoldscores", IN_ScoreOldDown);
+	gEngfuncs.pfnAddCommand ("-showoldscores", IN_ScoreOldUp);
 	gEngfuncs.pfnAddCommand ("+graph", IN_GraphDown);
 	gEngfuncs.pfnAddCommand ("-graph", IN_GraphUp);
 	gEngfuncs.pfnAddCommand ("+break",IN_BreakDown);

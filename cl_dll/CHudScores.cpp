@@ -55,12 +55,15 @@ int CHudScores::VidInit(void)
 
 int CHudScores::Draw (float flTime)
 {
-	if (m_pCvarHudScores->value < 1)
-		return 1;
-
 	// No Scoreboard in single-player
 	if (gEngfuncs.GetMaxClients() <= 1)
 		return 1;
+
+	if (m_pScorePanel && m_pScorePanel->IsVisible() && m_flScoreBoardLastUpdated < gHUD.m_flTime)
+	{
+		m_pScorePanel->FullUpdate();
+		m_flScoreBoardLastUpdated = gHUD.m_flTime + 0.5;
+	}
 
 	// VGUI1 code conflicts with VGUI2 
 #if 0
@@ -135,10 +138,15 @@ int CHudScores::Draw (float flTime)
 
 void CHudScores::ShowScoreBoard()
 {
+	// No Scoreboard in single-player
+	if (gEngfuncs.GetMaxClients() <= 1) return;
+
 	m_pScorePanel->ShowPanel(true);
 }
 
 void CHudScores::HideScoreBoard()
 {
+	// Prevent removal of scoreboard during intermission
+	if (gHUD.m_iIntermission) return;
 	m_pScorePanel->ShowPanel(false);
 }

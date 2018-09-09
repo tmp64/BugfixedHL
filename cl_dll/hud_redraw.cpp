@@ -22,6 +22,7 @@
 #include "vgui_TeamFortressViewport.h"
 #include "demo_api.h"
 #include "results.h"
+#include "CHudScores.h"
 
 #define MAX_LOGO_FRAMES 56
 
@@ -107,7 +108,7 @@ int CHud :: Redraw( float flTime, int intermission )
 			// Have to do this here so the scoreboard goes away
 			m_iIntermission = intermission;
 			gViewPort->HideCommandMenu();
-			gViewPort->HideScoreBoard();
+			gHUD.m_Scores->HideScoreBoard();
 			gViewPort->UpdateSpectatorPanel();
 		}
 		else if ( !m_iIntermission && intermission )
@@ -115,7 +116,7 @@ int CHud :: Redraw( float flTime, int intermission )
 			m_iIntermission = intermission;
 			gViewPort->HideCommandMenu();
 			gViewPort->HideVGUIMenu();
-			gViewPort->ShowScoreBoard();
+			gHUD.m_Scores->ShowScoreBoard();
 			gViewPort->UpdateSpectatorPanel();
 
 			// Clear center text

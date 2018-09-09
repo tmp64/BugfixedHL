@@ -21,8 +21,16 @@ public:
 	DECLARE_CLASS_SIMPLE(CScorePanel, vgui2::Frame);
 
 	// column widths at 640
-	enum { NAME_WIDTH = 160, SCORE_WIDTH = 60, DEATH_WIDTH = 60, PING_WIDTH = 80, VOICE_WIDTH = 0, FRIENDS_WIDTH = 0 };
-	// total = 340
+	enum
+	{
+		NAME_WIDTH = 200,
+		STEAMID_WIDTH = 100,
+		SCORE_WIDTH = 60,
+		DEATH_WIDTH = 60,
+		PING_WIDTH = 80
+	};
+	// 44 px are free
+	// total = 544
 
 public:
 	CScorePanel(IViewport *pParent);
@@ -86,15 +94,18 @@ private:
 	vgui2::Label *m_pPlayerCountLabel = nullptr;
 
 	int m_pHeader = 0;
+	int m_iPlayerCount = 0;
+	int m_iMargin = 100;
+	int m_iMinHeight = 320;
 
 	team_info_t m_pTeamInfo[MAX_TEAMS + 1];
 
-	void RecalcTeams();
-	void RecreatePlayers();
+	void RecalcItems();
 	void UpdateServerName();
 	void UpdateMapName();
 	void UpdatePlayerCount();
 	void AddHeader();
+	void Resize();
 
 	static bool StaticPlayerSortFunc(vgui2::SectionedListPanel *list, int itemID1, int itemID2);
 };

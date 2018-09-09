@@ -14,6 +14,12 @@
 #include "hud.h"
 #include "cl_util.h"
 
+#ifdef CSCOREBOARD_DEBUG
+#define DebugPrintf ConPrintf
+#else
+#define DebugPrintf
+#endif
+
 //--------------------------------------------------------------
 // Constructor & destructor
 //--------------------------------------------------------------
@@ -26,6 +32,8 @@ CScorePanel::CScorePanel(IViewport *pParent) : BaseClass(nullptr, "ScorePanel"),
 	SetMoveable(false);
 	SetSizeable(false);
 	SetProportional(true);
+	SetMouseInputEnabled(false);
+	SetKeyBoardInputEnabled(false);
 
 	// Header labels
 	m_pServerNameLabel = new vgui2::Label(this, "ServerName", "A Half-Life Server");
@@ -91,22 +99,27 @@ void CScorePanel::ShowPanel(bool state)
 }
 
 //--------------------------------------------------------------
-// Scoreboard update methods
+// Completeley resets the scoreboard and recalculates everything
 //--------------------------------------------------------------
 void CScorePanel::FullUpdate()
 {
-	m_pPlayerList->DeleteAllItems();
-	m_pPlayerList->RemoveAllSections();
-	memset(m_pTeamInfo, 0, sizeof(m_pTeamInfo));
-
+	DebugPrintf("CScoreBoard::FullUpdate: Full update called\n");
 	UpdateServerName();
-	AddHeader();
-	RecalcTeams();
+	RecalcItems();
+	Resize();
 }
 
-void CScorePanel::RecalcTeams()
+//--------------------------------------------------------------
+// Creates sections for teams in right order and fills them with players
+//--------------------------------------------------------------
+void CScorePanel::RecalcItems()
 {
-	ConPrintf("Sorting scoreboard\n");
+	m_pPlayerList->DeleteAllItems();
+	m_pPlayerList->RemoveAllSections();
+	m_iPlayerCount = 0;
+	memset(m_pTeamInfo, 0, sizeof(m_pTeamInfo));
+	AddHeader();
+	DebugPrintf("CScoreBoard::RecalItems: Full resorting\n");
 	// Fill team info from player info
 	// FIXME: Use overriden values in g_TeamInfo if need to
 	for (int i = 1; i <= MAX_PLAYERS; i++)
@@ -117,6 +130,7 @@ void CScorePanel::RecalcTeams()
 		if (!m_pTeamInfo[team].name[0]) strncpy(m_pTeamInfo[team].name, g_PlayerExtraInfo[i].teamname, MAX_TEAM_NAME);
 		m_pTeamInfo[team].name[MAX_TEAM_NAME - 1] = '\0';
 		m_pTeamInfo[team].players++;
+		m_iPlayerCount++;
 		m_pTeamInfo[team].kills += g_PlayerExtraInfo[i].frags;
 		m_pTeamInfo[team].deaths += g_PlayerExtraInfo[i].deaths;
 	}
@@ -138,18 +152,22 @@ void CScorePanel::RecalcTeams()
 	std::set<int, decltype(cmp)> set(cmp);
 
 	for (int i = 1; i <= MAX_TEAMS; i++) if (m_pTeamInfo[i].players > 0) set.insert(i);
-
+	
 	// Create sections in right order
 	for (int team : set)
 	{
 		char buf[16];
+		if (team == m_pHeader) continue;
 		m_pPlayerList->AddSection(team, "", StaticPlayerSortFunc);
 		m_pPlayerList->AddColumnToSection(team, "name", m_pTeamInfo[team].name, vgui2::SectionedListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), NAME_WIDTH));
+		m_pPlayerList->AddColumnToSection(team, "steamid", "", vgui2::SectionedListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), STEAMID_WIDTH));
 		snprintf(buf, sizeof(buf), "%d", m_pTeamInfo[team].kills);
 		m_pPlayerList->AddColumnToSection(team, "frags", buf, vgui2::SectionedListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), SCORE_WIDTH));
 		snprintf(buf, sizeof(buf), "%d", m_pTeamInfo[team].deaths);
 		m_pPlayerList->AddColumnToSection(team, "deaths", buf, vgui2::SectionedListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), DEATH_WIDTH));
 		m_pPlayerList->AddColumnToSection(team, "ping", "", vgui2::SectionedListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), PING_WIDTH));
+		m_pPlayerList->SetSectionFgColor(team, gGameInfo.GetTeamColor(team));
+		DebugPrintf("CScoreBoard::RecalItems Team '%s' is %d\n", m_pTeamInfo[team].name, team);
 	}
 
 	// Add players to sections
@@ -158,16 +176,23 @@ void CScorePanel::RecalcTeams()
 		if (!g_PlayerInfoList[i].name) continue; // Player is not connected
 		int team = g_PlayerExtraInfo[i].teamnumber;
 		KeyValues *playerData = new KeyValues("data");
-		playerData->SetString("name", g_PlayerInfoList[i].name);
+		playerData->SetString("name", RemoveColorCodes(g_PlayerInfoList[i].name));
+		playerData->SetString("steamid", g_PlayerSteamId[i]);
 		playerData->SetInt("frags", g_PlayerExtraInfo[i].frags);
 		playerData->SetInt("deaths", g_PlayerExtraInfo[i].deaths);
 		playerData->SetInt("ping", g_PlayerInfoList[i].ping);
 		int item = m_pPlayerList->AddItem(team, playerData);
-		m_pPlayerList->SetItemFgColor(item, SDK_Color(255, 0, 0, 255));
+		m_pPlayerList->SetItemFgColor(item, gGameInfo.GetTeamColor(team));
+		if (g_PlayerInfoList[i].thisplayer) m_pPlayerList->SetSelectedItem(item);
 		playerData->deleteThis();
 	}
+
+	UpdatePlayerCount();
 }
 
+//--------------------------------------------------------------
+// Copies server name from TeamFortressViewport to the label
+//--------------------------------------------------------------
 void CScorePanel::UpdateServerName()
 {
 	// TODO: Find a better way to convert UTF-8 -> wchar_t *
@@ -179,14 +204,64 @@ void CScorePanel::UpdateServerName()
 	}
 }
 
+//--------------------------------------------------------------
+// Updates player count label using calculated in RecalcTeams() amount of players online and info from the engine
+//--------------------------------------------------------------
+void CScorePanel::UpdatePlayerCount()
+{
+	wchar_t buf[32];
+	swprintf(buf, L"%d/%d", m_iPlayerCount, gEngfuncs.GetMaxClients());	// May be unsafe, but 32 chars should be enough
+	m_pPlayerCountLabel->SetText(buf);
+}
+
+//--------------------------------------------------------------
+// Creates the header section
+//--------------------------------------------------------------
 void CScorePanel::AddHeader()
 {
 	m_pPlayerList->AddSection(m_pHeader, "", StaticPlayerSortFunc);
 	m_pPlayerList->SetSectionAlwaysVisible(m_pHeader);
 	m_pPlayerList->AddColumnToSection(m_pHeader, "name", "#PlayerName", vgui2::SectionedListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), NAME_WIDTH));
+	m_pPlayerList->AddColumnToSection(m_pHeader, "steamid", "Steam ID", vgui2::SectionedListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), STEAMID_WIDTH));
 	m_pPlayerList->AddColumnToSection(m_pHeader, "frags", "#PlayerScore", vgui2::SectionedListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), SCORE_WIDTH));
 	m_pPlayerList->AddColumnToSection(m_pHeader, "deaths", "#PlayerDeath", vgui2::SectionedListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), DEATH_WIDTH));
 	m_pPlayerList->AddColumnToSection(m_pHeader, "ping", "#PlayerPing", vgui2::SectionedListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), PING_WIDTH));
+}
+
+//--------------------------------------------------------------
+// Resizes the scoreboard to fit all players
+//--------------------------------------------------------------
+void CScorePanel::Resize()
+{
+	int wide, tall, x, y;
+	int height = 0, listHeight = 0, addHeight = 0;
+	m_pPlayerList->GetPos(x, y);
+	addHeight = y + vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), 4);	// Header + bottom padding // TODO: Get padding in runtime
+	height += addHeight;
+	m_pPlayerList->GetContentSize(wide, tall);
+	listHeight = max(m_iMinHeight, tall);
+	height += listHeight;
+
+	if (ScreenHeight - height < m_iMargin * 2)
+	{
+		// It didn't fit
+		height = ScreenHeight - m_iMargin * 2;
+		listHeight = height = addHeight;
+		m_pPlayerList->SetVerticalScrollbar(true);
+	}
+	else
+	{
+		m_pPlayerList->SetVerticalScrollbar(false);
+	}
+	m_pPlayerList->GetSize(wide, tall);
+	m_pPlayerList->SetSize(wide, listHeight);
+	GetSize(wide, tall);
+	SetSize(wide, height);
+
+	// Move to center
+	GetPos(x, y);
+	y = (ScreenHeight - height) / 2;
+	SetPos(x, y);
 }
 
 //--------------------------------------------------------------
