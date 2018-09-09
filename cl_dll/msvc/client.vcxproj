@@ -69,7 +69,7 @@ CALL "$(ProjectDir)PreBuild.bat" "$(ProjectDir)..\" "$(ProjectDir)..\..\"
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\utils\vgui\include;..\..\engine;..\..\common;..\..\pm_shared;..\..\dlls;..\jpeg;..\;..\..\vgui2;..\..\public;..\..\public\math;..\..\source_sdk\public;..\..\source_sdk\public\tier1;..\..\source_sdk\public\html;..\..\source_sdk\common;..\..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_DEBUG;WIN32;_WINDOWS;CLIENT_DLL;CLIENT_WEAPONS;_CRT_SECURE_NO_WARNINGS;PCRE_STATIC;HAVE_CONFIG_H;USE_VGUI2;NO_MALLOC_OVERRIDE;CSCOREBOARD_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;WIN32;_WINDOWS;CLIENT_DLL;CLIENT_WEAPONS;_CRT_SECURE_NO_WARNINGS;PCRE_STATIC;HAVE_CONFIG_H;USE_VGUI2;NO_MALLOC_OVERRIDE;CSCOREBOARD_DEBUG;%(PreprocessorDefinitions);NO_MALLOC_OVERRIDE</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <AdditionalOptions>/Zc:threadSafeInit-</AdditionalOptions>
@@ -114,15 +114,15 @@ CALL "$(ProjectDir)PreBuild.bat" "$(ProjectDir)..\" "$(ProjectDir)..\..\"
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>..\..\utils\vgui\include;..\..\engine;..\..\common;..\..\pm_shared;..\..\dlls;..\jpeg;..\;..\..\vgui2;..\..\public;..\..\public\math;..\..\source_sdk\public;..\..\source_sdk\public\tier1;..\..\source_sdk\public\html;..\..\source_sdk\common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;CLIENT_DLL;CLIENT_WEAPONS;_CRT_SECURE_NO_WARNINGS;PCRE_STATIC;HAVE_CONFIG_H;USE_VGUI2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\utils\vgui\include;..\..\engine;..\..\common;..\..\pm_shared;..\..\dlls;..\jpeg;..\;..\..\vgui2;..\..\public;..\..\public\math;..\..\source_sdk\public;..\..\source_sdk\public\tier1;..\..\source_sdk\public\html;..\..\source_sdk\common;..\..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;CLIENT_DLL;CLIENT_WEAPONS;_CRT_SECURE_NO_WARNINGS;PCRE_STATIC;HAVE_CONFIG_H;USE_VGUI2;NO_MALLOC_OVERRIDE</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <AdditionalOptions>/Zc:threadSafeInit-</AdditionalOptions>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>dbghelp.lib;psapi.lib;winmm.lib;wsock32.lib;../../utils/vgui/lib/win32_vc6/vgui.lib;../dinput/dinput8.lib;../dinput/dxguid.lib;..\lib\public\tier0.lib;..\lib\public\vstdlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>dbghelp.lib;psapi.lib;winmm.lib;wsock32.lib;../../utils/vgui/lib/win32_vc6/vgui.lib;../dinput/dinput8.lib;../dinput/dxguid.lib;..\lib\public\tier0.lib;..\lib\public\vstdlib.lib;..\..\source_sdk\tier1\Release\tier1.lib;..\..\source_sdk\vgui2\controls\Release\vgui2_controls.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)client.dll</OutputFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
