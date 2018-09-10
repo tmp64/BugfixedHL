@@ -105,6 +105,7 @@ void CScorePanel::FullUpdate()
 {
 	DebugPrintf("CScoreBoard::FullUpdate: Full update called\n");
 	UpdateServerName();
+	UpdateMapName();
 	RecalcItems();
 	Resize();
 }
@@ -202,6 +203,13 @@ void CScorePanel::UpdateServerName()
 		std::wstring dest = convert.from_bytes(gGameInfo.GetServerName());
 		m_pServerNameLabel->SetText(dest.c_str());
 	}
+}
+
+void CScorePanel::UpdateMapName()
+{
+	std::wstring_convert<std::codecvt_utf8 <wchar_t>, wchar_t> convert;
+	std::wstring str = L"Map: " + convert.from_bytes(gEngfuncs.pfnGetLevelName()).substr(5);	// substr is to remove "maps/" before mapname.bsp
+	m_pMapNameLabel->SetText(str.c_str());
 }
 
 //--------------------------------------------------------------
