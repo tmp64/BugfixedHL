@@ -1,0 +1,15 @@
+add_sources(
+    anorms.h
+    archtypes.h
+    cdll_int.h
+    customentity.h
+    custom.h
+    edict.h
+    eiface.h
+    keydefs.h
+    progdefs.h
+    progs.h
+    Sequence.h
+    shake.h
+    studio.h
+)

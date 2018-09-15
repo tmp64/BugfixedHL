@@ -22,16 +22,16 @@
 	if [ "$new_version" != "$old_version" ]; then
 		echo "Updating appversion.h, old version \"$old_version\", new version \"$new_version\"."
 
-		echo '#ifndef __APPVERSION_H__' > appversion.h
-		echo '#define __APPVERSION_H__' >> appversion.h
-		echo '' >> appversion.h
+		echo '#ifndef __APPVERSION_H__' > ${CMAKE_SOURCE_DIR}/dlls/appversion.h
+		echo '#define __APPVERSION_H__' >> ${CMAKE_SOURCE_DIR}/dlls/appversion.h
+		echo '' >> ${CMAKE_SOURCE_DIR}/dlls/appversion.h
 
-		echo -n '#define APP_VERSION ' >> appversion.h
-		echo "\"$new_version\"" >> appversion.h
+		echo -n '#define APP_VERSION ' >> ${CMAKE_SOURCE_DIR}/dlls/appversion.h
+		echo "\"$new_version\"" >> ${CMAKE_SOURCE_DIR}/dlls/appversion.h
 
-		echo -n '#define APP_VERSION_DATE ' >> appversion.h
-		echo "\"$git_date\"" >> appversion.h
+		echo -n '#define APP_VERSION_DATE ' >> ${CMAKE_SOURCE_DIR}/dlls/appversion.h
+		echo "\"$git_date\"" >> ${CMAKE_SOURCE_DIR}/dlls/appversion.h
 
-		echo '' >> appversion.h
-		echo '#endif //__APPVERSION_H__' >> appversion.h
+		echo '' >> ${CMAKE_SOURCE_DIR}/dlls/appversion.h
+		echo '#endif //__APPVERSION_H__' >> ${CMAKE_SOURCE_DIR}/dlls/appversion.h
 	fi
