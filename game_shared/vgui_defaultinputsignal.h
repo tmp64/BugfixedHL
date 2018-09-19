@@ -8,13 +8,11 @@
 #ifndef VGUI_DEFAULTINPUTSIGNAL_H
 #define VGUI_DEFAULTINPUTSIGNAL_H
 #ifdef _WIN32
-#ifndef __MINGW32__
 #pragma once
-#endif /* not __MINGW32__ */
 #endif
 
 
-#include "vgui_inputsignal.h"
+#include "VGUI_InputSignal.h"
 
 
 namespace vgui

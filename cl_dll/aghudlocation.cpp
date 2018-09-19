@@ -1,11 +1,14 @@
 // Martin Webrant (BulliT)
 
 #include "hud.h"
+#include "cl_entity.h"
 #include "cl_util.h"
 #include "parsemsg.h"
 
 #ifdef _WIN32
 #include <windows.h>
+#else
+#define MAX_PATH 1024
 #endif
 
 DECLARE_MESSAGE(m_Location, Location)

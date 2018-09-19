@@ -1,11 +1,11 @@
-//========= Copyright © 1996-2002, Valve LLC, All rights reserved. ============
+//========= Copyright ï¿½ 1996-2002, Valve LLC, All rights reserved. ============
 //
 // Purpose: New version of the slider bar
 //
 // $NoKeywords: $
 //=============================================================================
 
-#include "VGUI_Slider2.h"
+#include "vgui_slider2.h"
 
 #include<VGUI_InputSignal.h>
 #include<VGUI_App.h>

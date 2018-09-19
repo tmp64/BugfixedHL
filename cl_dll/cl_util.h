@@ -28,26 +28,26 @@
 
 #define DECLARE_MESSAGE(y, x) int __MsgFunc_##x(const char *pszName, int iSize, void *pbuf) \
 							{ \
-							return gHUD.##y.MsgFunc_##x(pszName, iSize, pbuf ); \
+							return gHUD.y.MsgFunc_##x(pszName, iSize, pbuf ); \
 							}
 
 // If gHUD.y is a pointer
 #define DECLARE_MESSAGE_PTR(y, x) int __MsgFunc_##x(const char *pszName, int iSize, void *pbuf) \
 							{ \
-							return gHUD.##y->MsgFunc_##x(pszName, iSize, pbuf ); \
+							return gHUD.y->MsgFunc_##x(pszName, iSize, pbuf ); \
 							}
 
 
 #define HOOK_COMMAND(x, y) gEngfuncs.pfnAddCommand( x, __CmdFunc_##y );
 #define DECLARE_COMMAND(y, x) void __CmdFunc_##x( void ) \
 							{ \
-								gHUD.##y.UserCmd_##x( ); \
+								gHUD.y.UserCmd_##x( ); \
 							}
 
 // If gHUD.y is a pointer
 #define DECLARE_COMMAND_PTR(y, x) void __CmdFunc_##x( void ) \
 							{ \
-								gHUD.##y->UserCmd_##x( ); \
+								gHUD.y->UserCmd_##x( ); \
 							}
 
 inline float CVAR_GET_FLOAT( const char *x ) {	return gEngfuncs.pfnGetCvarFloat( (char*)x ); }
@@ -126,7 +126,14 @@ inline int ConsoleStringLen( const char *string )
 }
 
 char *RemoveColorCodes(const char *string, bool inPlace = false);
+#ifdef _WIN32
 RGBA SetConsoleColor(RGBA color);
+#else
+inline RGBA SetConsoleColor(RGBA color)
+{
+	return color;
+}
+#endif
 void ConsolePrint(const char *string);
 void ConsolePrintColor(const char *string, RGBA color);
 void CenterPrint(const char *string);
@@ -140,6 +147,7 @@ float *GetClientTeamColor(int clientIndex);
 inline void PlaySound( char *szSound, float vol ) { gEngfuncs.pfnPlaySoundByName( szSound, vol ); }
 inline void PlaySound( int iSound, float vol ) { gEngfuncs.pfnPlaySoundByIndex( iSound, vol ); }
 
+// FIXME: replace min() and max() maxros with <algorithm>
 #define max(a, b)  (((a) > (b)) ? (a) : (b))
 #define min(a, b)  (((a) < (b)) ? (a) : (b))
 #define clamp(x, a, b)  (((x) <= (a)) ? (a) : (((x) >= (b)) ? (b) : (x)))

@@ -1,5 +1,5 @@
 add_sources(
-	activity.h
+    activity.h
     activitymap.h
     aflock.cpp
     agrunt.cpp
@@ -80,7 +80,6 @@ add_sources(
     Makefile
     maprules.cpp
     maprules.h
-    memory.h
     monsterevent.h
     monstermaker.cpp
     monsters.cpp
@@ -98,7 +97,6 @@ add_sources(
     pathcorner.cpp
     path.cpp
     path.h
-    pcre
     plane.cpp
     plane.h
     plats.cpp
@@ -157,9 +155,9 @@ add_sources(
 if(WIN32)
     add_sources(
         memory.cpp
+        memory.h
         Wxdebug.cpp
     )
 endif()
 
 add_subdirectory( wpn_shared )
-

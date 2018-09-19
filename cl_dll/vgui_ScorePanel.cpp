@@ -26,8 +26,8 @@
 #include "cl_entity.h"
 #include "vgui_TeamFortressViewport.h"
 #include "vgui_ScorePanel.h"
-#include "..\game_shared\vgui_helpers.h"
-#include "..\game_shared\vgui_loadtga.h"
+#include "vgui_helpers.h"
+#include "vgui_loadtga.h"
 #include "vgui_SpectatorPanel.h"
 #include "CHudTextMessage.h"
 #include "CHudTimer.h"
@@ -458,10 +458,14 @@ void ScorePanel::Update()
 
 	// Set next map
 	char temp[MAX_MAP_NAME + 10];
+#ifdef _WIN32
 	const char* nextmap = gHUD.m_Timer->GetNextmap();
+#else
+	const char* nextmap = "";
+#endif
 	if (nextmap[0])
 	{
-		sprintf_s(temp, sizeof(temp), "nextmap: %s", nextmap);
+		snprintf(temp, sizeof(temp), "nextmap: %s", nextmap);
 		m_NextmapLabel.setText(MAX_MAP_NAME, temp);
 	}
 	else

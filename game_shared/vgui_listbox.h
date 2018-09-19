@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2002, Valve LLC, All rights reserved. ============
+//========= Copyright ï¿½ 1996-2002, Valve LLC, All rights reserved. ============
 //
 // Purpose: 
 //
@@ -8,17 +8,15 @@
 #ifndef VOICE_LISTBOX_H
 #define VOICE_LISTBOX_H
 #ifdef _WIN32
-#ifndef __MINGW32__
 #pragma once
-#endif /* not __MINGW32__ */
 #endif
 
 
 #include "VGUI_Panel.h"
 #include "VGUI_IntChangeSignal.h"
 
-#include "VGUI_Slider2.h"
-#include "VGUI_ScrollBar2.h"
+#include "vgui_slider2.h"
+#include "vgui_scrollbar2.h"
 
 
 namespace vgui

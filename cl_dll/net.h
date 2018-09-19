@@ -1,4 +1,4 @@
-//========= Copyright © 2012, AGHL.RU, All rights reserved. ============
+//========= Copyright ï¿½ 2012, AGHL.RU, All rights reserved. ============
 //
 // Purpose: Network communications.
 //
@@ -8,6 +8,7 @@
 #define NETH
 #pragma once
 
+#ifdef _WIN32
 #include <winsock.h>
 
 int NetSendReceiveUdp(const char *addr, int port, const char *sendbuf, int len, char *recvbuf, int size);
@@ -18,5 +19,6 @@ void NetClearSocket(SOCKET s);
 void NetCloseSocket(SOCKET s);
 
 char *NetGetRuleValueFromBuffer(const char *buffer, int len, const char *cvar);
+#endif
 
 #endif

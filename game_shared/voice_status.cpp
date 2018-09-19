@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2002, Valve LLC, All rights reserved. ============
+//========= Copyright ï¿½ 1996-2002, Valve LLC, All rights reserved. ============
 //
 // Purpose: 
 //
@@ -44,7 +44,7 @@
 #include "VGUI_TextImage.h"
 #include "vgui_loadtga.h"
 #include "vgui_helpers.h"
-#include "vgui_mousecode.h"
+#include "VGUI_MouseCode.h"
 
 
 
@@ -109,7 +109,14 @@ void ForEachBannedPlayer(char id[16])
 		id[8], id[9], id[10], id[11], 
 		id[12], id[13], id[14], id[15]
 		);
-	_strupr(str);
+#ifdef _WIN32
+	strupr(str);
+#else
+	{
+		for (char *i = str; *i != '\0'; i++)
+			*i = toupper(*i);
+	}
+#endif
 	gEngfuncs.pfnConsolePrint(str);
 }
 
@@ -405,7 +412,7 @@ void CVoiceStatus::UpdateSpeakerStatus(int entindex, qboolean bTalking)
 	if( gEngfuncs.pfnGetCvarFloat("voice_clientdebug") )
 	{
 		char msg[256];
-		_snprintf( msg, sizeof(msg), "CVoiceStatus::UpdateSpeakerStatus: ent %d talking = %d\n", entindex, bTalking );
+		snprintf( msg, sizeof(msg), "CVoiceStatus::UpdateSpeakerStatus: ent %d talking = %d\n", entindex, bTalking );
 		gEngfuncs.pfnConsolePrint( msg );
 	}
 
@@ -446,7 +453,7 @@ void CVoiceStatus::UpdateSpeakerStatus(int entindex, qboolean bTalking)
 					GetPlayerInfo(entindex, &info);
 
 					char paddedName[512];
-					_snprintf(paddedName, sizeof(paddedName), "%s   ", info.name);
+					snprintf(paddedName, sizeof(paddedName), "%s   ", info.name);
 
 					int color[3];
 					m_pHelper->GetPlayerTextColor( entindex, color );
@@ -506,7 +513,7 @@ void CVoiceStatus::UpdateServerState(bool bForce)
 		m_bServerModEnable = bCVarModEnable;
 
 		char str[256];
-		_snprintf(str, sizeof(str), "VModEnable %d", m_bServerModEnable);
+		snprintf(str, sizeof(str), "VModEnable %d", m_bServerModEnable);
 		ServerCmd(str);
 
 		if(gEngfuncs.pfnGetCvarFloat("voice_clientdebug"))

@@ -8,14 +8,12 @@
 #ifndef VGUI_HELPERS_H
 #define VGUI_HELPERS_H
 #ifdef _WIN32
-#ifndef __MINGW32__
 #pragma once
-#endif /* not __MINGW32__ */
 #endif
 
 
-#include "vgui_panel.h"
-#include "vgui_label.h"
+#include "VGUI_Panel.h"
+#include "VGUI_Label.h"
 
 
 inline int PanelTop(vgui::Panel *pPanel)	{int x,y,w,h; pPanel->getBounds(x,y,w,h); return y;}

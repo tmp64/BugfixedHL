@@ -73,7 +73,6 @@ add_sources(
     com_weapons.h
     demo.cpp
     demo.h
-    dinput
     entity.cpp
     ev_common.cpp
     events.cpp
@@ -82,9 +81,6 @@ add_sources(
     ev_hldm.h
     GameStudioModelRenderer.cpp
     GameStudioModelRenderer.h
-    GameStudioModelRenderer_Sample.cpp
-    GameStudioModelRenderer_Sample.h
-    hl
     hud.h
     hud_iface.h
     hud_msg.cpp
@@ -93,14 +89,9 @@ add_sources(
     hud_servers.h
     hud_servers_priv.h
     hud_update.cpp
-    in_camera.cpp
     in_defs.h
     input.cpp
-    inputw32.cpp
-    jpeg
     kbutton.h
-    msvc
-    net.cpp
     net.h
     #overview.cpp   # Disabled?
     #overview.h
@@ -109,7 +100,6 @@ add_sources(
     readme.txt
     results.cpp
     results.h
-    soundsystem.cpp
     StudioModelRenderer.cpp
     StudioModelRenderer.h
     studio_util.cpp
@@ -143,36 +133,45 @@ add_sources(
     view.cpp
     view.h
     wrect.h
-
+    ../dlls/com_utils.h
     ../dlls/com_utils.cpp
+    ../dlls/path.h
     ../dlls/crossbow.cpp
     ../dlls/crowbar.cpp
     ../dlls/egon.cpp
     ../dlls/gauss.cpp
     ../dlls/handgrenade.cpp
     ../dlls/hornetgun.cpp
-    ../dlls/memory.cpp
     ../dlls/mp5.cpp
     ../dlls/path.cpp
-    ../dlls/pcre/pcre_chartables.c
-    ../dlls/pcre/pcre_compile.c
-    ../dlls/pcre/pcre_exec.c
-    ../dlls/pcre/pcre_globals.c
-    ../dlls/pcre/pcre_newline.c
-    ../dlls/pcre/pcre_tables.c
-    ../dlls/pcre/pcre_try_flipped.c
     ../dlls/python.cpp
     ../dlls/rpg.cpp
     ../dlls/satchel.cpp
     ../dlls/shotgun.cpp
     ../dlls/squeakgrenade.cpp
     ../dlls/tripmine.cpp
-    ../dlls/wpn_shared/hl_wpn_glock.cpp
 )
+
+if( MSVC )
+    add_sources(
+        inputw32.cpp
+        in_camera.cpp
+        soundsystem.cpp
+        net.cpp
+        ../dlls/memory.cpp
+        ../dlls/memory.h
+    )
+else()
+    add_sources(
+        inputw32_sdl.cpp
+        in_camera_sdl.cpp
+    )
+endif()
 
 if( MSVC )
     add_subdirectory( dinput )
 endif()
 add_subdirectory( hl )
 add_subdirectory( jpeg )
-
+add_subdirectory( ${CMAKE_SOURCE_DIR}/dlls/wpn_shared wpn_shared)
+add_subdirectory( ${CMAKE_SOURCE_DIR}/dlls/pcre pcre)

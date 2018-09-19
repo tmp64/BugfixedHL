@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2002, Valve LLC, All rights reserved. ============
+//========= Copyright ï¿½ 1996-2002, Valve LLC, All rights reserved. ============
 //
 // Purpose: 
 //
@@ -6,18 +6,19 @@
 //=============================================================================
 
 #include "../cl_dll/hud.h"
+#include "../cl_dll/CHudTextMessage.h"
 #include "../cl_dll/cl_util.h"
-#include "../cl_dll/vgui_teamfortressviewport.h"
+#include "../cl_dll/vgui_TeamFortressViewport.h"
 
 
-#include "vgui_actionsignal.h"
+#include "VGUI_ActionSignal.h"
 #include "voice_vgui_tweakdlg.h"
 #include "voice_vgui_tweakdlg.h"
-#include "vgui_panel.h"
-#include "vgui_scrollbar.h"
-#include "vgui_slider.h"
+#include "VGUI_Panel.h"
+#include "VGUI_ScrollBar.h"
+#include "VGUI_Slider.h"
 #include "ivoicetweak.h"
-#include "vgui_button.h"
+#include "VGUI_Button.h"
 #include "vgui_checkbutton2.h"
 #include "vgui_helpers.h"
 
@@ -213,11 +214,11 @@ void CVoiceVGUITweakDlg::Open()
 	setSize(m_DlgWidth, m_DlgHeight);
 
 	int curY = ITEM_BORDER;
-	m_MicVolume.Init(this, gHUD.m_TextMessage.BufferedLocaliseTextString("#Mic_Volume"), curY);
+	m_MicVolume.Init(this, gHUD.m_TextMessage->BufferedLocaliseTextString("#Mic_Volume"), curY);
 	m_MicVolume.SetValue(m_pVoiceTweak->GetControlFloat(MicrophoneVolume));
 	curY = PanelBottom(&m_MicVolume.m_Label);
 
-	m_SpeakerVolume.Init(this, gHUD.m_TextMessage.BufferedLocaliseTextString("#Speaker_Volume"), curY);
+	m_SpeakerVolume.Init(this, gHUD.m_TextMessage->BufferedLocaliseTextString("#Speaker_Volume"), curY);
 	m_SpeakerVolume.SetValue(m_pVoiceTweak->GetControlFloat(OtherSpeakerScale));
 	curY = PanelBottom(&m_SpeakerVolume.m_Label);
 
@@ -231,7 +232,7 @@ void CVoiceVGUITweakDlg::Open()
 
 	// Setup the OK button.
 	int buttonWidth, buttonHeight;
-	m_Button_OK.setText(gHUD.m_TextMessage.BufferedLocaliseTextString("#Menu_OK"));
+	m_Button_OK.setText(gHUD.m_TextMessage->BufferedLocaliseTextString("#Menu_OK"));
 	m_Button_OK.getSize(buttonWidth, buttonHeight);
 	m_Button_OK.setPos((m_DlgWidth - buttonWidth) / 2, m_DlgHeight - buttonHeight - 3);
 	m_Button_OK.setParent(this);
@@ -239,7 +240,7 @@ void CVoiceVGUITweakDlg::Open()
 	// Put the label on the top.
 	m_Label.setBgColor(0, 0, 0, 255);
 	m_Label.setFgColor(255,255,255,0);
-	m_Label.setText(gHUD.m_TextMessage.BufferedLocaliseTextString("#Voice_Properties"));
+	m_Label.setText(gHUD.m_TextMessage->BufferedLocaliseTextString("#Voice_Properties"));
 	int labelWidth, labelHeight;
 	m_Label.getSize(labelWidth, labelHeight);
 	m_Label.setPos((m_DlgWidth - labelWidth) / 2, 5);

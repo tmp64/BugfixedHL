@@ -10,16 +10,14 @@
 //
 
 #ifdef _WIN32
-
 #include <windows.h>
+#else // _WIN32
 
 /*============
 String functions
 strrepl: replaces substrings in a string
 ============*/
 bool strrepl(char *str, int size, const char *find, const char *repl);
-
-#else // _WIN32
 
 #include <pthread.h>
 #include <sys/time.h>

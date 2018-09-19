@@ -9,6 +9,8 @@
 // Functions for storing game results files.
 //
 
+#ifdef _WIN32
+
 #include <crtdbg.h>
 #include <time.h>
 #include <io.h>
@@ -533,3 +535,8 @@ void ResultsInit(void)
 	sprintf_s(g_szTempDemoList, MAX_PATH, "%s\\tempdemolist.txt", g_szModDirectory);
 	ResultsPurgeDemos();
 }
+
+#else
+
+
+#endif

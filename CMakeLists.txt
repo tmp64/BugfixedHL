@@ -120,11 +120,11 @@ elseif( UNIX )
 	endif()
 endif()
 
-#Highest warning level and warnings as errors
+# Warning level
 if( MSVC )
 	set( WARNING_LEVEL_STRICTEST "/W4 " )
 else()
-	set( WARNING_LEVEL_STRICTEST "-Wall " )
+	set( WARNING_LEVEL_STRICTEST "-Wall -Wno-write-strings -Wno-unknown-pragmas -Wno-endif-labels -Wno-switch -Wno-unused-variable -Wno-unused-function" )
 endif()
 
 #Shared directories
@@ -164,8 +164,8 @@ clear_sources()
 #set( vstdlib_DIR ${GAME_BIN_PATH} CACHE PATH "vstdlib library location" )
 #find_package( vstdlib MODULE REQUIRED )
 
-#set( THREADS_PREFER_PTHREAD_FLAG ON )
-#find_package( Threads REQUIRED )
+set( THREADS_PREFER_PTHREAD_FLAG ON )
+find_package( Threads REQUIRED )
 
 if( UNIX AND NOT APPLE )
 	set( UNIX_FS_LIB stdc++fs )
@@ -180,9 +180,9 @@ set( SHARED_DEPENDENCIES
 #Set up source_sdk projects first
 #add_subdirectory( source_sdk )
 
-#
-#Client library
-#
+#--------------------------------------------------------------------------------------------------------
+# Client library
+#--------------------------------------------------------------------------------------------------------
 
 #Add in the shared sources
 add_sources( "${SHARED_SRCS}" )
@@ -194,7 +194,13 @@ add_subdirectory( cl_dll )
 
 preprocess_sources()
 
-add_library( client SHARED ${PREP_SRCS} )
+# appversion.h generator
+add_custom_command (
+	OUTPUT ${CMAKE_SOURCE_DIR}/cl_dll/appversion.h
+	COMMAND sh -c 'CMAKE_SOURCE_DIR=${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/cl_dll/appversion.sh'
+)
+
+add_library( client SHARED ${PREP_SRCS} ${CMAKE_SOURCE_DIR}/cl_dll/appversion.h )
 
 #Needs static CRT to avoid alloc issues.
 configure_msvc_runtime( client STATIC )
@@ -203,6 +209,7 @@ check_winxp_support( client )
 
 target_include_directories( client PRIVATE
     cl_dll
+	utils/vgui/include_DLLEXPORT
 	${SHARED_INCLUDE_PATHS}
 	${SHARED_EXTERNAL_INCLUDE_PATHS}
 )
@@ -211,6 +218,8 @@ target_compile_definitions( client PRIVATE
 	${SHARED_DEFS}
 	${SHARED_GAME_DEFS}
 	CLIENT_DLL
+	PCRE_STATIC
+	HAVE_CONFIG_H
 )
 
 #Find client dependencies
@@ -240,6 +249,7 @@ target_link_libraries( client
 	${CLIENT_PLAT_LIBS}
 	SDL2
 	${SHARED_DEPENDENCIES}
+	Threads::Threads
 	${UNIX_FS_LIB}
 )
 
@@ -258,13 +268,13 @@ if( MSVC )
 elseif( NOT APPLE )
 	#Generate a map file that provides information about the linking stage.
 	set( CLIENT_LINK_FLAGS
-		${CLIENT_LINK_FLAGS} "-Wl,-Map,client_map.txt "
+		${CLIENT_LINK_FLAGS} "-Wl,-Map,client_map.txt"
 	)
 endif()
 
 set_target_properties( client PROPERTIES
-	COMPILE_FLAGS "${WARNING_LEVEL_STRICTEST}"
-	LINK_FLAGS "${SHARED_GAME_LINKER_FLAGS} ${CLIENT_LINK_FLAGS}"
+	COMPILE_FLAGS "${WARNING_LEVEL_STRICTEST} -static-libgcc -static-libstdc++"
+	LINK_FLAGS "${SHARED_GAME_LINKER_FLAGS} ${CLIENT_LINK_FLAGS} -static-libgcc -static-libstdc++"
 )
 
 #No lib prefix
@@ -283,9 +293,9 @@ clear_sources()
 #End client library
 #
 
-#
-#Server library
-#
+#--------------------------------------------------------------------------------------------------------
+# Server library
+#--------------------------------------------------------------------------------------------------------
 
 #Add in the shared sources
 add_sources( "${SHARED_SRCS}" )

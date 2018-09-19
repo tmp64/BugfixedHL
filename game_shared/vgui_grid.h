@@ -8,13 +8,11 @@
 #ifndef VGUI_GRID_H
 #define VGUI_GRID_H
 #ifdef _WIN32
-#ifndef __MINGW32__
 #pragma once
-#endif /* not __MINGW32__ */
 #endif
 
 
-#include "vgui_panel.h"
+#include "VGUI_Panel.h"
 
 
 namespace vgui

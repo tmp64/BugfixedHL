@@ -8,9 +8,7 @@
 #ifndef VOICE_VGUI_TWEAKDLG_H
 #define VOICE_VGUI_TWEAKDLG_H
 #ifdef _WIN32
-#ifndef __MINGW32__
 #pragma once
-#endif /* not __MINGW32__ */
 #endif
 
 

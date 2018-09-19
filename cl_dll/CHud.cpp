@@ -30,7 +30,7 @@
 
 #include "demo.h"
 #include "demo_api.h"
-#include "vgui_scorepanel.h"
+#include "vgui_ScorePanel.h"
 #include "appversion.h"
 
 //-----------------------------------------------------
@@ -243,7 +243,9 @@ void __CmdFunc_ForceColors(void)
 
 void __CmdFunc_CustomTimer(void)
 {
+#ifdef _WIN32
 	gHUD.m_Timer->CustomTimerCommand();
+#endif
 }
 
 // TFFree Command Menu Message Handlers

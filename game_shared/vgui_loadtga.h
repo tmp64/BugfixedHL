@@ -8,13 +8,11 @@
 #ifndef VGUI_LOADTGA_H
 #define VGUI_LOADTGA_H
 #ifdef _WIN32
-#ifndef __MINGW32__
 #pragma once
-#endif /* not __MINGW32__ */
 #endif
 
 
-#include "vgui_bitmaptga.h"
+#include "VGUI_BitmapTGA.h"
 
 
 vgui::BitmapTGA* vgui_LoadTGA(char const *pFilename);

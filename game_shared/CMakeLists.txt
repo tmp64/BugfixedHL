@@ -1,32 +1,27 @@
-if(CLIENT_DLL)
-    add_sources(
-	    bitvec.h
-        vgui_checkbutton2.cpp
-        vgui_checkbutton2.h
-        vgui_grid.cpp
-        vgui_grid.h
-        vgui_helpers.cpp
-        vgui_helpers.h
-        vgui_defaultinputsignal.h
-        vgui_listbox.cpp
-        vgui_listbox.h
-        vgui_loadtga.cpp
-        vgui_loadtga.h
-        vgui_scrollbar2.cpp
-        vgui_scrollbar2.h
-        vgui_slider2.cpp
-        vgui_slider2.h
-        voice_banmgr.cpp
-        voice_banmgr.h
-        voice_common.h
-        voice_status.cpp
-        voice_status.h
-        voice_vgui_tweakdlg.cpp
-        voice_vgui_tweakdlg.h
-    )
-else()
-    add_sources(
-        voice_gamemgr.cpp
-        voice_gamemgr.h
-    )
-endif()
+add_sources(
+    bitvec.h
+    vgui_checkbutton2.cpp
+    vgui_checkbutton2.h
+    vgui_grid.cpp
+    vgui_grid.h
+    vgui_helpers.cpp
+    vgui_helpers.h
+    vgui_defaultinputsignal.h
+    vgui_listbox.cpp
+    vgui_listbox.h
+    vgui_loadtga.cpp
+    vgui_loadtga.h
+    vgui_scrollbar2.cpp
+    vgui_scrollbar2.h
+    vgui_slider2.cpp
+    vgui_slider2.h
+    voice_banmgr.cpp
+    voice_banmgr.h
+    voice_common.h
+    voice_status.cpp
+    voice_status.h
+    voice_vgui_tweakdlg.cpp
+    voice_vgui_tweakdlg.h
+    voice_gamemgr.cpp
+    voice_gamemgr.h
+)

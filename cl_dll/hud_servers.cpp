@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2002, Valve LLC, All rights reserved. ============
+//========= Copyright ï¿½ 1996-2002, Valve LLC, All rights reserved. ============
 //
 // Purpose: 
 //
@@ -12,17 +12,23 @@
 #include "hud_servers.h"
 #include "net_api.h"
 #include <string.h>
+#ifdef _WIN32
 #include <winsock.h>
+#else
+#define __cdecl
+#define CALLBACK	// FIXME: ?
+#include <arpa/inet.h>
+#endif
 
 static int	context_id;
 
-// Default master server address in case we can't read any from woncomm.lst file
+// Default master server address in case we can't read any from valvecomm.lst file
 #define VALVE_MASTER_ADDRESS "half-life.east.won.net"
 #define PORT_MASTER	 27010
 #define PORT_SERVER  27015
 
 // File where we really should look for master servers
-#define MASTER_PARSE_FILE "woncomm.lst"
+#define MASTER_PARSE_FILE "valvecomm.lst"
 
 #define MAX_QUERIES 20
 

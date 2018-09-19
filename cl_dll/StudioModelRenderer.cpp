@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2002, Valve LLC, All rights reserved. ============
+//========= Copyright ï¿½ 1996-2002, Valve LLC, All rights reserved. ============
 //
 // Purpose: 
 //
@@ -33,14 +33,14 @@
 #define NUM_LEGS_BONES 8
 const char *legs_bones[NUM_LEGS_BONES] =
 {
-	{ "Bip01" },
-	{ "Bip01 Pelvis" },
-	{ "Bip01 L Leg" },
-	{ "Bip01 L Leg1" },
-	{ "Bip01 L Foot" },
-	{ "Bip01 R Leg" },
-	{ "Bip01 R Leg1" },
-	{ "Bip01 R Foot" },
+	"Bip01",
+	"Bip01 Pelvis",
+	"Bip01 L Leg",
+	"Bip01 L Leg1",
+	"Bip01 L Foot",
+	"Bip01 R Leg",
+	"Bip01 R Leg1",
+	"Bip01 R Foot",
 };
 
 // Global engine <-> studio model rendering code interface

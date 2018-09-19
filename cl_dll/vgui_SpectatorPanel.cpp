@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2002, Valve LLC, All rights reserved. ============
+//========= Copyright ï¿½ 1996-2002, Valve LLC, All rights reserved. ============
 //
 // Purpose: 
 //
@@ -17,7 +17,7 @@
 #include "pm_shared.h"
 #include "vgui_TeamFortressViewport.h"
 #include "vgui_SpectatorPanel.h"
-#include "vgui_scorepanel.h"
+#include "vgui_ScorePanel.h"
 #include "CHudSpectator.h"
 #include "CHudTextMessage.h"
 
@@ -234,7 +234,7 @@ void SpectatorPanel::ShowMenu(bool isVisible)
 		{
 			char string[ 64 ];
 
-			_snprintf( string, sizeof( string ) - 1, "%c%s", HUD_PRINTCENTER, CHudTextMessage::BufferedLocaliseTextString( "#Spec_Duck" ) );
+			snprintf( string, sizeof( string ) - 1, "%c%s", HUD_PRINTCENTER, CHudTextMessage::BufferedLocaliseTextString( "#Spec_Duck" ) );
 			string[ sizeof( string ) - 1 ] = '\0';
 
 			gHUD.m_TextMessage->MsgFunc_TextMsg( NULL, strlen( string ) + 1, string );

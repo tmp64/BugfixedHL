@@ -9,11 +9,16 @@
 // implementation of CHudTimer class
 //
 
+#include "CHudTimer.h"
+#include "hud.h"
+
+// CHudTimer requires WinSock so it's disabled on non-windows systems
+// TODO: crossplatform net.h
+#ifdef _WIN32
+
 #include <windows.h>
 #include <time.h>
 
-#include "CHudTimer.h"
-#include "hud.h"
 #include "cl_util.h"
 #include "parsemsg.h"
 #include "net_api.h"
@@ -683,3 +688,13 @@ void CHudTimer::DrawTimerInternal(int time, float ypos, int r, int g, int b, boo
 	int width = TextMessageDrawString(ScreenWidth + 1, ypos, text, 0, 0, 0);
 	TextMessageDrawString((ScreenWidth - width) / 2, ypos, text, r, g, b);
 }
+
+#else
+
+// Empty implementation
+int CHudTimer::Init(void) { return 1; }
+int CHudTimer::VidInit(void) { return 1; }
+void CHudTimer::Think(void) {}
+int CHudTimer::Draw(float) { return 0; }
+
+#endif

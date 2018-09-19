@@ -8,9 +8,7 @@
 #ifndef VGUI_SCROLLBAR2_H
 #define VGUI_SCROLLBAR2_H
 #ifdef _WIN32
-#ifndef __MINGW32__
 #pragma once
-#endif /* not __MINGW32__ */
 #endif
 
 #include<VGUI.h>

@@ -1,0 +1,13 @@
+add_sources(
+    config.h
+    pcre.h
+    pcre_internal.h
+    ucp.h
+    pcre_chartables.c
+    pcre_compile.c
+    pcre_exec.c
+    pcre_globals.c
+    pcre_newline.c
+    pcre_tables.c
+    pcre_try_flipped.c
+)

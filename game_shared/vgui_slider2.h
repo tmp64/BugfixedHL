@@ -8,9 +8,7 @@
 #ifndef VGUI_SLIDER2_H
 #define VGUI_SLIDER2_H
 #ifdef _WIN32
-#ifndef __MINGW32__
 #pragma once
-#endif /* not __MINGW32__ */
 #endif
 
 #include<VGUI.h>

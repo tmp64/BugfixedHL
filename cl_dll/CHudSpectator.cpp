@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2002, Valve LLC, All rights reserved. ============
+//========= Copyright ï¿½ 1996-2002, Valve LLC, All rights reserved. ============
 //
 // Purpose: 
 //
@@ -588,7 +588,9 @@ void CHudSpectator::DirectorMessage( int iSize, void *pbuf )
 
 		case DRC_CMD_STUFFTEXT:
 							string = READ_STRING();
+							#ifdef _WIN32
 							SanitizeCommands(string);
+							#endif
 							if (string[0] != 0)
 							{
 								ClientCmd(string);
@@ -810,9 +812,11 @@ void CHudSpectator::SetModes(int iNewMainMode, int iNewInsetMode)
 		{
 			char cmdstring[32];
 			// forward command to server
+#ifdef _WIN32
 			if (gHUD.m_Timer->GetAgVersion() == CHudTimer::SV_AG_MINI || gHUD.m_Timer->GetAgVersion() == CHudTimer::SV_AG_FULL)
 				sprintf(cmdstring,"spec_mode %i", iNewMainMode);
 			else
+#endif
 				sprintf(cmdstring,"specmode %i", iNewMainMode);
 			gEngfuncs.pfnServerCmd(cmdstring);
 			return;
