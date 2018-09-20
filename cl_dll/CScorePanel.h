@@ -23,13 +23,13 @@ public:
 	// column widths at 640
 	enum
 	{
-		NAME_WIDTH = 200,
+		NAME_WIDTH = 184,
 		STEAMID_WIDTH = 100,
+		EFF_WIDTH = 60,
 		SCORE_WIDTH = 60,
 		DEATH_WIDTH = 60,
 		PING_WIDTH = 80
 	};
-	// 44 px are free
 	// total = 544
 
 public:
