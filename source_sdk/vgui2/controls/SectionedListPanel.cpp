@@ -1074,10 +1074,11 @@ void SectionedListPanel::SetItemFgColor( int itemID, SDK_Color color )
 //-----------------------------------------------------------------------------
 void SectionedListPanel::SetSectionFgColor(int sectionID, SDK_Color color)
 {
-	if (!m_Sections.IsValidIndex(sectionID))
+	int index = FindSectionIndexByID(sectionID);
+	if (index < 0)
 		return;
 
-	m_Sections[sectionID].m_pHeader->SetColor(color);
+	m_Sections[index].m_pHeader->SetColor(color);
 }
 
 //-----------------------------------------------------------------------------
