@@ -534,7 +534,7 @@ void IN_Impulse (void)
 void IN_ScoreDown(void)
 {
 	KeyDown(&in_score);
-	if (gHUD.m_Scores->m_pScorePanel) gHUD.m_Scores->ShowScoreBoard();
+	gHUD.m_Scores->ShowScoreBoard();
 }
 
 void IN_ScoreUp(void)
@@ -545,7 +545,7 @@ void IN_ScoreUp(void)
 	{
 		gViewPort->HideScoreBoard();
 	}
-	if (gHUD.m_Scores->m_pScorePanel) gHUD.m_Scores->HideScoreBoard();
+	gHUD.m_Scores->HideScoreBoard();
 }
 
 void IN_ScoreOldDown(void)

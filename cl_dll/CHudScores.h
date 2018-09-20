@@ -21,7 +21,7 @@ public:
 	int Draw(float flTime);
 	void Think();
 	void ShowScoreBoard();
-	void HideScoreBoard();
+	void HideScoreBoard(bool force = false);
 
 private:
 	HudScoresData m_ScoresData[MAX_PLAYERS] = {};

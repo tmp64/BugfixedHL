@@ -142,15 +142,20 @@ void CHudScores::Think()
 
 void CHudScores::ShowScoreBoard()
 {
+	if (!m_pScorePanel) return;
+
 	// No Scoreboard in single-player
 	if (gEngfuncs.GetMaxClients() <= 1) return;
 
 	m_pScorePanel->ShowPanel(true);
 }
 
-void CHudScores::HideScoreBoard()
+void CHudScores::HideScoreBoard(bool force)
 {
+	if (!m_pScorePanel) return;
+
 	// Prevent removal of scoreboard during intermission
-	if (gHUD.m_iIntermission) return;
+	if (!force && gHUD.m_iIntermission) return;
+
 	m_pScorePanel->ShowPanel(false);
 }
