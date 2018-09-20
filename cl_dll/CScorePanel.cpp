@@ -254,7 +254,7 @@ void CScorePanel::Resize()
 	{
 		// It didn't fit
 		height = ScreenHeight - m_iMargin * 2;
-		listHeight = height = addHeight;
+		listHeight = height - addHeight;
 		m_pPlayerList->SetVerticalScrollbar(true);
 	}
 	else
