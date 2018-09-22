@@ -176,7 +176,7 @@ int CHudMenu :: Draw( float flTime )
 		{
 			menu_ralign	 = FALSE;
 			menu_x		 = 20;
-			y			+= (12);
+			y			+= (16);
 			
 			sptr++;
 		}
