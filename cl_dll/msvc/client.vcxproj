@@ -190,15 +190,16 @@ CALL "$(ProjectDir)PreBuild.bat" "$(ProjectDir)..\" "$(ProjectDir)..\..\"
     <ClCompile Include="..\aghudtimeout.cpp" />
     <ClCompile Include="..\aghudvote.cpp" />
     <ClCompile Include="..\aglocation.cpp" />
-    <ClCompile Include="..\CGameInfo.cpp" />
     <ClCompile Include="..\CHudAmmo.cpp" />
     <ClCompile Include="..\ammohistory.cpp" />
     <ClCompile Include="..\CHudAmmoSecondary.cpp" />
     <ClCompile Include="..\CHudBattery.cpp" />
     <ClCompile Include="..\cdll_int.cpp" />
     <ClCompile Include="..\CHudBase.cpp" />
+    <ClCompile Include="..\CHudScoreBoard.cpp" />
     <ClCompile Include="..\com_weapons.cpp" />
     <ClCompile Include="..\CHudDeathNotice.cpp" />
+    <ClCompile Include="..\CPlayerListPanel.cpp" />
     <ClCompile Include="..\CScorePanel.cpp" />
     <ClCompile Include="..\demo.cpp" />
     <ClCompile Include="..\entity.cpp" />
@@ -422,7 +423,6 @@ CALL "$(ProjectDir)PreBuild.bat" "$(ProjectDir)..\" "$(ProjectDir)..\..\"
     <ClInclude Include="..\ammo.h" />
     <ClInclude Include="..\ammohistory.h" />
     <ClInclude Include="..\camera.h" />
-    <ClInclude Include="..\CGameInfo.h" />
     <ClInclude Include="..\CHudAmmo.h" />
     <ClInclude Include="..\CHudAmmoSecondary.h" />
     <ClInclude Include="..\CHudBase.h" />
@@ -433,6 +433,7 @@ CALL "$(ProjectDir)PreBuild.bat" "$(ProjectDir)..\" "$(ProjectDir)..\..\"
     <ClInclude Include="..\CHudMenu.h" />
     <ClInclude Include="..\CHudMessage.h" />
     <ClInclude Include="..\CHudSayText.h" />
+    <ClInclude Include="..\CHudScoreBoard.h" />
     <ClInclude Include="..\CHudScores.h" />
     <ClInclude Include="..\CHudStatusBar.h" />
     <ClInclude Include="..\CHudStatusIcons.h" />
@@ -442,6 +443,7 @@ CALL "$(ProjectDir)PreBuild.bat" "$(ProjectDir)..\" "$(ProjectDir)..\..\"
     <ClInclude Include="..\cl_dll.h" />
     <ClInclude Include="..\cl_util.h" />
     <ClInclude Include="..\com_weapons.h" />
+    <ClInclude Include="..\CPlayerListPanel.h" />
     <ClInclude Include="..\CScorePanel.h" />
     <ClInclude Include="..\demo.h" />
     <ClInclude Include="..\eventscripts.h" />

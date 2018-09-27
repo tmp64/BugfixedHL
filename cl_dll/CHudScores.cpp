@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -21,11 +21,9 @@
 #include "CHudScores.h"
 #include "hud.h"
 #include "cl_util.h"
-//#include "vgui_TeamFortressViewport.h"
-//#include "vgui_ScorePanel.h"
+#include "vgui_TeamFortressViewport.h"
+#include "vgui_ScorePanel.h"
 
-#include "vgui2/CBaseViewport.h"
-#include "CScorePanel.h"
 
 int CHudScores::Init(void)
 {
@@ -44,20 +42,18 @@ int CHudScores::VidInit(void)
 	m_iOverLay = 0;
 	m_flScoreBoardLastUpdated = 0;
 
-	if (m_pScorePanel == nullptr)
-	{
-		m_pScorePanel = dynamic_cast<CScorePanel *>(g_pViewport->CreatePanelByName(VIEWPORT_PANEL_SCORE));
-		//g_pViewport->AddNewPanel(m_pScorePanel);
-	}
-	m_pScorePanel->ShowPanel(false);
-
 	return 1;
 }
 
-int CHudScores::Draw (float flTime)
+int CHudScores::Draw(float flTime)
 {
-	// VGUI1 code conflicts with VGUI2 
-#if 0
+	if (m_pCvarHudScores->value < 1)
+		return 1;
+
+	// No Scoreboard in single-player
+	if (gEngfuncs.GetMaxClients() <= 1)
+		return 1;
+
 	if (gViewPort && gViewPort->m_pScoreBoard)
 	{
 		// Update the Scoreboard
@@ -122,40 +118,6 @@ int CHudScores::Draw (float flTime)
 			ypos += gHUD.m_scrinfo.iCharHeight * 0.9;
 		}
 	}
-#endif
 
 	return 1;
-}
-
-void CHudScores::Think()
-{
-	// No Scoreboard in single-player
-	if (gEngfuncs.GetMaxClients() <= 1)
-		return;
-
-	if (m_pScorePanel && m_pScorePanel->IsVisible() && m_flScoreBoardLastUpdated < gHUD.m_flTime)
-	{
-		m_pScorePanel->FullUpdate();
-		m_flScoreBoardLastUpdated = gHUD.m_flTime + 0.5;
-	}
-}
-
-void CHudScores::ShowScoreBoard()
-{
-	if (!m_pScorePanel) return;
-
-	// No Scoreboard in single-player
-	if (gEngfuncs.GetMaxClients() <= 1) return;
-
-	m_pScorePanel->ShowPanel(true);
-}
-
-void CHudScores::HideScoreBoard(bool force)
-{
-	if (!m_pScorePanel) return;
-
-	// Prevent removal of scoreboard during intermission
-	if (!force && gHUD.m_iIntermission) return;
-
-	m_pScorePanel->ShowPanel(false);
 }

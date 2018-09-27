@@ -415,7 +415,10 @@
     <ClCompile Include="..\CScorePanel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\CGameInfo.cpp">
+    <ClCompile Include="..\CHudScoreBoard.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\CPlayerListPanel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1068,7 +1071,10 @@
     <ClInclude Include="..\CScorePanel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\CGameInfo.h">
+    <ClInclude Include="..\CHudScoreBoard.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CPlayerListPanel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

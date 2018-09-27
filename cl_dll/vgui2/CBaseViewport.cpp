@@ -19,7 +19,7 @@
 #include "CClientVGUI.h"
 
 #include "CBaseViewport.h"
-#include "CHudScores.h"
+#include "CHudScoreBoard.h"
 #include "hud.h"
 
 CBaseViewport* g_pViewport = nullptr;
@@ -108,7 +108,7 @@ int CBaseViewport::UseVGUI1()
 
 void CBaseViewport::HideScoreBoard()
 {
-	gHUD.m_Scores->HideScoreBoard(true);
+	gHUD.m_ScoreBoard->HideScoreBoard(true);
 }
 
 void CBaseViewport::HideAllVGUIMenu()
@@ -117,7 +117,7 @@ void CBaseViewport::HideAllVGUIMenu()
 
 void CBaseViewport::ActivateClientUI()
 {
-	if (gHUD.m_iIntermission) gHUD.m_Scores->ShowScoreBoard();
+	if (gHUD.m_iIntermission) gHUD.m_ScoreBoard->ShowScoreBoard();
 }
 
 void CBaseViewport::HideClientUI()

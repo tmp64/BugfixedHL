@@ -1,10 +1,9 @@
 #include "CScorePanel.h"
-#include "CGameInfo.h"
 #include "vgui2/CClientVGUI.h"
 #include "vgui2/VGUI2Paths.h"
 #include "vgui2/CBaseViewport.h"
 #include <vgui_controls/Label.h>
-#include <vgui_controls/SectionedListPanel.h>
+#include <CPlayerListPanel.h>
 #include <KeyValues.h>
 #include <vgui_controls/BuildModeDialog.h>
 #include <string>
@@ -41,7 +40,7 @@ CScorePanel::CScorePanel(IViewport *pParent) : BaseClass(nullptr, "ScorePanel"),
 	m_pPlayerCountLabel = new vgui2::Label(this, "PlayerCount", "2/32");
 
 	// Player list
-	m_pPlayerList = new vgui2::SectionedListPanel(this, "PlayerList");
+	m_pPlayerList = new CPlayerListPanel(this, "PlayerList");
 	m_pPlayerList->SetVerticalScrollbar(false);
 
 	LoadControlSettings(UI_RESOURCE_DIR "/ScorePanel.res");
@@ -119,6 +118,8 @@ void CScorePanel::RecalcItems()
 	m_pPlayerList->RemoveAllSections();
 	m_iPlayerCount = 0;
 	memset(m_pTeamInfo, 0, sizeof(m_pTeamInfo));
+	memset(m_pClientItems, -1, sizeof(m_pClientItems));
+	memset(m_pClientTeams, 0, sizeof(m_pClientTeams));
 	AddHeader();
 	DebugPrintf("CScorePanel::RecalItems: Full resorting\n");
 	// Fill team info from player info
@@ -128,10 +129,10 @@ void CScorePanel::RecalcItems()
 		GetPlayerInfo(i, &g_PlayerInfoList[i]);
 		if (!g_PlayerInfoList[i].name) continue; // Player is not connected
 		int team = g_PlayerExtraInfo[i].teamnumber;
+		m_pClientTeams[i] = team;
 		if (!m_pTeamInfo[team].name[0]) strncpy(m_pTeamInfo[team].name, g_PlayerExtraInfo[i].teamname, MAX_TEAM_NAME);
 		m_pTeamInfo[team].name[MAX_TEAM_NAME - 1] = '\0';
 		m_pTeamInfo[team].players++;
-		m_iPlayerCount++;
 		m_pTeamInfo[team].kills += g_PlayerExtraInfo[i].frags;
 		m_pTeamInfo[team].deaths += g_PlayerExtraInfo[i].deaths;
 	}
@@ -160,40 +161,100 @@ void CScorePanel::RecalcItems()
 		char buf[16];
 		if (team == m_pHeader) continue;
 		m_pPlayerList->AddSection(team, "", StaticPlayerSortFunc);
-		m_pPlayerList->AddColumnToSection(team, "name", m_pTeamInfo[team].name, vgui2::SectionedListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), NAME_WIDTH));
-		m_pPlayerList->AddColumnToSection(team, "steamid", "", vgui2::SectionedListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), STEAMID_WIDTH));
+		m_pPlayerList->AddColumnToSection(team, "name", m_pTeamInfo[team].name, CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), NAME_WIDTH));
+		m_pPlayerList->AddColumnToSection(team, "steamid", "", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), STEAMID_WIDTH));
 		snprintf(buf, sizeof(buf), "%.2f", (double)m_pTeamInfo[team].kills / (double)(m_pTeamInfo[team].deaths + 1));
-		m_pPlayerList->AddColumnToSection(team, "eff", buf, vgui2::SectionedListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), DEATH_WIDTH));
+		m_pPlayerList->AddColumnToSection(team, "eff", buf, CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), DEATH_WIDTH));
 		snprintf(buf, sizeof(buf), "%d", m_pTeamInfo[team].kills);
-		m_pPlayerList->AddColumnToSection(team, "frags", buf, vgui2::SectionedListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), SCORE_WIDTH));
+		m_pPlayerList->AddColumnToSection(team, "frags", buf, CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), SCORE_WIDTH));
 		snprintf(buf, sizeof(buf), "%d", m_pTeamInfo[team].deaths);
-		m_pPlayerList->AddColumnToSection(team, "deaths", buf, vgui2::SectionedListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), DEATH_WIDTH));
-		m_pPlayerList->AddColumnToSection(team, "ping", "", vgui2::SectionedListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), PING_WIDTH));
-		m_pPlayerList->SetSectionFgColor(team, gGameInfo.GetTeamColor(team));
+		m_pPlayerList->AddColumnToSection(team, "deaths", buf, CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), DEATH_WIDTH));
+		m_pPlayerList->AddColumnToSection(team, "ping", "", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), PING_WIDTH));
+		m_pPlayerList->SetSectionFgColor(team, gHUD.GetTeamColor(team));
 		DebugPrintf("CScorePanel::RecalItems Team '%s' is %d\n", m_pTeamInfo[team].name, team);
 	}
 
 	// Add players to sections
-	for (int i = 1; i <= MAX_PLAYERS; i++)
+	UpdateAllClients();
+}
+
+//--------------------------------------------------------------
+// Creates or updates client's row in the list
+//--------------------------------------------------------------
+void CScorePanel::UpdateClientInfo(int client, bool autoUpdate)
+{
+	GetPlayerInfo(client, &g_PlayerInfoList[client]);
+	if (!g_PlayerInfoList[client].name)
 	{
-		if (!g_PlayerInfoList[i].name) continue; // Player is not connected
-		int team = g_PlayerExtraInfo[i].teamnumber;
-		char buf[16];
-		KeyValues *playerData = new KeyValues("data");
-		playerData->SetString("name", RemoveColorCodes(g_PlayerInfoList[i].name));
-		playerData->SetString("steamid", g_PlayerSteamId[i]);
-		snprintf(buf, sizeof(buf), "%.2f", (double)g_PlayerExtraInfo[i].frags / (double)(g_PlayerExtraInfo[i].deaths + 1));
-		playerData->SetString("eff", buf);
-		playerData->SetInt("frags", g_PlayerExtraInfo[i].frags);
-		playerData->SetInt("deaths", g_PlayerExtraInfo[i].deaths);
-		playerData->SetInt("ping", g_PlayerInfoList[i].ping);
-		int item = m_pPlayerList->AddItem(team, playerData);
-		m_pPlayerList->SetItemFgColor(item, gGameInfo.GetTeamColor(team));
-		if (g_PlayerInfoList[i].thisplayer) m_pPlayerList->SetSelectedItem(item);
-		playerData->deleteThis();
+		// Player is not connected
+		if (m_pClientItems[client] != -1)
+		{
+			m_pPlayerList->RemoveItem(m_pClientItems[client]);
+			m_iPlayerCount--;
+			DebugPrintf("CScorePanel::UpdateClientInfo: client %d removed\n", client);
+		}
+		return;
+	}
+	
+	int team = g_PlayerExtraInfo[client].teamnumber;
+
+	if (m_pClientTeams[client] != team)
+	{
+		// Player changed teams
+		// Remove existing item, code below will recreate it in the right team
+		m_pPlayerList->RemoveItem(m_pClientItems[client]);
+		m_pClientItems[client] = -1;
+		m_pClientTeams[client] = team;
+		DebugPrintf("CScorePanel::UpdateClientInfo: client %d changed teams\n", client);
 	}
 
+	char buf[16];
+	KeyValues *playerData = new KeyValues("data");
+	playerData->SetString("name", RemoveColorCodes(g_PlayerInfoList[client].name));
+	playerData->SetString("steamid", g_PlayerSteamId[client]);
+	snprintf(buf, sizeof(buf), "%.2f", (double)g_PlayerExtraInfo[client].frags / (double)(g_PlayerExtraInfo[client].deaths + 1));
+	playerData->SetString("eff", buf);
+	playerData->SetInt("frags", g_PlayerExtraInfo[client].frags);
+	playerData->SetInt("deaths", g_PlayerExtraInfo[client].deaths);
+	playerData->SetInt("ping", g_PlayerInfoList[client].ping);
+
+	if (m_pClientItems[client] == -1)
+	{
+		// Create new item
+		m_pClientItems[client] = m_pPlayerList->AddItem(team, playerData);
+		m_pPlayerList->SetItemFgColor(m_pClientItems[client], gHUD.GetTeamColor(team));
+		m_iPlayerCount++;
+		DebugPrintf("CScorePanel::UpdateClientInfo: client %d added\n", client);
+	}
+	else
+	{
+		// Modify existing item
+		m_pPlayerList->ModifyItem(m_pClientItems[client], team, playerData);
+		DebugPrintf("CScorePanel::UpdateClientInfo: client %d modified\n", client);
+	}
+	
+	if (g_PlayerInfoList[client].thisplayer) m_pPlayerList->SetSelectedItem(m_pClientItems[client]);
+	playerData->deleteThis();
+
+	if (autoUpdate)
+	{
+		UpdatePlayerCount();
+		Resize();
+	}
+}
+
+//--------------------------------------------------------------
+// Update all players (also removes disconnected players)
+//--------------------------------------------------------------
+void CScorePanel::UpdateAllClients()
+{
+	DebugPrintf("CScorePanel::UpdateAllClients() called\n");
+	for (int i = 1; i <= MAX_PLAYERS; i++)
+	{
+		UpdateClientInfo(i, false);
+	}
 	UpdatePlayerCount();
+	Resize();
 }
 
 //--------------------------------------------------------------
@@ -202,10 +263,10 @@ void CScorePanel::RecalcItems()
 void CScorePanel::UpdateServerName()
 {
 	// TODO: Find a better way to convert UTF-8 -> wchar_t *
-	if (gGameInfo.GetServerName())
+	if (gHUD.GetServerName())
 	{
 		std::wstring_convert<std::codecvt_utf8 <wchar_t>, wchar_t> convert;
-		std::wstring dest = convert.from_bytes(gGameInfo.GetServerName());
+		std::wstring dest = convert.from_bytes(gHUD.GetServerName());
 		m_pServerNameLabel->SetText(dest.c_str());
 	}
 }
@@ -234,12 +295,12 @@ void CScorePanel::AddHeader()
 {
 	m_pPlayerList->AddSection(m_pHeader, "", StaticPlayerSortFunc);
 	m_pPlayerList->SetSectionAlwaysVisible(m_pHeader);
-	m_pPlayerList->AddColumnToSection(m_pHeader, "name", "#PlayerName", vgui2::SectionedListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), NAME_WIDTH));
-	m_pPlayerList->AddColumnToSection(m_pHeader, "steamid", "Steam ID", vgui2::SectionedListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), STEAMID_WIDTH));
-	m_pPlayerList->AddColumnToSection(m_pHeader, "eff", "Eff", vgui2::SectionedListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), DEATH_WIDTH));
-	m_pPlayerList->AddColumnToSection(m_pHeader, "frags", "#PlayerScore", vgui2::SectionedListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), SCORE_WIDTH));
-	m_pPlayerList->AddColumnToSection(m_pHeader, "deaths", "#PlayerDeath", vgui2::SectionedListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), DEATH_WIDTH));
-	m_pPlayerList->AddColumnToSection(m_pHeader, "ping", "#PlayerPing", vgui2::SectionedListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), PING_WIDTH));
+	m_pPlayerList->AddColumnToSection(m_pHeader, "name", "#PlayerName", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), NAME_WIDTH));
+	m_pPlayerList->AddColumnToSection(m_pHeader, "steamid", "Steam ID", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), STEAMID_WIDTH));
+	m_pPlayerList->AddColumnToSection(m_pHeader, "eff", "Eff", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), DEATH_WIDTH));
+	m_pPlayerList->AddColumnToSection(m_pHeader, "frags", "#PlayerScore", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), SCORE_WIDTH));
+	m_pPlayerList->AddColumnToSection(m_pHeader, "deaths", "#PlayerDeath", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), DEATH_WIDTH));
+	m_pPlayerList->AddColumnToSection(m_pHeader, "ping", "#PlayerPing", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), PING_WIDTH));
 }
 
 //--------------------------------------------------------------
@@ -281,7 +342,7 @@ void CScorePanel::Resize()
 //--------------------------------------------------------------
 // Sorting functions
 //--------------------------------------------------------------
-bool CScorePanel::StaticPlayerSortFunc(vgui2::SectionedListPanel *list, int itemID1, int itemID2)
+bool CScorePanel::StaticPlayerSortFunc(CPlayerListPanel *list, int itemID1, int itemID2)
 {
 	KeyValues *it1 = list->GetItemData(itemID1);
 	KeyValues *it2 = list->GetItemData(itemID2);

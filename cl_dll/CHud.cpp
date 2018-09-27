@@ -53,6 +53,7 @@
 #include "CHudTimer.h"
 #include "CHudScores.h"
 #include "CHudStatusIcons.h"
+#include "CHudScoreBoard.h"
 
 float g_ColorBlue[3]	= { 0.6f, 0.8f, 1.0f };
 float g_ColorRed[3]		= { 1.0f, 0.25f, 0.25f };
@@ -445,6 +446,7 @@ void CHud :: Init( void )
 	HUD_ELEM_INIT(StatusIcons);
 	HUD_ELEM_INIT(Timer);
 	HUD_ELEM_INIT(Scores);
+	HUD_ELEM_INIT(ScoreBoard);
 
 	if (g_iIsAg)
 	{
@@ -595,6 +597,7 @@ void CHud :: VidInit( void )
 	m_StatusIcons->VidInit();
 	m_Timer->VidInit();
 	m_Scores->VidInit();
+	m_ScoreBoard->VidInit();
 
 	if (g_iIsAg)
 	{

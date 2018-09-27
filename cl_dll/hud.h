@@ -30,6 +30,7 @@
 #include "ammo.h"
 #include <eiface.h>
 #include "CHudBase.h"
+#include <SDK_Color.h>
 
 bool ParseColor( char *string, RGBA &rgba );
 
@@ -56,6 +57,7 @@ class CHudMessage;
 class CHudTimer;
 class CHudScores;
 class CHudStatusIcons;
+class CHudScoreBoard;
 
 //-----------------------------------------------------
 // Game info structures declaration
@@ -165,6 +167,7 @@ public:
 	std::unique_ptr<CHudStatusIcons>	m_StatusIcons = nullptr;
 	std::unique_ptr<CHudTimer>			m_Timer = nullptr;
 	std::unique_ptr<CHudScores>			m_Scores = nullptr;
+	std::unique_ptr<CHudScoreBoard>		m_ScoreBoard = nullptr;		// VGUI2 scoreboard
 
 	//-----------------------------------------------------
 	// AG HUD elements
@@ -249,6 +252,21 @@ public:
 	void GetHudColor(int hudPart, int value, int &r, int &g, int &b);
 	float GetHudTransparency();
 
+	inline const char *GetServerName()
+	{
+		return m_szServerName;
+	}
+
+	inline void SetServerNamePtr(const char *ptr)	// Called in TeamFortressViewport
+	{
+		m_szServerName = ptr;
+	}
+
+	inline SDK_Color GetTeamColor(int team)
+	{
+		return m_pTeamColors[team % HLARRAYSIZE(m_pTeamColors)];
+	}
+
 private:
 	std::list<CHudBase *>	m_HudList;
 	HLHSPRITE				m_hsprLogo;
@@ -278,6 +296,16 @@ private:
 	char *m_rgszSpriteNames; /*[HUD_SPRITE_COUNT][MAX_SPRITE_NAME_LENGTH]*/
 
 	struct cvar_s *default_fov;
+	const char *m_szServerName = nullptr;	// Points to gViewPort->m_szServerName
+
+	// Team colors for VGUI2
+	SDK_Color m_pTeamColors[5] = {
+		SDK_Color(216, 216, 216, 255),	// "Off" white (default)
+		SDK_Color(125, 165, 210, 255),	// Blue
+		SDK_Color(200, 90, 70, 255),	// Red
+		SDK_Color(225, 205, 45, 255),	// Yellow
+		SDK_Color(145, 215, 140, 255)	// Green
+	};
 };
 
 extern CHud gHUD;

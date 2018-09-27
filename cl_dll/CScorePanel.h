@@ -12,8 +12,9 @@ namespace vgui2
 {
 	class Label;
 	class TextEntry;
-	class SectionedListPanel;
 }
+
+class CPlayerListPanel;
 
 class CScorePanel : public vgui2::Frame, public IViewportPanel
 {
@@ -37,6 +38,8 @@ public:
 	virtual ~CScorePanel();
 
 	void FullUpdate();
+	void UpdateClientInfo(int client, bool autoUpdate = true);	// manualUpdate - whether to update player count and resize at the end of client update
+	void UpdateAllClients();
 
 	//IViewportPanel overrides
 	const char *GetName() override
@@ -88,7 +91,7 @@ private:
 	};
 
 	IViewport *m_pViewport;
-	vgui2::SectionedListPanel *m_pPlayerList = nullptr;
+	CPlayerListPanel *m_pPlayerList = nullptr;
 	vgui2::Label *m_pServerNameLabel = nullptr;
 	vgui2::Label *m_pMapNameLabel = nullptr;
 	vgui2::Label *m_pPlayerCountLabel = nullptr;
@@ -99,6 +102,8 @@ private:
 	int m_iMinHeight = 320;
 
 	team_info_t m_pTeamInfo[MAX_TEAMS + 1];
+	int m_pClientItems[MAX_PLAYERS + 1];
+	int m_pClientTeams[MAX_PLAYERS + 1];
 
 	void RecalcItems();
 	void UpdateServerName();
@@ -107,7 +112,7 @@ private:
 	void AddHeader();
 	void Resize();
 
-	static bool StaticPlayerSortFunc(vgui2::SectionedListPanel *list, int itemID1, int itemID2);
+	static bool StaticPlayerSortFunc(CPlayerListPanel *list, int itemID1, int itemID2);
 };
 
 #endif

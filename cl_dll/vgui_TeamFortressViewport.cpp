@@ -57,7 +57,7 @@
 
 #include "CHudTextMessage.h"
 #include "CHudSpectator.h"
-#include "CGameInfo.h"
+#include "CHudScoreBoard.h"
 
 extern int g_iVisibleMouse;
 class CCommandMenu;
@@ -644,6 +644,7 @@ void TeamFortressViewport::Initialize( void )
 	}
 	m_iNumberOfTeams = 0;
 
+	gHUD.SetServerNamePtr(m_szServerName);
 	App::getInstance()->setCursorOveride( App::getInstance()->getScheme()->getCursor(Scheme::scu_none) );
 }
 
@@ -2293,8 +2294,6 @@ int TeamFortressViewport::MsgFunc_ServerName( const char *pszName, int iSize, vo
 	BEGIN_READ( pbuf, iSize );
 	strncpy( m_szServerName, READ_STRING(), MAX_SERVERNAME_LENGTH );
 	m_szServerName[MAX_SERVERNAME_LENGTH - 1] = 0;
-	gGameInfo.m_pServerName = m_szServerName;
-	gGameInfo.UpdateScoreboard();
 	return 1;
 }
 
@@ -2319,8 +2318,8 @@ int TeamFortressViewport::MsgFunc_ScoreInfo( const char *pszName, int iSize, voi
 			 g_PlayerExtraInfo[cl].teamnumber = 0;
 
 		UpdateOnPlayerInfo();
+		gHUD.m_ScoreBoard->UpdateClientInfo(cl);
 	}
-	gGameInfo.UpdateScoreboard();
 
 	return 1;
 }
@@ -2371,11 +2370,11 @@ int TeamFortressViewport::MsgFunc_TeamInfo( const char *pszName, int iSize, void
 	{  
 		// set the players team
 		strncpy( g_PlayerExtraInfo[cl].teamname, READ_STRING(), MAX_TEAM_NAME );
+		gHUD.m_ScoreBoard->UpdateClientInfo(cl);
 	}
 
 	// rebuild the list of teams
 	m_pScoreBoard->RebuildTeams();
-	gGameInfo.UpdateScoreboard();
 
 	return 1;
 }

@@ -3,8 +3,6 @@
 
 #include "CHudBase.h"
 
-class CScorePanel;
-
 struct HudScoresData
 {
 	char szScore[64];
@@ -14,14 +12,9 @@ struct HudScoresData
 class CHudScores : public CHudBase
 {
 public:
-	CScorePanel * m_pScorePanel = nullptr;
-
 	int Init(void);
 	int VidInit(void);
 	int Draw(float flTime);
-	void Think();
-	void ShowScoreBoard();
-	void HideScoreBoard(bool force = false);
 
 private:
 	HudScoresData m_ScoresData[MAX_PLAYERS] = {};
