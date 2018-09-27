@@ -9,6 +9,7 @@ class CHudScoreBoard : public CHudBase
 {
 public:
 	CScorePanel *m_pScorePanel = nullptr;
+	cvar_t* m_CvarMouseBtn = nullptr;
 
 	int Init(void);
 	int VidInit(void);
@@ -17,6 +18,8 @@ public:
 	void ShowScoreBoard();
 	void HideScoreBoard(bool force = false);
 	void UpdateClientInfo(int client);
+	void EnableMousePointer(bool enable);
+	bool IsVisible();
 
 private:
 	float m_flScoreBoardLastUpdated = 0;

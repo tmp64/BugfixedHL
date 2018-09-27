@@ -7,6 +7,7 @@
 #include "vgui2/ViewportPanelNames.h"
 
 class IViewport;
+class CHudScoreBoard;
 
 namespace vgui2
 {
@@ -40,6 +41,7 @@ public:
 	void FullUpdate();
 	void UpdateClientInfo(int client, bool autoUpdate = true);	// manualUpdate - whether to update player count and resize at the end of client update
 	void UpdateAllClients();
+	void EnableMousePointer(bool enable);
 
 	//IViewportPanel overrides
 	const char *GetName() override
@@ -81,6 +83,8 @@ public:
 		BaseClass::SetParent(parent);
 	}
 
+	friend class CHudScoreBoard;
+
 private:
 	struct team_info_t
 	{
@@ -90,6 +94,7 @@ private:
 		int players = 0;// Number of players
 	};
 
+	static CScorePanel *m_sSingleton;
 	IViewport *m_pViewport;
 	CPlayerListPanel *m_pPlayerList = nullptr;
 	vgui2::Label *m_pServerNameLabel = nullptr;

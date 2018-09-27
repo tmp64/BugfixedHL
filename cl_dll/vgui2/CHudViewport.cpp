@@ -1,10 +1,10 @@
 #include <vgui/IInputInternal.h>
 #include "vgui2/CClientMOTD.h"
 #include "CScorePanel.h"
-
 #include "CHudViewport.h"
-
 #include <vgui/ISurface.h>
+#include "hud.h"
+#include "CHudScoreBoard.h"
 
 void CHudViewport::Start()
 {
@@ -19,6 +19,7 @@ void CHudViewport::ActivateClientUI()
 void CHudViewport::CreateDefaultPanels()
 {
 	AddNewPanel( CreatePanelByName( VIEWPORT_PANEL_MOTD ) );
+	AddNewPanel( CreatePanelByName( VIEWPORT_PANEL_SCORE ) );
 }
 
 IViewportPanel* CHudViewport::CreatePanelByName( const char* pszName )

@@ -12,6 +12,8 @@
 #include <set>
 #include "hud.h"
 #include "cl_util.h"
+#include "cl_dll.h"
+#include "demo_api.h"
 
 #ifdef CSCOREBOARD_DEBUG
 #define DebugPrintf ConPrintf
@@ -19,20 +21,24 @@
 #define DebugPrintf
 #endif
 
+extern int g_iVisibleMouse;
+void IN_ResetMouse(void);
+CScorePanel *CScorePanel::m_sSingleton = nullptr;
+
 //--------------------------------------------------------------
 // Constructor & destructor
 //--------------------------------------------------------------
 CScorePanel::CScorePanel(IViewport *pParent) : BaseClass(nullptr, "ScorePanel"),
 												m_pViewport(pParent)
 {
+	m_sSingleton = this;
+
 	SetTitle("", true);
 	SetCloseButtonVisible(false);
 	SetScheme("GameScheme");
 	SetMoveable(false);
 	SetSizeable(false);
 	SetProportional(true);
-	SetMouseInputEnabled(false);
-	SetKeyBoardInputEnabled(false);
 
 	// Header labels
 	m_pServerNameLabel = new vgui2::Label(this, "ServerName", "A Half-Life Server");
@@ -68,6 +74,7 @@ void CScorePanel::ApplySchemeSettings(vgui2::IScheme * pScheme)
 	BaseClass::ApplySchemeSettings(pScheme);
 	//m_pServerNameLabel->SetFgColor(SDK_Color(255, 255, 255, 255));
 	m_pPlayerList->SetBorder(pScheme->GetBorder("FrameBorder"));
+	SetMouseInputEnabled(false);
 }
 
 void CScorePanel::OnKeyCodeTyped(vgui2::KeyCode code)
@@ -92,7 +99,7 @@ void CScorePanel::ShowPanel(bool state)
 	else
 	{
 		BaseClass::SetVisible(false);
-		SetMouseInputEnabled(false);
+		EnableMousePointer(false);
 		SetKeyBoardInputEnabled(false);
 	}
 }
@@ -107,6 +114,26 @@ void CScorePanel::FullUpdate()
 	UpdateMapName();
 	RecalcItems();
 	Resize();
+}
+
+//--------------------------------------------------------------
+// Shows mouse cursor when mouse button is cliecked
+//--------------------------------------------------------------
+void CScorePanel::EnableMousePointer(bool enable)
+{
+	if (enable && !IsVisible()) return;
+	dynamic_cast<vgui2::EditablePanel *>(m_pViewport)->SetMouseInputEnabled(enable);
+	dynamic_cast<vgui2::EditablePanel *>(m_pViewport)->SetKeyBoardInputEnabled(enable);
+	SetMouseInputEnabled(enable);
+	SetKeyBoardInputEnabled(enable);
+	if (!enable)
+	{
+		if (!gEngfuncs.pDemoAPI->IsPlayingback())
+		{
+			IN_ResetMouse();
+		}
+	}
+	g_iVisibleMouse = enable;
 }
 
 //--------------------------------------------------------------

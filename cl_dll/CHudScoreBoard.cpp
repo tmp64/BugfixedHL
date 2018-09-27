@@ -12,19 +12,15 @@
 
 int CHudScoreBoard::Init(void)
 {
+	m_CvarMouseBtn = CVAR_CREATE("hud_scoreboard_mousebtn", "2", FCVAR_ARCHIVE);
 	m_iFlags |= HUD_ACTIVE;
 	gHUD.AddHudElem(this);
+	m_pScorePanel = CScorePanel::m_sSingleton;
 	return 1;
 }
 
 int CHudScoreBoard::VidInit(void)
 {
-	if (m_pScorePanel == nullptr)
-	{
-		m_pScorePanel = dynamic_cast<CScorePanel *>(g_pViewport->CreatePanelByName(VIEWPORT_PANEL_SCORE));
-		g_pViewport->AddNewPanel(m_pScorePanel);
-	}
-	m_pScorePanel->ShowPanel(false);
 	return 1;
 }
 
@@ -69,4 +65,14 @@ void CHudScoreBoard::UpdateClientInfo(int client)
 {
 	if (!m_pScorePanel || !m_pScorePanel->IsVisible()) return;
 	m_pScorePanel->UpdateClientInfo(client);
+}
+
+void CHudScoreBoard::EnableMousePointer(bool enable)
+{
+	if (m_pScorePanel) m_pScorePanel->EnableMousePointer(enable);
+}
+
+bool CHudScoreBoard::IsVisible()
+{
+	return m_pScorePanel->IsVisible();
 }

@@ -474,6 +474,11 @@ extern void __CmdFunc_InputPlayerSpecial(void);
 
 void IN_Attack2Down(void) 
 {
+	if (gHUD.m_ScoreBoard->m_CvarMouseBtn->value == 2 && gHUD.m_ScoreBoard->IsVisible())
+	{
+		gHUD.m_ScoreBoard->EnableMousePointer(true);
+		return;
+	}
 	KeyDown(&in_attack2);
 	gHUD.m_Spectator->HandleButtonsDown( IN_ATTACK2 );
 }
@@ -510,6 +515,11 @@ void IN_GraphUp(void) {KeyUp(&in_graph);}
 
 void IN_AttackDown(void)
 {
+	if (gHUD.m_ScoreBoard->m_CvarMouseBtn->value == 1 && gHUD.m_ScoreBoard->IsVisible())
+	{
+		gHUD.m_ScoreBoard->EnableMousePointer(true);
+		return;
+	}
 	KeyDown( &in_attack );
 	gHUD.m_Spectator->HandleButtonsDown( IN_ATTACK );
 }
