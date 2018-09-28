@@ -100,6 +100,7 @@ private:
 	vgui2::Label *m_pServerNameLabel = nullptr;
 	vgui2::Label *m_pMapNameLabel = nullptr;
 	vgui2::Label *m_pPlayerCountLabel = nullptr;
+	vgui2::Label *m_pTimerLabel = nullptr;
 
 	int m_pHeader = 0;
 	int m_iPlayerCount = 0;

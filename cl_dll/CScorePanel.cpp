@@ -44,6 +44,7 @@ CScorePanel::CScorePanel(IViewport *pParent) : BaseClass(nullptr, "ScorePanel"),
 	m_pServerNameLabel = new vgui2::Label(this, "ServerName", "A Half-Life Server");
 	m_pMapNameLabel = new vgui2::Label(this, "MapName", "Map: crossfire");
 	m_pPlayerCountLabel = new vgui2::Label(this, "PlayerCount", "2/32");
+	m_pTimerLabel = new vgui2::Label(this, "TimeLeft", "Time left: 22:48");
 
 	// Player list
 	m_pPlayerList = new CPlayerListPanel(this, "PlayerList");
@@ -65,8 +66,6 @@ CScorePanel::~CScorePanel()
 //--------------------------------------------------------------
 void CScorePanel::Reset()
 {
-	//m_pPlayerList->DeleteAllItems();
-	//m_pPlayerList->RemoveAllSections();
 }
 
 void CScorePanel::ApplySchemeSettings(vgui2::IScheme * pScheme)
@@ -74,6 +73,7 @@ void CScorePanel::ApplySchemeSettings(vgui2::IScheme * pScheme)
 	BaseClass::ApplySchemeSettings(pScheme);
 	//m_pServerNameLabel->SetFgColor(SDK_Color(255, 255, 255, 255));
 	m_pPlayerList->SetBorder(pScheme->GetBorder("FrameBorder"));
+	m_pTimerLabel->SetVisible(false);
 	SetMouseInputEnabled(false);
 }
 
@@ -301,7 +301,8 @@ void CScorePanel::UpdateServerName()
 void CScorePanel::UpdateMapName()
 {
 	std::wstring_convert<std::codecvt_utf8 <wchar_t>, wchar_t> convert;
-	std::wstring str = L"Map: " + convert.from_bytes(gEngfuncs.pfnGetLevelName()).substr(5);	// substr is to remove "maps/" before mapname.bsp
+	std::wstring mapfile = convert.from_bytes(gEngfuncs.pfnGetLevelName());
+	std::wstring str = L"Map: " + mapfile.substr(5, mapfile.size() - 5 - 4);	// substr is to remove "maps/" before mapname and ".bsp" after
 	m_pMapNameLabel->SetText(str.c_str());
 }
 
