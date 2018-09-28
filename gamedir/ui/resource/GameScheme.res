@@ -20,6 +20,7 @@ Scheme
 		"OffWhite"			"216 216 216 255"
 		"DullWhite"			"142 142 142 255"
 		"Orange"			"255 155 0 255"
+		"DimOrange"			"196 119 0 128"
 		"TransparentBlack"		"0 0 0 128"
 		"Black"				"0 0 0 255"
 
@@ -147,6 +148,7 @@ Scheme
 		SectionedListPanel.SelectedBgColor				"Orange"
 		SectionedListPanel.OutOfFocusSelectedTextColor	"Black"
 		SectionedListPanel.OutOfFocusSelectedBgColor	"255 155 0 128"
+		SectionedListPanel.ThisPlayerBgColor			"DimOrange"
 
 		Slider.NobColor				"108 108 108 255"
 		Slider.TextColor			"180 180 180 255"

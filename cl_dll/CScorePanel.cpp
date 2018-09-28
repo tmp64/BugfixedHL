@@ -244,6 +244,7 @@ void CScorePanel::UpdateClientInfo(int client, bool autoUpdate)
 	playerData->SetInt("frags", g_PlayerExtraInfo[client].frags);
 	playerData->SetInt("deaths", g_PlayerExtraInfo[client].deaths);
 	playerData->SetInt("ping", g_PlayerInfoList[client].ping);
+	if (g_PlayerInfoList[client].thisplayer) playerData->SetInt("thisPlayer", 1);
 
 	if (m_pClientItems[client] == -1)
 	{
@@ -260,7 +261,6 @@ void CScorePanel::UpdateClientInfo(int client, bool autoUpdate)
 		DebugPrintf("CScorePanel::UpdateClientInfo: client %d modified\n", client);
 	}
 	
-	if (g_PlayerInfoList[client].thisplayer) m_pPlayerList->SetSelectedItem(m_pClientItems[client]);
 	playerData->deleteThis();
 
 	if (autoUpdate)
