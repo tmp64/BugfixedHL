@@ -986,3 +986,39 @@ void ConPrintf(const char *fmt, ...)
 
 	va_end(args);
 }
+
+// Code by voogru
+// https://forums.alliedmods.net/showthread.php?t=60899?t=60899
+long long GetSteamID64(const char *pszAuthID)
+{
+	if (!pszAuthID)
+		return 0;
+
+	int iServer = 0;
+	int iAuthID = 0;
+
+	char szAuthID[64];
+	strcpy_s(szAuthID, 63, pszAuthID);
+
+	char *szTmp = strtok(szAuthID, ":");
+	while (szTmp = strtok(NULL, ":"))
+	{
+		char *szTmp2 = strtok(NULL, ":");
+		if (szTmp2)
+		{
+			iServer = atoi(szTmp);
+			iAuthID = atoi(szTmp2);
+		}
+	}
+
+	if (iAuthID == 0)
+		return 0;
+
+	long long i64friendID = (long long)iAuthID * 2;
+
+	//Friend ID's with even numbers are the 0 auth server.
+	//Friend ID's with odd numbers are the 1 auth server.
+	i64friendID += 76561197960265728 + iServer;
+
+	return i64friendID;
+}

@@ -12,7 +12,7 @@
 
 int CHudScoreBoard::Init(void)
 {
-	m_CvarMouseBtn = CVAR_CREATE("hud_scoreboard_mousebtn", "2", FCVAR_ARCHIVE);
+	m_CvarMouseBtn = CVAR_CREATE("hud_scoreboard_mousebtn", "1", FCVAR_ARCHIVE);
 	m_iFlags |= HUD_ACTIVE;
 	gHUD.AddHudElem(this);
 	m_pScorePanel = CScorePanel::m_sSingleton;

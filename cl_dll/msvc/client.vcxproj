@@ -201,6 +201,7 @@ CALL "$(ProjectDir)PreBuild.bat" "$(ProjectDir)..\" "$(ProjectDir)..\..\"
     <ClCompile Include="..\CHudDeathNotice.cpp" />
     <ClCompile Include="..\CPlayerListPanel.cpp" />
     <ClCompile Include="..\CScorePanel.cpp" />
+    <ClCompile Include="..\CVoiceStatus2.cpp" />
     <ClCompile Include="..\demo.cpp" />
     <ClCompile Include="..\entity.cpp" />
     <ClCompile Include="..\events.cpp" />
@@ -445,6 +446,7 @@ CALL "$(ProjectDir)PreBuild.bat" "$(ProjectDir)..\" "$(ProjectDir)..\..\"
     <ClInclude Include="..\com_weapons.h" />
     <ClInclude Include="..\CPlayerListPanel.h" />
     <ClInclude Include="..\CScorePanel.h" />
+    <ClInclude Include="..\CVoiceStatus2.h" />
     <ClInclude Include="..\demo.h" />
     <ClInclude Include="..\eventscripts.h" />
     <ClInclude Include="..\ev_hldm.h" />

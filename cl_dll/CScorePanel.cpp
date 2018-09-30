@@ -1,25 +1,34 @@
-#include "CScorePanel.h"
-#include "vgui2/CClientVGUI.h"
-#include "vgui2/VGUI2Paths.h"
-#include "vgui2/CBaseViewport.h"
-#include <vgui_controls/Label.h>
-#include <CPlayerListPanel.h>
-#include <KeyValues.h>
-#include <vgui_controls/BuildModeDialog.h>
 #include <string>
 #include <locale>
 #include <codecvt>
 #include <set>
+#include "vgui2/CClientVGUI.h"
+#include "vgui2/VGUI2Paths.h"
+#include "vgui2/CBaseViewport.h"
+#include "CScorePanel.h"
+#include "CPlayerListPanel.h"
+#include "CVoiceStatus2.h"
+#include <vgui_controls/Label.h>
+#include <vgui_controls/Menu.h>
+#include <vgui_controls/BuildModeDialog.h>
+#include <vgui/IInputInternal.h>
+#include <vgui/ISurface.h>
+#include <vgui/ISystem.h>
+#include <vgui/ILocalize.h>
+#include <KeyValues.h>
 #include "hud.h"
 #include "cl_util.h"
 #include "cl_dll.h"
 #include "demo_api.h"
+#include "CHudTextMessage.h"
 
 #ifdef CSCOREBOARD_DEBUG
 #define DebugPrintf ConPrintf
 #else
 #define DebugPrintf
 #endif
+
+#define STEAM_PROFILE_URL "http://steamcommunity.com/profiles/"
 
 extern int g_iVisibleMouse;
 void IN_ResetMouse(void);
@@ -28,11 +37,10 @@ CScorePanel *CScorePanel::m_sSingleton = nullptr;
 //--------------------------------------------------------------
 // Constructor & destructor
 //--------------------------------------------------------------
-CScorePanel::CScorePanel(IViewport *pParent) : BaseClass(nullptr, "ScorePanel"),
+CScorePanel::CScorePanel(IViewport *pParent) : BaseClass(nullptr, VIEWPORT_PANEL_SCORE),
 												m_pViewport(pParent)
 {
 	m_sSingleton = this;
-
 	SetTitle("", true);
 	SetCloseButtonVisible(false);
 	SetScheme("GameScheme");
@@ -50,10 +58,12 @@ CScorePanel::CScorePanel(IViewport *pParent) : BaseClass(nullptr, "ScorePanel"),
 	m_pPlayerList = new CPlayerListPanel(this, "PlayerList");
 	m_pPlayerList->SetVerticalScrollbar(false);
 
+	CreatePlayerMenu();
+
 	LoadControlSettings(UI_RESOURCE_DIR "/ScorePanel.res");
 	InvalidateLayout();
 	SetVisible(false);
-
+	EnableMousePointer(false);
 	//ActivateBuildMode();
 }
 
@@ -71,10 +81,8 @@ void CScorePanel::Reset()
 void CScorePanel::ApplySchemeSettings(vgui2::IScheme * pScheme)
 {
 	BaseClass::ApplySchemeSettings(pScheme);
-	//m_pServerNameLabel->SetFgColor(SDK_Color(255, 255, 255, 255));
 	m_pPlayerList->SetBorder(pScheme->GetBorder("FrameBorder"));
 	m_pTimerLabel->SetVisible(false);
-	SetMouseInputEnabled(false);
 }
 
 void CScorePanel::OnKeyCodeTyped(vgui2::KeyCode code)
@@ -101,6 +109,7 @@ void CScorePanel::ShowPanel(bool state)
 		BaseClass::SetVisible(false);
 		EnableMousePointer(false);
 		SetKeyBoardInputEnabled(false);
+		m_pMenu->SetVisible(false);
 	}
 }
 
@@ -237,6 +246,7 @@ void CScorePanel::UpdateClientInfo(int client, bool autoUpdate)
 
 	char buf[16];
 	KeyValues *playerData = new KeyValues("data");
+	playerData->SetInt("client", client);
 	playerData->SetString("name", RemoveColorCodes(g_PlayerInfoList[client].name));
 	playerData->SetString("steamid", g_PlayerSteamId[client]);
 	snprintf(buf, sizeof(buf), "%.2f", (double)g_PlayerExtraInfo[client].frags / (double)(g_PlayerExtraInfo[client].deaths + 1));
@@ -365,6 +375,221 @@ void CScorePanel::Resize()
 	GetPos(x, y);
 	y = (ScreenHeight - height) / 2;
 	SetPos(x, y);
+}
+
+//--------------------------------------------------------------
+// Player context menu
+//--------------------------------------------------------------
+void CScorePanel::CreatePlayerMenu()
+{
+	m_pMenu = new vgui2::Menu(this, nullptr);
+	m_pMenu->SetVisible(false);
+	m_pMenu->AddActionSignalTarget(this);
+	m_pMenuInfo.muteItemID = m_pMenu->AddMenuItem("Mute", "Mute", "MenuMute", this);
+	m_pMenu->AddSeparator();
+	m_pMenuInfo.profilePageItemID = m_pMenu->AddMenuItem("SteamProfile", "Open Steam profile", "MenuSteamProfile", this);
+	m_pMenuInfo.profileUrlItemID = m_pMenu->AddMenuItem("SteamURL", "Copy profile URL", "MenuSteamURL", this);
+	m_pMenu->AddSeparator();
+	m_pMenu->AddMenuItem("CopyName", "Copy nickname", "MenuCopyName", this);
+	m_pMenu->AddMenuItem("CopyNameRaw", "Copy raw nickname", "MenuCopyNameRaw", this);
+	m_pMenu->AddMenuItem("CopySteamID", "Copy Steam ID", "MenuCopySteamID", this);
+	m_pMenu->AddMenuItem("CopySteamID64", "Copy Steam ID 64", "MenuCopySteamID64", this);
+}
+
+void CScorePanel::OpenPlayerMenu(int itemID)
+{
+	// Set menu info
+	m_pMenuInfo.itemID = itemID;
+	m_pMenuInfo.client = 0;
+	KeyValues *kv = m_pPlayerList->GetItemData(itemID);
+	if (!kv) return;
+	m_pMenuInfo.client = kv->GetInt("client", 0);
+	if (m_pMenuInfo.client == 0) return;
+
+	// SteamID64
+	m_pMenuInfo.steamID64 = GetSteamID64(g_PlayerSteamId[m_pMenuInfo.client]);
+	if (m_pMenuInfo.steamID64 != 0)
+	{
+		std::string openProfileCmd = ("url " STEAM_PROFILE_URL) + std::to_string(m_pMenuInfo.steamID64);
+		m_pMenu->UpdateMenuItem(m_pMenuInfo.profilePageItemID, "Open Steam profile", new KeyValues("Command", "command", openProfileCmd.c_str()));
+		m_pMenu->SetItemEnabled(m_pMenuInfo.profilePageItemID, true);
+		m_pMenu->SetItemEnabled(m_pMenuInfo.profileUrlItemID, true);
+	}
+	else
+	{
+		m_pMenu->SetItemEnabled(m_pMenuInfo.profilePageItemID, false);
+		m_pMenu->SetItemEnabled(m_pMenuInfo.profileUrlItemID, false);
+	}
+
+	// Player muting
+	bool thisPlayer = kv->GetInt("thisplayer", 0);
+	if (thisPlayer)
+	{
+		// Can't mute yourself
+		m_pMenu->UpdateMenuItem(m_pMenuInfo.muteItemID, "Mute", new KeyValues("Command", "command", "MenuMute"));
+		m_pMenu->SetItemEnabled(m_pMenuInfo.muteItemID, false);
+	}
+	else
+	{
+		m_pMenu->SetItemEnabled(m_pMenuInfo.muteItemID, true);
+		if (vgui2::voicemgr()->IsPlayerBlocked(m_pMenuInfo.client))
+		{
+			m_pMenu->UpdateMenuItem(m_pMenuInfo.muteItemID, "Unmute", new KeyValues("Command", "command", "MenuMute"));
+		}
+		else
+		{
+			m_pMenu->UpdateMenuItem(m_pMenuInfo.muteItemID, "Mute", new KeyValues("Command", "command", "MenuMute"));
+		}
+	}
+
+	// Open menu
+	// Code copied from vgui2::TextEntry
+	int cursorX, cursorY;
+	vgui2::input()->GetCursorPos(cursorX, cursorY);
+	m_pMenu->SetVisible(true);
+	m_pMenu->RequestFocus();
+
+	// relayout the menu immediately so that we know it's size
+	m_pMenu->InvalidateLayout(true);
+	int menuWide, menuTall;
+	m_pMenu->GetSize(menuWide, menuTall);
+
+	// work out where the cursor is and therefore the best place to put the menu
+	int wide, tall;
+	vgui2::surface()->GetScreenSize(wide, tall);
+
+	if (wide - menuWide > cursorX)
+	{
+		// menu hanging right
+		if (tall - menuTall > cursorY)
+		{
+			// menu hanging down
+			m_pMenu->SetPos(cursorX, cursorY);
+		}
+		else
+		{
+			// menu hanging up
+			m_pMenu->SetPos(cursorX, cursorY - menuTall);
+		}
+	}
+	else
+	{
+		// menu hanging left
+		if (tall - menuTall > cursorY)
+		{
+			// menu hanging down
+			m_pMenu->SetPos(cursorX - menuWide, cursorY);
+		}
+		else
+		{
+			// menu hanging up
+			m_pMenu->SetPos(cursorX - menuWide, cursorY - menuTall);
+		}
+	}
+
+	m_pMenu->RequestFocus();
+}
+
+void CScorePanel::OnItemContextMenu(int itemID)
+{
+	DebugPrintf("CScorePanel::OnRowContextMenu(itemID = %d) Player right-clicked\n", itemID);
+	OpenPlayerMenu(itemID);
+}
+
+//--------------------------------------------------------------
+// Commands
+//--------------------------------------------------------------
+void CScorePanel::OnCommandOverride(const char *command)
+{
+	DebugPrintf("CScorePanel::OnCommand(command = '%s')\n", command);
+	//-----------------------------------------------------------------------
+	if (!stricmp(command, "MenuMute"))
+	{
+		int client = m_pMenuInfo.client;
+		GetPlayerInfo(client, &g_PlayerInfoList[client]);
+		if (!g_PlayerInfoList[client].name || !g_PlayerInfoList[client].name[0])
+			return;	// Client disconnected
+		if (g_PlayerInfoList[client].thisplayer)
+			return;	// Can't mute yourself
+
+		char string[256];
+
+		if (vgui2::voicemgr()->IsPlayerBlocked(client))
+		{
+			char string1[1024];
+
+			// remove mute
+			vgui2::voicemgr()->SetPlayerBlockedState(client, false);
+			sprintf(string1, CHudTextMessage::BufferedLocaliseTextString("#Unmuted"), g_PlayerInfoList[client].name);
+			sprintf(string, "%c** %s\n", HUD_PRINTTALK, string1);
+		}
+		else
+		{
+			char string1[1024];
+			char string2[1024];
+
+			// mute the player
+			vgui2::voicemgr()->SetPlayerBlockedState(client, true);
+
+			sprintf(string1, CHudTextMessage::BufferedLocaliseTextString("#Muted"), g_PlayerInfoList[client].name);
+			sprintf(string2, CHudTextMessage::BufferedLocaliseTextString("#No_longer_hear_that_player"));
+			sprintf(string, "%c** %s %s\n", HUD_PRINTTALK, string1, string2);
+		}
+		gHUD.m_TextMessage->MsgFunc_TextMsg(NULL, strlen(string) + 1, string);
+	}
+	//-----------------------------------------------------------------------
+	else if (!stricmp(command, "MenuSteamProfile"))
+	{
+		// Handled by vgui2::Button
+	}
+	else if (!stricmp(command, "MenuSteamURL"))
+	{
+		GetPlayerInfo(m_pMenuInfo.client, &g_PlayerInfoList[m_pMenuInfo.client]);
+		if (!g_PlayerInfoList[m_pMenuInfo.client].name || !g_PlayerInfoList[m_pMenuInfo.client].name[0])
+			return;	// Client disconnected
+		std::string url = STEAM_PROFILE_URL + std::to_string(m_pMenuInfo.steamID64);
+		vgui2::system()->SetClipboardText(url.c_str(), url.size());
+	}
+	//-----------------------------------------------------------------------
+	else if (!stricmp(command, "MenuCopyName"))
+	{
+		GetPlayerInfo(m_pMenuInfo.client, &g_PlayerInfoList[m_pMenuInfo.client]);
+		if (!g_PlayerInfoList[m_pMenuInfo.client].name || !g_PlayerInfoList[m_pMenuInfo.client].name[0])
+			return;	// Client disconnected
+		wchar_t name[MAX_PLAYER_NAME + 1];
+		vgui2::localize()->ConvertANSIToUnicode(RemoveColorCodes(g_PlayerInfoList[m_pMenuInfo.client].name), name, sizeof(name));
+		vgui2::system()->SetClipboardText(name, wcslen(name));
+	}
+	else if (!stricmp(command, "MenuCopyNameRaw"))
+	{
+		GetPlayerInfo(m_pMenuInfo.client, &g_PlayerInfoList[m_pMenuInfo.client]);
+		if (!g_PlayerInfoList[m_pMenuInfo.client].name || !g_PlayerInfoList[m_pMenuInfo.client].name[0])
+			return;	// Client disconnected
+		wchar_t name[MAX_PLAYER_NAME + 1];
+		vgui2::localize()->ConvertANSIToUnicode(g_PlayerInfoList[m_pMenuInfo.client].name, name, sizeof(name));
+		vgui2::system()->SetClipboardText(name, wcslen(name));
+	}
+	else if (!stricmp(command, "MenuCopySteamID"))
+	{
+		GetPlayerInfo(m_pMenuInfo.client, &g_PlayerInfoList[m_pMenuInfo.client]);
+		if (!g_PlayerInfoList[m_pMenuInfo.client].name || !g_PlayerInfoList[m_pMenuInfo.client].name[0])
+			return;	// Client disconnected
+		std::string steamid = "STEAM_" + std::string(g_PlayerSteamId[m_pMenuInfo.client]);
+		vgui2::system()->SetClipboardText(steamid.c_str(), steamid.size());
+	}
+	else if (!stricmp(command, "MenuCopySteamID64"))
+	{
+		GetPlayerInfo(m_pMenuInfo.client, &g_PlayerInfoList[m_pMenuInfo.client]);
+		if (!g_PlayerInfoList[m_pMenuInfo.client].name || !g_PlayerInfoList[m_pMenuInfo.client].name[0])
+			return;	// Client disconnected
+		std::string steamid = std::to_string(m_pMenuInfo.steamID64);
+		vgui2::system()->SetClipboardText(steamid.c_str(), steamid.size());
+	}
+	//-----------------------------------------------------------------------
+	else
+	{
+		BaseClass::OnCommand(command);
+	}
 }
 
 //--------------------------------------------------------------

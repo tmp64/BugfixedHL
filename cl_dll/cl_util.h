@@ -134,6 +134,8 @@ void ConPrintf(const char *fmt, ...);
 
 float *GetClientTeamColor(int clientIndex);
 
+long long GetSteamID64(const char *pszAuthID);
+
 // returns the players name of entity no.
 #define GetPlayerInfo (*gEngfuncs.pfnGetPlayerInfo)
 

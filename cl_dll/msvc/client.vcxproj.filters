@@ -421,6 +421,9 @@
     <ClCompile Include="..\CPlayerListPanel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\CVoiceStatus2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\ammo.h">
@@ -1075,6 +1078,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\CPlayerListPanel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CVoiceStatus2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -13,6 +13,7 @@ namespace vgui2
 {
 	class Label;
 	class TextEntry;
+	class Menu;
 }
 
 class CPlayerListPanel;
@@ -39,7 +40,7 @@ public:
 	virtual ~CScorePanel();
 
 	void FullUpdate();
-	void UpdateClientInfo(int client, bool autoUpdate = true);	// manualUpdate - whether to update player count and resize at the end of client update
+	void UpdateClientInfo(int client, bool autoUpdate = true);	// autoUpdate - whether to update player count and resize at the end of client update
 	void UpdateAllClients();
 	void EnableMousePointer(bool enable);
 
@@ -83,6 +84,10 @@ public:
 		BaseClass::SetParent(parent);
 	}
 
+	// Messages
+	MESSAGE_FUNC_CHARPTR(OnCommandOverride, "Command", command);	// For some reason, virtual function override doesn't work
+	MESSAGE_FUNC_INT(OnItemContextMenu, "ItemContextMenu", itemID);
+
 	friend class CHudScoreBoard;
 
 private:
@@ -94,6 +99,19 @@ private:
 		int players = 0;// Number of players
 	};
 
+	struct menu_info_t
+	{
+		// Global data
+		int muteItemID;
+		int profilePageItemID;
+		int profileUrlItemID;
+
+		// Selected player info
+		int itemID;
+		int client;
+		long long steamID64;
+	};
+
 	static CScorePanel *m_sSingleton;
 	IViewport *m_pViewport;
 	CPlayerListPanel *m_pPlayerList = nullptr;
@@ -101,6 +119,7 @@ private:
 	vgui2::Label *m_pMapNameLabel = nullptr;
 	vgui2::Label *m_pPlayerCountLabel = nullptr;
 	vgui2::Label *m_pTimerLabel = nullptr;
+	vgui2::Menu *m_pMenu = nullptr;
 
 	int m_pHeader = 0;
 	int m_iPlayerCount = 0;
@@ -111,6 +130,8 @@ private:
 	int m_pClientItems[MAX_PLAYERS + 1];
 	int m_pClientTeams[MAX_PLAYERS + 1];
 
+	menu_info_t m_pMenuInfo;
+
 	void RecalcItems();
 	void UpdateServerName();
 	void UpdateMapName();
@@ -118,6 +139,11 @@ private:
 	void AddHeader();
 	void Resize();
 
+	// Menu
+	void CreatePlayerMenu();
+	void OpenPlayerMenu(int itemID);
+
+	// Sorting functions
 	static bool StaticPlayerSortFunc(CPlayerListPanel *list, int itemID1, int itemID2);
 };
 
