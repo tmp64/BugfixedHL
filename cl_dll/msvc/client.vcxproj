@@ -81,7 +81,7 @@ CALL "$(ProjectDir)PreBuild.bat" "$(ProjectDir)..\" "$(ProjectDir)..\..\"
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>dbghelp.lib;psapi.lib;winmm.lib;wsock32.lib;../../utils/vgui/lib/win32_vc6/vgui.lib;../dinput/dinput8.lib;../dinput/dxguid.lib;..\lib\public\tier0.lib;..\lib\public\vstdlib.lib;..\..\source_sdk\tier1\Debug\tier1.lib;..\..\source_sdk\vgui2\controls\Debug\vgui2_controls.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>dbghelp.lib;psapi.lib;winmm.lib;wsock32.lib;../../utils/vgui/lib/win32_vc6/vgui.lib;../dinput/dinput8.lib;../dinput/dxguid.lib;..\..\lib\public\tier0.lib;..\..\lib\public\vstdlib.lib;..\..\lib\public\steam_api.lib;..\..\source_sdk\tier1\Debug\tier1.lib;..\..\source_sdk\vgui2\controls\Debug\vgui2_controls.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)client.dll</OutputFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
@@ -122,7 +122,7 @@ CALL "$(ProjectDir)PreBuild.bat" "$(ProjectDir)..\" "$(ProjectDir)..\..\"
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>dbghelp.lib;psapi.lib;winmm.lib;wsock32.lib;../../utils/vgui/lib/win32_vc6/vgui.lib;../dinput/dinput8.lib;../dinput/dxguid.lib;..\lib\public\tier0.lib;..\lib\public\vstdlib.lib;..\..\source_sdk\tier1\Release\tier1.lib;..\..\source_sdk\vgui2\controls\Release\vgui2_controls.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>dbghelp.lib;psapi.lib;winmm.lib;wsock32.lib;../../utils/vgui/lib/win32_vc6/vgui.lib;../dinput/dinput8.lib;../dinput/dxguid.lib;..\..\lib\public\tier0.lib;..\..\lib\public\vstdlib.lib;..\..\lib\public\steam_api.lib;..\..\source_sdk\tier1\Release\tier1.lib;..\..\source_sdk\vgui2\controls\Release\vgui2_controls.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)client.dll</OutputFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
@@ -297,6 +297,33 @@ CALL "$(ProjectDir)PreBuild.bat" "$(ProjectDir)..\" "$(ProjectDir)..\..\"
     <ClInclude Include="..\..\public\particleman.h" />
     <ClInclude Include="..\..\public\pman_particlemem.h" />
     <ClInclude Include="..\..\public\pman_triangleffect.h" />
+    <ClInclude Include="..\..\public\steam\isteamapplist.h" />
+    <ClInclude Include="..\..\public\steam\isteamapps.h" />
+    <ClInclude Include="..\..\public\steam\isteamclient.h" />
+    <ClInclude Include="..\..\public\steam\isteamcontroller.h" />
+    <ClInclude Include="..\..\public\steam\isteamfriends.h" />
+    <ClInclude Include="..\..\public\steam\isteamgameserver.h" />
+    <ClInclude Include="..\..\public\steam\isteamgameserverstats.h" />
+    <ClInclude Include="..\..\public\steam\isteamhtmlsurface.h" />
+    <ClInclude Include="..\..\public\steam\isteamhttp.h" />
+    <ClInclude Include="..\..\public\steam\isteammatchmaking.h" />
+    <ClInclude Include="..\..\public\steam\isteammusic.h" />
+    <ClInclude Include="..\..\public\steam\isteammusicremote.h" />
+    <ClInclude Include="..\..\public\steam\isteamnetworking.h" />
+    <ClInclude Include="..\..\public\steam\isteamremotestorage.h" />
+    <ClInclude Include="..\..\public\steam\isteamscreenshots.h" />
+    <ClInclude Include="..\..\public\steam\isteamugc.h" />
+    <ClInclude Include="..\..\public\steam\isteamunifiedmessages.h" />
+    <ClInclude Include="..\..\public\steam\isteamuser.h" />
+    <ClInclude Include="..\..\public\steam\isteamuserstats.h" />
+    <ClInclude Include="..\..\public\steam\isteamutils.h" />
+    <ClInclude Include="..\..\public\steam\matchmakingtypes.h" />
+    <ClInclude Include="..\..\public\steam\steamclientpublic.h" />
+    <ClInclude Include="..\..\public\steam\steamhttpenums.h" />
+    <ClInclude Include="..\..\public\steam\steamtypes.h" />
+    <ClInclude Include="..\..\public\steam\steamuniverse.h" />
+    <ClInclude Include="..\..\public\steam\steam_api.h" />
+    <ClInclude Include="..\..\public\steam\steam_gameserver.h" />
     <ClInclude Include="..\..\source_sdk\common\ifilesystemopendialog.h" />
     <ClInclude Include="..\..\source_sdk\public\basetypes.h" />
     <ClInclude Include="..\..\source_sdk\public\commonmacros.h" />

@@ -55,6 +55,8 @@
 #include "CHudStatusIcons.h"
 #include "CHudScoreBoard.h"
 
+#include "steam/steam_api.h"
+
 float g_ColorBlue[3]	= { 0.6f, 0.8f, 1.0f };
 float g_ColorRed[3]		= { 1.0f, 0.25f, 0.25f };
 float g_ColorGreen[3]	= { 0.6f, 1.0f, 0.6f };
@@ -615,6 +617,20 @@ void CHud :: VidInit( void )
 	}
 
 	GetClientVoiceMgr()->VidInit();
+
+	if (SteamAPI_IsSteamRunning())
+	{
+		ConsolePrintColor("Steam is running\n", RGBA(0x1E, 0xE6, 0x32));
+		if (SteamClient())
+		{
+			uint64_t id = SteamUser()->GetSteamID().ConvertToUint64();
+			const char *name = SteamFriends()->GetPersonaName();
+			ConPrintf("Steam ID: %lld\n", id);
+			ConPrintf("Steam nickname: %s\n", name);
+		}
+		else ConsolePrintColor("Steam API is not available\n", RGBA(0xF7, 0x33, 0x33));
+	}
+	else ConsolePrintColor("Steam is not running. How is that possible?", RGBA(0xF7, 0x33, 0x33));
 }
 
 void CHud::AddSprite(client_sprite_t *p)

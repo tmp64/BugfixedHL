@@ -39,6 +39,7 @@ union RGBA {
 
 	RGBA() { c = 0; }
 	RGBA(unsigned int value) { c = value; }
+	RGBA(unsigned char r1, unsigned char g1, unsigned char b1) { r = r1; g = g1; b = b1; a = 255; }
 	void Set(unsigned char r1, unsigned char g1, unsigned char b1) { r = r1; g = g1; b = b1; a = 255; }
 };
 
