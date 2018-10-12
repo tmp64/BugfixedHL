@@ -104,6 +104,9 @@ SET new_version=%new_version:~1%
 SET new_version=%new_version:-g=+%
 SET new_version=%new_version:-=.%
 
+:: Add VGUI2 suffix
+SET new_version=%new_version%+vgui2
+
 ::
 :: Check if version has changed
 ::
