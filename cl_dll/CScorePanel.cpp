@@ -21,6 +21,7 @@
 #include "cl_dll.h"
 #include "demo_api.h"
 #include "CHudTextMessage.h"
+#include "clientsteamcontext.h"
 
 #ifdef CSCOREBOARD_DEBUG
 #define DebugPrintf ConPrintf
@@ -410,8 +411,6 @@ void CScorePanel::OpenPlayerMenu(int itemID)
 	m_pMenuInfo.steamID64 = GetSteamID64(g_PlayerSteamId[m_pMenuInfo.client]);
 	if (m_pMenuInfo.steamID64 != 0)
 	{
-		std::string openProfileCmd = ("url " STEAM_PROFILE_URL) + std::to_string(m_pMenuInfo.steamID64);
-		m_pMenu->UpdateMenuItem(m_pMenuInfo.profilePageItemID, "Open Steam profile", new KeyValues("Command", "command", openProfileCmd.c_str()));
 		m_pMenu->SetItemEnabled(m_pMenuInfo.profilePageItemID, true);
 		m_pMenu->SetItemEnabled(m_pMenuInfo.profileUrlItemID, true);
 	}
@@ -540,7 +539,11 @@ void CScorePanel::OnCommandOverride(const char *command)
 	//-----------------------------------------------------------------------
 	else if (!stricmp(command, "MenuSteamProfile"))
 	{
-		// Handled by vgui2::Button
+		if (m_pMenuInfo.steamID64 > 0)
+		{
+			CSteamID steamId = CSteamID((uint64)m_pMenuInfo.steamID64);
+			ClientSteamContext().SteamFriends()->ActivateGameOverlayToUser("steamid", steamId);
+		}
 	}
 	else if (!stricmp(command, "MenuSteamURL"))
 	{
