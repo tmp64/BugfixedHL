@@ -11,6 +11,7 @@
 #include <vgui_controls/Label.h>
 #include <vgui_controls/Menu.h>
 #include <vgui_controls/BuildModeDialog.h>
+#include <vgui_controls/ImageList.h>
 #include <vgui/IInputInternal.h>
 #include <vgui/ISurface.h>
 #include <vgui/ISystem.h>
@@ -22,6 +23,8 @@
 #include "demo_api.h"
 #include "CHudTextMessage.h"
 #include "clientsteamcontext.h"
+#include "vgui_avatarimage.h"
+#include "CHudScoreBoard.h"
 
 #ifdef CSCOREBOARD_DEBUG
 #define DebugPrintf ConPrintf
@@ -66,10 +69,20 @@ CScorePanel::CScorePanel(IViewport *pParent) : BaseClass(nullptr, VIEWPORT_PANEL
 	SetVisible(false);
 	EnableMousePointer(false);
 	//ActivateBuildMode();
+
+	m_pImageList = NULL;
+
+	m_mapAvatarsToImageList.SetLessFunc(DefLessFunc(CSteamID));
+	m_mapAvatarsToImageList.RemoveAll();
 }
 
 CScorePanel::~CScorePanel()
 {
+	if (NULL != m_pImageList)
+	{
+		delete m_pImageList;
+		m_pImageList = NULL;
+	}
 }
 
 //--------------------------------------------------------------
@@ -84,6 +97,23 @@ void CScorePanel::ApplySchemeSettings(vgui2::IScheme * pScheme)
 	BaseClass::ApplySchemeSettings(pScheme);
 	m_pPlayerList->SetBorder(pScheme->GetBorder("FrameBorder"));
 	m_pTimerLabel->SetVisible(false);
+
+	if (m_pImageList)
+		delete m_pImageList;
+	m_pImageList = new vgui2::ImageList(false);
+
+	m_mapAvatarsToImageList.RemoveAll();
+
+	// resize the images to our resolution
+	for (int i = 0; i < m_pImageList->GetImageCount(); i++)
+	{
+		int wide, tall;
+		m_pImageList->GetImage(i)->GetSize(wide, tall);
+		m_pImageList->GetImage(i)->SetSize(vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), wide), vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), tall));
+	}
+
+	m_pPlayerList->SetImageList(m_pImageList, false);
+	m_pPlayerList->SetVisible(true);
 }
 
 void CScorePanel::OnKeyCodeTyped(vgui2::KeyCode code)
@@ -93,6 +123,11 @@ void CScorePanel::OnKeyCodeTyped(vgui2::KeyCode code)
 
 void CScorePanel::ShowPanel(bool state)
 {
+	if (m_pImageList == NULL)
+	{
+		InvalidateLayout(true, true);
+	}
+
 	if (BaseClass::IsVisible() == state)
 		return;
 
@@ -198,6 +233,8 @@ void CScorePanel::RecalcItems()
 		char buf[16];
 		if (team == m_pHeader) continue;
 		m_pPlayerList->AddSection(team, "", StaticPlayerSortFunc);
+		if (gHUD.m_ScoreBoard->m_CvarAvatars->value)
+			m_pPlayerList->AddColumnToSection(team, "avatar", "", CPlayerListPanel::COLUMN_IMAGE | CPlayerListPanel::COLUMN_RIGHT, m_iAvatarWidth);
 		m_pPlayerList->AddColumnToSection(team, "name", m_pTeamInfo[team].name, CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), NAME_WIDTH));
 		m_pPlayerList->AddColumnToSection(team, "steamid", "", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), STEAMID_WIDTH));
 		snprintf(buf, sizeof(buf), "%.2f", (double)m_pTeamInfo[team].kills / (double)(m_pTeamInfo[team].deaths + 1));
@@ -247,6 +284,8 @@ void CScorePanel::UpdateClientInfo(int client, bool autoUpdate)
 
 	char buf[16];
 	KeyValues *playerData = new KeyValues("data");
+	if (gHUD.m_ScoreBoard->m_CvarAvatars->value)
+		UpdatePlayerAvatar(client, playerData);
 	playerData->SetInt("client", client);
 	playerData->SetString("name", RemoveColorCodes(g_PlayerInfoList[client].name));
 	playerData->SetString("steamid", g_PlayerSteamId[client]);
@@ -334,6 +373,8 @@ void CScorePanel::AddHeader()
 {
 	m_pPlayerList->AddSection(m_pHeader, "", StaticPlayerSortFunc);
 	m_pPlayerList->SetSectionAlwaysVisible(m_pHeader);
+	if (gHUD.m_ScoreBoard->m_CvarAvatars->value)
+		m_pPlayerList->AddColumnToSection(m_pHeader, "avatar", "", CPlayerListPanel::COLUMN_IMAGE | CPlayerListPanel::COLUMN_RIGHT, m_iAvatarWidth);
 	m_pPlayerList->AddColumnToSection(m_pHeader, "name", "#PlayerName", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), NAME_WIDTH));
 	m_pPlayerList->AddColumnToSection(m_pHeader, "steamid", "Steam ID", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), STEAMID_WIDTH));
 	m_pPlayerList->AddColumnToSection(m_pHeader, "eff", "Eff", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), DEATH_WIDTH));
@@ -376,6 +417,44 @@ void CScorePanel::Resize()
 	GetPos(x, y);
 	y = (ScreenHeight - height) / 2;
 	SetPos(x, y);
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CScorePanel::UpdatePlayerAvatar(int playerIndex, KeyValues *kv)
+{
+	// Update their avatar
+	if (kv && ClientSteamContext().SteamFriends() && ClientSteamContext().SteamUtils())
+	{
+		uint64 steamID64 = GetSteamID64(g_PlayerSteamId[playerIndex]);
+		if (steamID64)
+		{
+			CSteamID steamIDForPlayer(steamID64);
+
+			// See if we already have that avatar in our list
+			int iMapIndex = m_mapAvatarsToImageList.Find(steamIDForPlayer);
+			int iImageIndex;
+			if (iMapIndex == m_mapAvatarsToImageList.InvalidIndex())
+			{
+				CAvatarImage *pImage = new CAvatarImage();
+				pImage->SetAvatarSteamID(steamIDForPlayer);
+				pImage->SetAvatarSize(32, 32);	// Deliberately non scaling
+				iImageIndex = m_pImageList->AddImage(pImage);
+
+				m_mapAvatarsToImageList.Insert(steamIDForPlayer, iImageIndex);
+			}
+			else
+			{
+				iImageIndex = m_mapAvatarsToImageList[iMapIndex];
+			}
+
+			kv->SetInt("avatar", iImageIndex);
+
+			CAvatarImage *pAvIm = (CAvatarImage *)m_pImageList->GetImage(iImageIndex);
+			pAvIm->UpdateFriendStatus();
+		}
+	}
 }
 
 //--------------------------------------------------------------

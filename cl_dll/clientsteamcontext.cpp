@@ -1,7 +1,6 @@
 //========= Copyright Valve Corporation, All rights reserved. ============//
 //#include "cbase.h"
 #include "clientsteamcontext.h"
-#include "wrect.h"
 #include "cl_dll.h"
 #include "cl_util.h"
 

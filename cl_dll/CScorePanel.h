@@ -5,6 +5,8 @@
 #include <vgui_controls/Frame.h>
 #include "vgui2/IViewportPanel.h"
 #include "vgui2/ViewportPanelNames.h"
+#include <tier1/UtlMap.h>
+#include <steam/steam_api.h>
 
 class IViewport;
 class CHudScoreBoard;
@@ -26,6 +28,7 @@ public:
 	// column widths at 640
 	enum
 	{
+		AVATAR_WIDTH = 64,
 		NAME_WIDTH = 184,
 		STEAMID_WIDTH = 100,
 		EFF_WIDTH = 60,
@@ -88,6 +91,8 @@ public:
 	MESSAGE_FUNC_CHARPTR(OnCommandOverride, "Command", command);	// For some reason, virtual function override doesn't work
 	MESSAGE_FUNC_INT(OnItemContextMenu, "ItemContextMenu", itemID);
 
+	CPanelAnimationVar(int, m_iAvatarWidth, "avatar_width", "64");
+
 	friend class CHudScoreBoard;
 
 private:
@@ -126,6 +131,9 @@ private:
 	int m_iMargin = 100;
 	int m_iMinHeight = 320;
 
+	vgui2::ImageList *m_pImageList;
+	CUtlMap<CSteamID, int> m_mapAvatarsToImageList;
+
 	team_info_t m_pTeamInfo[MAX_TEAMS + 1];
 	int m_pClientItems[MAX_PLAYERS + 1];
 	int m_pClientTeams[MAX_PLAYERS + 1];
@@ -138,6 +146,7 @@ private:
 	void UpdatePlayerCount();
 	void AddHeader();
 	void Resize();
+	void UpdatePlayerAvatar(int playerIndex, KeyValues *kv);
 
 	// Menu
 	void CreatePlayerMenu();

@@ -10,6 +10,7 @@ class CHudScoreBoard : public CHudBase
 public:
 	CScorePanel *m_pScorePanel = nullptr;
 	cvar_t* m_CvarMouseBtn = nullptr;
+	cvar_t* m_CvarAvatars = nullptr;
 
 	int Init(void);
 	int VidInit(void);

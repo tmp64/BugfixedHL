@@ -253,6 +253,7 @@ CALL "$(ProjectDir)PreBuild.bat" "$(ProjectDir)..\" "$(ProjectDir)..\..\"
     <ClCompile Include="..\vgui2\CClientVGUI.cpp" />
     <ClCompile Include="..\vgui2\CHudViewport.cpp" />
     <ClCompile Include="..\vgui2\KeyValuesCompat.cpp" />
+    <ClCompile Include="..\vgui_avatarimage.cpp" />
     <ClCompile Include="..\vgui_ClassMenu.cpp" />
     <ClCompile Include="..\vgui_ConsolePanel.cpp" />
     <ClCompile Include="..\vgui_ControlConfigPanel.cpp" />
@@ -507,6 +508,7 @@ CALL "$(ProjectDir)PreBuild.bat" "$(ProjectDir)..\" "$(ProjectDir)..\..\"
     <ClInclude Include="..\vgui2\KeyValuesCompat.h" />
     <ClInclude Include="..\vgui2\VGUI2Paths.h" />
     <ClInclude Include="..\vgui2\ViewportPanelNames.h" />
+    <ClInclude Include="..\vgui_avatarimage.h" />
     <ClInclude Include="..\vgui_ConsolePanel.h" />
     <ClInclude Include="..\vgui_ControlConfigPanel.h" />
     <ClInclude Include="..\vgui_int.h" />

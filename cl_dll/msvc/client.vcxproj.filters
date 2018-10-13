@@ -430,6 +430,9 @@
     <ClCompile Include="..\clientsteamcontext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\vgui_avatarimage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\ammo.h">
@@ -1171,6 +1174,9 @@
       <Filter>public\steam</Filter>
     </ClInclude>
     <ClInclude Include="..\clientsteamcontext.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vgui_avatarimage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
