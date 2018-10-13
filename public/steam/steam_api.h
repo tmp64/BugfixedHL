@@ -584,6 +584,7 @@ inline bool CSteamAPIContext::Init()
 	if ( !m_pSteamUGC )
 		return false;
 
+#if 0	// Causes exception in steamclient.dll
 	m_pSteamAppList = SteamClient()->GetISteamAppList( hSteamUser, hSteamPipe, STEAMAPPLIST_INTERFACE_VERSION );
 	if ( !m_pSteamAppList )
 		return false;
@@ -605,6 +606,7 @@ inline bool CSteamAPIContext::Init()
 	{
 		return false;
 	}
+#endif
 
 #ifdef _PS3
 	m_pSteamPS3OverlayRender = SteamClient()->GetISteamPS3OverlayRender();

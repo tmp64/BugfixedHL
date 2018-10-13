@@ -69,7 +69,7 @@ CALL "$(ProjectDir)PreBuild.bat" "$(ProjectDir)..\" "$(ProjectDir)..\..\"
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\utils\vgui\include;..\..\engine;..\..\common;..\..\pm_shared;..\..\dlls;..\jpeg;..\;..\..\vgui2;..\..\public;..\..\public\math;..\..\source_sdk\public;..\..\source_sdk\public\tier1;..\..\source_sdk\public\html;..\..\source_sdk\common;..\..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_DEBUG;WIN32;_WINDOWS;CLIENT_DLL;CLIENT_WEAPONS;_CRT_SECURE_NO_WARNINGS;PCRE_STATIC;HAVE_CONFIG_H;USE_VGUI2;NO_MALLOC_OVERRIDE;CSCOREBOARD_DEBUG;%(PreprocessorDefinitions);NO_MALLOC_OVERRIDE</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;WIN32;_WINDOWS;CLIENT_DLL;CLIENT_WEAPONS;_CRT_SECURE_NO_WARNINGS;PCRE_STATIC;HAVE_CONFIG_H;USE_VGUI2;NO_MALLOC_OVERRIDE;CSCOREBOARD_DEBUG;VERSION_SAFE_STEAM_API_INTERFACES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <AdditionalOptions>/Zc:threadSafeInit-</AdditionalOptions>
@@ -115,7 +115,7 @@ CALL "$(ProjectDir)PreBuild.bat" "$(ProjectDir)..\" "$(ProjectDir)..\..\"
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <AdditionalIncludeDirectories>..\..\utils\vgui\include;..\..\engine;..\..\common;..\..\pm_shared;..\..\dlls;..\jpeg;..\;..\..\vgui2;..\..\public;..\..\public\math;..\..\source_sdk\public;..\..\source_sdk\public\tier1;..\..\source_sdk\public\html;..\..\source_sdk\common;..\..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;CLIENT_DLL;CLIENT_WEAPONS;_CRT_SECURE_NO_WARNINGS;PCRE_STATIC;HAVE_CONFIG_H;USE_VGUI2;NO_MALLOC_OVERRIDE</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;CLIENT_DLL;CLIENT_WEAPONS;_CRT_SECURE_NO_WARNINGS;PCRE_STATIC;HAVE_CONFIG_H;USE_VGUI2;NO_MALLOC_OVERRIDE;VERSION_SAFE_STEAM_API_INTERFACES</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <AdditionalOptions>/Zc:threadSafeInit-</AdditionalOptions>
@@ -197,6 +197,7 @@ CALL "$(ProjectDir)PreBuild.bat" "$(ProjectDir)..\" "$(ProjectDir)..\..\"
     <ClCompile Include="..\cdll_int.cpp" />
     <ClCompile Include="..\CHudBase.cpp" />
     <ClCompile Include="..\CHudScoreBoard.cpp" />
+    <ClCompile Include="..\clientsteamcontext.cpp" />
     <ClCompile Include="..\com_weapons.cpp" />
     <ClCompile Include="..\CHudDeathNotice.cpp" />
     <ClCompile Include="..\CPlayerListPanel.cpp" />
@@ -468,6 +469,7 @@ CALL "$(ProjectDir)PreBuild.bat" "$(ProjectDir)..\" "$(ProjectDir)..\..\"
     <ClInclude Include="..\CHudTextMessage.h" />
     <ClInclude Include="..\CHudTimer.h" />
     <ClInclude Include="..\CHudTrain.h" />
+    <ClInclude Include="..\clientsteamcontext.h" />
     <ClInclude Include="..\cl_dll.h" />
     <ClInclude Include="..\cl_util.h" />
     <ClInclude Include="..\com_weapons.h" />

@@ -427,6 +427,9 @@
     <ClCompile Include="..\CVoiceStatus2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\clientsteamcontext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\ammo.h">
@@ -1166,6 +1169,9 @@
     </ClInclude>
     <ClInclude Include="..\..\public\steam\isteamgameserver.h">
       <Filter>public\steam</Filter>
+    </ClInclude>
+    <ClInclude Include="..\clientsteamcontext.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -41,6 +41,7 @@ extern "C"
 #include "svc_messages.h"
 #include "memory.h"
 #include "results.h"
+#include "clientsteamcontext.h"
 
 #define DLLEXPORT __declspec( dllexport )
 
@@ -323,6 +324,9 @@ Reinitializes all the hud variables.
 
 void DLLEXPORT HUD_Init( void )
 {
+#if !defined( NO_STEAM )
+	ClientSteamContext().Activate();
+#endif
 	InitInput();
 	gHUD.Init();
 	Scheme_Init();
@@ -395,6 +399,9 @@ Called at game exit.
 void DLLEXPORT HUD_Shutdown( void )
 {
 	ShutdownInput();
+#if !defined( NO_STEAM )
+	ClientSteamContext().Shutdown();
+#endif
 }
 
 /*

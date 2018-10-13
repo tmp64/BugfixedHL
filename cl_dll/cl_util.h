@@ -18,6 +18,8 @@
 
 #include "cvardef.h"
 
+union RGBA;
+
 #ifndef TRUE
 #define TRUE 1
 #define FALSE 0
