@@ -90,6 +90,12 @@ public:
 		m_nY = y;
 	}
 
+	virtual void SetOffset(int x, int y)
+	{
+		m_offX = x;
+		m_offY = y;
+	}
+
 	// Gets the size of the content
 	virtual void GetContentSize(int &wide, int &tall)
 	{
@@ -155,6 +161,7 @@ private:
 	bool m_bFriend;
 	bool m_bLoadPending;
 	float m_fNextLoadTime;	// used to throttle load attempts
+	int m_offX = 0, m_offY = 0;
 
 	EAvatarSize m_AvatarSize;
 	CSteamID	m_SteamID;

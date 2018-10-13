@@ -103,6 +103,7 @@ void CScorePanel::ApplySchemeSettings(vgui2::IScheme * pScheme)
 	m_pImageList = new vgui2::ImageList(false);
 
 	m_mapAvatarsToImageList.RemoveAll();
+	m_iAvatarPaddingLeft = m_iAvatarPaddingRight = vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), AVATAR_OFFSET);
 
 	// resize the images to our resolution
 	for (int i = 0; i < m_pImageList->GetImageCount(); i++)
@@ -234,7 +235,7 @@ void CScorePanel::RecalcItems()
 		if (team == m_pHeader) continue;
 		m_pPlayerList->AddSection(team, "", StaticPlayerSortFunc);
 		if (gHUD.m_ScoreBoard->m_CvarAvatars->value)
-			m_pPlayerList->AddColumnToSection(team, "avatar", "", CPlayerListPanel::COLUMN_IMAGE | CPlayerListPanel::COLUMN_RIGHT, m_iAvatarWidth);
+			m_pPlayerList->AddColumnToSection(team, "avatar", "", CPlayerListPanel::COLUMN_IMAGE, m_iAvatarWidth + m_iAvatarPaddingLeft + m_iAvatarPaddingRight);
 		m_pPlayerList->AddColumnToSection(team, "name", m_pTeamInfo[team].name, CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), NAME_WIDTH));
 		m_pPlayerList->AddColumnToSection(team, "steamid", "", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), STEAMID_WIDTH));
 		snprintf(buf, sizeof(buf), "%.2f", (double)m_pTeamInfo[team].kills / (double)(m_pTeamInfo[team].deaths + 1));
@@ -374,7 +375,7 @@ void CScorePanel::AddHeader()
 	m_pPlayerList->AddSection(m_pHeader, "", StaticPlayerSortFunc);
 	m_pPlayerList->SetSectionAlwaysVisible(m_pHeader);
 	if (gHUD.m_ScoreBoard->m_CvarAvatars->value)
-		m_pPlayerList->AddColumnToSection(m_pHeader, "avatar", "", CPlayerListPanel::COLUMN_IMAGE | CPlayerListPanel::COLUMN_RIGHT, m_iAvatarWidth);
+		m_pPlayerList->AddColumnToSection(m_pHeader, "avatar", "", CPlayerListPanel::COLUMN_IMAGE, m_iAvatarWidth + m_iAvatarPaddingLeft + m_iAvatarPaddingRight);
 	m_pPlayerList->AddColumnToSection(m_pHeader, "name", "#PlayerName", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), NAME_WIDTH));
 	m_pPlayerList->AddColumnToSection(m_pHeader, "steamid", "Steam ID", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), STEAMID_WIDTH));
 	m_pPlayerList->AddColumnToSection(m_pHeader, "eff", "Eff", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), DEATH_WIDTH));
@@ -438,6 +439,8 @@ void CScorePanel::UpdatePlayerAvatar(int playerIndex, KeyValues *kv)
 			if (iMapIndex == m_mapAvatarsToImageList.InvalidIndex())
 			{
 				CAvatarImage *pImage = new CAvatarImage();
+				pImage->SetOffset(m_iAvatarPaddingLeft, 0);
+				pImage->SetDrawFriend(false);
 				pImage->SetAvatarSteamID(steamIDForPlayer);
 				pImage->SetAvatarSize(32, 32);	// Deliberately non scaling
 				iImageIndex = m_pImageList->AddImage(pImage);

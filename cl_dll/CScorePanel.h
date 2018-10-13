@@ -28,6 +28,7 @@ public:
 	// column widths at 640
 	enum
 	{
+		AVATAR_OFFSET = 4,
 		AVATAR_WIDTH = 64,
 		NAME_WIDTH = 184,
 		STEAMID_WIDTH = 100,
@@ -91,7 +92,7 @@ public:
 	MESSAGE_FUNC_CHARPTR(OnCommandOverride, "Command", command);	// For some reason, virtual function override doesn't work
 	MESSAGE_FUNC_INT(OnItemContextMenu, "ItemContextMenu", itemID);
 
-	CPanelAnimationVar(int, m_iAvatarWidth, "avatar_width", "64");
+	CPanelAnimationVar(int, m_iAvatarWidth, "avatar_width", "34");
 
 	friend class CHudScoreBoard;
 
@@ -133,6 +134,7 @@ private:
 
 	vgui2::ImageList *m_pImageList;
 	CUtlMap<CSteamID, int> m_mapAvatarsToImageList;
+	int m_iAvatarPaddingLeft = 0, m_iAvatarPaddingRight = 0;
 
 	team_info_t m_pTeamInfo[MAX_TEAMS + 1];
 	int m_pClientItems[MAX_PLAYERS + 1];

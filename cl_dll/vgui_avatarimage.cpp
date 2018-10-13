@@ -208,8 +208,8 @@ void CAvatarImage::InitFromRGBA( int iAvatar, const byte *rgba, int width, int h
 //-----------------------------------------------------------------------------
 void CAvatarImage::Paint( void )
 {
-	int posX = m_nX;
-	int posY = m_nY;
+	int posX = m_nX + m_offX;
+	int posY = m_nY + m_offY;
 
 	if (m_bDrawFriend)
 	{
