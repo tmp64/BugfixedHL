@@ -274,7 +274,7 @@ endif()
 
 set_target_properties( client PROPERTIES
 	COMPILE_FLAGS "${WARNING_LEVEL_STRICTEST} -static-libgcc -static-libstdc++"
-	LINK_FLAGS "${SHARED_GAME_LINKER_FLAGS} ${CLIENT_LINK_FLAGS} -static-libgcc -static-libstdc++"
+	LINK_FLAGS "${SHARED_GAME_LINKER_FLAGS} ${CLIENT_LINK_FLAGS} -static-libgcc -static-libstdc++ -fno-stack-protector"
 )
 
 #No lib prefix

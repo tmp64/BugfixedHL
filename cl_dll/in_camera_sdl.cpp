@@ -616,14 +616,14 @@ void CAM_EndDistance(void)
    iMouseInUse=0;
 }
 
-int DLLEXPORT CL_IsThirdPerson( void )
+extern "C" int DLLEXPORT CL_IsThirdPerson( void )
 {
 //	RecClCL_IsThirdPerson();
 
 	return (cam_thirdperson ? 1 : 0) || (g_iUser1 && (g_iUser2 == gEngfuncs.GetLocalPlayer()->index) );
 }
 
-void DLLEXPORT CL_CameraOffset( float *ofs )
+extern "C" void DLLEXPORT CL_CameraOffset( float *ofs )
 {
 //	RecClCL_GetCameraOffsets(ofs);
 

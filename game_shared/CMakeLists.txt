@@ -22,6 +22,13 @@ add_sources(
     voice_status.h
     voice_vgui_tweakdlg.cpp
     voice_vgui_tweakdlg.h
-    voice_gamemgr.cpp
-    voice_gamemgr.h
+
+    ############################################    
+    # FIXME FIXME FIXME
+    # Files above are client-only
+    # Files below (commented out) are server-only
+    ############################################  
+    
+    #voice_gamemgr.cpp
+    #voice_gamemgr.h
 )
