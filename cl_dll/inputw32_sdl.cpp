@@ -28,6 +28,15 @@
 
 #define MOUSE_BUTTON_COUNT 5
 
+extern "C"
+{
+	void DLLEXPORT IN_ActivateMouse( void );
+	void DLLEXPORT IN_DeactivateMouse( void );
+	void DLLEXPORT IN_MouseEvent (int mstate);
+	void DLLEXPORT IN_Accumulate (void);
+	void DLLEXPORT IN_ClearStates (void);
+}
+
 // Set this to 1 to show mouse cursor.  Experimental
 int	g_iVisibleMouse = 0;
 

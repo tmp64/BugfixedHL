@@ -23,6 +23,13 @@ float CL_KeyState (kbutton_t *key);
 
 extern cl_enginefunc_t gEngfuncs;
 
+extern "C"
+{
+	void DLLEXPORT CAM_Think( void );
+	int DLLEXPORT CL_IsThirdPerson( void );
+	void DLLEXPORT CL_CameraOffset( float *ofs );
+}
+
 //-------------------------------------------------- Constants
 
 #define CAM_DIST_DELTA 1.0
