@@ -2,8 +2,10 @@
 /*.db
 /*.opendb
 /*.sdf
+/*.cmake
 /build
 /.vscode
+/.idea
 /CMakeFiles
 /cmake-build-debug
 CMakeCache.txt

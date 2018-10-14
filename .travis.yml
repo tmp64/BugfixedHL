@@ -1,22 +1,14 @@
 language: cpp
 sudo: required
-dist: bionic
+dist: trusty
 compiler:
 - g++
 os:
 - linux
 before_install:
-  - curl https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz --output steamcmd_linux.tar.gz
-  - tar -xvzf steamcmd_linux.tar.gz
-  - ./steamcmd.sh +login anonymous +force_install_dir ./hl +app_update 90 +quit
-script: export CC=gcc-5 CXX=g++-5 && cmake -DGAME_BIN_PATH ./hl . && make
-addons:
-  apt:
-    packages:
-    - lib32gcc1
-    - curl
-    - cmake
-    - gcc-5
-    - g++-5
-    - gcc-5-multilib
-    - g++-5-multilib
+  - sudo apt-get -y update && sudo apt-get -y install software-properties-common
+  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test && sudo apt-get -y update
+  - sudo apt-get install lib32gcc1 g++-5 gcc-5 gcc-5-multilib g++-5-multilib cmake
+  - curl https://files.hldm.org/hl-linux-client-libs.tar.gz --output hl-linux-client-libs.tar.gz
+  - mkdir ./hl && tar -xvzf hl-linux-client-libs.tar.gz -C ./hl
+script: export CC=gcc-5 CXX=g++-5 && cmake -DGAME_BIN_PATH=./hl . && make client
