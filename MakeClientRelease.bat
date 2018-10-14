@@ -34,6 +34,7 @@ SET /P version=<"%TMPFILE%.tmp1"
 :: Strip away #define and stuff
 SET version=%version:~21%
 SET version=%version:"=%
+SET version=%version:+=-%
 
 ::
 :: Copy files to a directory
