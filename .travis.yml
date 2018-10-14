@@ -1,0 +1,22 @@
+language: cpp
+sudo: required
+dist: bionic
+compiler:
+- g++
+os:
+- linux
+before_install:
+  - curl https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz --output steamcmd_linux.tar.gz
+  - tar -xvzf steamcmd_linux.tar.gz
+  - ./steamcmd.sh +login anonymous +force_install_dir ./hl +app_update 90 +quit
+script: export CC=gcc-5 CXX=g++-5 && cmake -DGAME_BIN_PATH ./hl . && make
+addons:
+  apt:
+    packages:
+    - lib32gcc1
+    - curl
+    - cmake
+    - gcc-5
+    - g++-5
+    - gcc-5-multilib
+    - g++-5-multilib
