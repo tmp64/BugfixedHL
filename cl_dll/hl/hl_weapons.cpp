@@ -12,6 +12,7 @@
 *   without written permission from Valve LLC.
 *
 ****/
+#include <algorithm>
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
@@ -30,6 +31,12 @@
 #include "../hud_iface.h"
 #include "../com_weapons.h"
 #include "../demo.h"
+
+#undef min
+#undef max
+
+using std::min;
+using std::max;
 
 extern globalvars_t *gpGlobals;
 extern int g_iUser1;
