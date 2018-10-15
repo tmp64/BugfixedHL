@@ -409,7 +409,6 @@ void CHud :: Init( void )
 	m_pCvarShowNextmap = CVAR_CREATE( "hud_shownextmapinscore", "1", FCVAR_ARCHIVE );	// controls whether or not to show nextmap in scoreboard table
 	m_pCvarShowLoss = CVAR_CREATE( "hud_showlossinscore", "1", FCVAR_ARCHIVE );	// controls whether or not to show loss in scoreboard table
 	m_pCvarShowSteamId = CVAR_CREATE( "hud_showsteamidinscore", "1", FCVAR_ARCHIVE );	// controls whether or not to show SteamId in scoreboard table
-	m_pCvarShowKd = CVAR_CREATE("hud_showkdinscore", "1", FCVAR_ARCHIVE);	// controls whether or not to show K/D ratio in scoreboard table
 	m_pCvarColorText = CVAR_CREATE( "hud_colortext", "1", FCVAR_ARCHIVE );
 	m_pCvarRDynamicEntLight = CVAR_CREATE("r_dynamic_ent_light", "1", FCVAR_ARCHIVE);
 
@@ -971,4 +970,68 @@ void CenterPrint( const char *string )
 		gEngfuncs.pfnCenterPrint(string);
 	else
 		gEngfuncs.pfnCenterPrint(RemoveColorCodes(string));
+}
+
+int CHud :: DrawHudStringColorCodes(int x, int y, const char *string, int _r, int _g, int _b)
+{
+	if (!string || !*string)
+		return x;
+
+	if (gHUD.m_pCvarColorText->value == 0)
+		return gHUD.DrawHudString(x, y, string, _r, _g, _b);
+
+	char *c1 = (char*)string;
+	char *c2 = (char*)string;
+	int r = _r, g = _g, b = _b;
+	int colorIndex;
+	while (true)
+	{
+		// Search for next color code
+		colorIndex = -1;
+		while (*c2 && *(c2 + 1) && !(*c2 == '^' && *(c2 + 1) >= '0' && *(c2 + 1) <= '9'))
+			c2++;
+		if (*c2 == '^' && *(c2 + 1) >= '0' && *(c2 + 1) <= '9')
+		{
+			colorIndex = *(c2 + 1) - '0';
+			*c2 = 0;
+		}
+		// Draw current string
+		x = gHUD.DrawHudString(x, y, c1, r, g, b);
+
+		if (colorIndex >= 0)
+		{
+			// Revert change and advance
+			*c2 = '^';
+			c2 += 2;
+			c1 = c2;
+
+			// Return if next string is empty
+			if (!*c1)
+				return x;
+
+			// Setup color
+			r = g_iColorsCodes[colorIndex][0];
+			g = g_iColorsCodes[colorIndex][1];
+			b = g_iColorsCodes[colorIndex][2];
+			continue;
+		}
+
+		// Done
+		break;
+	}
+	return x;
+}
+
+int CHud::DrawHudStringReverseColorCodes(int x, int y, const char *string, int _r, int _g, int _b)
+{
+	if (!string || !*string)
+		return x;
+
+	if (gHUD.m_pCvarColorText->value == 0)
+		return gHUD.DrawHudStringReverse(x, y, string, _r, _g, _b);
+
+	// Move the string pos to the left to make it look like DrawHudStringReverse
+	x -= TextMessageDrawString(ScreenWidth + 1, y, RemoveColorCodes(string), _r, _g, _b);
+
+	return DrawHudStringColorCodes(x, y, string, _r, _g, _b);
 }

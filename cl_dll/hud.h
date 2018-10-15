@@ -234,7 +234,6 @@ public:
 	cvar_t	*m_pCvarShowNextmap;
 	cvar_t	*m_pCvarShowLoss;
 	cvar_t	*m_pCvarShowSteamId;
-	cvar_t	*m_pCvarShowKd;
 	cvar_t	*m_pCvarColorText;
 	cvar_t	*m_pCvarRDynamicEntLight;
 
@@ -242,6 +241,8 @@ public:
 	int DrawHudNumber(int x, int y, int iFlags, int iNumber, int r, int g, int b);
 	int DrawHudString(int x, int y, const char *szString, int r, int g, int b);
 	int DrawHudStringReverse(int xpos, int ypos, const char *szString, int r, int g, int b);
+	int DrawHudStringColorCodes(int x, int y, const char *string, int _r, int _g, int _b);
+	int DrawHudStringReverseColorCodes(int x, int y, const char *string, int _r, int _g, int _b);
 	int DrawHudNumberString(int xpos, int ypos, int iNumber, int r, int g, int b);
 	int GetNumWidth(int iNumber, int iFlags);
 	int GetHudCharWidth(int c);
