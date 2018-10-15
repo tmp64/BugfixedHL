@@ -34,6 +34,8 @@
 	float	vJumpAngles[3];
 #endif
 
+static vec3_t vec3_origin = {0,0,0};
+
 static int pm_shared_initialized = 0;
 
 #pragma warning( disable : 4305 )

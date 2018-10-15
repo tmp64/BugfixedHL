@@ -25,6 +25,27 @@
 #define DEBUG 1
 #endif
 
+// Min/max
+#ifdef __cplusplus
+
+#include <algorithm>
+#undef min
+#undef max
+using std::min;
+using std::max;
+
+#else
+
+#ifndef min
+#define min(a,b)  (((a) < (b)) ? (a) : (b))
+#endif
+
+#ifndef max
+#define max(a,b)  (((a) > (b)) ? (a) : (b))
+#endif
+
+#endif
+
 // Silence certain warnings
 #pragma warning(disable : 4244)		// int or float down-conversion
 #pragma warning(disable : 4305)		// int or float data truncation
@@ -49,11 +70,8 @@ typedef int BOOL;
 #define MAX_PATH PATH_MAX
 #include <limits.h>
 #include <stdarg.h>
-#ifndef min
-#define min(a,b)  (((a) < (b)) ? (a) : (b))
-#endif
-#ifndef max
-#define max(a,b)  (((a) > (b)) ? (a) : (b))
+
+#ifndef _snprintf
 #define _snprintf snprintf
 #define _vsnprintf(a,b,c,d) vsnprintf(a,b,c,d)
 #endif

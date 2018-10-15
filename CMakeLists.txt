@@ -143,7 +143,6 @@ set( SHARED_INCLUDE_PATHS
 	#source_sdk/public/tier1
 	#source_sdk/public
 	#source_sdk/common
-	${CMAKE_SOURCE_DIR}  #Should ideally get rid of this.
 )
 
 add_subdirectory( common )
@@ -188,6 +187,7 @@ set( SHARED_DEPENDENCIES
 add_sources( "${SHARED_SRCS}" )
 
 #Add in the client directories
+add_subdirectory( game_shared/client )
 add_subdirectory( cl_dll )
 #add_subdirectory( source_sdk/common )
 #add_subdirectory( source_sdk/public )
@@ -208,6 +208,7 @@ configure_msvc_runtime( client STATIC )
 check_winxp_support( client )
 
 target_include_directories( client PRIVATE
+	game_shared/client
     cl_dll
 	utils/vgui/include_DLLEXPORT
 	${SHARED_INCLUDE_PATHS}
@@ -301,6 +302,7 @@ clear_sources()
 add_sources( "${SHARED_SRCS}" )
 
 #Add in the server directories
+add_subdirectory( game_shared/server )
 add_subdirectory( dlls )
 
 preprocess_sources()
@@ -321,6 +323,7 @@ check_winxp_support( hl )
 target_include_directories( hl PRIVATE
 	${SHARED_INCLUDE_PATHS}
 	${SHARED_EXTERNAL_INCLUDE_PATHS}
+	game_shared/server
 )
 
 target_compile_definitions( hl PRIVATE

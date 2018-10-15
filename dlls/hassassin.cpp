@@ -21,12 +21,12 @@
 #include	"extdll.h"
 #include	"util.h"
 #include	"cbase.h"
-#include	"monsters.h"
 #include	"schedule.h"
 #include	"squadmonster.h"
 #include	"weapons.h"
 #include	"soundent.h"
 #include	"game.h"
+#include	"monsters.h"
 
 extern DLL_GLOBAL int  g_iSkillLevel;
 
@@ -728,12 +728,12 @@ void CHAssassin :: RunAI( void )
 			EMIT_SOUND (ENT(pev), CHAN_BODY, "debris/beamstart1.wav", 0.2, ATTN_NORM );
 		}
 
-		pev->renderamt = max( pev->renderamt - 50, m_iTargetRanderamt );
+		pev->renderamt = max( pev->renderamt - 50, (float)m_iTargetRanderamt );
 		pev->rendermode = kRenderTransTexture;
 	}
 	else if (pev->renderamt < m_iTargetRanderamt)
 	{
-		pev->renderamt = min( pev->renderamt + 50, m_iTargetRanderamt );
+		pev->renderamt = min( pev->renderamt + 50, (float)m_iTargetRanderamt );
 		if (pev->renderamt == 255)
 			pev->rendermode = kRenderNormal;
 	}
