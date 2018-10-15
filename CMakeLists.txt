@@ -18,8 +18,8 @@ include( WinXPSupport )
 
 project( BugfixedHL )
 
-#C++11 support
-set( CMAKE_CXX_FLAGS "-std=c++11" )
+#C++14 support
+set( CMAKE_CXX_FLAGS "-std=c++14" )
 
 if( CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU" )
 	# Always build as 32 bit
