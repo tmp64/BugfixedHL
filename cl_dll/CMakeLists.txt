@@ -26,6 +26,7 @@ add_sources(
     ammo.h
     ammohistory.cpp
     ammohistory.h
+	appversion.h
     camera.h
     cdll_int.cpp
     CHudAmmo.cpp
@@ -73,6 +74,7 @@ add_sources(
     com_weapons.h
     demo.cpp
     demo.h
+	dllexport.h
     entity.cpp
     ev_common.cpp
     events.cpp
@@ -160,6 +162,8 @@ if( MSVC )
         net.cpp
         ../dlls/memory.cpp
         ../dlls/memory.h
+		client.rc
+		resource.h
     )
 else()
     add_sources(

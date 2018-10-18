@@ -29,6 +29,8 @@
 #include "results.h"
 #include "vgui_TeamFortressViewport.h"
 
+#undef PlaySound
+
 // FIXME: Windows only
 #ifndef _WIN32
 #define ResultsAddLog(...)

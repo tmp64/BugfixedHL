@@ -30,7 +30,6 @@ extern "C"
 #include "vgui_TeamFortressViewport.h"
 #include "CHudSpectator.h"
 
-
 extern "C" 
 {
 	struct kbutton_s DLLEXPORT *KB_Find( const char *name );

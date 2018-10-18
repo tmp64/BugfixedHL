@@ -19,12 +19,19 @@ include( WinXPSupport )
 project( BugfixedHL )
 
 #C++14 support
-set( CMAKE_CXX_FLAGS "-std=c++14" )
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 if( CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU" )
 	# Always build as 32 bit
 	# Additional debug info for GDB.
 	set( SHARED_COMPILER_FLAGS "${SHARED_COMPILER_FLAGS} -m32 -g" )
+endif()
+
+if( MSVC )
+	# Enable exception support
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")
 endif()
 
 set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SHARED_COMPILER_FLAGS}" )
@@ -122,9 +129,9 @@ endif()
 
 # Warning level
 if( MSVC )
-	set( WARNING_LEVEL_STRICTEST "/W4 " )
+	set( WARNING_LEVEL " " )
 else()
-	set( WARNING_LEVEL_STRICTEST "-Wall -Wno-write-strings -Wno-unknown-pragmas -Wno-endif-labels -Wno-switch -Wno-unused-variable -Wno-unused-function" )
+	set( WARNING_LEVEL "-Wall -Wno-write-strings -Wno-unknown-pragmas -Wno-endif-labels -Wno-switch -Wno-unused-variable -Wno-unused-function" )
 endif()
 
 #Shared directories
@@ -194,18 +201,25 @@ add_subdirectory( cl_dll )
 
 preprocess_sources()
 
-# appversion.h generator
-add_custom_command (
-	OUTPUT ${CMAKE_SOURCE_DIR}/cl_dll/appversion.h
-	COMMAND sh -c 'CMAKE_SOURCE_DIR=${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/cl_dll/appversion.sh'
-)
-
 add_library( client SHARED ${PREP_SRCS} ${CMAKE_SOURCE_DIR}/cl_dll/appversion.h )
 
 #Needs static CRT to avoid alloc issues.
 configure_msvc_runtime( client STATIC )
 
 check_winxp_support( client )
+
+# Generate appversion.h
+if ( WIN32 )
+	add_custom_command( TARGET client
+		PRE_BUILD
+		COMMAND ${CMAKE_SOURCE_DIR}/scripts/GenerateAppVersion.bat "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}\\cl_dll\\appversion.h"
+	)
+else()
+	add_custom_command( TARGET client
+		PRE_BUILD
+		COMMAND ${CMAKE_SOURCE_DIR}/scripts/GenerateAppVersion.sh "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}/cl_dll/appversion.h"
+	)
+endif()
 
 target_include_directories( client PRIVATE
 	game_shared/client
@@ -230,6 +244,12 @@ find_package( vgui MODULE REQUIRED )
 set( SDL2_DIR ${GAME_BIN_PATH} CACHE PATH "SDL2 shared library location" )
 find_package( SDL2 MODULE REQUIRED )
 
+if ( MSVC )
+	# DInput for direct mouse input
+	find_package( DInput REQUIRED )
+	find_package( DXGUID REQUIRED )
+endif()
+
 #Set the list of platform specific libraries
 if( WIN32 )
 	set( CLIENT_PLAT_LIBS 
@@ -237,18 +257,21 @@ if( WIN32 )
         psapi
         winmm
         wsock32
+		DINPUT
+		DXGUID
     )
 else()
-	set( CLIENT_PLAT_LIBS "dl" )
+	set( CLIENT_PLAT_LIBS 
+		dl
+		SDL2
+	)
 endif()
 
 #Link with client dependencies
 target_link_libraries( client 
-	${DELAYIMP}
 	vgui
 	${VGUI2_LIBS}
 	${CLIENT_PLAT_LIBS}
-	SDL2
 	${SHARED_DEPENDENCIES}
 	Threads::Threads
 	${UNIX_FS_LIB}
@@ -263,19 +286,26 @@ set_target_properties( client PROPERTIES
 )
 
 set( CLIENT_LINK_FLAGS )
+set ( CLIENT_COMPILE_FLAGS )
 
 if( MSVC )
 	set( CLIENT_LINK_FLAGS "${CLIENT_LINK_FLAGS} " )
 elseif( NOT APPLE )
+	# Link statically with standart libraries to avoid any issues
+	# May be overkill
+	set( CLIENT_COMPILE_FLAGS
+		${CLIENT_COMPILE_FLAGS} "-static-libgcc -static-libstdc++"
+	)
+
 	#Generate a map file that provides information about the linking stage.
 	set( CLIENT_LINK_FLAGS
-		${CLIENT_LINK_FLAGS} "-Wl,-Map,client_map.txt"
+		${CLIENT_LINK_FLAGS} "-Wl,-Map,client_map.txt -static-libgcc -static-libstdc++ -fno-stack-protector"
 	)
 endif()
 
 set_target_properties( client PROPERTIES
-	COMPILE_FLAGS "${WARNING_LEVEL_STRICTEST} -static-libgcc -static-libstdc++"
-	LINK_FLAGS "${SHARED_GAME_LINKER_FLAGS} ${CLIENT_LINK_FLAGS} -static-libgcc -static-libstdc++ -fno-stack-protector"
+	COMPILE_FLAGS "${WARNING_LEVEL} ${CLIENT_COMPILE_FLAGS}"
+	LINK_FLAGS "${SHARED_GAME_LINKER_FLAGS} ${CLIENT_LINK_FLAGS}"
 )
 
 #No lib prefix
@@ -307,18 +337,25 @@ add_subdirectory( dlls )
 
 preprocess_sources()
 
-# appversion.h generator
-add_custom_command (
-	OUTPUT ${CMAKE_SOURCE_DIR}/dlls/appversion.h
-	COMMAND sh -c 'CMAKE_SOURCE_DIR=${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/dlls/appversion.sh'
-)
-
 add_library( hl SHARED ${PREP_SRCS} ${CMAKE_SOURCE_DIR}/dlls/appversion.h )
 
 #Needs static CRT to avoid alloc issues.
 configure_msvc_runtime( hl STATIC )
 
 check_winxp_support( hl )
+
+# Generate appversion.h
+if ( WIN32 )
+	add_custom_command( TARGET client
+		PRE_BUILD
+		COMMAND ${CMAKE_SOURCE_DIR}/scripts/GenerateAppVersion.bat "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}\\dlls\\appversion.h"
+	)
+else()
+	add_custom_command( TARGET client
+		PRE_BUILD
+		COMMAND ${CMAKE_SOURCE_DIR}/scripts/GenerateAppVersion.sh "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}/cl_dll/appversion.h"
+	)
+endif()
 
 target_include_directories( hl PRIVATE
 	${SHARED_INCLUDE_PATHS}
@@ -336,14 +373,13 @@ target_compile_definitions( hl PRIVATE
 
 #Set the list of platform specific libraries
 if( WIN32 )
-	set( SERVER_PLAT_LIBS Ws2_32 Shlwapi )
+	set( SERVER_PLAT_LIBS )
 else()
 	set( SERVER_PLAT_LIBS dl )
 endif()
 
 #Link with server dependencies
 target_link_libraries( hl 
-	${DELAYIMP}
 	${SERVER_PLAT_LIBS}
 	${SHARED_DEPENDENCIES}
 	${UNIX_FS_LIB}
@@ -360,12 +396,7 @@ set_target_properties( hl PROPERTIES
 set( SERVER_LINK_FLAGS )
 
 if( MSVC )
-	#Copy the def file so it's local to the binary directory
-	file( COPY ${CMAKE_SOURCE_DIR}/hl.def DESTINATION ${CMAKE_BINARY_DIR} )
-
-	#Add the module definition file. Needed for GiveFnptrsToDll function export.
-	#Add delay loaded libraries.
-	set( SERVER_LINK_FLAGS "/DEF:hl.def ${SQL_DLL_DELAYLOAD}" )
+	
 else()
 	if( NOT APPLE )
 		#Generate a map file that provides information about the linking stage.
@@ -375,9 +406,8 @@ else()
 	endif()
 endif()
 
-#SQL libraries are delay loaded to keep them in the game directory.
 set_target_properties( hl PROPERTIES
-	COMPILE_FLAGS "${WARNING_LEVEL_STRICTEST}" 
+	COMPILE_FLAGS "${WARNING_LEVEL}" 
 	LINK_FLAGS "${SHARED_GAME_LINKER_FLAGS} ${SERVER_LINK_FLAGS}"
 )
 

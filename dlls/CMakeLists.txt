@@ -8,7 +8,7 @@ add_sources(
     animation.cpp
     animation.h
     apache.cpp
-    appversion.sh
+    appversion.h
     barnacle.cpp
     barney.cpp
     basemonster.h
@@ -22,7 +22,6 @@ add_sources(
     cdll_dll.h
     client.cpp
     client.h
-    CMakeLists.txt
     combat.cpp
     com_utils.cpp
     com_utils.h
@@ -77,7 +76,6 @@ add_sources(
     items.h
     leech.cpp
     lights.cpp
-    Makefile
     maprules.cpp
     maprules.h
     monsterevent.h
@@ -87,7 +85,6 @@ add_sources(
     monsterstate.cpp
     mortar.cpp
     mp5.cpp
-    msvc
     multiplay_gamerules.cpp
     nihilanth.cpp
     nodes.cpp
@@ -146,7 +143,6 @@ add_sources(
     weapons.cpp
     weapons.h
     world.cpp
-    wpn_shared
     wxdebug.h
     xen.cpp
     zombie.cpp
@@ -154,9 +150,9 @@ add_sources(
 
 if(WIN32)
     add_sources(
-        memory.cpp
-        memory.h
         Wxdebug.cpp
+		hl.rc
+		resource.h
     )
 endif()
 

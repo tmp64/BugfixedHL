@@ -18,6 +18,12 @@
 #include <windows.h>
 #include <dsound.h>
 #include <mmsystem.h>
+#include "hud.h"
+#include "util_vector.h"
+#include "cl_util.h"
+#include "const.h"
+#include "entity_state.h"
+#include "cl_entity.h"
 #include "r_studioint.h"
 
 extern engine_studio_api_t IEngineStudio;

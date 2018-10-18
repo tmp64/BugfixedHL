@@ -3,5 +3,6 @@
 /*.opendb
 /*.sdf
 /build
+/build_*
 /.vscode
 /BugfixedHL-*.zip

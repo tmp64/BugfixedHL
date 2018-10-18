@@ -23,7 +23,7 @@
 #include "demo_api.h"
 #include "vgui_TeamFortressViewport.h"
 #include "memory.h"
-
+#include <windows.h>
 
 bool g_bFormatError = false;
 cvar_t *m_pCvarResultsFileFormat, *m_pCvarResultsCounterFormat;
