@@ -1839,9 +1839,8 @@ void CSaveRestoreBuffer :: BufferRewind( int size )
 	m_pdata->size -= size;
 }
 
-#ifndef _WIN32
-extern "C" {
-unsigned _rotr ( unsigned val, int shift)
+#if !defined(_WIN32) && !defined(_rotr)
+extern "C" unsigned _rotr ( unsigned val, int shift)
 {
         register unsigned lobit;        /* non-zero means lo bit set */
         register unsigned num = val;    /* number to rotate */
@@ -1857,7 +1856,6 @@ unsigned _rotr ( unsigned val, int shift)
         }
 
         return num;
-}
 }
 #endif
 

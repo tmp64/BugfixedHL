@@ -39,20 +39,6 @@ set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${SHARED_COMPILER_FLAGS}" )
 
 unset( SHARED_COMPILER_FLAGS )
 
-#Get the game directory
-set( GAME_BIN_PATH "$ENV{GamePath}" CACHE PATH "Game directory path (where hl.exe is)" )
-
-if( "${GAME_BIN_PATH}" STREQUAL "" )
-
-	message( FATAL_ERROR "Unable to get game directory path" )
-
-endif()
-
-#Base dir for game outputs
-set( GAME_BASE_PATH "${GAME_BIN_PATH}/valve" )
-
-message( STATUS "Base Game Path: ${GAME_BASE_PATH}" )
-
 #Shared preprocessor definitions
 set( SHARED_DEFS 
 )
@@ -131,7 +117,7 @@ endif()
 if( MSVC )
 	set( WARNING_LEVEL " " )
 else()
-	set( WARNING_LEVEL "-Wall -Wno-write-strings -Wno-unknown-pragmas -Wno-endif-labels -Wno-switch -Wno-unused-variable -Wno-unused-function" )
+	set( WARNING_LEVEL "-Wall -Wno-write-strings -Wno-unknown-pragmas -Wno-endif-labels -Wno-switch -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unused-function" )
 endif()
 
 #Shared directories
@@ -164,10 +150,7 @@ get_sources( SHARED_SRCS )
 clear_sources()
 
 #Find shared dependencies
-#set( tier0_DIR ${GAME_BIN_PATH} CACHE PATH "tier0 library location" )
 #find_package( tier0 MODULE REQUIRED )
-
-#set( vstdlib_DIR ${GAME_BIN_PATH} CACHE PATH "vstdlib library location" )
 #find_package( vstdlib MODULE REQUIRED )
 
 set( THREADS_PREFER_PTHREAD_FLAG ON )
@@ -190,6 +173,13 @@ set( SHARED_DEPENDENCIES
 # Client library
 #--------------------------------------------------------------------------------------------------------
 
+# Generate appversion.h during configuration before adding any sources
+if ( WIN32 )
+	execute_process( COMMAND ${CMAKE_SOURCE_DIR}/scripts/GenerateAppVersion.bat "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}\\cl_dll\\appversion.h" )
+else()
+	execute_process( COMMAND ${CMAKE_SOURCE_DIR}/scripts/GenerateAppVersion.sh "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}/cl_dll/appversion.h" )
+endif()
+
 #Add in the shared sources
 add_sources( "${SHARED_SRCS}" )
 
@@ -203,23 +193,38 @@ preprocess_sources()
 
 add_library( client SHARED ${PREP_SRCS} ${CMAKE_SOURCE_DIR}/cl_dll/appversion.h )
 
-#Needs static CRT to avoid alloc issues.
-configure_msvc_runtime( client STATIC )
+# appversion.h generator target
+# A hack to make PRE_BUILD be actually PRE_BUILD on non-MSVC (non-Windows, generally speaking)
+if ( NOT MSVC )
+	add_custom_target( client_appversion ${CMAKE_SOURCE_DIR}/scripts/GenerateAppVersion.sh "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}/cl_dll/appversion.h" )
+	add_dependencies( client client_appversion )
+endif()
 
-check_winxp_support( client )
-
-# Generate appversion.h
 if ( WIN32 )
+	# Generate appversion.h before building the library on Windows
 	add_custom_command( TARGET client
 		PRE_BUILD
 		COMMAND ${CMAKE_SOURCE_DIR}/scripts/GenerateAppVersion.bat "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}\\cl_dll\\appversion.h"
 	)
 else()
+	if( UNIX AND NOT APPLE )
+		# Fix vgui.so path in client.so
+		# " The best kostil' is not kostil' "
+		add_custom_command( TARGET client
+			POST_BUILD
+			COMMAND ${CMAKE_SOURCE_DIR}/scripts/FixClientLibPath.sh "$<TARGET_FILE:client>"
+		)
+	endif()
 	add_custom_command( TARGET client
-		PRE_BUILD
-		COMMAND ${CMAKE_SOURCE_DIR}/scripts/GenerateAppVersion.sh "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}/cl_dll/appversion.h"
+		POST_BUILD
+		COMMAND ${CMAKE_SOURCE_DIR}/scripts/DeployLibs.sh "${CMAKE_SOURCE_DIR}/scripts/PublishPathClient.txt" "$<TARGET_FILE:client>"
 	)
 endif()
+
+#Needs static CRT to avoid alloc issues.
+configure_msvc_runtime( client STATIC )
+
+check_winxp_support( client )
 
 target_include_directories( client PRIVATE
 	game_shared/client
@@ -238,10 +243,7 @@ target_compile_definitions( client PRIVATE
 )
 
 #Find client dependencies
-set( vgui_DIR ${GAME_BIN_PATH} CACHE PATH "VGUI1 shared library location" )
 find_package( vgui MODULE REQUIRED )
-
-set( SDL2_DIR ${GAME_BIN_PATH} CACHE PATH "SDL2 shared library location" )
 find_package( SDL2 MODULE REQUIRED )
 
 if ( MSVC )
@@ -275,14 +277,6 @@ target_link_libraries( client
 	${SHARED_DEPENDENCIES}
 	Threads::Threads
 	${UNIX_FS_LIB}
-)
-
-#CMake places libraries in /Debug or /Release on Windows, so explicitly set the paths for both.
-#On Linux, it uses LIBRARY_OUTPUT_DIRECTORY
-set_target_properties( client PROPERTIES
-	LIBRARY_OUTPUT_DIRECTORY "${GAME_BASE_PATH}/cl_dlls"
-	RUNTIME_OUTPUT_DIRECTORY_DEBUG "${GAME_BASE_PATH}/cl_dlls"
-	RUNTIME_OUTPUT_DIRECTORY_RELEASE "${GAME_BASE_PATH}/cl_dlls"
 )
 
 set( CLIENT_LINK_FLAGS )
@@ -328,6 +322,13 @@ clear_sources()
 # Server library
 #--------------------------------------------------------------------------------------------------------
 
+# Generate appversion.h during configuration before adding any sources
+if ( WIN32 )
+	execute_process( COMMAND ${CMAKE_SOURCE_DIR}/scripts/GenerateAppVersion.bat "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}\\dlls\\appversion.h" )
+else()
+	execute_process( COMMAND ${CMAKE_SOURCE_DIR}/scripts/GenerateAppVersion.sh "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}/dlls/appversion.h" )
+endif()
+
 #Add in the shared sources
 add_sources( "${SHARED_SRCS}" )
 
@@ -339,23 +340,30 @@ preprocess_sources()
 
 add_library( hl SHARED ${PREP_SRCS} ${CMAKE_SOURCE_DIR}/dlls/appversion.h )
 
-#Needs static CRT to avoid alloc issues.
-configure_msvc_runtime( hl STATIC )
+# appversion.h generator target
+# A hack to make PRE_BUILD be actually PRE_BUILD on non-MSVC (non-Windows, generally speaking)
+if ( NOT MSVC )
+	add_custom_target( hl_appversion ${CMAKE_SOURCE_DIR}/scripts/GenerateAppVersion.sh "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}/dlls/appversion.h" )
+	add_dependencies( hl hl_appversion )
+endif()
 
-check_winxp_support( hl )
-
-# Generate appversion.h
 if ( WIN32 )
-	add_custom_command( TARGET client
+	# Generate appversion.h before building the library on Windows
+	add_custom_command( TARGET hl
 		PRE_BUILD
 		COMMAND ${CMAKE_SOURCE_DIR}/scripts/GenerateAppVersion.bat "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}\\dlls\\appversion.h"
 	)
 else()
 	add_custom_command( TARGET client
-		PRE_BUILD
-		COMMAND ${CMAKE_SOURCE_DIR}/scripts/GenerateAppVersion.sh "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}/cl_dll/appversion.h"
+		POST_BUILD
+		COMMAND ${CMAKE_SOURCE_DIR}/scripts/DeployLibs.sh "${CMAKE_SOURCE_DIR}/scripts/PublishPathServer.txt" "$<TARGET_FILE:hl>"
 	)
 endif()
+
+#Needs static CRT to avoid alloc issues.
+configure_msvc_runtime( hl STATIC )
+
+check_winxp_support( hl )
 
 target_include_directories( hl PRIVATE
 	${SHARED_INCLUDE_PATHS}
@@ -383,14 +391,6 @@ target_link_libraries( hl
 	${SERVER_PLAT_LIBS}
 	${SHARED_DEPENDENCIES}
 	${UNIX_FS_LIB}
-)
-
-#CMake places libraries in /Debug or /Release on Windows, so explicitly set the paths for both.
-#On Linux, it uses LIBRARY_OUTPUT_DIRECTORY
-set_target_properties( hl PROPERTIES
-	LIBRARY_OUTPUT_DIRECTORY "${GAME_BASE_PATH}/dlls"
-	RUNTIME_OUTPUT_DIRECTORY_DEBUG "${GAME_BASE_PATH}/dlls"
-	RUNTIME_OUTPUT_DIRECTORY_RELEASE "${GAME_BASE_PATH}/dlls"
 )
 
 set( SERVER_LINK_FLAGS )

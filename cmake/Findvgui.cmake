@@ -4,7 +4,7 @@
 #
 
 # Prefer game install directory (for shared libs)
-find_library( VGUI1 NAMES vgui vgui${CMAKE_SHARED_LIBRARY_SUFFIX} PATHS ${vgui_DIR} ${CMAKE_SOURCE_DIR}/utils/vgui/lib/win32_vc6 NO_DEFAULT_PATH )
+find_library( VGUI1 NAMES vgui vgui${CMAKE_SHARED_LIBRARY_SUFFIX} PATHS ${vgui_DIR} ${CMAKE_SOURCE_DIR}/utils/vgui/lib/win32_vc6 ${CMAKE_SOURCE_DIR}/lib/public NO_DEFAULT_PATH )
 
 include( FindPackageHandleStandardArgs )
 find_package_handle_standard_args( vgui DEFAULT_MSG VGUI1 )
