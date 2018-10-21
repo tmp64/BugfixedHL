@@ -206,6 +206,11 @@ if ( WIN32 )
 		PRE_BUILD
 		COMMAND ${CMAKE_SOURCE_DIR}/scripts/GenerateAppVersion.bat "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}\\cl_dll\\appversion.h"
 	)
+	
+	add_custom_command( TARGET client
+		POST_BUILD
+		COMMAND ${CMAKE_SOURCE_DIR}/scripts/DeployLibs.bat "${CMAKE_SOURCE_DIR}\\scripts\\PublishPathClient.txt" "$<TARGET_FILE:client>" "$<TARGET_PDB_FILE:client>"
+	)
 else()
 	if( UNIX AND NOT APPLE )
 		# Fix vgui.so path in client.so
@@ -353,8 +358,13 @@ if ( WIN32 )
 		PRE_BUILD
 		COMMAND ${CMAKE_SOURCE_DIR}/scripts/GenerateAppVersion.bat "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}\\dlls\\appversion.h"
 	)
+	
+	add_custom_command( TARGET hl
+		POST_BUILD
+		COMMAND ${CMAKE_SOURCE_DIR}/scripts/DeployLibs.bat "${CMAKE_SOURCE_DIR}\\scripts\\PublishPathServer.txt" "$<TARGET_FILE:hl>" "$<TARGET_PDB_FILE:hl>"
+	)
 else()
-	add_custom_command( TARGET client
+	add_custom_command( TARGET hl
 		POST_BUILD
 		COMMAND ${CMAKE_SOURCE_DIR}/scripts/DeployLibs.sh "${CMAKE_SOURCE_DIR}/scripts/PublishPathServer.txt" "$<TARGET_FILE:hl>"
 	)
