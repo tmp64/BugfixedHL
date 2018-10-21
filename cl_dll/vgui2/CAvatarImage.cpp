@@ -8,7 +8,7 @@
 #include <vgui_controls/Panel.h>
 #include <vgui_controls/MessageMap.h>
 #include <vgui/ISurface.h>
-#include "vgui_avatarimage.h"
+#include "CAvatarImage.h"
 #if defined( _X360 )
 #include "xbox/xbox_win32stubs.h"
 #endif

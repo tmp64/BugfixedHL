@@ -23,7 +23,7 @@
 #include "demo_api.h"
 #include "CHudTextMessage.h"
 #include "clientsteamcontext.h"
-#include "vgui_avatarimage.h"
+#include "CAvatarImage.h"
 #include "CHudScoreBoard.h"
 
 #ifdef CSCOREBOARD_DEBUG

@@ -415,23 +415,23 @@
     <ClCompile Include="..\vgui2\CBackGroundPanel.cpp">
       <Filter>vgui2</Filter>
     </ClCompile>
-    <ClCompile Include="..\CScorePanel.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\CHudScoreBoard.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\CPlayerListPanel.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\CVoiceStatus2.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\clientsteamcontext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\vgui_avatarimage.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="..\vgui2\CVoiceStatus2.cpp">
+      <Filter>vgui2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vgui2\CAvatarImage.cpp">
+      <Filter>vgui2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vgui2\CHudScoreBoard.cpp">
+      <Filter>vgui2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vgui2\CPlayerListPanel.cpp">
+      <Filter>vgui2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vgui2\CScorePanel.cpp">
+      <Filter>vgui2</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1080,18 +1080,6 @@
     <ClInclude Include="..\vgui2\ViewportPanelNames.h">
       <Filter>vgui2</Filter>
     </ClInclude>
-    <ClInclude Include="..\CScorePanel.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\CHudScoreBoard.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\CPlayerListPanel.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\CVoiceStatus2.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\public\steam\isteamgameserverstats.h">
       <Filter>public\steam</Filter>
     </ClInclude>
@@ -1176,8 +1164,20 @@
     <ClInclude Include="..\clientsteamcontext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\vgui_avatarimage.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="..\vgui2\CScorePanel.h">
+      <Filter>vgui2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vgui2\CVoiceStatus2.h">
+      <Filter>vgui2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vgui2\CAvatarImage.h">
+      <Filter>vgui2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vgui2\CHudScoreBoard.h">
+      <Filter>vgui2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vgui2\CPlayerListPanel.h">
+      <Filter>vgui2</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

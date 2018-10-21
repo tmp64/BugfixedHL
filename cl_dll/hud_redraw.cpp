@@ -22,7 +22,7 @@
 #include "vgui_TeamFortressViewport.h"
 #include "demo_api.h"
 #include "results.h"
-#include "CHudScoreBoard.h"
+#include "vgui2/CHudScoreBoard.h"
 
 #define MAX_LOGO_FRAMES 56
 

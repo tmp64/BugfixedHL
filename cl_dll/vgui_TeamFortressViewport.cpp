@@ -57,7 +57,7 @@
 
 #include "CHudTextMessage.h"
 #include "CHudSpectator.h"
-#include "CHudScoreBoard.h"
+#include "vgui2/CHudScoreBoard.h"
 
 extern int g_iVisibleMouse;
 class CCommandMenu;

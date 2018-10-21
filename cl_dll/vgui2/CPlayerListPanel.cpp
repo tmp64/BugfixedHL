@@ -14,7 +14,7 @@
 #include <KeyValues.h>
 #include <vgui/MouseCode.h>
 
-#include <CPlayerListPanel.h>
+#include "CPlayerListPanel.h"
 #include <vgui_controls/Button.h>
 #include <vgui_controls/Controls.h>
 #include <vgui_controls/Label.h>

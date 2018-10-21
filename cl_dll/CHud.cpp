@@ -53,7 +53,7 @@
 #include "CHudTimer.h"
 #include "CHudScores.h"
 #include "CHudStatusIcons.h"
-#include "CHudScoreBoard.h"
+#include "vgui2/CHudScoreBoard.h"
 
 #include "clientsteamcontext.h"
 
