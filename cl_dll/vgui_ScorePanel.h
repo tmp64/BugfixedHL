@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2002, Valve LLC, All rights reserved. ============
+//========= Copyright ï¿½ 1996-2002, Valve LLC, All rights reserved. ============
 //
 // Purpose: 
 //
@@ -14,7 +14,7 @@
 #include<VGUI_TextGrid.h>
 #include<VGUI_Label.h>
 #include<VGUI_TextImage.h>
-#include "..\game_shared\vgui_listbox.h"
+#include "vgui_listbox.h"
 
 #include <ctype.h>
 
@@ -24,13 +24,12 @@
 #define COLUMN_TRACKER	0
 #define COLUMN_NAME		1
 #define COLUMN_STEAMID	2
-#define COLUMN_KD		3
-#define COLUMN_KILLS	4
-#define COLUMN_DEATHS	5
-#define COLUMN_LATENCY	6
-#define COLUMN_VOICE	7
-#define COLUMN_BLANK	8
-#define NUM_COLUMNS		9
+#define COLUMN_KILLS	3
+#define COLUMN_DEATHS	4
+#define COLUMN_LATENCY	5
+#define COLUMN_VOICE	6
+#define COLUMN_BLANK	7
+#define NUM_COLUMNS		8
 #define NUM_ROWS		(MAX_PLAYERS + (MAX_SCOREBOARD_TEAMS * 2))
 
 enum
@@ -230,8 +229,8 @@ private:
 
 class ScoreTablePanel;
 
-#include "..\game_shared\vgui_grid.h"
-#include "..\game_shared\vgui_defaultinputsignal.h"
+#include "vgui_grid.h"
+#include "vgui_defaultinputsignal.h"
 
 //-----------------------------------------------------------------------------
 // Purpose: Scoreboard back panel

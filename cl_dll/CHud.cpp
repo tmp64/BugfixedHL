@@ -30,7 +30,7 @@
 
 #include "demo.h"
 #include "demo_api.h"
-#include "vgui_scorepanel.h"
+#include "vgui_ScorePanel.h"
 #include "appversion.h"
 
 //-----------------------------------------------------
@@ -246,7 +246,9 @@ void __CmdFunc_ForceColors(void)
 
 void __CmdFunc_CustomTimer(void)
 {
+#ifdef _WIN32
 	gHUD.m_Timer->CustomTimerCommand();
+#endif
 }
 
 // TFFree Command Menu Message Handlers
@@ -410,7 +412,6 @@ void CHud :: Init( void )
 	m_pCvarShowNextmap = CVAR_CREATE( "hud_shownextmapinscore", "1", FCVAR_ARCHIVE );	// controls whether or not to show nextmap in scoreboard table
 	m_pCvarShowLoss = CVAR_CREATE( "hud_showlossinscore", "1", FCVAR_ARCHIVE );	// controls whether or not to show loss in scoreboard table
 	m_pCvarShowSteamId = CVAR_CREATE( "hud_showsteamidinscore", "1", FCVAR_ARCHIVE );	// controls whether or not to show SteamId in scoreboard table
-	m_pCvarShowKd = CVAR_CREATE("hud_showkdinscore", "1", FCVAR_ARCHIVE);	// controls whether or not to show K/D ratio in scoreboard table
 	m_pCvarColorText = CVAR_CREATE( "hud_colortext", "1", FCVAR_ARCHIVE );
 	m_pCvarRDynamicEntLight = CVAR_CREATE("r_dynamic_ent_light", "1", FCVAR_ARCHIVE);
 

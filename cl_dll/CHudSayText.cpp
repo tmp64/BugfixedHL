@@ -21,7 +21,6 @@
 #include <string.h>
 #include <stdio.h>
 #include <time.h>
-#include <windows.h>
 
 #include "CHudSayText.h"
 #include "hud.h"
@@ -29,6 +28,13 @@
 #include "parsemsg.h"
 #include "results.h"
 #include "vgui_TeamFortressViewport.h"
+
+#undef PlaySound
+
+// FIXME: Windows only
+#ifndef _WIN32
+#define ResultsAddLog(...)
+#endif
 
 #define MAX_LINES	5
 #define MAX_CHARS_PER_LINE	256  /* it can be less than this, depending on char size */

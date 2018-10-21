@@ -18,7 +18,7 @@
 #include "hud.h"
 #include "memory.h"
 #include "cvardef.h"
-#include "jpge.h"
+#include "jpeg/jpge.h"
 #include "cl_util.h"
 #include "results.h"
 #include "parsemsg.h"

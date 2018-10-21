@@ -11,6 +11,7 @@ public:
 	void Think(void);
 	int Draw(float flTime);
 
+#ifdef _WIN32
 	int MsgFunc_Timer(const char *pszName, int iSize, void *pbuf);
 
 	void DoResync(void);
@@ -69,6 +70,7 @@ private:
 	int		m_iReceivedSize;
 	int		m_iReceivedPackets;
 	int		m_iReceivedPacketsCount;
+#endif
 };
 
 #endif

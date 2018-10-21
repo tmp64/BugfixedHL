@@ -19,7 +19,9 @@
 //
 #include <stdio.h>
 #include <string.h>
-#include <windows.h>
+#include <string>
+#include <locale>
+#include <codecvt>
 #include "CHudMessage.h"
 #include "hud.h"
 #include "cl_util.h"
@@ -247,11 +249,13 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 {
 	int i, j, width;
 	wchar_t wLine[MAX_HUD_STRING + 1];
-	wchar_t wText[MAX_MESSAGE_TEXT_LENGTH + 1];
-	wchar_t  *pwText;
+	//wchar_t wText[MAX_MESSAGE_TEXT_LENGTH + 1];
+	const wchar_t  *pwText;
 	int lineHeight = gHUD.m_scrinfo.iCharHeight + ADJUST_MESSAGE;
 
-	MultiByteToWideChar(CP_UTF8, 0, pMessage->pMessage, -1, wText, MAX_MESSAGE_TEXT_LENGTH);
+	//MultiByteToWideChar(CP_UTF8, 0, pMessage->pMessage, -1, wText, MAX_MESSAGE_TEXT_LENGTH);
+	std::wstring_convert<std::codecvt_utf8 <wchar_t>, wchar_t> convert;
+	std::wstring wText = convert.from_bytes(pMessage->pMessage);
 
 	// Count lines and width
 	m_parms.time = time;
@@ -261,7 +265,7 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 	m_parms.length = 0;
 	m_parms.totalWidth = 0;
 	width = 0;
-	pwText = wText;
+	pwText = wText.c_str();
 	while (*pwText)
 	{
 		if (*pwText == '\n')
@@ -284,7 +288,7 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 
 	MessageScanStart();
 
-	pwText = wText;
+	pwText = wText.c_str();
 	for (i = 0; i < m_parms.lines; i++)
 	{
 		m_parms.lineLength = 0;
@@ -379,6 +383,7 @@ int CHudMessage::Draw( float fTime )
 
 		pMessage = m_pMessages[i];
 
+#ifdef _WIN32
 		// Filter out MiniAG timer that passed before we detected server AG version
 		if (gHUD.m_Timer->GetAgVersion() == CHudTimer::SV_AG_MINI && (
 			fabs(pMessage->y - 0.01) < 0.0002f && fabs(pMessage->x - 0.5) < 0.0002f ||	// Original MiniAG coordinates
@@ -389,6 +394,7 @@ int CHudMessage::Draw( float fTime )
 			m_pMessages[i] = NULL;
 			continue;
 		}
+#endif
 
 		// This is when the message is over
 		switch( pMessage->effect )
@@ -470,6 +476,7 @@ void CHudMessage::MessageAdd( const char *pName, float time )
 		}
 
 		// Filter out MiniAG timer
+#ifdef _WIN32
 		if (gHUD.m_Timer->GetAgVersion() == CHudTimer::SV_AG_MINI && (
 			fabs(tempMessage->y - 0.01) < 0.0002f && fabs(tempMessage->x - 0.5) < 0.0002f ||	// Original MiniAG coordinates
 			fabs(tempMessage->y - 0.01) < 0.0002f && fabs(tempMessage->x + 1) < 0.0002f			// Russian Crossfire MiniAG coordinates
@@ -478,6 +485,7 @@ void CHudMessage::MessageAdd( const char *pName, float time )
 			// TODO: Additional checks on text in the message...
 			return;
 		}
+#endif
 
 		if (gHUD.m_pCvarColorText->value != 0)
 			RemoveColorCodes(tempMessage->pMessage, true);

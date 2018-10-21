@@ -19,14 +19,17 @@
 //
 
 #include <string.h>
+#ifdef _WIN32
 #include <windows.h>
 #include <psapi.h>
 #include <dbghelp.h>
+#endif
 
+#include "dllexport.h"
 #include "hud.h"
 #include "cl_util.h"
 #include "netadr.h"
-#include "vgui_schememanager.h"
+#include "vgui_SchemeManager.h"
 #include "GameStudioModelRenderer.h"
 #include "CHudSpectator.h"
 
@@ -43,13 +46,12 @@ extern "C"
 #include "results.h"
 #include "clientsteamcontext.h"
 
-#define DLLEXPORT __declspec( dllexport )
-
-
 cl_enginefunc_t gEngfuncs;
 CHud gHUD;
 TeamFortressViewport *gViewPort = NULL;
+#ifdef _WIN32
 PVOID hVehHandler = NULL;
+#endif
 bool g_bDllDetaching = false;
 
 void InitInput (void);
@@ -67,21 +69,21 @@ Called when the DLL is first loaded.
 */
 extern "C" 
 {
-int		DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion );
-int		DLLEXPORT HUD_VidInit( void );
-void	DLLEXPORT HUD_Init( void );
-int		DLLEXPORT HUD_Redraw( float flTime, int intermission );
-int		DLLEXPORT HUD_UpdateClientData( client_data_t *cdata, float flTime );
-void	DLLEXPORT HUD_Reset ( void );
-void	DLLEXPORT HUD_Shutdown( void );
-void	DLLEXPORT HUD_PlayerMove( struct playermove_s *ppmove, int server );
-void	DLLEXPORT HUD_PlayerMoveInit( struct playermove_s *ppmove );
-char	DLLEXPORT HUD_PlayerMoveTexture( char *name );
-int		DLLEXPORT HUD_ConnectionlessPacket( const struct netadr_s *net_from, const char *args, char *response_buffer, int *response_buffer_size );
-int		DLLEXPORT HUD_GetHullBounds( int hullnumber, float *mins, float *maxs );
-void	DLLEXPORT HUD_Frame( double time );
-void	DLLEXPORT HUD_VoiceStatus(int entindex, qboolean bTalking);
-void	DLLEXPORT HUD_DirectorMessage( int iSize, void *pbuf );
+int		_DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion );
+int		_DLLEXPORT HUD_VidInit( void );
+void	_DLLEXPORT HUD_Init( void );
+int		_DLLEXPORT HUD_Redraw( float flTime, int intermission );
+int		_DLLEXPORT HUD_UpdateClientData( client_data_t *cdata, float flTime );
+void	_DLLEXPORT HUD_Reset ( void );
+void	_DLLEXPORT HUD_Shutdown( void );
+void	_DLLEXPORT HUD_PlayerMove( struct playermove_s *ppmove, int server );
+void	_DLLEXPORT HUD_PlayerMoveInit( struct playermove_s *ppmove );
+char	_DLLEXPORT HUD_PlayerMoveTexture( char *name );
+int		_DLLEXPORT HUD_ConnectionlessPacket( const struct netadr_s *net_from, const char *args, char *response_buffer, int *response_buffer_size );
+int		_DLLEXPORT HUD_GetHullBounds( int hullnumber, float *mins, float *maxs );
+void	_DLLEXPORT HUD_Frame( double time );
+void	_DLLEXPORT HUD_VoiceStatus(int entindex, qboolean bTalking);
+void	_DLLEXPORT HUD_DirectorMessage( int iSize, void *pbuf );
 }
 
 /*
@@ -91,7 +93,7 @@ HUD_GetHullBounds
   Engine calls this to enumerate player collision hulls, for prediction.  Return 0 if the hullnumber doesn't exist.
 ================================
 */
-int DLLEXPORT HUD_GetHullBounds( int hullnumber, float *mins, float *maxs )
+int _DLLEXPORT HUD_GetHullBounds( int hullnumber, float *mins, float *maxs )
 {
 	int iret = 0;
 
@@ -125,7 +127,7 @@ HUD_ConnectionlessPacket
   size of the response_buffer, so you must zero it out if you choose not to respond.
 ================================
 */
-int	DLLEXPORT HUD_ConnectionlessPacket( const struct netadr_s *net_from, const char *args, char *response_buffer, int *response_buffer_size )
+int	_DLLEXPORT HUD_ConnectionlessPacket( const struct netadr_s *net_from, const char *args, char *response_buffer, int *response_buffer_size )
 {
 	// Parse stuff from args
 	int max_buffer_size = *response_buffer_size;
@@ -139,23 +141,24 @@ int	DLLEXPORT HUD_ConnectionlessPacket( const struct netadr_s *net_from, const c
 	return 0;
 }
 
-void DLLEXPORT HUD_PlayerMoveInit( struct playermove_s *ppmove )
+void _DLLEXPORT HUD_PlayerMoveInit( struct playermove_s *ppmove )
 {
 	PM_Init( ppmove );
 }
 
-char DLLEXPORT HUD_PlayerMoveTexture( char *name )
+char _DLLEXPORT HUD_PlayerMoveTexture( char *name )
 {
 	return PM_FindTextureType( name );
 }
 
-void DLLEXPORT HUD_PlayerMove( struct playermove_s *ppmove, int server )
+void _DLLEXPORT HUD_PlayerMove( struct playermove_s *ppmove, int server )
 {
 	PM_Move( ppmove, server );
 }
 
 
-// Vectored Exceptions Handler
+// Vectored Exceptions Handler for Windows
+#ifdef _WIN32
 LONG NTAPI VectoredExceptionsHandler(PEXCEPTION_POINTERS pExceptionInfo)
 {
 	long exceptionCode = pExceptionInfo->ExceptionRecord->ExceptionCode;
@@ -280,8 +283,9 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 	}
 	return TRUE;
 }
+#endif
 
-int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
+int _DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 {
 	if (iVersion != CLDLL_INTERFACE_VERSION)
 		return 0;
@@ -304,12 +308,14 @@ Called whenever the client connects to a server.
 ==========================
 */
 
-int DLLEXPORT HUD_VidInit( void )
+int _DLLEXPORT HUD_VidInit( void )
 {
 	gHUD.VidInit();
 	VGui_Startup();
 	g_StudioRenderer.InitOnConnect();
+#ifdef _WIN32
 	ResultsStop();
+#endif
 	return 1;
 }
 
@@ -322,7 +328,7 @@ Reinitializes all the hud variables.
 ==========================
 */
 
-void DLLEXPORT HUD_Init( void )
+void _DLLEXPORT HUD_Init( void )
 {
 #if !defined( NO_STEAM )
 	ClientSteamContext().Activate();
@@ -330,10 +336,12 @@ void DLLEXPORT HUD_Init( void )
 	InitInput();
 	gHUD.Init();
 	Scheme_Init();
+#ifdef _WIN32
 	MemoryPatcherInit();
 	SvcMessagesInit();
 	ResultsInit();
 	SetAffinity();
+#endif
 }
 
 
@@ -346,7 +354,7 @@ redraw the HUD.
 ===========================
 */
 
-int DLLEXPORT HUD_Redraw( float time, int intermission )
+int _DLLEXPORT HUD_Redraw( float time, int intermission )
 {
 	gHUD.Redraw( time, intermission );
 
@@ -367,7 +375,7 @@ returns 1 if anything has been changed, 0 otherwise.
 ==========================
 */
 
-int DLLEXPORT HUD_UpdateClientData(client_data_t *pcldata, float flTime )
+int _DLLEXPORT HUD_UpdateClientData(client_data_t *pcldata, float flTime )
 {
 	IN_Commands();
 
@@ -383,7 +391,7 @@ Obsolete: Doesn't called anymore from the engine.
 ==========================
 */
 
-void DLLEXPORT HUD_Reset( void )
+void _DLLEXPORT HUD_Reset( void )
 {
 	gHUD.VidInit();
 }
@@ -396,7 +404,7 @@ Called at game exit.
 ==========================
 */
 
-void DLLEXPORT HUD_Shutdown( void )
+void _DLLEXPORT HUD_Shutdown( void )
 {
 	ShutdownInput();
 #if !defined( NO_STEAM )
@@ -412,10 +420,12 @@ Called by engine every frame that client .dll is loaded
 ==========================
 */
 
-void DLLEXPORT HUD_Frame( double time )
+void _DLLEXPORT HUD_Frame( double time )
 {
+#ifdef _WIN32
 	MemoryPatcherHudFrame();
 	ResultsFrame(time);
+#endif
 
 	ServersThink( time );
 
@@ -431,7 +441,7 @@ Called when a player starts or stops talking.
 ==========================
 */
 
-void DLLEXPORT HUD_VoiceStatus(int entindex, qboolean bTalking)
+void _DLLEXPORT HUD_VoiceStatus(int entindex, qboolean bTalking)
 {
 	GetClientVoiceMgr()->UpdateSpeakerStatus(entindex, bTalking);
 }
@@ -444,7 +454,7 @@ Called when a director event message was received
 ==========================
 */
 
-void DLLEXPORT HUD_DirectorMessage( int iSize, void *pbuf )
+void _DLLEXPORT HUD_DirectorMessage( int iSize, void *pbuf )
 {
 	 gHUD.m_Spectator->DirectorMessage( iSize, pbuf );
 }

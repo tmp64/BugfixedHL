@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2002, Valve LLC, All rights reserved. ============
+//========= Copyright ï¿½ 1996-2002, Valve LLC, All rights reserved. ============
 //
 // Purpose: 
 //
@@ -31,7 +31,6 @@ extern "C"
 #include "vgui_TeamFortressViewport.h"
 #include "CHudSpectator.h"
 
-
 extern "C" 
 {
 	struct kbutton_s DLLEXPORT *KB_Find( const char *name );
@@ -41,7 +40,9 @@ extern "C"
 
 extern int g_iAlive;
 extern int g_weaponselect;
+#ifdef _WIN32
 extern float diffYaw, diffPitch;
+#endif
 
 extern cl_enginefunc_t gEngfuncs;
 
@@ -682,12 +683,16 @@ void CL_AdjustAngles ( float frametime, vec3_t &viewangles )
 	if (viewangles[PITCH] > cl_pitchdown->value)
 	{
 		viewangles[PITCH] = cl_pitchdown->value;
+		#ifdef _WIN32
 		diffPitch = 0;
+		#endif
 	}
 	if (viewangles[PITCH] < -cl_pitchup->value)
 	{
 		viewangles[PITCH] = -cl_pitchup->value;
+		#ifdef _WIN32
 		diffPitch = 0;
+		#endif
 	}
 
 	if (viewangles[ROLL] > 50)

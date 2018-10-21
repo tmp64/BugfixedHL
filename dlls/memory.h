@@ -12,6 +12,7 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
+#ifdef _WIN32
 #include <stdint.h>
 
 
@@ -119,4 +120,5 @@ extern int *g_EngineReadPos;
 extern UserMessage **g_pUserMessages;
 extern bool g_bNewerBuild;
 
+#endif
 #endif MEMORY_H

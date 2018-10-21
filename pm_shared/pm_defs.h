@@ -45,6 +45,9 @@
 #include "usercmd.h"
 #endif
 
+struct hull_s;
+struct model_s;
+
 // physent_t
 typedef struct physent_s
 {

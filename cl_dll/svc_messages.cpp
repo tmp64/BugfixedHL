@@ -8,6 +8,7 @@
 //
 // Engine messages handlers
 //
+#ifdef _WIN32
 
 #include <string.h>
 #include <time.h>
@@ -157,11 +158,11 @@ bool SanitizeCommands(char *str)
 				if (!isGood || log & (1 << 2))
 				{
 					// Action
-					char *a = isGood ? "Server executed command: %s\n" : "Server tried to execute bad command: %s\n";
+					const char *a = isGood ? "Server executed command: %s\n" : "Server tried to execute bad command: %s\n";
 					// Common or developer console
 					void (*m)(char *,...) = (log & (1 << 1)) ? gEngfuncs.Con_Printf : gEngfuncs.Con_DPrintf;
 					// Log
-					m(a, c);
+					m(const_cast<char *>(a), c);	// TODO: Removing const from char * should be an error
 				}
 			}
 			if (log & (1 << 8))	// file
@@ -179,7 +180,7 @@ bool SanitizeCommands(char *str)
 						if (current != NULL)
 							fprintf(f, "[%04i-%02i-%02i %02i:%02i:%02i] ", current->tm_year + 1900, current->tm_mon + 1, current->tm_mday, current->tm_hour, current->tm_min, current->tm_sec);
 						// Action
-						char *a = isGood ? "[allowed] " : "[blocked] ";
+						const char *a = isGood ? "[allowed] " : "[blocked] ";
 						fputs(a, f);
 						// Command
 						fputs(c, f);
@@ -508,3 +509,5 @@ void SvcMessagesInit(void)
 	m_pCvarClProtectBlockCvar = gEngfuncs.pfnRegisterVariable("cl_protect_block_cvar", "", FCVAR_ARCHIVE);
 	gEngfuncs.pfnAddCommand("cl_protect", ProtectHelp);
 }
+
+#endif

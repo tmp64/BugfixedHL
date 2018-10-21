@@ -34,7 +34,7 @@
 
 bool ParseColor( char *string, RGBA &rgba );
 
-#include "..\game_shared\voice_status.h"
+#include "voice_status.h"
 
 //-----------------------------------------------------
 // Forward declarations
@@ -130,7 +130,7 @@ struct CharWidths
 #include "aghudtimeout.h"
 #include "aghudvote.h"
 
-#define HUD_ELEM_INIT_FULL(type, var) var = std::unique_ptr<type>(new type()); var->m_isDeletable = true; var->Init();
+#define HUD_ELEM_INIT_FULL(type, var) var = std::shared_ptr<type>(new type()); var->m_isDeletable = true; var->Init();
 #define HUD_ELEM_INIT(x) HUD_ELEM_INIT_FULL(CHud##x, m_##x)
 
 class CHud
@@ -150,24 +150,24 @@ public:
 	//-----------------------------------------------------
 	// HUD elements
 	//-----------------------------------------------------
-	std::unique_ptr<CHudAmmo>			m_Ammo	= nullptr;
-	std::unique_ptr<CHudHealth>			m_Health = nullptr;
-	std::unique_ptr<CHudSpectator>		m_Spectator = nullptr;
-	std::unique_ptr<CHudGeiger>			m_Geiger = nullptr;
-	std::unique_ptr<CHudBattery>		m_Battery = nullptr;
-	std::unique_ptr<CHudTrain>			m_Train = nullptr;
-	std::unique_ptr<CHudFlashlight>		m_Flash = nullptr;
-	std::unique_ptr<CHudMessage>		m_Message = nullptr;
-	std::unique_ptr<CHudStatusBar>		m_StatusBar = nullptr;
-	std::unique_ptr<CHudDeathNotice>	m_DeathNotice = nullptr;
-	std::unique_ptr<CHudSayText>		m_SayText = nullptr;
-	std::unique_ptr<CHudMenu>			m_Menu = nullptr;
-	std::unique_ptr<CHudAmmoSecondary>	m_AmmoSecondary = nullptr;
-	std::unique_ptr<CHudTextMessage>	m_TextMessage = nullptr;
-	std::unique_ptr<CHudStatusIcons>	m_StatusIcons = nullptr;
-	std::unique_ptr<CHudTimer>			m_Timer = nullptr;
-	std::unique_ptr<CHudScores>			m_Scores = nullptr;
-	std::unique_ptr<CHudScoreBoard>		m_ScoreBoard = nullptr;		// VGUI2 scoreboard
+	std::shared_ptr<CHudAmmo>			m_Ammo	= nullptr;
+	std::shared_ptr<CHudHealth>			m_Health = nullptr;
+	std::shared_ptr<CHudSpectator>		m_Spectator = nullptr;
+	std::shared_ptr<CHudGeiger>			m_Geiger = nullptr;
+	std::shared_ptr<CHudBattery>		m_Battery = nullptr;
+	std::shared_ptr<CHudTrain>			m_Train = nullptr;
+	std::shared_ptr<CHudFlashlight>		m_Flash = nullptr;
+	std::shared_ptr<CHudMessage>		m_Message = nullptr;
+	std::shared_ptr<CHudStatusBar>		m_StatusBar = nullptr;
+	std::shared_ptr<CHudDeathNotice>	m_DeathNotice = nullptr;
+	std::shared_ptr<CHudSayText>		m_SayText = nullptr;
+	std::shared_ptr<CHudMenu>			m_Menu = nullptr;
+	std::shared_ptr<CHudAmmoSecondary>	m_AmmoSecondary = nullptr;
+	std::shared_ptr<CHudTextMessage>	m_TextMessage = nullptr;
+	std::shared_ptr<CHudStatusIcons>	m_StatusIcons = nullptr;
+	std::shared_ptr<CHudTimer>			m_Timer = nullptr;
+	std::shared_ptr<CHudScores>			m_Scores = nullptr;
+	std::shared_ptr<CHudScoreBoard>		m_ScoreBoard = nullptr;		// VGUI2 scoreboard
 
 	//-----------------------------------------------------
 	// AG HUD elements
@@ -237,7 +237,6 @@ public:
 	cvar_t	*m_pCvarShowNextmap;
 	cvar_t	*m_pCvarShowLoss;
 	cvar_t	*m_pCvarShowSteamId;
-	cvar_t	*m_pCvarShowKd;
 	cvar_t	*m_pCvarColorText;
 	cvar_t	*m_pCvarRDynamicEntLight;
 

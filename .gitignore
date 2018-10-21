@@ -2,4 +2,9 @@
 /*.db
 /*.opendb
 /*.sdf
+/build
+/build_*
+/.vscode
 /BugfixedHL-*.zip
+/scripts/PublishPathClient.txt
+/scripts/PublishPathServer.txt

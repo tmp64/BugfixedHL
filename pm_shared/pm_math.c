@@ -27,7 +27,6 @@
 
 #pragma warning(disable : 4244)
 
-vec3_t vec3_origin = {0,0,0};
 int nanmask = 255<<23;
 
 float	anglemod(float a)

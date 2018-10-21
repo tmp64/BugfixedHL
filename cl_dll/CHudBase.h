@@ -1,6 +1,10 @@
 #ifndef CHUDBASE_H
 #define CHUDBASE_H
 
+#ifndef _WIN32
+#define _cdecl 
+#endif
+
 #include "cl_dll.h"
 #include "wrect.h"
 #include "cvardef.h"

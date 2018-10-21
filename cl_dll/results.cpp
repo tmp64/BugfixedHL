@@ -9,6 +9,8 @@
 // Functions for storing game results files.
 //
 
+#ifdef _WIN32
+
 #include <crtdbg.h>
 #include <time.h>
 #include <io.h>
@@ -21,7 +23,7 @@
 #include "demo_api.h"
 #include "vgui_TeamFortressViewport.h"
 #include "memory.h"
-
+#include <windows.h>
 
 bool g_bFormatError = false;
 cvar_t *m_pCvarResultsFileFormat, *m_pCvarResultsCounterFormat;
@@ -533,3 +535,8 @@ void ResultsInit(void)
 	sprintf_s(g_szTempDemoList, MAX_PATH, "%s\\tempdemolist.txt", g_szModDirectory);
 	ResultsPurgeDemos();
 }
+
+#else
+
+
+#endif

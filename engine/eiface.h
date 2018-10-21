@@ -36,10 +36,20 @@
 // This is conveniently done for them in extdll.h
 //
 
+// Client's DLLEXPORT is defined in cl_dll/dllexport.h and uses __declspec(dllexport) on Windows
+// Server interface uses __stdcall on Windows
+#ifndef CLIENT_DLL
+
 #ifdef _WIN32
 #define DLLEXPORT __stdcall
 #else
-#define DLLEXPORT /* */
+#define DLLEXPORT __attribute__ ((visibility("default")))
+#endif
+
+#else
+
+#include "dllexport.h"
+
 #endif
 
 typedef enum

@@ -14,9 +14,11 @@
 #endif
 
 #include "com_utils.h"
-
-
-#ifdef _WIN32
+#include <stdlib.h>
+#include <string.h>
+#include <algorithm>
+using std::min;
+using std::max;
 
 /*============
 String functions
@@ -72,8 +74,6 @@ bool strrepl(char *str, int size, const char *find, const char *repl)
 	free(buffer);
 	return true;
 }
-
-#endif
 
 
 #ifdef _WIN32

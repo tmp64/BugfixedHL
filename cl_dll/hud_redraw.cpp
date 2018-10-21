@@ -15,7 +15,6 @@
 //
 // hud_redraw.cpp
 //
-#include <windows.h>
 #include "hud.h"
 #include "cl_util.h"
 
@@ -23,6 +22,14 @@
 #include "demo_api.h"
 #include "results.h"
 #include "vgui2/CHudScoreBoard.h"
+
+// Fix conflicts with STL
+// FIXME: replace min() and max() maxros with <algorithm>
+#undef min
+#undef max
+#include <string>
+#include <codecvt>
+#include <locale>
 
 #define MAX_LOGO_FRAMES 56
 
@@ -46,7 +53,9 @@ void CHud::Think(void)
 {
 	int newfov;
 
+#ifdef _WIN32
 	ResultsThink();
+#endif
 
 	for (CHudBase *i : m_HudList)
 	{
@@ -95,10 +104,12 @@ int CHud :: Redraw( float flTime, int intermission )
 	if ( m_flTimeDelta < 0 )
 		m_flTimeDelta = 0;
 
+#ifdef _WIN32
 	if (m_iIntermission && !intermission)
 	{
 		ResultsStop();
 	}
+#endif
 
 	// Bring up the scoreboard during intermission
 	if (gViewPort)
@@ -381,8 +392,7 @@ int CHud::CalculateCharWidth(int c)
 	wchar_t wch[2];
 	wch[0] = c;
 	wch[1] = 0;
-	char ch[MB_LEN_MAX + 1];
-	WideCharToMultiByte(CP_UTF8, 0, wch, -1, ch, MB_LEN_MAX + 1, NULL, NULL);
-	int width = TextMessageDrawString(ScreenWidth + 1, 0, ch, 255, 255, 255);
+	std::wstring_convert<std::codecvt_utf8 <wchar_t>> convert;
+	int width = TextMessageDrawString(ScreenWidth + 1, 0, convert.to_bytes(wch).c_str(), 255, 255, 255);
 	return width;
 }

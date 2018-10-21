@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2002, Valve LLC, All rights reserved. ============
+//========= Copyright ï¿½ 1996-2002, Valve LLC, All rights reserved. ============
 //
 // Purpose: 
 //
@@ -27,6 +27,15 @@
 #include "StudioModelRenderer.h"
 #include "GameStudioModelRenderer.h"
 #include "CHudSpectator.h"
+#include "dllexport.h"
+
+#ifndef _WIN32
+char *_strlwr(char *str)
+{
+	for (char *i = str; *i != '\0'; i++) *i = tolower(*i);
+	return str;
+}
+#endif
 
 //
 // Override the StudioModelRender virtual member functions here to implement custom bone
@@ -609,7 +618,6 @@ HUD_GetStudioModelInterface
 Export this function for the engine to use the studio renderer class to render objects.
 ====================
 */
-#define DLLEXPORT __declspec( dllexport )
 extern "C" int DLLEXPORT HUD_GetStudioModelInterface( int version, struct r_studio_interface_s **ppinterface, struct engine_studio_api_s *pstudio )
 {
 	if ( version != STUDIO_INTERFACE_VERSION )
