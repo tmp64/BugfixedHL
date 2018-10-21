@@ -1,4 +1,4 @@
-#include "./public/interface.h"
+#include "public_interface.h"
 #include "vstdlib/IKeyValuesSystem.h"
 #include "KeyValues.h"
 #include "KeyValuesCompat.h"

@@ -4,6 +4,7 @@ add_sources(
 	interface.h
 	interface.cpp
 	keydefs.h
+	public_interface.h
 )
 
 add_subdirectory( math )

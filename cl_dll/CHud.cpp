@@ -53,9 +53,11 @@
 #include "CHudTimer.h"
 #include "CHudScores.h"
 #include "CHudStatusIcons.h"
-#include "vgui2/CHudScoreBoard.h"
 
+#ifdef USE_VGUI2
+#include "vgui2/CHudScoreBoard.h"
 #include "clientsteamcontext.h"
+#endif
 
 float g_ColorBlue[3]	= { 0.6f, 0.8f, 1.0f };
 float g_ColorRed[3]		= { 1.0f, 0.25f, 0.25f };
@@ -449,7 +451,9 @@ void CHud :: Init( void )
 	HUD_ELEM_INIT(StatusIcons);
 	HUD_ELEM_INIT(Timer);
 	HUD_ELEM_INIT(Scores);
+#ifdef USE_VGUI2
 	HUD_ELEM_INIT(ScoreBoard);
+#endif
 
 	if (g_iIsAg)
 	{
@@ -600,7 +604,9 @@ void CHud :: VidInit( void )
 	m_StatusIcons->VidInit();
 	m_Timer->VidInit();
 	m_Scores->VidInit();
+#ifdef USE_VGUI2
 	m_ScoreBoard->VidInit();
+#endif
 
 	if (g_iIsAg)
 	{
@@ -619,7 +625,7 @@ void CHud :: VidInit( void )
 
 	GetClientVoiceMgr()->VidInit();
 
-#if !defined( NO_STEAM )
+#ifdef USE_VGUI2
 	if (SteamAPI_IsSteamRunning())
 	{
 		ConsolePrintColor("Steam is running\n", RGBA(0x1E, 0xE6, 0x32));

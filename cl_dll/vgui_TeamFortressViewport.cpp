@@ -2322,7 +2322,9 @@ int TeamFortressViewport::MsgFunc_ScoreInfo( const char *pszName, int iSize, voi
 			 g_PlayerExtraInfo[cl].teamnumber = 0;
 
 		UpdateOnPlayerInfo();
+#ifdef USE_VGUI2
 		gHUD.m_ScoreBoard->UpdateClientInfo(cl);
+#endif
 	}
 
 	return 1;
@@ -2374,7 +2376,9 @@ int TeamFortressViewport::MsgFunc_TeamInfo( const char *pszName, int iSize, void
 	{  
 		// set the players team
 		strncpy( g_PlayerExtraInfo[cl].teamname, READ_STRING(), MAX_TEAM_NAME );
+#ifdef USE_VGUI2
 		gHUD.m_ScoreBoard->UpdateClientInfo(cl);
+#endif
 	}
 
 	// rebuild the list of teams

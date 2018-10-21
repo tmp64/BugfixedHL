@@ -475,11 +475,13 @@ extern void __CmdFunc_InputPlayerSpecial(void);
 
 void IN_Attack2Down(void) 
 {
+#ifdef USE_VGUI2
 	if (gHUD.m_ScoreBoard->m_CvarMouseBtn->value == 2 && gHUD.m_ScoreBoard->IsVisible())
 	{
 		gHUD.m_ScoreBoard->EnableMousePointer(true);
 		return;
 	}
+#endif
 	KeyDown(&in_attack2);
 	gHUD.m_Spectator->HandleButtonsDown( IN_ATTACK2 );
 }
@@ -516,11 +518,13 @@ void IN_GraphUp(void) {KeyUp(&in_graph);}
 
 void IN_AttackDown(void)
 {
+#ifdef USE_VGUI2
 	if (gHUD.m_ScoreBoard->m_CvarMouseBtn->value == 1 && gHUD.m_ScoreBoard->IsVisible())
 	{
 		gHUD.m_ScoreBoard->EnableMousePointer(true);
 		return;
 	}
+#endif
 	KeyDown( &in_attack );
 	gHUD.m_Spectator->HandleButtonsDown( IN_ATTACK );
 }
@@ -542,6 +546,7 @@ void IN_Impulse (void)
 	in_impulse = atoi( gEngfuncs.Cmd_Argv(1) );
 }
 
+#ifdef USE_VGUI2
 void IN_ScoreDown(void)
 {
 	KeyDown(&in_score);
@@ -553,8 +558,13 @@ void IN_ScoreUp(void)
 	KeyUp(&in_score);
 	gHUD.m_ScoreBoard->HideScoreBoard();
 }
+#endif
 
+#ifdef USE_VGUI2
 void IN_ScoreOldDown(void)
+#else
+void IN_ScoreDown(void)
+#endif
 {
 	KeyDown(&in_score);
 	if (gViewPort)
@@ -563,7 +573,11 @@ void IN_ScoreOldDown(void)
 	}
 }
 
+#ifdef USE_VGUI2
 void IN_ScoreOldUp(void)
+#else
+void IN_ScoreUp(void)
+#endif
 {
 	KeyUp(&in_score);
 	if (gViewPort)
@@ -1120,8 +1134,10 @@ void InitInput (void)
 	gEngfuncs.pfnAddCommand ("-score", IN_ScoreUp);
 	gEngfuncs.pfnAddCommand ("+showscores", IN_ScoreDown);
 	gEngfuncs.pfnAddCommand ("-showscores", IN_ScoreUp);
+#ifdef USE_VGUI2
 	gEngfuncs.pfnAddCommand ("+showoldscores", IN_ScoreOldDown);
 	gEngfuncs.pfnAddCommand ("-showoldscores", IN_ScoreOldUp);
+#endif
 	gEngfuncs.pfnAddCommand ("+graph", IN_GraphDown);
 	gEngfuncs.pfnAddCommand ("-graph", IN_GraphUp);
 	gEngfuncs.pfnAddCommand ("+break",IN_BreakDown);

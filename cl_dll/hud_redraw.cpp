@@ -119,7 +119,11 @@ int CHud :: Redraw( float flTime, int intermission )
 			// Have to do this here so the scoreboard goes away
 			m_iIntermission = intermission;
 			gViewPort->HideCommandMenu();
+#ifdef USE_VGUI2
 			gHUD.m_ScoreBoard->HideScoreBoard();
+#else
+			gViewPort->HideScoreBoard();
+#endif
 			gViewPort->UpdateSpectatorPanel();
 		}
 		else if ( !m_iIntermission && intermission )
@@ -127,7 +131,11 @@ int CHud :: Redraw( float flTime, int intermission )
 			m_iIntermission = intermission;
 			gViewPort->HideCommandMenu();
 			gViewPort->HideVGUIMenu();
+#ifdef USE_VGUI2
 			gHUD.m_ScoreBoard->ShowScoreBoard();
+#else
+			gViewPort->ShowScoreBoard();
+#endif
 			gViewPort->UpdateSpectatorPanel();
 
 			// Clear center text

@@ -15,6 +15,7 @@ list( APPEND CMAKE_MODULE_PATH
 include( InputFilesList )
 include( MSVCRuntime )
 include( WinXPSupport )
+include( Ternary )
 
 project( BugfixedHL )
 
@@ -38,6 +39,9 @@ set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SHARED_COMPILER_FLAGS}" )
 set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${SHARED_COMPILER_FLAGS}" )
 
 unset( SHARED_COMPILER_FLAGS )
+
+option( USE_VGUI2 "Whether to include VGUI2 features" )
+ternary( USE_VGUI2_DEFINE USE_VGUI2 1 0 )
 
 #Shared preprocessor definitions
 set( SHARED_DEFS 
@@ -127,31 +131,21 @@ set( SHARED_EXTERNAL_INCLUDE_PATHS
 
 set( SHARED_INCLUDE_PATHS
 	common
-	#public
-	#public/math
 	engine
 	pm_shared
 	game_shared
 	dlls
-	#source_sdk/public/tier1
-	#source_sdk/public
-	#source_sdk/common
 )
 
 add_subdirectory( common )
 add_subdirectory( engine )
 add_subdirectory( pm_shared )
 add_subdirectory( game_shared )
-#add_subdirectory( public )
 
 #Save the shares sources into SHARED_SRCS
 get_sources( SHARED_SRCS )
 
 clear_sources()
-
-#Find shared dependencies
-#find_package( tier0 MODULE REQUIRED )
-#find_package( vstdlib MODULE REQUIRED )
 
 set( THREADS_PREFER_PTHREAD_FLAG ON )
 find_package( Threads REQUIRED )
@@ -160,14 +154,41 @@ if( UNIX AND NOT APPLE )
 	set( UNIX_FS_LIB stdc++fs )
 endif()
 
-set( SHARED_DEPENDENCIES
-	#tier0
-	#vstdlib
-	#tier1
-)
+# Source SDK code
+set( SOURCE_SDK_SRC )
+set( SOURCE_SDK_DEPENDENCIES )
+set( SOURCE_SDK_INCLUDE_PATHS )
+set( SOURCE_SDK_DEFINES )
 
-#Set up source_sdk projects first
-#add_subdirectory( source_sdk )
+if ( USE_VGUI2 )
+	find_package( tier0 MODULE REQUIRED )
+	find_package( vstdlib MODULE REQUIRED )
+	find_package( SteamAPI MODULE REQUIRED )
+	
+	add_subdirectory( public )
+	add_subdirectory( source_sdk )
+	
+	set( SOURCE_SDK_DEPENDENCIES
+		tier0
+		vstdlib
+		tier1
+		vgui2_controls
+		SteamAPI
+	)
+	
+	set( SOURCE_SDK_INCLUDE_PATHS
+		public
+		public/math
+		source_sdk/public/tier1
+		source_sdk/public
+		source_sdk/common
+	)
+	
+	set( SOURCE_SDK_DEFINES
+		VERSION_SAFE_STEAM_API_INTERFACES
+		USE_VGUI2=${USE_VGUI2_DEFINE}
+	)
+endif()
 
 #--------------------------------------------------------------------------------------------------------
 # Client library
@@ -237,6 +258,7 @@ target_include_directories( client PRIVATE
 	utils/vgui/include_DLLEXPORT
 	${SHARED_INCLUDE_PATHS}
 	${SHARED_EXTERNAL_INCLUDE_PATHS}
+	${SOURCE_SDK_INCLUDE_PATHS}
 )
 
 target_compile_definitions( client PRIVATE
@@ -245,6 +267,7 @@ target_compile_definitions( client PRIVATE
 	CLIENT_DLL
 	PCRE_STATIC
 	HAVE_CONFIG_H
+	${SOURCE_SDK_DEFINES}
 )
 
 #Find client dependencies
@@ -280,6 +303,7 @@ target_link_libraries( client
 	${VGUI2_LIBS}
 	${CLIENT_PLAT_LIBS}
 	${SHARED_DEPENDENCIES}
+	${SOURCE_SDK_DEPENDENCIES}
 	Threads::Threads
 	${UNIX_FS_LIB}
 )

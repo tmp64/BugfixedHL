@@ -1,0 +1,28 @@
+add_sources(
+	CBackGroundPanel.h
+	CBackGroundPanel.cpp
+	CBaseViewport.h
+	CBaseViewport.cpp
+	CHudViewport.h
+	CHudViewport.cpp
+	CClientVGUI.h
+	CClientVGUI.cpp
+	CClientMOTD.h
+	CClientMOTD.cpp
+	IViewport.h
+	IViewportPanel.h
+	VGUI2Paths.h
+	ViewportPanelNames.h
+	CAvatarImage.h
+	CAvatarImage.cpp
+	CHudScoreBoard.h
+	CHudScoreBoard.cpp
+	CPlayerListPanel.h
+	CPlayerListPanel.cpp
+	CScorePanel.h
+	CScorePanel.cpp
+	CVoiceStatus2.h
+	CVoiceStatus2.cpp
+	KeyValuesCompat.h
+	KeyValuesCompat.cpp
+)

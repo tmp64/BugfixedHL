@@ -19,7 +19,6 @@ add_sources(
     exefuncs.h
     hltv.h
     in_buttons.h
-    interface.cpp
     interface.h
     ivoicetweak.h
     mathlib.h
@@ -38,3 +37,9 @@ add_sources(
     usercmd.h
     weaponinfo.h
 )
+
+if ( NOT USE_VGUI2 )
+	add_sources(
+		interface.cpp	# tier1 uses interface.cpp from /public
+	)
+endif()

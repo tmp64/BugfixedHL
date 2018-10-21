@@ -44,7 +44,10 @@ extern "C"
 #include "svc_messages.h"
 #include "memory.h"
 #include "results.h"
+
+#ifdef USE_VGUI2
 #include "clientsteamcontext.h"
+#endif
 
 cl_enginefunc_t gEngfuncs;
 CHud gHUD;
@@ -330,7 +333,7 @@ Reinitializes all the hud variables.
 
 void _DLLEXPORT HUD_Init( void )
 {
-#if !defined( NO_STEAM )
+#ifdef USE_VGUI2
 	ClientSteamContext().Activate();
 #endif
 	InitInput();
@@ -407,7 +410,7 @@ Called at game exit.
 void _DLLEXPORT HUD_Shutdown( void )
 {
 	ShutdownInput();
-#if !defined( NO_STEAM )
+#ifdef USE_VGUI2
 	ClientSteamContext().Shutdown();
 #endif
 }

@@ -30,7 +30,10 @@
 #include "ammo.h"
 #include <eiface.h>
 #include "CHudBase.h"
+
+#ifdef USE_VGUI2
 #include <SDK_Color.h>
+#endif
 
 bool ParseColor( char *string, RGBA &rgba );
 
@@ -57,7 +60,10 @@ class CHudMessage;
 class CHudTimer;
 class CHudScores;
 class CHudStatusIcons;
+
+#ifdef USE_VGUI2
 class CHudScoreBoard;
+#endif
 
 //-----------------------------------------------------
 // Game info structures declaration
@@ -167,7 +173,9 @@ public:
 	std::shared_ptr<CHudStatusIcons>	m_StatusIcons = nullptr;
 	std::shared_ptr<CHudTimer>			m_Timer = nullptr;
 	std::shared_ptr<CHudScores>			m_Scores = nullptr;
+#ifdef USE_VGUI2
 	std::shared_ptr<CHudScoreBoard>		m_ScoreBoard = nullptr;		// VGUI2 scoreboard
+#endif
 
 	//-----------------------------------------------------
 	// AG HUD elements
@@ -263,10 +271,12 @@ public:
 		m_szServerName = ptr;
 	}
 
+#ifdef USE_VGUI2
 	inline SDK_Color GetTeamColor(int team)
 	{
 		return m_pTeamColors[team % HLARRAYSIZE(m_pTeamColors)];
 	}
+#endif
 
 private:
 	std::list<CHudBase *>	m_HudList;
@@ -299,6 +309,7 @@ private:
 	struct cvar_s *default_fov;
 	const char *m_szServerName = nullptr;	// Points to gViewPort->m_szServerName
 
+#ifdef USE_VGUI2
 	// Team colors for VGUI2
 	SDK_Color m_pTeamColors[5] = {
 		SDK_Color(216, 216, 216, 255),	// "Off" white (default)
@@ -307,6 +318,7 @@ private:
 		SDK_Color(225, 205, 45, 255),	// Yellow
 		SDK_Color(145, 215, 140, 255)	// Green
 	};
+#endif
 };
 
 extern CHud gHUD;

@@ -1,6 +1,6 @@
 #include "CVoiceStatus2.h"
 #include "hud.h"
-#include "../game_shared/voice_status.h"
+#include "../game_shared/client/voice_status.h"
 
 static CVoiceStatus2 g_VoiceMgr2;
 

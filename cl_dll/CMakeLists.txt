@@ -179,3 +179,12 @@ add_subdirectory( hl )
 add_subdirectory( jpeg )
 add_subdirectory( ${CMAKE_SOURCE_DIR}/dlls/wpn_shared wpn_shared)
 add_subdirectory( ${CMAKE_SOURCE_DIR}/dlls/pcre pcre)
+
+if( USE_VGUI2 )
+	add_sources(
+		clientsteamcontext.h
+		clientsteamcontext.cpp
+	)
+
+	add_subdirectory( vgui2 )
+endif()
