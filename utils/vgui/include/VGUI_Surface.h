@@ -31,7 +31,12 @@ public:
 	virtual void createPopup(Panel* embeddedPanel);
 	virtual bool hasFocus();
 	virtual bool isWithin(int x,int y);
+	// GetMousePos breaks compatibility with pre-SteamPipe Windows clients.
+	// Keeping it compiling on non-Windows may not be necessary but I couldn't
+	// confirm whether it works on Linux or not at the moment of writing this comment
+#ifndef _WIN32
 	virtual void GetMousePos( int &x, int &y );
+#endif
 protected:
 	virtual int  createNewTextureID(void);
 	virtual void drawSetColor(int r,int g,int b,int a);
