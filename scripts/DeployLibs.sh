@@ -13,7 +13,7 @@ do
     echo "Deploying to: ${p}"
 
     FIRST=0
-    mkdir "${p}"
+    mkdir -p "${p}"
 
     for file in "$@"
     do

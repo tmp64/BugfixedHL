@@ -20,7 +20,7 @@
 #include <vgui_controls/Slider.h>
 #include <vgui_controls/Controls.h>
 #include <vgui_controls/TextImage.h>
-#include "common/minmax.h"
+#include "common/MinMax.h"
 // memdbgon must be the last include file in a .cpp file!!!
 #include <tier0/memdbgon.h>
 

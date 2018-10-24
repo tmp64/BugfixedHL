@@ -31,7 +31,7 @@
 #include <vgui_controls/TextImage.h>
 #include <vgui_controls/Menu.h>
 #include <vgui_controls/Tooltip.h>
-#include "common/minmax.h"
+#include "common/MinMax.h"
 // memdbgon must be the last include file in a .cpp file
 #include "tier0/memdbgon.h"
 

@@ -128,14 +128,7 @@ inline int ConsoleStringLen( const char *string )
 }
 
 char *RemoveColorCodes(const char *string, bool inPlace = false);
-#ifdef _WIN32
 RGBA SetConsoleColor(RGBA color);
-#else
-inline RGBA SetConsoleColor(RGBA color)
-{
-	return color;
-}
-#endif
 void ConsolePrint(const char *string);
 void ConsolePrintColor(const char *string, RGBA color);
 void CenterPrint(const char *string);

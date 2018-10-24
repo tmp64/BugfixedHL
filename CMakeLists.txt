@@ -168,11 +168,12 @@ if ( USE_VGUI2 )
 	add_subdirectory( public )
 	add_subdirectory( source_sdk )
 	
+	# Order matters!
 	set( SOURCE_SDK_DEPENDENCIES
+		vgui2_controls
+		tier1
 		tier0
 		vstdlib
-		tier1
-		vgui2_controls
 		SteamAPI
 	)
 	

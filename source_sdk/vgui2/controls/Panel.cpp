@@ -38,7 +38,7 @@
 #include "vstdlib/ICommandline.h"
 
 #include "tier0/vprof.h"
-#include "common/minmax.h"
+#include "common/MinMax.h"
 // memdbgon must be the last include file in a .cpp file!!!
 #include <tier0/memdbgon.h>
 

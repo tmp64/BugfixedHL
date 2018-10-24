@@ -30,7 +30,7 @@
 #include <vgui_controls/ImagePanel.h>
 
 #include "tier1/UtlString.h"
-#include "common/minmax.h"
+#include "common/MinMax.h"
 // memdbgon must be the last include file in a .cpp file!!!
 #include <tier0/memdbgon.h>
 

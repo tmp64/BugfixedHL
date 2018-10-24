@@ -3,6 +3,7 @@
 
 #undef min
 #undef max
+#undef clamp
 
 #include <algorithm>
 

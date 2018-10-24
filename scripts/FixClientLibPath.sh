@@ -27,9 +27,26 @@ if [ ! -f "$LIB" ]; then
     exit 1
 fi
 
-echo "[${LIB}] Fixing vgui.so path"
-
-# Get original vgui.so path
+# Fix vgui.so
 ORIGINAL=$(ldd ${LIB} | grep vgui.so | awk -F" " '{print $1}')
-REPLACEMENT="vgui.so"
-$PATCHELF --replace-needed ${ORIGINAL} ${REPLACEMENT} ${LIB}
+if [ ! -z "$ORIGINAL" ]; then
+    echo "[${LIB}] Fixing vgui.so path"
+    REPLACEMENT="vgui.so"
+    $PATCHELF --replace-needed ${ORIGINAL} ${REPLACEMENT} ${LIB}
+fi
+
+# Fix libtier0.so
+ORIGINAL=$(ldd ${LIB} | grep libtier0.so | awk -F" " '{print $1}')
+if [ ! -z "$ORIGINAL" ]; then
+    echo "[${LIB}] Fixing libtier0.so path"
+    REPLACEMENT="libtier0.so"
+    $PATCHELF --replace-needed ${ORIGINAL} ${REPLACEMENT} ${LIB}
+fi
+
+# Fix libvstdlib.so
+ORIGINAL=$(ldd ${LIB} | grep libvstdlib.so | awk -F" " '{print $1}')
+if [ ! -z "$ORIGINAL" ]; then
+    echo "[${LIB}] Fixing libvstdlib.so path"
+    REPLACEMENT="libvstdlib.so"
+    $PATCHELF --replace-needed ${ORIGINAL} ${REPLACEMENT} ${LIB}
+fi

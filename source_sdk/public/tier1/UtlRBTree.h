@@ -10,7 +10,7 @@
 #define UTLRBTREE_H
 
 #include "tier1/strtools.h"
-
+#include "MinMax.h"
 #include "tier1/UtlMemory.h"
 
 //-----------------------------------------------------------------------------

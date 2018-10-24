@@ -363,7 +363,13 @@ void CScorePanel::UpdateMapName()
 void CScorePanel::UpdatePlayerCount()
 {
 	wchar_t buf[32];
-	swprintf(buf, L"%d/%d", m_iPlayerCount, gEngfuncs.GetMaxClients());	// May be unsafe, but 32 chars should be enough
+#ifdef _WIN32
+	swprintf(buf, // May be unsafe, but 32 chars should be enough
+#else
+	swprintf(buf, sizeof(buf),
+#endif
+		L"%d/%d", m_iPlayerCount, gEngfuncs.GetMaxClients()
+	);	
 	m_pPlayerCountLabel->SetText(buf);
 }
 

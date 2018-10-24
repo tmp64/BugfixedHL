@@ -20,7 +20,7 @@
 #include <vgui/IPanel.h>
 #include <KeyValues.h>
 #include <vgui/MouseCode.h>
-#include "common/minmax.h"
+#include "common/MinMax.h"
 #include <vgui_controls/Menu.h>
 #include <vgui_controls/ScrollBar.h>
 #include <vgui_controls/TextEntry.h>
