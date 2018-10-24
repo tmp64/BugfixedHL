@@ -44,7 +44,12 @@ public:
 	virtual bool hasFocus()=0;
 	virtual bool isWithin(int x,int y)=0;
 	virtual int  createNewTextureID(void)=0;
+	// GetMousePos breaks compatibility with pre-SteamPipe Windows clients.
+	// Keeping it compiling on non-Windows may not be necessary but I couldn't
+	// confirm whether it works on Linux or not at the moment of writing this comment
+#ifndef _WIN32
 	virtual void GetMousePos( int &x, int &y ) = 0;
+#endif
 protected:
 	virtual void addModeInfo(int wide,int tall,int bpp);
 protected:
