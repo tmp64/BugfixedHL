@@ -43,6 +43,8 @@ unset( SHARED_COMPILER_FLAGS )
 option( USE_VGUI2 "Whether to include VGUI2 features" )
 ternary( USE_VGUI2_DEFINE USE_VGUI2 1 0 )
 
+option( AUTO_DEPLOY "Whether to automatically deploy to deploy paths" 1 )
+
 #Shared preprocessor definitions
 set( SHARED_DEFS 
 )
@@ -229,10 +231,12 @@ if ( WIN32 )
 		COMMAND ${CMAKE_SOURCE_DIR}/scripts/GenerateAppVersion.bat "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}\\cl_dll\\appversion.h"
 	)
 	
-	add_custom_command( TARGET client
-		POST_BUILD
-		COMMAND ${CMAKE_SOURCE_DIR}/scripts/DeployLibs.bat "${CMAKE_SOURCE_DIR}\\scripts\\PublishPathClient.txt" "$<TARGET_FILE:client>" "$<TARGET_PDB_FILE:client>"
-	)
+    if ( AUTO_DEPLOY )
+	    add_custom_command( TARGET client
+		    POST_BUILD
+		    COMMAND ${CMAKE_SOURCE_DIR}/scripts/DeployLibs.bat "${CMAKE_SOURCE_DIR}\\scripts\\PublishPathClient.txt" "$<TARGET_FILE:client>" "$<TARGET_PDB_FILE:client>"
+	    )
+    endif()
 else()
 	if( UNIX AND NOT APPLE )
 		# Fix vgui.so path in client.so
@@ -242,10 +246,13 @@ else()
 			COMMAND ${CMAKE_SOURCE_DIR}/scripts/FixClientLibPath.sh "$<TARGET_FILE:client>"
 		)
 	endif()
-	add_custom_command( TARGET client
-		POST_BUILD
-		COMMAND ${CMAKE_SOURCE_DIR}/scripts/DeployLibs.sh "${CMAKE_SOURCE_DIR}/scripts/PublishPathClient.txt" "$<TARGET_FILE:client>"
-	)
+    
+    if ( AUTO_DEPLOY )
+	    add_custom_command( TARGET client
+		    POST_BUILD
+		    COMMAND ${CMAKE_SOURCE_DIR}/scripts/DeployLibs.sh "${CMAKE_SOURCE_DIR}/scripts/PublishPathClient.txt" "$<TARGET_FILE:client>"
+	    )
+    endif()
 endif()
 
 #Needs static CRT to avoid alloc issues.
@@ -384,15 +391,19 @@ if ( WIN32 )
 		COMMAND ${CMAKE_SOURCE_DIR}/scripts/GenerateAppVersion.bat "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}\\dlls\\appversion.h"
 	)
 	
-	add_custom_command( TARGET hl
-		POST_BUILD
-		COMMAND ${CMAKE_SOURCE_DIR}/scripts/DeployLibs.bat "${CMAKE_SOURCE_DIR}\\scripts\\PublishPathServer.txt" "$<TARGET_FILE:hl>" "$<TARGET_PDB_FILE:hl>"
-	)
+    if ( AUTO_DEPLOY )
+	    add_custom_command( TARGET hl
+		    POST_BUILD
+		    COMMAND ${CMAKE_SOURCE_DIR}/scripts/DeployLibs.bat "${CMAKE_SOURCE_DIR}\\scripts\\PublishPathServer.txt" "$<TARGET_FILE:hl>" "$<TARGET_PDB_FILE:hl>"
+	    )
+    endif()
 else()
-	add_custom_command( TARGET hl
-		POST_BUILD
-		COMMAND ${CMAKE_SOURCE_DIR}/scripts/DeployLibs.sh "${CMAKE_SOURCE_DIR}/scripts/PublishPathServer.txt" "$<TARGET_FILE:hl>"
-	)
+    if ( AUTO_DEPLOY )
+	    add_custom_command( TARGET hl
+		    POST_BUILD
+		    COMMAND ${CMAKE_SOURCE_DIR}/scripts/DeployLibs.sh "${CMAKE_SOURCE_DIR}/scripts/PublishPathServer.txt" "$<TARGET_FILE:hl>"
+	    )
+    endif()
 endif()
 
 #Needs static CRT to avoid alloc issues.
