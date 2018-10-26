@@ -300,6 +300,18 @@ int CHudAmmo::Init(void)
 	CVAR_CREATE( "hud_fastswitch", "0", FCVAR_ARCHIVE );		// controls whether or not weapons can be selected in one keypress
 	m_pCvarHudWeapon = CVAR_CREATE( "hud_weapon", "0", FCVAR_ARCHIVE );			// controls displaying sprite of currently selected weapon
 
+	// Custom crosshair cvars
+	m_pCustomCrosshair.enable		= CVAR_CREATE("cl_crosshair_custom", "0", FCVAR_ARCHIVE);
+	m_pCustomCrosshair.red			= CVAR_CREATE("cl_crosshair_red", "0", FCVAR_ARCHIVE);
+	m_pCustomCrosshair.green		= CVAR_CREATE("cl_crosshair_green", "255", FCVAR_ARCHIVE);
+	m_pCustomCrosshair.blue			= CVAR_CREATE("cl_crosshair_blue", "255", FCVAR_ARCHIVE);
+	m_pCustomCrosshair.gap			= CVAR_CREATE("cl_crosshair_gap", "8", FCVAR_ARCHIVE);
+	m_pCustomCrosshair.size			= CVAR_CREATE("cl_crosshair_size", "6", FCVAR_ARCHIVE);
+	m_pCustomCrosshair.thickness	= CVAR_CREATE("cl_crosshair_thickness", "2", FCVAR_ARCHIVE);
+	//m_pCustomCrosshair.outline_thickness = CVAR_CREATE("cl_crosshair_outline_thickness", "1", FCVAR_ARCHIVE);
+	m_pCustomCrosshair.dot			= CVAR_CREATE("cl_crosshair_dot", "0", FCVAR_ARCHIVE);
+	m_pCustomCrosshair.t			= CVAR_CREATE("cl_crosshair_t", "0", FCVAR_ARCHIVE);
+
 	m_iFlags |= HUD_ACTIVE; //!!!
 
 	gWR.Init();
@@ -641,8 +653,14 @@ void CHudAmmo::UpdateCrosshair()
 	{ // normal crosshairs
 		if (m_fOnTarget && m_pWeapon->hAutoaim)
 			SetCrosshair(m_pWeapon->hAutoaim, m_pWeapon->rcAutoaim, 255, 255, 255);
-		else
+		else if(!m_pCustomCrosshair.enable->value)
 			SetCrosshair(m_pWeapon->hCrosshair, m_pWeapon->rcCrosshair, 255, 255, 255);
+		else // Disable crosshair because custom one is enabled
+		{
+			wrect_t rc;
+			memset(&rc, 0, sizeof(wrect_t));
+			SetCrosshair(0, rc, 0, 0, 0);
+		}
 	}
 	else
 	{ // zoomed crosshairs
@@ -980,6 +998,44 @@ int CHudAmmo::Draw(float flTime)
 			int iOffset = (m_pWeapon->rcAmmo2.bottom - m_pWeapon->rcAmmo2.top)/8;
 			SPR_DrawAdditive(0, x, y - iOffset, &m_pWeapon->rcAmmo2);
 		}
+	}
+
+	// Draw custom crosshair if enabled
+	if (m_pCustomCrosshair.enable->value && gHUD.m_iFOV >= 90 && !(m_fOnTarget && m_pWeapon->hAutoaim))
+	{
+		int cx = ScreenWidth / 2;
+		int cy = ScreenHeight / 2;
+		int r = m_pCustomCrosshair.red->value;
+		int g = m_pCustomCrosshair.green->value;
+		int b = m_pCustomCrosshair.blue->value;
+		int a = 255;
+		int gap = m_pCustomCrosshair.gap->value / 2;
+		int thick = m_pCustomCrosshair.thickness->value;
+		int size = m_pCustomCrosshair.size->value;
+		bool t = m_pCustomCrosshair.t->value;
+		//int outline = m_pCustomCrosshair.outline_thickness->value;
+
+		// Draw dot
+		if (m_pCustomCrosshair.dot->value)
+		{
+			FillRGBA(cx - thick / 2, cy - thick / 2, thick, thick, r, g, b, a);
+		}
+
+		// Draw outline
+		/*if (outline > 0)
+		{
+			FillRGBA(cx + gap - outline, cy - thick / 2 - outline, size + outline * 2, thick + outline * 2, 32, 32, 32, 255);
+			FillRGBA(cx - gap - size - outline, cy - thick / 2 - outline, size + outline * 2, thick + outline * 2, 32, 32, 32, 255);
+			FillRGBA(cx - thick / 2 - outline, cy + gap - outline, thick + outline * 2, size + outline * 2, 0, 0, 0, 255);
+			FillRGBA(cx - thick / 2 - outline, cy - gap - size - outline, thick + outline * 2, size + outline * 2, 0, 0, 0, 255);
+		}*/
+
+		// Draw crosshair
+		FillRGBA(cx + gap, cy - thick / 2, size, thick, r, g, b, a);
+		FillRGBA(cx - gap - size, cy - thick / 2, size, thick, r, g, b, a);
+		FillRGBA(cx - thick / 2, cy + gap, thick, size, r, g, b, a);
+		if (!t)
+			FillRGBA(cx - thick / 2, cy - gap - size, thick, size, r, g, b, a);
 	}
 
 	return 1;

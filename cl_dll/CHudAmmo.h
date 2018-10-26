@@ -47,6 +47,22 @@ private:
 	int		m_iMaxSlot;	// There are 5 (0-4) slots by default and they can extend to 6. This will be used to draw additional weapon bucket(s) on a hud.
 
 	cvar_t	*m_pCvarHudWeapon;
+
+	// Custom crosshair cvars
+	struct custom_crosshair_cvars_t
+	{
+		cvar_t *enable;
+		cvar_t *red;
+		cvar_t *green;
+		cvar_t *blue;
+		cvar_t *gap;
+		cvar_t *size;
+		cvar_t *thickness;
+		//cvar_t *outline_thickness;
+		cvar_t *dot;
+		cvar_t *t;
+	};
+	custom_crosshair_cvars_t m_pCustomCrosshair;
 };
 
 #endif
