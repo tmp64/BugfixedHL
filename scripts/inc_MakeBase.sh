@@ -72,6 +72,9 @@ mkdir -p "${GAMEDIR}"
 # Copy files from gamedir to $GAMEDIR
 cp -r ../gamedir/. "${GAMEDIR}"
 
+# Copy README.md
+cp ../README.md "${GAMEDIR}/README.txt"
+
 # Copy other files
 CopyFiles
 

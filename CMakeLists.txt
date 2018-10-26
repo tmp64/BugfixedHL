@@ -40,9 +40,11 @@ set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${SHARED_COMPILER_FLAGS}" )
 
 unset( SHARED_COMPILER_FLAGS )
 
+# VGUI2 option
 option( USE_VGUI2 "Whether to include VGUI2 features" )
 ternary( USE_VGUI2_DEFINE USE_VGUI2 1 0 )
 
+# Autodeploy option
 option( AUTO_DEPLOY "Whether to automatically deploy to deploy paths" 1 )
 
 #Shared preprocessor definitions
@@ -240,7 +242,7 @@ if ( WIN32 )
 else()
 	if( UNIX AND NOT APPLE )
 		# Fix vgui.so path in client.so
-		# " The best kostil' is not kostil' "
+		# " The best kostil' is not kostil' " (c) EzicMan
 		add_custom_command( TARGET client
 			POST_BUILD
 			COMMAND ${CMAKE_SOURCE_DIR}/scripts/FixClientLibPath.sh "$<TARGET_FILE:client>"
