@@ -309,7 +309,8 @@ int CHudAmmo::Init(void)
 	m_pCustomCrosshair.size			= CVAR_CREATE("cl_crosshair_size", "6", FCVAR_ARCHIVE);
 	m_pCustomCrosshair.thickness	= CVAR_CREATE("cl_crosshair_thickness", "2", FCVAR_ARCHIVE);
 	//m_pCustomCrosshair.outline_thickness = CVAR_CREATE("cl_crosshair_outline_thickness", "1", FCVAR_ARCHIVE);
-	m_pCustomCrosshair.dot		= CVAR_CREATE("cl_crosshair_dot", "0", FCVAR_ARCHIVE);
+	m_pCustomCrosshair.dot			= CVAR_CREATE("cl_crosshair_dot", "0", FCVAR_ARCHIVE);
+	m_pCustomCrosshair.t			= CVAR_CREATE("cl_crosshair_t", "0", FCVAR_ARCHIVE);
 
 	m_iFlags |= HUD_ACTIVE; //!!!
 
@@ -1011,6 +1012,7 @@ int CHudAmmo::Draw(float flTime)
 		int gap = m_pCustomCrosshair.gap->value / 2;
 		int thick = m_pCustomCrosshair.thickness->value;
 		int size = m_pCustomCrosshair.size->value;
+		bool t = m_pCustomCrosshair.t->value;
 		//int outline = m_pCustomCrosshair.outline_thickness->value;
 
 		// Draw dot
@@ -1032,7 +1034,8 @@ int CHudAmmo::Draw(float flTime)
 		FillRGBA(cx + gap, cy - thick / 2, size, thick, r, g, b, a);
 		FillRGBA(cx - gap - size, cy - thick / 2, size, thick, r, g, b, a);
 		FillRGBA(cx - thick / 2, cy + gap, thick, size, r, g, b, a);
-		FillRGBA(cx - thick / 2, cy - gap - size, thick, size, r, g, b, a);
+		if (!t)
+			FillRGBA(cx - thick / 2, cy - gap - size, thick, size, r, g, b, a);
 	}
 
 	return 1;

@@ -60,6 +60,7 @@ private:
 		cvar_t *thickness;
 		//cvar_t *outline_thickness;
 		cvar_t *dot;
+		cvar_t *t;
 	};
 	custom_crosshair_cvars_t m_pCustomCrosshair;
 };
