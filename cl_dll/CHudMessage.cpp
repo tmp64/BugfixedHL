@@ -21,7 +21,6 @@
 #include <string.h>
 #include <string>
 #include <locale>
-#include <codecvt>
 #include "CHudMessage.h"
 #include "hud.h"
 #include "cl_util.h"
@@ -249,13 +248,13 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 {
 	int i, j, width;
 	wchar_t wLine[MAX_HUD_STRING + 1];
-	//wchar_t wText[MAX_MESSAGE_TEXT_LENGTH + 1];
+	wchar_t wText[MAX_MESSAGE_TEXT_LENGTH + 1];
 	const wchar_t  *pwText;
 	int lineHeight = gHUD.m_scrinfo.iCharHeight + ADJUST_MESSAGE;
 
-	//MultiByteToWideChar(CP_UTF8, 0, pMessage->pMessage, -1, wText, MAX_MESSAGE_TEXT_LENGTH);
-	std::wstring_convert<std::codecvt_utf8 <wchar_t>, wchar_t> convert;
-	std::wstring wText = convert.from_bytes(pMessage->pMessage);
+	const char *strPtr = pMessage->pMessage;
+	std::mbstate_t state = std::mbstate_t();
+	std::mbsrtowcs(wText, &strPtr, MAX_MESSAGE_TEXT_LENGTH, &state);
 
 	// Count lines and width
 	m_parms.time = time;
@@ -265,7 +264,7 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 	m_parms.length = 0;
 	m_parms.totalWidth = 0;
 	width = 0;
-	pwText = wText.c_str();
+	pwText = wText;
 	while (*pwText)
 	{
 		if (*pwText == '\n')
@@ -288,7 +287,7 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 
 	MessageScanStart();
 
-	pwText = wText.c_str();
+	pwText = wText;
 	for (i = 0; i < m_parms.lines; i++)
 	{
 		m_parms.lineLength = 0;
