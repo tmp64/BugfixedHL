@@ -28,6 +28,10 @@
 #include "parsemsg.h"
 #include "CHudTimer.h"
 
+#ifdef _WIN32
+#include <Windows.h>
+#endif
+
 DECLARE_MESSAGE_PTR( m_Message, HudText )
 DECLARE_MESSAGE_PTR( m_Message, GameTitle )
 
@@ -249,13 +253,32 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 {
 	int i, j, width;
 	wchar_t wLine[MAX_HUD_STRING + 1];
-	//wchar_t wText[MAX_MESSAGE_TEXT_LENGTH + 1];
-	const wchar_t  *pwText;
+	wchar_t wTextBuf[MAX_MESSAGE_TEXT_LENGTH + 1];
+	const wchar_t *wText = nullptr;
+	const wchar_t *pwText;
 	int lineHeight = gHUD.m_scrinfo.iCharHeight + ADJUST_MESSAGE;
 
-	//MultiByteToWideChar(CP_UTF8, 0, pMessage->pMessage, -1, wText, MAX_MESSAGE_TEXT_LENGTH);
-	std::wstring_convert<std::codecvt_utf8 <wchar_t>, wchar_t> convert;
-	std::wstring wText = convert.from_bytes(pMessage->pMessage);
+#ifdef _WIN32
+	MultiByteToWideChar(CP_UTF8, 0, pMessage->pMessage, -1, wTextBuf, MAX_MESSAGE_TEXT_LENGTH);
+	wText = wTextBuf;
+#else
+	std::wstring wstr;
+
+	try
+	{
+		std::wstring_convert<std::codecvt_utf8 <wchar_t>, wchar_t> convert;
+		wstr = convert.from_bytes(pMessage->pMessage);
+		wText = wstr.c_str();
+	}
+	catch (const std::exception &)
+	{
+		// Fall back to std::mbsrtowcs if std::wstring_convert fails
+		const char *strPtr = pMessage->pMessage;
+		std::mbstate_t state = std::mbstate_t();
+		std::mbsrtowcs(wTextBuf, &strPtr, MAX_MESSAGE_TEXT_LENGTH, &state);
+		wText = wTextBuf;
+	}
+#endif
 
 	// Count lines and width
 	m_parms.time = time;
@@ -265,7 +288,7 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 	m_parms.length = 0;
 	m_parms.totalWidth = 0;
 	width = 0;
-	pwText = wText.c_str();
+	pwText = wText;
 	while (*pwText)
 	{
 		if (*pwText == '\n')
@@ -288,7 +311,7 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 
 	MessageScanStart();
 
-	pwText = wText.c_str();
+	pwText = wText;
 	for (i = 0; i < m_parms.lines; i++)
 	{
 		m_parms.lineLength = 0;

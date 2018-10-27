@@ -340,21 +340,27 @@ void CScorePanel::UpdateAllClients()
 //--------------------------------------------------------------
 void CScorePanel::UpdateServerName()
 {
-	// TODO: Find a better way to convert UTF-8 -> wchar_t *
 	if (gHUD.GetServerName())
 	{
-		std::wstring_convert<std::codecvt_utf8 <wchar_t>, wchar_t> convert;
-		std::wstring dest = convert.from_bytes(gHUD.GetServerName());
-		m_pServerNameLabel->SetText(dest.c_str());
+		wchar_t str[64];
+		vgui2::localize()->ConvertANSIToUnicode(gHUD.GetServerName(), str, sizeof(str));
+		m_pServerNameLabel->SetText(str);
 	}
 }
 
 void CScorePanel::UpdateMapName()
 {
-	std::wstring_convert<std::codecvt_utf8 <wchar_t>, wchar_t> convert;
-	std::wstring mapfile = convert.from_bytes(gEngfuncs.pfnGetLevelName());
-	std::wstring str = L"Map: " + mapfile.substr(5, mapfile.size() - 5 - 4);	// substr is to remove "maps/" before mapname and ".bsp" after
-	m_pMapNameLabel->SetText(str.c_str());
+	try
+	{
+		std::wstring_convert<std::codecvt_utf8 <wchar_t>, wchar_t> convert;
+		std::wstring mapfile = convert.from_bytes(gEngfuncs.pfnGetLevelName());
+		std::wstring str = L"Map: " + mapfile.substr(5, mapfile.size() - 5 - 4);	// substr is to remove "maps/" before mapname and ".bsp" after
+		m_pMapNameLabel->SetText(str.c_str());
+	}
+	catch (const std::exception &)
+	{
+		m_pMapNameLabel->SetText(L"Error! Invalid map name");
+	}
 }
 
 //--------------------------------------------------------------
