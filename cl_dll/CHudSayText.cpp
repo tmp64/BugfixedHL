@@ -195,6 +195,10 @@ void CHudSayText :: SayTextPrint( const char *pszBuf, int iBufSize, int clientIn
 			ConsolePrintColor(pszBuf + 1, color);
 		else
 			ConsolePrint(pszBuf + 1);
+
+		int strLen = strlen(pszBuf + 1);
+		if (pszBuf[strLen] != '\n')
+			ConsolePrint("\n");
 		ResultsAddLog(pszBuf + 1, true);
 	}
 	else
