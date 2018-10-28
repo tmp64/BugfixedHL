@@ -128,6 +128,7 @@ private:
 	vgui2::Menu *m_pMenu = nullptr;
 
 	int m_pHeader = 0;
+	int m_pSpectatorSection = 33;
 	int m_iPlayerCount = 0;
 	int m_iMargin = 100;
 	int m_iMinHeight = 320;
