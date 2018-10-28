@@ -199,6 +199,7 @@ void CScorePanel::RecalcItems()
 	int spectatorCount = 0;
 	int spectatorFrags = 0;
 	int spectatorDeaths = 0;
+	int totalPlayerCount = 0;
 	// Fill team info from player info
 	// FIXME: Use overriden values in g_TeamInfo if need to
 	for (int i = 1; i <= MAX_PLAYERS; i++)
@@ -218,6 +219,7 @@ void CScorePanel::RecalcItems()
 			spectatorFrags += g_PlayerExtraInfo[i].frags;
 			spectatorDeaths += g_PlayerExtraInfo[i].deaths;
 		}
+		totalPlayerCount++;
 	}
 
 	// Sort teams
@@ -241,12 +243,13 @@ void CScorePanel::RecalcItems()
 	// Create sections in right order
 	for (int team : set)
 	{
-		char buf[16];
+		char buf[64];
 		if (team == m_pHeader) continue;
 		m_pPlayerList->AddSection(team, "", StaticPlayerSortFunc);
 		if (gHUD.m_ScoreBoard->m_CvarAvatars->value)
 			m_pPlayerList->AddColumnToSection(team, "avatar", "", CPlayerListPanel::COLUMN_IMAGE, m_iAvatarWidth + m_iAvatarPaddingLeft + m_iAvatarPaddingRight);
-		m_pPlayerList->AddColumnToSection(team, "name", m_pTeamInfo[team].name, CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), NAME_WIDTH));
+		snprintf(buf, sizeof(buf), "%s (%d/%d, %.0f%%)", m_pTeamInfo[team].name, m_pTeamInfo[team].players, totalPlayerCount, (double)m_pTeamInfo[team].players / totalPlayerCount * 100.0);
+		m_pPlayerList->AddColumnToSection(team, "name", buf, CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), NAME_WIDTH));
 		m_pPlayerList->AddColumnToSection(team, "steamid", "", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), STEAMID_WIDTH));
 		snprintf(buf, sizeof(buf), "%.2f", (double)m_pTeamInfo[team].kills / (double)(m_pTeamInfo[team].deaths + 1));
 		m_pPlayerList->AddColumnToSection(team, "eff", buf, CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), DEATH_WIDTH));
@@ -262,11 +265,12 @@ void CScorePanel::RecalcItems()
 	// Add spectator section
 	if (spectatorCount != 0)
 	{
-		char buf[16];
+		char buf[64];
 		m_pPlayerList->AddSection(m_pSpectatorSection, "", StaticPlayerSortFunc);
 		if (gHUD.m_ScoreBoard->m_CvarAvatars->value)
 			m_pPlayerList->AddColumnToSection(m_pSpectatorSection, "avatar", "", CPlayerListPanel::COLUMN_IMAGE, m_iAvatarWidth + m_iAvatarPaddingLeft + m_iAvatarPaddingRight);
-		m_pPlayerList->AddColumnToSection(m_pSpectatorSection, "name", "Spectators", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), NAME_WIDTH));
+		snprintf(buf, sizeof(buf), "Spectators (%d/%d, %.0f%%)", spectatorCount, totalPlayerCount, (double)spectatorCount / totalPlayerCount * 100.0);
+		m_pPlayerList->AddColumnToSection(m_pSpectatorSection, "name", buf, CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), NAME_WIDTH));
 		m_pPlayerList->AddColumnToSection(m_pSpectatorSection, "steamid", "", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), STEAMID_WIDTH));
 		snprintf(buf, sizeof(buf), "%.2f", (double)spectatorFrags / (double)(spectatorDeaths + 1));
 		m_pPlayerList->AddColumnToSection(m_pSpectatorSection, "eff", buf, CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), DEATH_WIDTH));
