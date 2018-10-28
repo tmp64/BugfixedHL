@@ -1087,7 +1087,8 @@ long long GetSteamID64(const char *pszAuthID)
 	int iAuthID = 0;
 
 	char szAuthID[64];
-	strcpy(szAuthID, pszAuthID);		// FIXME: buffer overflow is possible
+	strncpy(szAuthID, pszAuthID, sizeof(szAuthID) - 1);
+	szAuthID[sizeof(szAuthID) - 1] = '\0';
 
 	char *szTmp = strtok(szAuthID, ":");
 	while (szTmp = strtok(NULL, ":"))
