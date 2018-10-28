@@ -57,7 +57,10 @@
 
 #include "CHudTextMessage.h"
 #include "CHudSpectator.h"
+
+#ifdef USE_VGUI2
 #include "vgui2/CHudScoreBoard.h"
+#endif
 
 extern int g_iVisibleMouse;
 class CCommandMenu;
@@ -2298,6 +2301,7 @@ int TeamFortressViewport::MsgFunc_ServerName( const char *pszName, int iSize, vo
 	BEGIN_READ( pbuf, iSize );
 	strncpy( m_szServerName, READ_STRING(), MAX_SERVERNAME_LENGTH );
 	m_szServerName[MAX_SERVERNAME_LENGTH - 1] = 0;
+	gHUD.m_ScoreBoard->UpdateServerName();
 	return 1;
 }
 

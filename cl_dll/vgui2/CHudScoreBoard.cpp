@@ -77,3 +77,8 @@ bool CHudScoreBoard::IsVisible()
 {
 	return m_pScorePanel->IsVisible();
 }
+
+void CHudScoreBoard::UpdateServerName()
+{
+	m_pScorePanel->UpdateServerName();
+}

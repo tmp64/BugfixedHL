@@ -21,6 +21,7 @@ public:
 	void UpdateClientInfo(int client);
 	void EnableMousePointer(bool enable);
 	bool IsVisible();
+	void UpdateServerName();
 
 private:
 	float m_flScoreBoardLastUpdated = 0;

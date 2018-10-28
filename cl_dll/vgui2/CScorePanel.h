@@ -47,6 +47,7 @@ public:
 	void UpdateClientInfo(int client, bool autoUpdate = true);	// autoUpdate - whether to update player count and resize at the end of client update
 	void UpdateAllClients();
 	void EnableMousePointer(bool enable);
+	void UpdateServerName();
 
 	//IViewportPanel overrides
 	const char *GetName() override
@@ -144,7 +145,6 @@ private:
 	menu_info_t m_pMenuInfo;
 
 	void RecalcItems();
-	void UpdateServerName();
 	void UpdateMapName();
 	void UpdatePlayerCount();
 	void AddHeader();
