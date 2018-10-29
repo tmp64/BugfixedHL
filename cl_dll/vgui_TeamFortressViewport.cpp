@@ -2301,7 +2301,9 @@ int TeamFortressViewport::MsgFunc_ServerName( const char *pszName, int iSize, vo
 	BEGIN_READ( pbuf, iSize );
 	strncpy( m_szServerName, READ_STRING(), MAX_SERVERNAME_LENGTH );
 	m_szServerName[MAX_SERVERNAME_LENGTH - 1] = 0;
+#ifdef USE_VGUI2
 	gHUD.m_ScoreBoard->UpdateServerName();
+#endif
 	return 1;
 }
 
