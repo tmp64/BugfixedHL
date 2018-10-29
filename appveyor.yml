@@ -1,0 +1,86 @@
+version: 'build-{build}'
+
+branches:
+  only:
+    - master
+    - AppVeyor
+
+image:
+  - Visual Studio 2017
+  - Ubuntu1804
+
+environment:
+  matrix:
+    - CMAKE_BUILD_DIR: build_auto
+      CMAKE_OPTIONS:
+    - VGUI2_BUILD: 1
+      CMAKE_BUILD_DIR: build_auto_vgui2
+      CMAKE_OPTIONS: -DUSE_VGUI2=1
+
+install:
+  - sh: sudo dpkg --add-architecture i386
+  - sh: sudo apt update
+  - sh: sudo apt install libc6:i386 cmake gcc g++ gcc-multilib g++-multilib
+
+for:
+# Client & Server for Linux
+-
+  matrix:
+    only:
+      - image: Ubuntu
+
+  build_script:
+  # - sh: mkdir ${CMAKE_BUILD_DIR}
+  # - sh: cd ${CMAKE_BUILD_DIR}
+  # - sh: cmake .. -DAUTO_DEPLOY=0 ${CMAKE_OPTIONS}
+  # - sh: make -j2 client
+  # - sh: make -j2 hl
+  - sh: ./scripts/MakeClientRelease.sh
+  - sh: ./scripts/MakeServerRelease.sh
+  
+# Client with VGUI2 for Linux
+-
+  matrix:
+    only:
+      - image: Ubuntu
+      - VGUI2_BUILD: 1
+
+  build_script:
+  # - sh: mkdir ${CMAKE_BUILD_DIR}
+  # - sh: cd ${CMAKE_BUILD_DIR}
+  # - sh: cmake .. -DAUTO_DEPLOY=0 ${CMAKE_OPTIONS}
+  # - sh: make -j2 client
+  - sh: ./scripts/MakeClientVGUI2Release.sh
+
+# Client & Server for Windows
+-
+  matrix:
+    only:
+      - image: Visual Studio 2017
+
+  build_script:
+  - cmd: mkdir ${CMAKE_BUILD_DIR}
+  - cmd: cd ${CMAKE_BUILD_DIR}
+  - cmd: cmake -DAUTO_DEPLOY=0 ${CMAKE_OPTIONS} ..
+  - cmd: MSBuild.exe BugfixedHL.sln /t:client /p:PlatformTarget=x86 /p:Configuration=Release
+  - cmd: MSBuild.exe BugfixedHL.sln /t:hl /p:PlatformTarget=x86 /p:Configuration=Release
+  - cmd: scripts/AppVeyor_PackageClient.bat
+  - cmd: scripts/AppVeyor_PackageServer.bat
+  
+# Client with VGUI2 for Windows
+-
+  matrix:
+    only:
+      - image: Visual Studio 2017
+      - VGUI2_BUILD: 1
+
+  build_script:
+  - cmd: mkdir ${CMAKE_BUILD_DIR}
+  - cmd: cd ${CMAKE_BUILD_DIR}
+  - cmd: cmake -DAUTO_DEPLOY=0 ${CMAKE_OPTIONS} ..
+  - cmd: MSBuild.exe BugfixedHL.sln /t:client /p:PlatformTarget=x86 /p:Configuration=Release
+  - cmd: scripts/AppVeyor_PackageClientVGUI2.bat
+
+artifacts:
+  - path: BugfixedHL-*.zip
+  - path: BugfixedHL-*.tar.gz
