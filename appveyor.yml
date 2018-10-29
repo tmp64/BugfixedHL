@@ -27,21 +27,7 @@ install:
   - sh: sudo apt-get install -y libc6:i386 cmake gcc g++ gcc-multilib g++-multilib patchelf > /dev/null
 
 build_script:
-  - cmd: |
-      mkdir "%CMAKE_BUILD_DIR%"
-      cd "%CMAKE_BUILD_DIR%"
-      cmake -DAUTO_DEPLOY=0 %CMAKE_OPTIONS% ..
-      IF "%SERVER_BUILD%"=="0" (
-        MSBuild.exe BugfixedHL.sln /t:client /p:PlatformTarget=x86 /p:Configuration=Release /m
-        IF "%VGUI2_BUILD%"=="1" (
-          ../scripts/AppVeyor_PackageClientVGUI2.bat
-        ) ELSE (
-          ../scripts/AppVeyor_PackageClient.bat
-        )
-      ) ELSE (
-        MSBuild.exe BugfixedHL.sln /t:hl /p:PlatformTarget=x86 /p:Configuration=Release /m
-        ../scripts/AppVeyor_PackageServer.bat
-      )
+  - cmd: scripts/AppVeyor_WindowsBuild.bat
   - sh: |
       if [ "$SERVER_BUILD" -eq "0" ]; then
         if [ "$VGUI2_BUILD" -eq "0" ]; then
