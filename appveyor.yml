@@ -23,85 +23,33 @@ environment:
 
 install:
   - sh: sudo dpkg --add-architecture i386
-  - sh: sudo apt update > /dev/null
-  - sh: sudo apt install -y libc6:i386 cmake gcc g++ gcc-multilib g++-multilib > /dev/null
+  - sh: sudo apt-get update > /dev/null
+  - sh: sudo apt-get install -y libc6:i386 cmake gcc g++ gcc-multilib g++-multilib patchelf > /dev/null
 
-for:
-# Client for Linux
--
-  matrix:
-    only:
-      - image: Ubuntu1804
-
-  build_script:
-    - sh: 'echo Build has started: Linux Client'
-    - sh: ./scripts/MakeClientRelease.sh
-    
-# Server for Linux
--
-  matrix:
-    only:
-      - image: Ubuntu1804
-      - SERVER_BUILD: 1
-
-  build_script:
-    - sh: 'echo Build has started: Linux Server'
-    - sh: ./scripts/MakeServerRelease.sh
-  
-# Client with VGUI2 for Linux
--
-  matrix:
-    only:
-      - image: Ubuntu1804
-      - VGUI2_BUILD: 1
-
-  build_script:
-    - sh: 'echo Build has started: Linux Client VGUI2'
-    - sh: ./scripts/MakeClientVGUI2Release.sh
-
-# Client for Windows
--
-  matrix:
-    only:
-      - image: Visual Studio 2017
-
-  build_script:
-    - cmd: 'ECHO Build has started: Windows'
-    - cmd: mkdir %CMAKE_BUILD_DIR%
-    - cmd: cd %CMAKE_BUILD_DIR%
-    - cmd: cmake -DAUTO_DEPLOY=0 %CMAKE_OPTIONS% ..
-    - cmd: MSBuild.exe BugfixedHL.sln /t:client /p:PlatformTarget=x86 /p:Configuration=Release /m
-    - cmd: ../scripts/AppVeyor_PackageClient.bat
-
-# Server for Windows
--
-  matrix:
-    only:
-      - image: Visual Studio 2017
-      - SERVER_BUILD: 1
-
-  build_script:
-    - cmd: 'ECHO Build has started: Windows'
-    - cmd: mkdir %CMAKE_BUILD_DIR%
-    - cmd: cd %CMAKE_BUILD_DIR%
-    - cmd: cmake -DAUTO_DEPLOY=0 %CMAKE_OPTIONS% ..
-    - cmd: MSBuild.exe BugfixedHL.sln /t:hl /p:PlatformTarget=x86 /p:Configuration=Release /m
-    - cmd: ../scripts/AppVeyor_PackageServer.bat
-
-# Client with VGUI2 for Windows
--
-  matrix:
-    only:
-      - image: Visual Studio 2017
-      - VGUI2_BUILD: 1
-
-  build_script:
-    - cmd: 'ECHO Build has started: Windows VGUI2'
-    - cmd: mkdir %CMAKE_BUILD_DIR%
-    - cmd: cd %CMAKE_BUILD_DIR%
-    - cmd: cmake -DAUTO_DEPLOY=0 %CMAKE_OPTIONS% ..
-    - cmd: MSBuild.exe BugfixedHL.sln /t:client /p:PlatformTarget=x86 /p:Configuration=Release /m
-    - cmd: ../scripts/AppVeyor_PackageClientVGUI2.bat
+build_script:
+  - cmd: |
+      mkdir %CMAKE_BUILD_DIR%
+      cd %CMAKE_BUILD_DIR%
+      cmake -DAUTO_DEPLOY=0 %CMAKE_OPTIONS% ..
+      IF %SERVER_BUILD%=="0" (
+        MSBuild.exe BugfixedHL.sln /t:client /p:PlatformTarget=x86 /p:Configuration=Release /m
+        IF %VGUI2_BUILD%=="1" (../scripts/AppVeyor_PackageClientVGUI2.bat)
+        ELSE (../scripts/AppVeyor_PackageClient.bat)
+      )
+      ELSE (
+        MSBuild.exe BugfixedHL.sln /t:hl /p:PlatformTarget=x86 /p:Configuration=Release /m
+        ../scripts/AppVeyor_PackageServer.bat
+      )
+  - sh: |
+      if [ "$SERVER_BUILD" -eq "0" ]; then
+        if [ "$VGUI2_BUILD" -eq "0" ]; then
+          ./scripts/MakeClientRelease.sh
+        else
+          ./scripts/MakeClientVGUI2Release.sh
+        fi
+      else
+        ./scripts/MakeServerRelease.sh
+      fi
 
 artifacts:
   - path: BugfixedHL-*.zip
