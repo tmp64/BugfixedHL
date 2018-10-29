@@ -1,10 +1,5 @@
 version: 'build-{build}'
 
-branches:
-  only:
-    - master
-    - AppVeyor
-
 image:
   - Visual Studio 2017
   - Ubuntu1804
@@ -13,12 +8,18 @@ environment:
   matrix:
     - CMAKE_BUILD_DIR: build_auto_client
       CMAKE_OPTIONS:
-    - VGUI2_BUILD: 1
-      CMAKE_BUILD_DIR: build_auto_client_vgui2
+      VGUI2_BUILD: 0
+      SERVER_BUILD: 0
+      
+    - CMAKE_BUILD_DIR: build_auto_client_vgui2
       CMAKE_OPTIONS: -DUSE_VGUI2=1
-    - SERVER_BUILD: 1
-      CMAKE_BUILD_DIR: build_auto_server
+      VGUI2_BUILD: 1
+      SERVER_BUILD: 0
+      
+    - CMAKE_BUILD_DIR: build_auto_server
       CMAKE_OPTIONS:
+      VGUI2_BUILD: 0
+      SERVER_BUILD: 1
 
 install:
   - sh: sudo dpkg --add-architecture i386
@@ -30,7 +31,7 @@ for:
 -
   matrix:
     only:
-      - image: Ubuntu
+      - image: Ubuntu1804
 
   build_script:
     - sh: 'echo Build has started: Linux Client'
@@ -40,7 +41,7 @@ for:
 -
   matrix:
     only:
-      - image: Ubuntu
+      - image: Ubuntu1804
       - SERVER_BUILD: 1
 
   build_script:
@@ -51,7 +52,7 @@ for:
 -
   matrix:
     only:
-      - image: Ubuntu
+      - image: Ubuntu1804
       - VGUI2_BUILD: 1
 
   build_script:
@@ -70,7 +71,7 @@ for:
     - cmd: cd %CMAKE_BUILD_DIR%
     - cmd: cmake -DAUTO_DEPLOY=0 %CMAKE_OPTIONS% ..
     - cmd: MSBuild.exe BugfixedHL.sln /t:client /p:PlatformTarget=x86 /p:Configuration=Release /m
-    - cmd: scripts/AppVeyor_PackageClient.bat
+    - cmd: ../scripts/AppVeyor_PackageClient.bat
 
 # Server for Windows
 -
@@ -85,7 +86,7 @@ for:
     - cmd: cd %CMAKE_BUILD_DIR%
     - cmd: cmake -DAUTO_DEPLOY=0 %CMAKE_OPTIONS% ..
     - cmd: MSBuild.exe BugfixedHL.sln /t:hl /p:PlatformTarget=x86 /p:Configuration=Release /m
-    - cmd: scripts/AppVeyor_PackageServer.bat
+    - cmd: ../scripts/AppVeyor_PackageServer.bat
 
 # Client with VGUI2 for Windows
 -
@@ -100,7 +101,7 @@ for:
     - cmd: cd %CMAKE_BUILD_DIR%
     - cmd: cmake -DAUTO_DEPLOY=0 %CMAKE_OPTIONS% ..
     - cmd: MSBuild.exe BugfixedHL.sln /t:client /p:PlatformTarget=x86 /p:Configuration=Release /m
-    - cmd: scripts/AppVeyor_PackageClientVGUI2.bat
+    - cmd: ../scripts/AppVeyor_PackageClientVGUI2.bat
 
 artifacts:
   - path: BugfixedHL-*.zip
