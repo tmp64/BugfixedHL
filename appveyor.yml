@@ -35,7 +35,7 @@ for:
   # - sh: cmake .. -DAUTO_DEPLOY=0 ${CMAKE_OPTIONS}
   # - sh: make -j2 client
   # - sh: make -j2 hl
-  - sh: echo Build has started: Linux
+  - sh: 'echo Build has started: Linux'
   - sh: ./scripts/MakeClientRelease.sh
   - sh: ./scripts/MakeServerRelease.sh
   
@@ -51,7 +51,7 @@ for:
   # - sh: cd ${CMAKE_BUILD_DIR}
   # - sh: cmake .. -DAUTO_DEPLOY=0 ${CMAKE_OPTIONS}
   # - sh: make -j2 client
-  - sh: echo Build has started: Linux VGUI2
+  - sh: 'echo Build has started: Linux VGUI2'
   - sh: ./scripts/MakeClientVGUI2Release.sh
 
 # Client & Server for Windows
@@ -61,7 +61,7 @@ for:
       - image: Visual Studio 2017
 
   build_script:
-  - cmd: ECHO Build has started: Windows
+  - cmd: 'ECHO Build has started: Windows'
   - cmd: mkdir %CMAKE_BUILD_DIR%
   - cmd: cd %CMAKE_BUILD_DIR%
   - cmd: cmake -DAUTO_DEPLOY=0 %CMAKE_OPTIONS% ..
@@ -78,7 +78,7 @@ for:
       - VGUI2_BUILD: 1
 
   build_script:
-  - cmd: ECHO Build has started: Windows VGUI2
+  - cmd: 'ECHO Build has started: Windows VGUI2'
   - cmd: mkdir %CMAKE_BUILD_DIR%
   - cmd: cd %CMAKE_BUILD_DIR%
   - cmd: cmake -DAUTO_DEPLOY=0 %CMAKE_OPTIONS% ..
