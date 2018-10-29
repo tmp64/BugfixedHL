@@ -33,6 +33,8 @@
 #endif
 
 #define STEAM_PROFILE_URL "http://steamcommunity.com/profiles/"
+#define PING "#PlayerPing"
+#define PING_LOSS "Ping/Loss"
 
 extern int g_iVisibleMouse;
 void IN_ResetMouse(void);
@@ -331,7 +333,12 @@ void CScorePanel::UpdateClientInfo(int client, bool autoUpdate)
 	playerData->SetString("eff", buf);
 	playerData->SetInt("frags", g_PlayerExtraInfo[client].frags);
 	playerData->SetInt("deaths", g_PlayerExtraInfo[client].deaths);
-	playerData->SetInt("ping", g_PlayerInfoList[client].ping);
+	if (gHUD.m_ScoreBoard->m_Cvar_Loss->value)
+	{
+		snprintf(buf, sizeof(buf), "%d/%d", g_PlayerInfoList[client].ping, g_PlayerInfoList[client].packetloss);
+		playerData->SetString("ping", buf);
+	}
+	else playerData->SetInt("ping", g_PlayerInfoList[client].ping);
 	if (g_PlayerInfoList[client].thisplayer) playerData->SetInt("thisPlayer", 1);
 
 	if (m_pClientItems[client] == -1)
@@ -430,7 +437,7 @@ void CScorePanel::AddHeader()
 	m_pPlayerList->AddColumnToSection(m_pHeader, "eff", "Eff", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), DEATH_WIDTH));
 	m_pPlayerList->AddColumnToSection(m_pHeader, "frags", "#PlayerScore", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), SCORE_WIDTH));
 	m_pPlayerList->AddColumnToSection(m_pHeader, "deaths", "#PlayerDeath", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), DEATH_WIDTH));
-	m_pPlayerList->AddColumnToSection(m_pHeader, "ping", "#PlayerPing", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), PING_WIDTH));
+	m_pPlayerList->AddColumnToSection(m_pHeader, "ping", gHUD.m_ScoreBoard->m_Cvar_Loss->value ? PING_LOSS : PING, CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), PING_WIDTH));
 }
 
 //--------------------------------------------------------------

@@ -11,6 +11,7 @@ public:
 	CScorePanel *m_pScorePanel = nullptr;
 	cvar_t* m_CvarMouseBtn = nullptr;
 	cvar_t* m_CvarAvatars = nullptr;
+	cvar_t* m_Cvar_Loss = nullptr;
 
 	int Init(void);
 	int VidInit(void);
