@@ -20,7 +20,7 @@ environment:
 install:
   - sh: sudo dpkg --add-architecture i386
   - sh: sudo apt update
-  - sh: sudo apt install libc6:i386 cmake gcc g++ gcc-multilib g++-multilib
+  - sh: sudo apt install -y libc6:i386 cmake gcc g++ gcc-multilib g++-multilib
 
 for:
 # Client & Server for Linux
@@ -35,6 +35,7 @@ for:
   # - sh: cmake .. -DAUTO_DEPLOY=0 ${CMAKE_OPTIONS}
   # - sh: make -j2 client
   # - sh: make -j2 hl
+  - sh: echo Build has started: Linux
   - sh: ./scripts/MakeClientRelease.sh
   - sh: ./scripts/MakeServerRelease.sh
   
@@ -50,6 +51,7 @@ for:
   # - sh: cd ${CMAKE_BUILD_DIR}
   # - sh: cmake .. -DAUTO_DEPLOY=0 ${CMAKE_OPTIONS}
   # - sh: make -j2 client
+  - sh: echo Build has started: Linux VGUI2
   - sh: ./scripts/MakeClientVGUI2Release.sh
 
 # Client & Server for Windows
@@ -59,9 +61,10 @@ for:
       - image: Visual Studio 2017
 
   build_script:
-  - cmd: mkdir ${CMAKE_BUILD_DIR}
-  - cmd: cd ${CMAKE_BUILD_DIR}
-  - cmd: cmake -DAUTO_DEPLOY=0 ${CMAKE_OPTIONS} ..
+  - cmd: ECHO Build has started: Windows
+  - cmd: mkdir %CMAKE_BUILD_DIR%
+  - cmd: cd %CMAKE_BUILD_DIR%
+  - cmd: cmake -DAUTO_DEPLOY=0 %CMAKE_OPTIONS% ..
   - cmd: MSBuild.exe BugfixedHL.sln /t:client /p:PlatformTarget=x86 /p:Configuration=Release
   - cmd: MSBuild.exe BugfixedHL.sln /t:hl /p:PlatformTarget=x86 /p:Configuration=Release
   - cmd: scripts/AppVeyor_PackageClient.bat
@@ -75,9 +78,10 @@ for:
       - VGUI2_BUILD: 1
 
   build_script:
-  - cmd: mkdir ${CMAKE_BUILD_DIR}
-  - cmd: cd ${CMAKE_BUILD_DIR}
-  - cmd: cmake -DAUTO_DEPLOY=0 ${CMAKE_OPTIONS} ..
+  - cmd: ECHO Build has started: Windows VGUI2
+  - cmd: mkdir %CMAKE_BUILD_DIR%
+  - cmd: cd %CMAKE_BUILD_DIR%
+  - cmd: cmake -DAUTO_DEPLOY=0 %CMAKE_OPTIONS% ..
   - cmd: MSBuild.exe BugfixedHL.sln /t:client /p:PlatformTarget=x86 /p:Configuration=Release
   - cmd: scripts/AppVeyor_PackageClientVGUI2.bat
 
