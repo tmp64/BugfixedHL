@@ -1,8 +1,16 @@
+[![Build status](https://ci.appveyor.com/api/projects/status/c61oe1cjcs593ufm/branch/master?svg=true)](https://ci.appveyor.com/project/tmp64/bugfixedhl/branch/master)
+
 # Bugfixed and improved HL release
 Bugfixed and improved HLSDK release.
 This was started in a purpose to replace bugged hl.dll on a server to prevent frequent server crashes.
 Now it's a lot of fixes and improvements to server and client sides.
 Based on HLSDK version 2.3-p3 patched by metamod team.
+
+## Downloads
+Releases are available on [GitHub Releases page](https://github.com/tmp64/BugfixedHL/releases).
+
+Development build can be found on project's [AppVeyor page](https://ci.appveyor.com/project/tmp64/bugfixedhl/branch/master).
+They may be unstable or may not work at all.
 
 ## VGUI2
 VGUI2 is a UI library by Valve for Steam and Source Engine.
@@ -38,7 +46,8 @@ VGUI1 has some limitations over VGUI2:
 > Use `version` command to get your game version.
 - Download latest release archive from the [Releases](https://github.com/tmp64/BugfixedHL/releases) page
 - Copy all files from release archive "valve" folder to server/client "valve" folder replacing all.
-- For Steam copy to "&lt;Steam Installation or Library Directory&gt;\steamapps\common\Half-Life\valve" folder.
+- Steam: copy to &lt;Steam Installation or Library Directory&gt;\steamapps\common\Half-Life\valve
+- No-Steam: copy to &lt;game folder&gt;\valve
 
 ## Support forum URL
 http://aghl.ru/forum/viewtopic.php?f=36&t=686
