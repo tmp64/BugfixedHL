@@ -116,8 +116,8 @@ struct CharWidths
 	}
 	void Reset()
 	{
-		memset(indexes, 0, MAX_BASE_CHARS);
-		memset(widths, 0, MAX_BASE_CHARS);
+		memset(indexes, 0, HLARRAYSIZE(indexes));
+		memset(widths, 0, HLARRAYSIZE(widths));
 	}
 };
 

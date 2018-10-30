@@ -127,7 +127,7 @@ int HistoryResource :: DrawAmmoHistory( float flTime )
 				float a;
 
 				float scale = (rgAmmoHistory[i].DisplayTime - flTime) * 80;
-				a = min(scale, 255) * gHUD.GetHudTransparency();
+				a = min(scale, 255.f) * gHUD.GetHudTransparency();
 
 				gHUD.GetHudColor(0, 0, r, g, b);
 				ScaleColors(r, g, b, a);
@@ -155,7 +155,7 @@ int HistoryResource :: DrawAmmoHistory( float flTime )
 				float a;
 
 				float scale = (rgAmmoHistory[i].DisplayTime - flTime) * 80;
-				a = min(scale, 255) * gHUD.GetHudTransparency();
+				a = min(scale, 255.f) * gHUD.GetHudTransparency();
 
 				gHUD.GetHudColor(0, 0, r, g, b);
 
@@ -180,7 +180,7 @@ int HistoryResource :: DrawAmmoHistory( float flTime )
 				wrect_t rect = gHUD.GetSpriteRect( rgAmmoHistory[i].iId );
 
 				float scale = (rgAmmoHistory[i].DisplayTime - flTime) * 80;
-				a = min(scale, 255) * gHUD.GetHudTransparency();
+				a = min(scale, 255.f) * gHUD.GetHudTransparency();
 
 				gHUD.GetHudColor(0, 0, r, g, b);
 				ScaleColors(r, g, b, a);

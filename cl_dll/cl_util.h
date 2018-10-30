@@ -145,11 +145,15 @@ long long GetSteamID64(const char *pszAuthID);
 inline void PlaySound( char *szSound, float vol ) { gEngfuncs.pfnPlaySoundByName( szSound, vol ); }
 inline void PlaySound( int iSound, float vol ) { gEngfuncs.pfnPlaySoundByIndex( iSound, vol ); }
 
-// FIXME: replace min() and max() maxros with <algorithm>
+#ifdef __cplusplus
+#include "MinMax.h"
+#else
+
 #define max(a, b)  (((a) > (b)) ? (a) : (b))
 #define min(a, b)  (((a) < (b)) ? (a) : (b))
 #define clamp(x, a, b)  (((x) <= (a)) ? (a) : (((x) >= (b)) ? (b) : (x)))
-//#define fabs(x)	   ((x) > 0 ? (x) : 0 - (x))
+
+#endif
 
 void ScaleColors( int &r, int &g, int &b, int a );
 
