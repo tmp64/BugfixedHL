@@ -38,7 +38,7 @@ int AgHudNextmap::Draw(float fTime)
 		return 1;
 	}
 
-	char szText[32];
+	char szText[64];
 
 	int r, g, b, a;
 	a = 255 * gHUD.GetHudTransparency();

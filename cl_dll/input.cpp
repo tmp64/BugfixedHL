@@ -40,6 +40,10 @@ extern "C"
 
 extern int g_iAlive;
 extern int g_weaponselect;
+extern "C" int g_iOnGround;
+extern "C" int g_iWaterlevel;
+extern "C" int g_iIsAg;
+
 #ifdef _WIN32
 extern float diffYaw, diffPitch;
 #endif
@@ -52,10 +56,10 @@ extern "C" float anglemod( float a );
 bool g_bDecentJumped = false;
 bool g_bLongJumped = false;
 bool g_bBunnyhopJumped = false;
-extern "C" int g_iOnGround = 0;
-extern "C" int g_iWaterlevel = 0;
 
-extern "C" int g_iIsAg = 0;
+int g_iOnGround = 0;
+int g_iWaterlevel = 0;
+int g_iIsAg = 0;
 
 void IN_Init (void);
 void IN_Move ( float frametime, usercmd_t *cmd);

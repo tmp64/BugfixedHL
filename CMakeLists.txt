@@ -125,7 +125,8 @@ endif()
 if( MSVC )
 	set( WARNING_LEVEL " " )
 else()
-	set( WARNING_LEVEL "-Wall -Wno-write-strings -Wno-unknown-pragmas -Wno-endif-labels -Wno-switch -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unused-function" )
+	set( WARNING_LEVEL "-Wno-write-strings -Wno-unknown-pragmas -Wno-endif-labels -Wno-switch -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-value" )
+    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-delete-non-virtual-dtor" )
 endif()
 
 #Shared directories
