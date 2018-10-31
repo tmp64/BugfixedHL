@@ -77,6 +77,6 @@ public:
 /**
 *	Interface version for IBaseUI.
 */
-#define IBASEUI_NAME "VEngineVGui001"
+#define IBASEUI_NAME "BaseUI001"
 
 #endif //ENGINE_IBASEUI_H
