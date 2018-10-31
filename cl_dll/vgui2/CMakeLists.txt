@@ -25,4 +25,9 @@ add_sources(
 	CVoiceStatus2.cpp
 	KeyValuesCompat.h
 	KeyValuesCompat.cpp
+	IGameUIPanel.h
+	GameUIPanelNames.h
+	IEngineVgui.h
+	CGameUITestPanel.h
+	CGameUITestPanel.cpp
 )

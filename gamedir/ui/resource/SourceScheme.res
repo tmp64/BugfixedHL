@@ -368,7 +368,7 @@ Scheme
 			"1"
 			{
 				"name"		"Tahoma"
-				"tall"		"10"
+				"tall"		"14"
 				"weight"	"1000"
 			}
 		}
@@ -471,7 +471,7 @@ Scheme
 			"1"
 			{
 				"name"		"Marlett"
-				"tall"		"11"
+				"tall"		"14"
 				"weight"	"0"
 				"symbol"	"1"
 			}

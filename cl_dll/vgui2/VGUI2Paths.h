@@ -42,6 +42,11 @@
 */
 #define UI_HUDLAYOUT_FILENAME ( UI_SCRIPTS_DIR "/HudLayout.res" )
 
+/**
+*	Scheme for GameUI panels.
+*/
+#define UI_GAMEUISCHEME_FILENAME ( UI_RESOURCE_DIR "/SourceScheme.res" )
+
 /** @} */
 
 #endif //GAME_CLIENT_UI_VGUI2_VGUI2PATHS_H
