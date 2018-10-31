@@ -9,7 +9,7 @@ Based on HLSDK version 2.3-p3 patched by metamod team.
 ## Downloads
 Releases are available on [GitHub Releases page](https://github.com/tmp64/BugfixedHL/releases).
 
-Development build can be found on project's [AppVeyor page](https://ci.appveyor.com/project/tmp64/bugfixedhl/branch/master).
+Development builds can be found on project's [AppVeyor page](https://ci.appveyor.com/project/tmp64/bugfixedhl/branch/master).
 They may be unstable or may not work at all.
 
 ## VGUI2
