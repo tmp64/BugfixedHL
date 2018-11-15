@@ -202,6 +202,7 @@ void CScorePanel::RecalcItems()
 	int spectatorFrags = 0;
 	int spectatorDeaths = 0;
 	int totalPlayerCount = 0;
+
 	// Fill team info from player info
 	// FIXME: Use overriden values in g_TeamInfo if need to
 	for (int i = 1; i <= MAX_PLAYERS; i++)
@@ -215,12 +216,6 @@ void CScorePanel::RecalcItems()
 		m_pTeamInfo[team].players++;
 		m_pTeamInfo[team].kills += g_PlayerExtraInfo[i].frags;
 		m_pTeamInfo[team].deaths += g_PlayerExtraInfo[i].deaths;
-		if (g_IsSpectator[i])
-		{
-			spectatorCount++;
-			spectatorFrags += g_PlayerExtraInfo[i].frags;
-			spectatorDeaths += g_PlayerExtraInfo[i].deaths;
-		}
 		totalPlayerCount++;
 	}
 
@@ -264,26 +259,6 @@ void CScorePanel::RecalcItems()
 		DebugPrintf("CScorePanel::RecalItems Team '%s' is %d\n", m_pTeamInfo[team].name, team);
 	}
 
-	// Add spectator section
-	if (spectatorCount != 0)
-	{
-		char buf[64];
-		m_pPlayerList->AddSection(m_pSpectatorSection, "", StaticPlayerSortFunc);
-		if (gHUD.m_ScoreBoard->m_CvarAvatars->value)
-			m_pPlayerList->AddColumnToSection(m_pSpectatorSection, "avatar", "", CPlayerListPanel::COLUMN_IMAGE, m_iAvatarWidth + m_iAvatarPaddingLeft + m_iAvatarPaddingRight);
-		snprintf(buf, sizeof(buf), "Spectators (%d/%d, %.0f%%)", spectatorCount, totalPlayerCount, (double)spectatorCount / totalPlayerCount * 100.0);
-		m_pPlayerList->AddColumnToSection(m_pSpectatorSection, "name", buf, CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), NAME_WIDTH));
-		m_pPlayerList->AddColumnToSection(m_pSpectatorSection, "steamid", "", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), STEAMID_WIDTH));
-		snprintf(buf, sizeof(buf), "%.2f", (double)spectatorFrags / (double)(spectatorDeaths + 1));
-		m_pPlayerList->AddColumnToSection(m_pSpectatorSection, "eff", buf, CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), DEATH_WIDTH));
-		snprintf(buf, sizeof(buf), "%d", spectatorFrags);
-		m_pPlayerList->AddColumnToSection(m_pSpectatorSection, "frags", buf, CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), SCORE_WIDTH));
-		snprintf(buf, sizeof(buf), "%d", spectatorDeaths);
-		m_pPlayerList->AddColumnToSection(m_pSpectatorSection, "deaths", buf, CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), DEATH_WIDTH));
-		m_pPlayerList->AddColumnToSection(m_pSpectatorSection, "ping", "", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), PING_WIDTH));
-		m_pPlayerList->SetSectionFgColor(m_pSpectatorSection, gHUD.GetTeamColor(0));
-	}
-
 	// Add players to sections
 	UpdateAllClients();
 }
@@ -306,11 +281,7 @@ void CScorePanel::UpdateClientInfo(int client, bool autoUpdate)
 		return;
 	}
 	
-	int team;
-	if (g_IsSpectator[client])
-		team = m_pSpectatorSection;
-	else
-		team = g_PlayerExtraInfo[client].teamnumber;
+	int team = g_PlayerExtraInfo[client].teamnumber;
 
 	if (m_pClientTeams[client] != team)
 	{
@@ -345,7 +316,7 @@ void CScorePanel::UpdateClientInfo(int client, bool autoUpdate)
 	{
 		// Create new item
 		m_pClientItems[client] = m_pPlayerList->AddItem(team, playerData);
-		m_pPlayerList->SetItemFgColor(m_pClientItems[client], gHUD.GetTeamColor( g_IsSpectator[client] ? 0 : team ));
+		m_pPlayerList->SetItemFgColor(m_pClientItems[client], gHUD.GetTeamColor(team));
 		m_iPlayerCount++;
 		DebugPrintf("CScorePanel::UpdateClientInfo: client %d added\n", client);
 	}
