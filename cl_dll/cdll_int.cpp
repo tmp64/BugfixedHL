@@ -29,6 +29,7 @@
 #include "hud.h"
 #include "cl_util.h"
 #include "netadr.h"
+#include "../public/interface.h"
 #include "vgui_SchemeManager.h"
 #include "GameStudioModelRenderer.h"
 #include "CHudSpectator.h"
@@ -472,3 +473,48 @@ extern "C" DLLEXPORT void* ClientFactory()
 	return nullptr;
 }
 #endif
+
+#include "../public/cl_dll/IGameClientExports.h"
+
+//-----------------------------------------------------------------------------
+// Purpose: Exports functions that are used by the gameUI for UI dialogs
+//-----------------------------------------------------------------------------
+class CClientExports : public IGameClientExports
+{
+public:
+	// returns the name of the server the user is connected to, if any
+	virtual const char *GetServerHostName()
+	{
+		if (gHUD.GetServerName())
+		{
+			return gHUD.GetServerName();
+		}
+		return "";
+	}
+
+	// ingame voice manipulation
+	virtual bool IsPlayerGameVoiceMuted(int playerIndex)
+	{
+		if (GetClientVoiceMgr())
+			return GetClientVoiceMgr()->IsPlayerBlocked(playerIndex);
+		return false;
+	}
+
+	virtual void MutePlayerGameVoice(int playerIndex)
+	{
+		if (GetClientVoiceMgr())
+		{
+			GetClientVoiceMgr()->SetPlayerBlockedState(playerIndex, true);
+		}
+	}
+
+	virtual void UnmutePlayerGameVoice(int playerIndex)
+	{
+		if (GetClientVoiceMgr())
+		{
+			GetClientVoiceMgr()->SetPlayerBlockedState(playerIndex, false);
+		}
+	}
+};
+
+EXPOSE_SINGLE_INTERFACE(CClientExports, IGameClientExports, GAMECLIENTEXPORTS_INTERFACE_VERSION);
