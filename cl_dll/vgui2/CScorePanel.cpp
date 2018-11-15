@@ -293,12 +293,13 @@ void CScorePanel::UpdateClientInfo(int client, bool autoUpdate)
 		DebugPrintf("CScorePanel::UpdateClientInfo: client %d changed teams\n", client);
 	}
 
-	char buf[16];
+	char buf[64];
 	KeyValues *playerData = new KeyValues("data");
 	if (gHUD.m_ScoreBoard->m_CvarAvatars->value)
 		UpdatePlayerAvatar(client, playerData);
 	playerData->SetInt("client", client);
-	playerData->SetString("name", RemoveColorCodes(g_PlayerInfoList[client].name));
+	snprintf(buf, 64, "%s%s", RemoveColorCodes(g_PlayerInfoList[client].name), (g_IsSpectator[client] ? " (spectator)" : ""));
+	playerData->SetString("name", buf);
 	playerData->SetString("steamid", g_PlayerSteamId[client]);
 	snprintf(buf, sizeof(buf), "%.2f", (double)g_PlayerExtraInfo[client].frags / (double)(g_PlayerExtraInfo[client].deaths + 1));
 	playerData->SetString("eff", buf);
