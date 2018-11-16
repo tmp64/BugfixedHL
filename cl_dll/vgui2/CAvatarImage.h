@@ -146,6 +146,8 @@ public:
 	virtual vgui2::HTexture GetID();
 	virtual void SetRotation( int iRotation ) { return; }
 
+	virtual void SetSecondImage(vgui2::IImage *image) { m_SecondImage = image; }
+
 protected:
 	void InitFromRGBA( int iAvatar, const byte *rgba, int width, int height );
 
@@ -165,6 +167,7 @@ private:
 
 	EAvatarSize m_AvatarSize;
 	CSteamID	m_SteamID;
+	vgui2::IImage *m_SecondImage = nullptr;
 
 	//=============================================================================
 	// HPE_BEGIN:

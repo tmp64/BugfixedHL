@@ -236,6 +236,11 @@ void CAvatarImage::Paint( void )
 		m_pDefaultImage->SetColor(m_Color);
 		m_pDefaultImage->Paint();
 	}
+
+	if (m_SecondImage)
+	{
+		m_SecondImage->Paint();
+	}
 }
 
 //-----------------------------------------------------------------------------

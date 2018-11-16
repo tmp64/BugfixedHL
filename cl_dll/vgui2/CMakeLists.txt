@@ -25,4 +25,6 @@ add_sources(
 	CVoiceStatus2.cpp
 	KeyValuesCompat.h
 	KeyValuesCompat.cpp
+	CPngImage.h
+	CPngImage.cpp
 )

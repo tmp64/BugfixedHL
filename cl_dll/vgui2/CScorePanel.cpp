@@ -24,6 +24,7 @@
 #include "CHudTextMessage.h"
 #include "clientsteamcontext.h"
 #include "CAvatarImage.h"
+#include "CPngImage.h"
 #include "CHudScoreBoard.h"
 
 #ifdef CSCOREBOARD_DEBUG
@@ -76,6 +77,8 @@ CScorePanel::CScorePanel(IViewport *pParent) : BaseClass(nullptr, VIEWPORT_PANEL
 
 	m_mapAvatarsToImageList.SetLessFunc(DefLessFunc(CSteamID));
 	m_mapAvatarsToImageList.RemoveAll();
+
+	m_pMutedIcon = new CPngImage("ui/gfx/MutedIcon32.png");
 }
 
 CScorePanel::~CScorePanel()
@@ -106,6 +109,7 @@ void CScorePanel::ApplySchemeSettings(vgui2::IScheme * pScheme)
 
 	m_mapAvatarsToImageList.RemoveAll();
 	m_iAvatarPaddingLeft = m_iAvatarPaddingRight = vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), AVATAR_OFFSET);
+	m_pMutedIcon->SetOffset(m_iAvatarPaddingLeft, 0);
 
 	// resize the images to our resolution
 	for (int i = 0; i < m_pImageList->GetImageCount(); i++)
@@ -117,6 +121,7 @@ void CScorePanel::ApplySchemeSettings(vgui2::IScheme * pScheme)
 
 	m_pPlayerList->SetImageList(m_pImageList, false);
 	m_pPlayerList->SetVisible(true);
+	m_iMutedIconIndex = m_pImageList->AddImage(m_pMutedIcon);
 }
 
 void CScorePanel::OnKeyCodeTyped(vgui2::KeyCode code)
@@ -158,6 +163,12 @@ void CScorePanel::ShowPanel(bool state)
 void CScorePanel::FullUpdate()
 {
 	DebugPrintf("CScoreBoard::FullUpdate: Full update called\n");
+
+	if (gHUD.m_ScoreBoard->m_CvarAvatars->value)
+		m_iAvatarWidth = AVATAR_WIDTH;
+	else
+		m_iAvatarWidth = AVATAR_OFF_WIDTH;
+
 	UpdateServerName();
 	UpdateMapName();
 	RecalcItems();
@@ -243,8 +254,7 @@ void CScorePanel::RecalcItems()
 		char buf[64];
 		if (team == m_pHeader) continue;
 		m_pPlayerList->AddSection(team, "", StaticPlayerSortFunc);
-		if (gHUD.m_ScoreBoard->m_CvarAvatars->value)
-			m_pPlayerList->AddColumnToSection(team, "avatar", "", CPlayerListPanel::COLUMN_IMAGE, m_iAvatarWidth + m_iAvatarPaddingLeft + m_iAvatarPaddingRight);
+		m_pPlayerList->AddColumnToSection(team, "avatar", "", CPlayerListPanel::COLUMN_IMAGE, m_iAvatarWidth + m_iAvatarPaddingLeft + m_iAvatarPaddingRight);
 		snprintf(buf, sizeof(buf), "%s (%d/%d, %.0f%%)", m_pTeamInfo[team].name, m_pTeamInfo[team].players, totalPlayerCount, (double)m_pTeamInfo[team].players / totalPlayerCount * 100.0);
 		m_pPlayerList->AddColumnToSection(team, "name", buf, CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), NAME_WIDTH));
 		m_pPlayerList->AddColumnToSection(team, "steamid", "", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), STEAMID_WIDTH));
@@ -295,8 +305,7 @@ void CScorePanel::UpdateClientInfo(int client, bool autoUpdate)
 
 	char buf[64];
 	KeyValues *playerData = new KeyValues("data");
-	if (gHUD.m_ScoreBoard->m_CvarAvatars->value)
-		UpdatePlayerAvatar(client, playerData);
+	UpdatePlayerAvatar(client, playerData);	// Also updates mute icon
 	playerData->SetInt("client", client);
 	snprintf(buf, 64, "%s%s", RemoveColorCodes(g_PlayerInfoList[client].name), (g_IsSpectator[client] ? " (spectator)" : ""));
 	playerData->SetString("name", buf);
@@ -402,8 +411,7 @@ void CScorePanel::AddHeader()
 {
 	m_pPlayerList->AddSection(m_pHeader, "", StaticPlayerSortFunc);
 	m_pPlayerList->SetSectionAlwaysVisible(m_pHeader);
-	if (gHUD.m_ScoreBoard->m_CvarAvatars->value)
-		m_pPlayerList->AddColumnToSection(m_pHeader, "avatar", "", CPlayerListPanel::COLUMN_IMAGE, m_iAvatarWidth + m_iAvatarPaddingLeft + m_iAvatarPaddingRight);
+	m_pPlayerList->AddColumnToSection(m_pHeader, "avatar", "", CPlayerListPanel::COLUMN_IMAGE, m_iAvatarWidth + m_iAvatarPaddingLeft + m_iAvatarPaddingRight);
 	m_pPlayerList->AddColumnToSection(m_pHeader, "name", "#PlayerName", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), NAME_WIDTH));
 	m_pPlayerList->AddColumnToSection(m_pHeader, "steamid", "Steam ID", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), STEAMID_WIDTH));
 	m_pPlayerList->AddColumnToSection(m_pHeader, "eff", "Eff", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), DEATH_WIDTH));
@@ -453,38 +461,48 @@ void CScorePanel::Resize()
 //-----------------------------------------------------------------------------
 void CScorePanel::UpdatePlayerAvatar(int playerIndex, KeyValues *kv)
 {
+	if (!kv)
+		return;
+
 	// Update their avatar
-	if (kv && ClientSteamContext().SteamFriends() && ClientSteamContext().SteamUtils())
+	uint64 steamID64 = GetSteamID64(g_PlayerSteamId[playerIndex]);
+	if (gHUD.m_ScoreBoard->m_CvarAvatars->value && ClientSteamContext().SteamFriends() && ClientSteamContext().SteamUtils() && steamID64)
 	{
-		uint64 steamID64 = GetSteamID64(g_PlayerSteamId[playerIndex]);
-		if (steamID64)
+		CSteamID steamIDForPlayer(steamID64);
+
+		// See if we already have that avatar in our list
+		int iMapIndex = m_mapAvatarsToImageList.Find(steamIDForPlayer);
+		int iImageIndex;
+		if (iMapIndex == m_mapAvatarsToImageList.InvalidIndex())
 		{
-			CSteamID steamIDForPlayer(steamID64);
+			CAvatarImage *pImage = new CAvatarImage();
+			pImage->SetOffset(m_iAvatarPaddingLeft, 0);
+			pImage->SetDrawFriend(false);
+			pImage->SetAvatarSteamID(steamIDForPlayer);
+			pImage->SetAvatarSize(32, 32);	// Deliberately non scaling
+			iImageIndex = m_pImageList->AddImage(pImage);
 
-			// See if we already have that avatar in our list
-			int iMapIndex = m_mapAvatarsToImageList.Find(steamIDForPlayer);
-			int iImageIndex;
-			if (iMapIndex == m_mapAvatarsToImageList.InvalidIndex())
-			{
-				CAvatarImage *pImage = new CAvatarImage();
-				pImage->SetOffset(m_iAvatarPaddingLeft, 0);
-				pImage->SetDrawFriend(false);
-				pImage->SetAvatarSteamID(steamIDForPlayer);
-				pImage->SetAvatarSize(32, 32);	// Deliberately non scaling
-				iImageIndex = m_pImageList->AddImage(pImage);
-
-				m_mapAvatarsToImageList.Insert(steamIDForPlayer, iImageIndex);
-			}
-			else
-			{
-				iImageIndex = m_mapAvatarsToImageList[iMapIndex];
-			}
-
-			kv->SetInt("avatar", iImageIndex);
-
-			CAvatarImage *pAvIm = (CAvatarImage *)m_pImageList->GetImage(iImageIndex);
-			pAvIm->UpdateFriendStatus();
+			m_mapAvatarsToImageList.Insert(steamIDForPlayer, iImageIndex);
 		}
+		else
+		{
+			iImageIndex = m_mapAvatarsToImageList[iMapIndex];
+		}
+
+		kv->SetInt("avatar", iImageIndex);
+
+		CAvatarImage *pAvIm = (CAvatarImage *)m_pImageList->GetImage(iImageIndex);
+		pAvIm->UpdateFriendStatus();
+
+		if (vgui2::voicemgr()->IsPlayerBlocked(playerIndex))
+			pAvIm->SetSecondImage(m_pMutedIcon);
+		else
+			pAvIm->SetSecondImage(nullptr);
+	}
+	else
+	{
+		if (vgui2::voicemgr()->IsPlayerBlocked(playerIndex))
+			kv->SetInt("avatar", m_iMutedIconIndex);
 	}
 }
 
@@ -645,6 +663,7 @@ void CScorePanel::OnCommandOverride(const char *command)
 			sprintf(string, "%c** %s %s\n", HUD_PRINTTALK, string1, string2);
 		}
 		gHUD.m_TextMessage->MsgFunc_TextMsg(NULL, strlen(string) + 1, string);
+		UpdateClientInfo(client);	// Update mute icon
 	}
 	//-----------------------------------------------------------------------
 	else if (!stricmp(command, "MenuSteamProfile"))

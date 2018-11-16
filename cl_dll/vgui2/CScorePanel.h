@@ -19,6 +19,8 @@ namespace vgui2
 }
 
 class CPlayerListPanel;
+class CPngImage;
+class CAvatarImage;
 
 class CScorePanel : public vgui2::Frame, public IViewportPanel
 {
@@ -29,7 +31,8 @@ public:
 	enum
 	{
 		AVATAR_OFFSET = 4,
-		AVATAR_WIDTH = 64,
+		AVATAR_WIDTH = 34,
+		AVATAR_OFF_WIDTH = 22,
 		NAME_WIDTH = 184,
 		STEAMID_WIDTH = 100,
 		EFF_WIDTH = 60,
@@ -93,8 +96,6 @@ public:
 	MESSAGE_FUNC_CHARPTR(OnCommandOverride, "Command", command);	// For some reason, virtual function override doesn't work
 	MESSAGE_FUNC_INT(OnItemContextMenu, "ItemContextMenu", itemID);
 
-	CPanelAnimationVar(int, m_iAvatarWidth, "avatar_width", "34");
-
 	friend class CHudScoreBoard;
 
 private:
@@ -127,15 +128,17 @@ private:
 	vgui2::Label *m_pPlayerCountLabel = nullptr;
 	vgui2::Label *m_pTimerLabel = nullptr;
 	vgui2::Menu *m_pMenu = nullptr;
+	CPngImage *m_pMutedIcon = nullptr;
 
 	int m_pHeader = 0;
 	int m_iPlayerCount = 0;
 	int m_iMargin = 100;
 	int m_iMinHeight = 320;
+	int m_iMutedIconIndex = 0;
 
 	vgui2::ImageList *m_pImageList;
 	CUtlMap<CSteamID, int> m_mapAvatarsToImageList;
-	int m_iAvatarPaddingLeft = 0, m_iAvatarPaddingRight = 0;
+	int m_iAvatarPaddingLeft = 0, m_iAvatarPaddingRight = 0, m_iAvatarWidth = 0;
 
 	team_info_t m_pTeamInfo[MAX_TEAMS + 1];
 	int m_pClientItems[MAX_PLAYERS + 1];

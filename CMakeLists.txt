@@ -279,6 +279,7 @@ target_compile_definitions( client PRIVATE
 	PCRE_STATIC
 	HAVE_CONFIG_H
 	${SOURCE_SDK_DEFINES}
+	LODEPNG_NO_COMPILE_CPP
 )
 
 #Find client dependencies

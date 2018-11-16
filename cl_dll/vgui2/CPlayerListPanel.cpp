@@ -341,6 +341,10 @@ public:
 								image = m_pListPanel->m_pImageList->GetImage(imageIndex);
 								SetImageAtIndex(i, image, 0);
 							}
+							else
+							{
+								SetImageAtIndex(i, nullptr, 0);
+							}
 						}
 						else
 						{

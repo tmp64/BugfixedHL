@@ -178,6 +178,7 @@ if( MSVC )
 endif()
 add_subdirectory( hl )
 add_subdirectory( jpeg )
+add_subdirectory( lodepng )
 add_subdirectory( ${CMAKE_SOURCE_DIR}/dlls/wpn_shared wpn_shared)
 add_subdirectory( ${CMAKE_SOURCE_DIR}/dlls/pcre pcre)
 
