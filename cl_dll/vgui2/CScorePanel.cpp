@@ -215,7 +215,6 @@ void CScorePanel::RecalcItems()
 	int totalPlayerCount = 0;
 
 	// Fill team info from player info
-	// FIXME: Use overriden values in g_TeamInfo if need to
 	for (int i = 1; i <= MAX_PLAYERS; i++)
 	{
 		GetPlayerInfo(i, &g_PlayerInfoList[i]);
@@ -246,7 +245,18 @@ void CScorePanel::RecalcItems()
 	};
 	std::set<int, decltype(cmp)> set(cmp);
 
-	for (int i = 1; i <= MAX_TEAMS; i++) if (m_pTeamInfo[i].players > 0) set.insert(i);
+	for (int i = 1; i <= MAX_TEAMS; i++)
+	{
+		if (m_pTeamInfo[i].players > 0)
+		{
+			if (g_TeamInfo[i].scores_overriden)
+			{
+				m_pTeamInfo[i].kills = g_TeamInfo[i].frags;
+				m_pTeamInfo[i].deaths = g_TeamInfo[i].deaths;
+			}
+			set.insert(i);
+		}
+	}
 	
 	// Create sections in right order
 	for (int team : set)
