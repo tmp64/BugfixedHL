@@ -12,6 +12,7 @@
 #include <vgui_controls/Menu.h>
 #include <vgui_controls/BuildModeDialog.h>
 #include <vgui_controls/ImageList.h>
+#include <vgui_controls/CheckButton.h>
 #include <vgui/IInputInternal.h>
 #include <vgui/ISurface.h>
 #include <vgui/ISystem.h>
@@ -65,12 +66,15 @@ CScorePanel::CScorePanel(IViewport *pParent) : BaseClass(nullptr, VIEWPORT_PANEL
 	m_pPlayerList = new CPlayerListPanel(this, "PlayerList");
 	m_pPlayerList->SetVerticalScrollbar(false);
 
+	// Sort switch
+	m_pEffSortSwitch = new vgui2::CheckButton(this, "EffSortSwitch", "Sort by eff");
+	SetSortByFrags();
+
 	CreatePlayerMenu();
 
 	LoadControlSettings(UI_RESOURCE_DIR "/ScorePanel.res");
 	InvalidateLayout();
 	SetVisible(false);
-	EnableMousePointer(false);
 	//ActivateBuildMode();
 
 	m_pImageList = NULL;
@@ -122,6 +126,7 @@ void CScorePanel::ApplySchemeSettings(vgui2::IScheme * pScheme)
 	m_pPlayerList->SetImageList(m_pImageList, false);
 	m_pPlayerList->SetVisible(true);
 	m_iMutedIconIndex = m_pImageList->AddImage(m_pMutedIcon);
+	EnableMousePointer(false);
 }
 
 void CScorePanel::OnKeyCodeTyped(vgui2::KeyCode code)
@@ -139,14 +144,17 @@ void CScorePanel::ShowPanel(bool state)
 	if (BaseClass::IsVisible() == state)
 		return;
 
-	//m_pViewport->ShowBackGround(state);
-
 	if (state)
 	{
 		Reset();
 		Update();
-
+		HideExtraControls();
+		if (gHUD.m_ScoreBoard->m_CvarEffSort->value)
+			m_pEffSortSwitch->SetSelected(true);
+		else
+			m_pEffSortSwitch->SetSelected(false);
 		BaseClass::Activate();
+		SetMouseInputEnabled(false);
 	}
 	else
 	{
@@ -176,7 +184,7 @@ void CScorePanel::FullUpdate()
 }
 
 //--------------------------------------------------------------
-// Shows mouse cursor when mouse button is cliecked
+// Shows mouse cursor when mouse button is clicked
 //--------------------------------------------------------------
 void CScorePanel::EnableMousePointer(bool enable)
 {
@@ -185,7 +193,11 @@ void CScorePanel::EnableMousePointer(bool enable)
 	dynamic_cast<vgui2::EditablePanel *>(m_pViewport)->SetKeyBoardInputEnabled(enable);
 	SetMouseInputEnabled(enable);
 	SetKeyBoardInputEnabled(enable);
-	if (!enable)
+	if (enable)
+	{
+		ShowExtraControls();
+	}
+	else
 	{
 		if (!gEngfuncs.pDemoAPI->IsPlayingback())
 		{
@@ -232,16 +244,8 @@ void CScorePanel::RecalcItems()
 	// Sort teams
 	auto cmp = [this](int lhs, int rhs)
 	{
-		// Comapre kills
-		if (m_pTeamInfo[lhs].kills > m_pTeamInfo[rhs].kills) return true;
-		else if (m_pTeamInfo[lhs].kills < m_pTeamInfo[rhs].kills) return false;
-
-		// Comapre deaths if kills are equal
-		if (m_pTeamInfo[lhs].deaths < m_pTeamInfo[rhs].deaths) return true;
-		else if (m_pTeamInfo[lhs].deaths > m_pTeamInfo[rhs].deaths) return false;
-
-		// Comapre idx if everything is equal
-		return lhs > rhs;
+		Assert(m_pTeamSortFunction);
+		return m_pTeamSortFunction(lhs, rhs);
 	};
 	std::set<int, decltype(cmp)> set(cmp);
 
@@ -263,7 +267,7 @@ void CScorePanel::RecalcItems()
 	{
 		char buf[64];
 		if (team == m_pHeader) continue;
-		m_pPlayerList->AddSection(team, "", StaticPlayerSortFunc);
+		m_pPlayerList->AddSection(team, "", m_pPlayerSortFunction);
 		m_pPlayerList->AddColumnToSection(team, "avatar", "", CPlayerListPanel::COLUMN_IMAGE, m_iAvatarWidth + m_iAvatarPaddingLeft + m_iAvatarPaddingRight);
 		snprintf(buf, sizeof(buf), "%s (%d/%d, %.0f%%)", m_pTeamInfo[team].name, m_pTeamInfo[team].players, totalPlayerCount, (double)m_pTeamInfo[team].players / totalPlayerCount * 100.0);
 		m_pPlayerList->AddColumnToSection(team, "name", buf, CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), NAME_WIDTH));
@@ -324,7 +328,7 @@ void CScorePanel::UpdateClientInfo(int client, bool autoUpdate)
 	playerData->SetString("eff", buf);
 	playerData->SetInt("frags", g_PlayerExtraInfo[client].frags);
 	playerData->SetInt("deaths", g_PlayerExtraInfo[client].deaths);
-	if (gHUD.m_ScoreBoard->m_Cvar_Loss->value)
+	if (gHUD.m_ScoreBoard->m_CvarLoss->value)
 	{
 		snprintf(buf, sizeof(buf), "%d/%d", g_PlayerInfoList[client].ping, g_PlayerInfoList[client].packetloss);
 		playerData->SetString("ping", buf);
@@ -419,7 +423,7 @@ void CScorePanel::UpdatePlayerCount()
 //--------------------------------------------------------------
 void CScorePanel::AddHeader()
 {
-	m_pPlayerList->AddSection(m_pHeader, "", StaticPlayerSortFunc);
+	m_pPlayerList->AddSection(m_pHeader, "", m_pPlayerSortFunction);
 	m_pPlayerList->SetSectionAlwaysVisible(m_pHeader);
 	m_pPlayerList->AddColumnToSection(m_pHeader, "avatar", "", CPlayerListPanel::COLUMN_IMAGE, m_iAvatarWidth + m_iAvatarPaddingLeft + m_iAvatarPaddingRight);
 	m_pPlayerList->AddColumnToSection(m_pHeader, "name", "#PlayerName", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), NAME_WIDTH));
@@ -427,7 +431,7 @@ void CScorePanel::AddHeader()
 	m_pPlayerList->AddColumnToSection(m_pHeader, "eff", "Eff", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), DEATH_WIDTH));
 	m_pPlayerList->AddColumnToSection(m_pHeader, "frags", "#PlayerScore", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), SCORE_WIDTH));
 	m_pPlayerList->AddColumnToSection(m_pHeader, "deaths", "#PlayerDeath", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), DEATH_WIDTH));
-	m_pPlayerList->AddColumnToSection(m_pHeader, "ping", gHUD.m_ScoreBoard->m_Cvar_Loss->value ? PING_LOSS : PING, CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), PING_WIDTH));
+	m_pPlayerList->AddColumnToSection(m_pHeader, "ping", gHUD.m_ScoreBoard->m_CvarLoss->value ? PING_LOSS : PING, CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), PING_WIDTH));
 }
 
 //--------------------------------------------------------------
@@ -464,6 +468,10 @@ void CScorePanel::Resize()
 	GetPos(x, y);
 	y = (ScreenHeight - height) / 2;
 	SetPos(x, y);
+
+	// Resize extra controls
+	if (IsMouseInputEnabled())
+		ShowExtraControls();
 }
 
 //-----------------------------------------------------------------------------
@@ -634,6 +642,31 @@ void CScorePanel::OnItemContextMenu(int itemID)
 }
 
 //--------------------------------------------------------------
+// Extra controls that are shown when mouse is enabled
+//--------------------------------------------------------------
+void CScorePanel::ShowExtraControls()
+{
+	int x[3], y[3];
+	
+	// Update checkbox's size
+	m_pEffSortSwitch->GetContentSize(x[0], y[0]);
+	m_pEffSortSwitch->SetSize(x[0], y[0]);
+
+	// Update checkbox's position
+	m_pPlayerCountLabel->GetPos(x[0], y[0]);
+	m_pEffSortSwitch->GetPos(x[1], y[1]);
+	m_pEffSortSwitch->SetPos(x[0] - m_pEffSortSwitch->GetWide() - vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), 6), y[1]);
+
+	m_pEffSortSwitch->SetVisible(true);
+	
+}
+
+void CScorePanel::HideExtraControls()
+{
+	m_pEffSortSwitch->SetVisible(false);
+}
+
+//--------------------------------------------------------------
 // Commands
 //--------------------------------------------------------------
 void CScorePanel::OnCommandOverride(const char *command)
@@ -737,7 +770,46 @@ void CScorePanel::OnCommandOverride(const char *command)
 //--------------------------------------------------------------
 // Sorting functions
 //--------------------------------------------------------------
-bool CScorePanel::StaticPlayerSortFunc(CPlayerListPanel *list, int itemID1, int itemID2)
+void CScorePanel::SetSortByFrags()
+{
+	m_pPlayerSortFunction = StaticPlayerSortFuncByFrags;
+	m_pTeamSortFunction = [this](int lhs, int rhs)
+	{
+		// Comapre kills
+		if (m_pTeamInfo[lhs].kills > m_pTeamInfo[rhs].kills) return true;
+		else if (m_pTeamInfo[lhs].kills < m_pTeamInfo[rhs].kills) return false;
+
+		// Comapre deaths if kills are equal
+		if (m_pTeamInfo[lhs].deaths < m_pTeamInfo[rhs].deaths) return true;
+		else if (m_pTeamInfo[lhs].deaths > m_pTeamInfo[rhs].deaths) return false;
+
+		// Comapre idx if everything is equal
+		return lhs > rhs;
+	};
+}
+
+void CScorePanel::SetSortByEff()
+{
+	m_pPlayerSortFunction = StaticPlayerSortFuncByEff;
+	m_pTeamSortFunction = [this](int lhs, int rhs)
+	{
+		double leff = (double)m_pTeamInfo[lhs].kills / (double)(m_pTeamInfo[lhs].deaths + 1);
+		double reff = (double)m_pTeamInfo[rhs].kills / (double)(m_pTeamInfo[rhs].kills + 1);
+
+		// Comapre efficiency
+		if (leff > reff) return true;
+		else if (leff < reff) return false;
+
+		// Comapre deaths if efficiency is equal
+		if (m_pTeamInfo[lhs].deaths < m_pTeamInfo[rhs].deaths) return true;
+		else if (m_pTeamInfo[lhs].deaths > m_pTeamInfo[rhs].deaths) return false;
+
+		// Comapre idx if everything is equal
+		return lhs > rhs;
+	};
+}
+
+bool CScorePanel::StaticPlayerSortFuncByFrags(CPlayerListPanel *list, int itemID1, int itemID2)
 {
 	KeyValues *it1 = list->GetItemData(itemID1);
 	KeyValues *it2 = list->GetItemData(itemID2);
@@ -761,4 +833,43 @@ bool CScorePanel::StaticPlayerSortFunc(CPlayerListPanel *list, int itemID1, int 
 
 	// the same, so compare itemID's (as a sentinel value to get deterministic sorts)
 	return itemID1 < itemID2;
+}
+
+bool CScorePanel::StaticPlayerSortFuncByEff(CPlayerListPanel * list, int itemID1, int itemID2)
+{
+	KeyValues *it1 = list->GetItemData(itemID1);
+	KeyValues *it2 = list->GetItemData(itemID2);
+	Assert(it1 && it2);
+
+	// first compare frags
+	int k1 = it1->GetInt("frags");
+	int k2 = it2->GetInt("frags");
+	int d1 = it1->GetInt("deaths");
+	int d2 = it2->GetInt("deaths");
+	double eff1 = (double)k1 / (double)(d1 + 1);
+	double eff2 = (double)k2 / (double)(d2 + 1);
+
+	if (eff1 > eff2)
+		return true;
+	else if (eff1 < eff2)
+		return false;
+
+	// next compare deaths
+	if (d1 > d2)
+		return false;
+	else if (d1 < d2)
+		return true;
+
+	// the same, so compare itemID's (as a sentinel value to get deterministic sorts)
+	return itemID1 < itemID2;
+}
+
+void CScorePanel::OnCheckButtonChecked(int state)
+{
+	if (state)
+		SetSortByEff();
+	else
+		SetSortByFrags();
+	gHUD.m_ScoreBoard->m_CvarEffSort->value = !!state;
+	FullUpdate();
 }

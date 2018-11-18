@@ -1,12 +1,14 @@
 #ifndef CSCOREPANEL_H
 #define CSCOREPANEL_H
 
+#include <functional>
 #include <cdll_dll.h>
 #include <vgui_controls/Frame.h>
 #include "vgui2/IViewportPanel.h"
 #include "vgui2/ViewportPanelNames.h"
 #include <tier1/UtlMap.h>
 #include <steam/steam_api.h>
+#include "CPlayerListPanel.h"
 
 class IViewport;
 class CHudScoreBoard;
@@ -14,8 +16,8 @@ class CHudScoreBoard;
 namespace vgui2
 {
 	class Label;
-	class TextEntry;
 	class Menu;
+	class CheckButton;
 }
 
 class CPlayerListPanel;
@@ -95,6 +97,7 @@ public:
 	// Messages
 	MESSAGE_FUNC_CHARPTR(OnCommandOverride, "Command", command);	// For some reason, virtual function override doesn't work
 	MESSAGE_FUNC_INT(OnItemContextMenu, "ItemContextMenu", itemID);
+	MESSAGE_FUNC_INT(OnCheckButtonChecked, "CheckButtonChecked", state);
 
 	friend class CHudScoreBoard;
 
@@ -128,6 +131,7 @@ private:
 	vgui2::Label *m_pPlayerCountLabel = nullptr;
 	vgui2::Label *m_pTimerLabel = nullptr;
 	vgui2::Menu *m_pMenu = nullptr;
+	vgui2::CheckButton *m_pEffSortSwitch = nullptr;
 	CPngImage *m_pMutedIcon = nullptr;
 
 	int m_pHeader = 0;
@@ -157,8 +161,19 @@ private:
 	void CreatePlayerMenu();
 	void OpenPlayerMenu(int itemID);
 
+	// Extra controls
+	void ShowExtraControls();
+	void HideExtraControls();
+
 	// Sorting functions
-	static bool StaticPlayerSortFunc(CPlayerListPanel *list, int itemID1, int itemID2);
+	CPlayerListPanel::SectionSortFunc_t m_pPlayerSortFunction = nullptr;
+	std::function<bool(int lhs, int rhs)> m_pTeamSortFunction;
+
+	void SetSortByFrags();
+	void SetSortByEff();
+
+	static bool StaticPlayerSortFuncByFrags(CPlayerListPanel *list, int itemID1, int itemID2);
+	static bool StaticPlayerSortFuncByEff(CPlayerListPanel *list, int itemID1, int itemID2);
 };
 
 #endif
