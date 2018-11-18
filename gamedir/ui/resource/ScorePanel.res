@@ -108,6 +108,12 @@
 		"tabPosition"		"0"
 		"bgcolor_override" "0 0 0 84"
 	}
+	"EffSortSwitch"
+	{
+		"ControlName"		"CheckButton"
+		"fieldName"		"EffSortSwitch"
+		"ypos"		"11"
+	}
 	"BuildModeDialog"
 	{
 		"ControlName"		"BuildModeDialog"
