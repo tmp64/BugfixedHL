@@ -15,6 +15,7 @@
 #ifdef _WIN32
 #include <stdint.h>
 
+#define MAX_PATTERN 128
 
 typedef struct cl_enginemessages_s
 {
@@ -102,17 +103,30 @@ struct CGameConsole003
 	void *panel;
 };
 
+namespace Memory
+{
+	// Common
+	// Converts HEX string containing pairs of symbols 0-9, A-F, a-f with possible space splitting into byte array
+	size_t ConvertHexString(const char *srcHexString, unsigned char *outBuffer, size_t bufferSize);
+	size_t MemoryFindForward(size_t start, size_t end, const unsigned char *pattern, const unsigned char *mask, size_t pattern_len);
+	// Signed char versions assume pattern and mask are in HEX string format and perform conversions
+	size_t MemoryFindForward(size_t start, size_t end, const char *pattern, const char *mask);
+	size_t MemoryFindBackward(size_t start, size_t end, const unsigned char *pattern, const unsigned char *mask, size_t pattern_len);
+	// Signed char versions assume pattern and mask are in HEX string format and perform conversions
+	size_t MemoryFindBackward(size_t start, size_t end, const char *pattern, const char *mask);
 
-void HookSvcMessages(cl_enginemessages_t *pEngineMessages);
-void UnHookSvcMessages(cl_enginemessages_t *pEngineMessages);
-void PatchEngine(void);
-void UnPatchEngine(void);
-void PatchEngineInit(void);
-void MemoryPatcherInit(void);
-void MemoryPatcherHudFrame(void);
-void StopServerBrowserThreads(void);
-void SetAffinity(void);
-
+	// Platform
+	void OnLibraryInit();
+	void OnLibraryDeinit();
+	void OnHudInit();
+	void OnFrame();
+	void HookSvcMessages(cl_enginemessages_t *pEngineMessages);
+	void UnHookSvcMessages(cl_enginemessages_t *pEngineMessages);
+}
+/*
+Other functions defined in memory_???.cpp:
+	RGBA SetConsoleColor(RGBA color);
+*/
 
 extern void **g_EngineBuf;
 extern int *g_EngineBufSize;

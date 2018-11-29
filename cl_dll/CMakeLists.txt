@@ -152,7 +152,8 @@ add_sources(
     ../dlls/shotgun.cpp
     ../dlls/squeakgrenade.cpp
     ../dlls/tripmine.cpp
-    ../dlls/memory.h
+    memory.h
+    memory_common.cpp
 )
 
 if( MSVC )
@@ -161,7 +162,7 @@ if( MSVC )
         in_camera.cpp
         soundsystem.cpp
         net.cpp
-        ../dlls/memory_win32.cpp
+        memory_win32.cpp
 		client.rc
 		resource.h
     )
@@ -169,7 +170,7 @@ else()
     add_sources(
         inputw32_sdl.cpp
         in_camera_sdl.cpp
-        ../dlls/memory_linux.cpp
+        memory_linux.cpp
     )
 endif()
 

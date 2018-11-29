@@ -24,8 +24,7 @@
 #include "parsemsg.h"
 #include "com_utils.h"
 
-#define MAX_PATTERN 128
-
+using namespace Memory;
 
 typedef void (__fastcall *ThisCallIntInt)(void *, int, int, int);
 
@@ -166,7 +165,6 @@ int m_iDisplayFrequency;
 #define ThreadQuerySetWin32StartAddress 9
 typedef NTSTATUS NTAPI NtQueryInformationThreadProto(HANDLE ThreadHandle, THREADINFOCLASS ThreadInformationClass, PVOID ThreadInformation, ULONG ThreadInformationLength, PULONG ReturnLength);
 
-
 bool GetModuleAddress(const char *moduleName, size_t &moduleBase, size_t &moduleEnd)
 {
 	HANDLE hProcess = GetCurrentProcess();
@@ -202,161 +200,6 @@ void GetGameUiModuleAddress(void)
 void GetServerBrowserModuleAddress(void)
 {
 	GetModuleAddress("ServerBrowser.dll", g_ServerBrowserBase, g_ServerBrowserEnd);
-}
-
-// Converts HEX string containing pairs of symbols 0-9, A-F, a-f with possible space splitting into byte array
-size_t ConvertHexString(const char *srcHexString, unsigned char *outBuffer, size_t bufferSize)
-{
-	unsigned char *in = (unsigned char *)srcHexString;
-	unsigned char *out = outBuffer;
-	unsigned char *end = outBuffer + bufferSize;
-	bool low = false;
-	uint8_t byte = 0;
-	while (*in && out < end)
-	{
-		if (*in >= '0' && *in <= '9') { byte |= *in - '0'; }
-		else if (*in >= 'A' && *in <= 'F') { byte |= *in - 'A' + 10; }
-		else if (*in >= 'a' && *in <= 'f') { byte |= *in - 'a' + 10; }
-		else if (*in == ' ') { in++; continue; }
-
-		if (!low)
-		{
-			byte = byte << 4;
-			in++;
-			low = true;
-			continue;
-		}
-		low = false;
-
-		*out = byte;
-		byte = 0;
-
-		in++;
-		out++;
-	}
-	return out - outBuffer;
-}
-size_t MemoryFindForward(size_t start, size_t end, const unsigned char *pattern, const unsigned char *mask, size_t pattern_len)
-{
-	// Ensure start is lower than the end
-	if (start > end)
-	{
-		size_t reverse = end;
-		end = start;
-		start = reverse;
-	}
-
-	unsigned char *cend = (unsigned char*)(end - pattern_len + 1);
-	unsigned char *current = (unsigned char*)(start);
-
-	// Just linear search for sequence of bytes from the start till the end minus pattern length
-	size_t i;
-	if (mask)
-	{
-		// honoring mask
-		while (current < cend)
-		{
-			for (i = 0; i < pattern_len; i++)
-			{
-				if ((current[i] & mask[i]) != (pattern[i] & mask[i]))
-					break;
-			}
-
-			if (i == pattern_len)
-				return (size_t)(void*)current;
-
-			current++;
-		}
-	}
-	else
-	{
-		// without mask
-		while (current < cend)
-		{
-			for (i = 0; i < pattern_len; i++)
-			{
-				if (current[i] != pattern[i])
-					break;
-			}
-
-			if (i == pattern_len)
-				return (size_t)(void*)current;
-
-			current++;
-		}
-	}
-
-	return NULL;
-}
-// Signed char versions assume pattern and mask are in HEX string format and perform conversions
-size_t MemoryFindForward(size_t start, size_t end, const char *pattern, const char *mask)
-{
-	unsigned char p[MAX_PATTERN];
-	unsigned char m[MAX_PATTERN];
-	size_t pl = ConvertHexString(pattern, p, sizeof(p));
-	size_t ml = mask != NULL ? ConvertHexString(mask, m, sizeof(m)) : 0;
-	return MemoryFindForward(start, end, p, mask != NULL ? m : NULL, pl >= ml ? pl : ml);
-}
-size_t MemoryFindBackward(size_t start, size_t end, const unsigned char *pattern, const unsigned char *mask, size_t pattern_len)
-{
-	// Ensure start is higher than the end
-	if (start < end)
-	{
-		size_t reverse = end;
-		end = start;
-		start = reverse;
-	}
-
-	unsigned char *cend = (unsigned char*)(end);
-	unsigned char *current = (unsigned char*)(start - pattern_len);
-
-	// Just linear search backward for sequence of bytes from the start minus pattern length till the end
-	size_t i;
-	if (mask)
-	{
-		// honoring mask
-		while (current >= cend)
-		{
-			for (i = 0; i < pattern_len; i++)
-			{
-				if ((current[i] & mask[i]) != (pattern[i] & mask[i]))
-					break;
-			}
-
-			if (i == pattern_len)
-				return (size_t)(void*)current;
-
-			current--;
-		}
-	}
-	else
-	{
-		// without mask
-		while (current >= cend)
-		{
-			for (i = 0; i < pattern_len; i++)
-			{
-				if (current[i] != pattern[i])
-					break;
-			}
-
-			if (i == pattern_len)
-				return (size_t)(void*)current;
-
-			current--;
-		}
-	}
-
-	return NULL;
-}
-// Signed char versions assume pattern and mask are in HEX string format and perform conversions
-size_t MemoryFindBackward(size_t start, size_t end, const char *pattern, const char *mask)
-{
-	unsigned char p[MAX_PATTERN];
-	unsigned char m[MAX_PATTERN];
-	size_t pl = ConvertHexString(pattern, p, sizeof(p));
-	size_t ml = mask != NULL ? ConvertHexString(mask, m, sizeof(m)) : 0;
-	return MemoryFindBackward(start, end, p, mask != NULL ? m : NULL, pl >= ml ? pl : ml);
 }
 
 // Replaces double word on specified address with new dword, returns old dword
@@ -1614,7 +1457,7 @@ void PatchEngineInit(void)
 }
 
 // Hooks requested SvcMessages functions
-void HookSvcMessages(cl_enginemessages_t *pEngineMessages)
+void Memory::HookSvcMessages(cl_enginemessages_t *pEngineMessages)
 {
 	// Ensure we have all needed addresses
 	if (!g_SvcMessagesTable || !g_EngineBuf || !g_EngineBufSize || !g_EngineReadPos || !g_pUserMessages) return;
@@ -1631,7 +1474,7 @@ void HookSvcMessages(cl_enginemessages_t *pEngineMessages)
 	}
 }
 // Unhooks requested SvcMessages functions
-void UnHookSvcMessages(cl_enginemessages_t *pEngineMessages)
+void Memory::UnHookSvcMessages(cl_enginemessages_t *pEngineMessages)
 {
 	// We just do same exchange for functions addresses
 	HookSvcMessages(pEngineMessages);
@@ -1744,7 +1587,7 @@ void SetAffinity(void)
 }
 
 // Output patch status and sets refresh rate
-void MemoryPatcherHudFrame(void)
+void Memory::OnFrame(void)
 {
 	if (g_ServerBrowserBase == 0)
 		GetServerBrowserModuleAddress();
@@ -1766,6 +1609,25 @@ void MemoryPatcherHudFrame(void)
 	g_bPatchStatusPrinted = true;
 
 	SetRefreshRate();
+}
+
+// Patch and hook the engine
+void Memory::OnLibraryInit()
+{
+	PatchEngine();
+}
+
+void Memory::OnLibraryDeinit()
+{
+	UnPatchEngine();
+	StopServerBrowserThreads();
+}
+
+// Called in HUD_Init
+void Memory::OnHudInit()
+{
+	MemoryPatcherInit();
+	SetAffinity();
 }
 
 // Set console output color

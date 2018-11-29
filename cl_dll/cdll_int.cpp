@@ -267,8 +267,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 	{
 		if (hVehHandler == NULL)
 			hVehHandler = AddVectoredExceptionHandler(1, VectoredExceptionsHandler);
-
-		PatchEngine();
+		Memory::OnLibraryInit();
 		HookSvcMessages();
 	}
 	else if (fdwReason == DLL_PROCESS_DETACH)
@@ -276,8 +275,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 		g_bDllDetaching = true;
 
 		UnHookSvcMessages();
-		UnPatchEngine();
-		StopServerBrowserThreads();
+		Memory::OnLibraryDeinit();
 
 		if (hVehHandler != NULL)
 		{
@@ -340,11 +338,10 @@ void _DLLEXPORT HUD_Init( void )
 	InitInput();
 	gHUD.Init();
 	Scheme_Init();
+	Memory::OnHudInit();
 #ifdef _WIN32
-	MemoryPatcherInit();
 	SvcMessagesInit();
 	ResultsInit();
-	SetAffinity();
 #endif
 }
 
@@ -426,8 +423,8 @@ Called by engine every frame that client .dll is loaded
 
 void _DLLEXPORT HUD_Frame( double time )
 {
+	Memory::OnFrame();
 #ifdef _WIN32
-	MemoryPatcherHudFrame();
 	ResultsFrame(time);
 #endif
 

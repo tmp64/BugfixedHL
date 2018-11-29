@@ -464,11 +464,11 @@ void HookSvcMessages(void)
 	pEngineMessages.pfnSvcStuffText = SvcStuffText;
 	pEngineMessages.pfnSvcSendCvarValue = SvcSendCvarValue;
 	pEngineMessages.pfnSvcSendCvarValue2 = SvcSendCvarValue2;
-	HookSvcMessages(&pEngineMessages);
+	Memory::HookSvcMessages(&pEngineMessages);
 }
 void UnHookSvcMessages(void)
 {
-	UnHookSvcMessages(&pEngineMessages);
+	Memory::UnHookSvcMessages(&pEngineMessages);
 }
 
 void DumpUserMessages(void)
