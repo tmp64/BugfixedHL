@@ -6,6 +6,7 @@
 
 #include "hud.h"
 #include "com_utils.h"
+#include "memory.h"
 
 void Memory::OnLibraryInit()
 {
