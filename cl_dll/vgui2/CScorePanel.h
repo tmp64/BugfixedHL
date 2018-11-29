@@ -134,6 +134,10 @@ private:
 	vgui2::CheckButton *m_pEffSortSwitch = nullptr;
 	CPngImage *m_pMutedIcon = nullptr;
 
+#ifdef CSCOREBOARD_DEBUG
+	vgui2::Label *m_pLastUpdateLabel = nullptr;
+#endif
+
 	int m_pHeader = 0;
 	int m_iPlayerCount = 0;
 	int m_iMargin = 100;

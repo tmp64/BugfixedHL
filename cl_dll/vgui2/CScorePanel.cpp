@@ -75,7 +75,12 @@ CScorePanel::CScorePanel(IViewport *pParent) : BaseClass(nullptr, VIEWPORT_PANEL
 	LoadControlSettings(UI_RESOURCE_DIR "/ScorePanel.res");
 	InvalidateLayout();
 	SetVisible(false);
+
+#ifdef CSCOREBOARD_DEBUG
+	// Debugging
+	m_pLastUpdateLabel = new vgui2::Label(this, "LastUpdate", "0.0");
 	//ActivateBuildMode();
+#endif
 
 	m_pImageList = NULL;
 
@@ -149,10 +154,6 @@ void CScorePanel::ShowPanel(bool state)
 		Reset();
 		Update();
 		HideExtraControls();
-		if (gHUD.m_ScoreBoard->m_CvarEffSort->value)
-			m_pEffSortSwitch->SetSelected(true);
-		else
-			m_pEffSortSwitch->SetSelected(false);
 		BaseClass::Activate();
 		SetMouseInputEnabled(false);
 	}
@@ -177,10 +178,33 @@ void CScorePanel::FullUpdate()
 	else
 		m_iAvatarWidth = AVATAR_OFF_WIDTH;
 
+	if (gHUD.m_ScoreBoard->m_CvarEffSort->value)
+	{
+		SetSortByEff();
+		m_pEffSortSwitch->ToggleButton::SetSelected(true);
+	}
+	else
+	{
+		SetSortByFrags();
+		m_pEffSortSwitch->ToggleButton::SetSelected(false);
+	}
+
 	UpdateServerName();
 	UpdateMapName();
 	RecalcItems();
 	Resize();
+
+#ifdef CSCOREBOARD_DEBUG
+	wchar_t buf[32];
+#ifdef _WIN32
+	swprintf(buf, // May be unsafe, but 32 chars should be enough
+#else
+	swprintf(buf, sizeof(buf),
+#endif
+		L"%.3f", gHUD.m_flTime
+	);
+	m_pLastUpdateLabel->SetText(buf);
+#endif
 }
 
 //--------------------------------------------------------------
@@ -866,10 +890,15 @@ bool CScorePanel::StaticPlayerSortFuncByEff(CPlayerListPanel * list, int itemID1
 
 void CScorePanel::OnCheckButtonChecked(int state)
 {
-	if (state)
-		SetSortByEff();
-	else
-		SetSortByFrags();
-	gHUD.m_ScoreBoard->m_CvarEffSort->value = !!state;
+	bool var = !!gHUD.m_ScoreBoard->m_CvarEffSort->value;
+	bool btn = !!state;
+	if (var != btn)
+	{
+		gHUD.m_ScoreBoard->m_CvarEffSort->value = btn;
+		if (btn)
+			ClientCmd("hud_scoreboard_effsort 1");
+		else
+			ClientCmd("hud_scoreboard_effsort 0");
+	}
 	FullUpdate();
 }
