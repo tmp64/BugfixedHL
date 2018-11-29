@@ -83,8 +83,35 @@ typedef struct hud_player_info_s
 	short topcolor;
 	short bottomcolor;
 
+	// The variable below is supposed to be SteamID64 of the player
+	// but it is only set if the game is CS1.6 or CSCZ
+	// The game may crash if you start the client DLL from 
+	// one of these games without that padding variable
+	uint64 padding;
+
 } hud_player_info_t;
 
+// Reverse-engineered from DWARF debug data on Linux
+typedef struct engine_player_info_s
+{
+	int userid;
+	char userinfo[256];
+	char name[32];
+	int spectator;
+	int ping;
+	int packet_loss;
+	char model[64];
+	int topcolor;
+	int bottomcolor;
+	int renderframe;
+	int gaitsequence;
+	int gaitframe;
+	int gaityaw;
+	int prevgaitorigin[3];
+	char customdata[0xA4];
+	char hashedcdkey[16];
+	uint64 m_nSteamID;
+} engine_player_info_t;
 
 typedef struct cl_enginefuncs_s
 {

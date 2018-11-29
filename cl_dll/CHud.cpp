@@ -1078,7 +1078,7 @@ void ConPrintf(const char *fmt, ...)
 
 // Code by voogru
 // https://forums.alliedmods.net/showthread.php?t=60899?t=60899
-long long GetSteamID64(const char *pszAuthID)
+long long ParseSteamID(const char *pszAuthID)
 {
 	if (!pszAuthID)
 		return 0;
@@ -1111,4 +1111,23 @@ long long GetSteamID64(const char *pszAuthID)
 	i64friendID += 76561197960265728 + iServer;
 
 	return i64friendID;
+}
+
+// A hack to get player_info_t from the engine
+engine_player_info_t *GetEnginePlayerInfo(int idx)
+{
+	hud_player_info_t info;
+	GetPlayerInfo(idx, &info);
+	if (!info.name)
+		return nullptr;
+	engine_player_info_t *ptr = reinterpret_cast<engine_player_info_t *>(info.name - offsetof(engine_player_info_t, name));
+	return ptr;
+}
+
+long long GetPlayerSteamID64(int idx)
+{
+	engine_player_info_t *info = GetEnginePlayerInfo(idx);
+	if (info->m_nSteamID / 10000000000000000 == 7)	// Check whether first digit is 7
+		return info->m_nSteamID;
+	return ParseSteamID(g_PlayerSteamId[idx]);
 }

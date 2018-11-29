@@ -136,7 +136,8 @@ void ConPrintf(const char *fmt, ...);
 
 float *GetClientTeamColor(int clientIndex);
 
-long long GetSteamID64(const char *pszAuthID);
+long long ParseSteamID(const char *pszAuthID);
+long long GetPlayerSteamID64(int idx);
 
 // returns the players name of entity no.
 #define GetPlayerInfo (*gEngfuncs.pfnGetPlayerInfo)
@@ -183,3 +184,4 @@ inline void UnpackRGB(int &r, int &g, int &b, unsigned long ulRGB)\
 }
 
 HLHSPRITE LoadSprite(const char *pszName);
+engine_player_info_t *GetEnginePlayerInfo(int idx);

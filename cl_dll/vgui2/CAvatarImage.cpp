@@ -324,7 +324,7 @@ void CAvatarImagePanel::SetPlayer( int entindex, EAvatarSize avatarSize )
 {
 	if (!entindex) m_pImage->ClearAvatarSteamID();
 
-	uint64 steamID64 = GetSteamID64(g_PlayerSteamId[entindex]);
+	uint64 steamID64 = GetPlayerSteamID64(entindex);
 
 	if (steamID64 && ClientSteamContext().SteamUtils() )
 	{		

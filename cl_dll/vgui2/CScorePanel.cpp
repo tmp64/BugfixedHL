@@ -507,7 +507,7 @@ void CScorePanel::UpdatePlayerAvatar(int playerIndex, KeyValues *kv)
 		return;
 
 	// Update their avatar
-	uint64 steamID64 = GetSteamID64(g_PlayerSteamId[playerIndex]);
+	uint64 steamID64 = GetPlayerSteamID64(playerIndex);
 	if (gHUD.m_ScoreBoard->m_CvarAvatars->value && ClientSteamContext().SteamFriends() && ClientSteamContext().SteamUtils() && steamID64)
 	{
 		CSteamID steamIDForPlayer(steamID64);
@@ -578,7 +578,7 @@ void CScorePanel::OpenPlayerMenu(int itemID)
 	if (m_pMenuInfo.client == 0) return;
 
 	// SteamID64
-	m_pMenuInfo.steamID64 = GetSteamID64(g_PlayerSteamId[m_pMenuInfo.client]);
+	m_pMenuInfo.steamID64 = GetPlayerSteamID64(m_pMenuInfo.client);
 	if (m_pMenuInfo.steamID64 != 0)
 	{
 		m_pMenu->SetItemEnabled(m_pMenuInfo.profilePageItemID, true);
