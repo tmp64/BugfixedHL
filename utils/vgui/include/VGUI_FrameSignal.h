@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef VGUI_FRAMESIGNAL_H
-#define VGUI_FRAMESIGNAL_H
+#ifndef VGUI1_FRAMESIGNAL_H
+#define VGUI1_FRAMESIGNAL_H
 
 #include<VGUI.h>
 

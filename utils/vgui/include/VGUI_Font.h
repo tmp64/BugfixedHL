@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef VGUI_FONT_H
-#define VGUI_FONT_H
+#ifndef VGUI1_FONT_H
+#define VGUI1_FONT_H
 
 #include<VGUI.h>
 

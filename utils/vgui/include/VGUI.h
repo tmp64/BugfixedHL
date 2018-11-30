@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef VGUI_H
-#define VGUI_H
+#ifndef VGUI1_H
+#define VGUI1_H
 
 //If you are going to add stuff to the vgui core...
 //

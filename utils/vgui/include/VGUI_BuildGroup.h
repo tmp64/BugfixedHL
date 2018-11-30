@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef VGUI_BUILDGROUP_H
-#define VGUI_BUILDGROUP_H
+#ifndef VGUI1_BUILDGROUP_H
+#define VGUI1_BUILDGROUP_H
 
 #include<VGUI.h>
 #include<VGUI_Dar.h>

@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef VGUI_TICKSIGNAL_H
-#define VGUI_TICKSIGNAL_H
+#ifndef VGUI1_TICKSIGNAL_H
+#define VGUI1_TICKSIGNAL_H
 
 #include<VGUI.h>
 

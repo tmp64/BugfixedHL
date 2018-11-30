@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef VGUI_TEXTGRID_H
-#define VGUI_TEXTGRID_H
+#ifndef VGUI1_TEXTGRID_H
+#define VGUI1_TEXTGRID_H
 
 #include<stdarg.h>
 #include<VGUI.h>

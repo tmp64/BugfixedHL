@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef VGUI_LOADTGA_H
-#define VGUI_LOADTGA_H
+#ifndef VGUI1_LOADTGA_H
+#define VGUI1_LOADTGA_H
 #ifdef _WIN32
 #pragma once
 #endif
@@ -19,4 +19,4 @@ vgui::BitmapTGA* vgui_LoadTGA(char const *pFilename);
 vgui::BitmapTGA* vgui_LoadTGANoInvertAlpha(char const *pFilename);
 
 
-#endif // VGUI_LOADTGA_H
+#endif // VGUI1_LOADTGA_H

@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef VGUI_HELPERS_H
-#define VGUI_HELPERS_H
+#ifndef VGUI1_HELPERS_H
+#define VGUI1_HELPERS_H
 #ifdef _WIN32
 #pragma once
 #endif
@@ -27,5 +27,5 @@ inline int PanelHeight(vgui::Panel *pPanel)	{int x,y,w,h; pPanel->getBounds(x,y,
 void AlignPanel(vgui::Panel *pChild, vgui::Panel *pParent, int alignment);
 
 
-#endif // VGUI_HELPERS_H
+#endif // VGUI1_HELPERS_H
 

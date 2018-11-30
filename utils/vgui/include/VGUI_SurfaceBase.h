@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef VGUI_SURFACEBASE_H
-#define VGUI_SURFACEBASE_H
+#ifndef VGUI1_SURFACEBASE_H
+#define VGUI1_SURFACEBASE_H
 
 #include<VGUI.h>
 #include<VGUI_Dar.h>

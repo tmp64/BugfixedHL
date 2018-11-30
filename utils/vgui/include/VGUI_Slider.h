@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef VGUI_SLIDER_H
-#define VGUI_SLIDER_H
+#ifndef VGUI1_SLIDER_H
+#define VGUI1_SLIDER_H
 
 #include<VGUI.h>
 #include<VGUI_Panel.h>

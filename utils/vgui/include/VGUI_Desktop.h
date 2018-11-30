@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef VGUI_DESKTOP_H
-#define VGUI_DESKTOP_H
+#ifndef VGUI1_DESKTOP_H
+#define VGUI1_DESKTOP_H
 
 #include<VGUI.h>
 #include<VGUI_Dar.h>

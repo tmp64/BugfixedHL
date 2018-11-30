@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef VGUI_TEXTIMAGE_H
-#define VGUI_TEXTIMAGE_H
+#ifndef VGUI1_TEXTIMAGE_H
+#define VGUI1_TEXTIMAGE_H
 
 #include<VGUI.h>
 #include<VGUI_Image.h>

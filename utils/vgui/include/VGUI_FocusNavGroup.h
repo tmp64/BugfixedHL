@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef VGUI_FOCUSNAVGROUP_H
-#define VGUI_FOCUSNAVGROUP_H
+#ifndef VGUI1_FOCUSNAVGROUP_H
+#define VGUI1_FOCUSNAVGROUP_H
 
 #include<VGUI.h>
 #include<VGUI_Dar.h>

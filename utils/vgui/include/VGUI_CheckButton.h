@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef VGUI_CHECKBUTTON_H
-#define VGUI_CHECKBUTTON_H
+#ifndef VGUI1_CHECKBUTTON_H
+#define VGUI1_CHECKBUTTON_H
 
 #include<VGUI.h>
 #include<VGUI_ToggleButton.h>

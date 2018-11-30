@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef VGUI_BUTTONGROUP_H
-#define VGUI_BUTTONGROUP_H
+#ifndef VGUI1_BUTTONGROUP_H
+#define VGUI1_BUTTONGROUP_H
 
 #include<VGUI.h>
 #include<VGUI_Dar.h>

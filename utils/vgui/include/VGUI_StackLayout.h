@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef VGUI_STACKLAYOUT_H
-#define VGUI_STACKLAYOUT_H
+#ifndef VGUI1_STACKLAYOUT_H
+#define VGUI1_STACKLAYOUT_H
 
 #include<VGUI.h>
 #include<VGUI_Layout.h>

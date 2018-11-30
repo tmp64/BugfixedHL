@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef VGUI_GRID_H
-#define VGUI_GRID_H
+#ifndef VGUI1_GRID_H
+#define VGUI1_GRID_H
 #ifdef _WIN32
 #pragma once
 #endif
@@ -119,4 +119,4 @@ protected:
 };
 
 
-#endif // VGUI_GRID_H
+#endif // VGUI1_GRID_H

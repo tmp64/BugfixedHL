@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef VGUI_CHECKBUTTON2_H
-#define VGUI_CHECKBUTTON2_H
+#ifndef VGUI1_CHECKBUTTON2_H
+#define VGUI1_CHECKBUTTON2_H
 #ifdef _WIN32
 #pragma once
 #endif
@@ -98,4 +98,4 @@ public:
 }
 
 
-#endif // VGUI_CHECKBUTTON2_H
+#endif // VGUI1_CHECKBUTTON2_H

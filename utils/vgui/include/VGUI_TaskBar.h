@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef VGUI_TASKBAR_H
-#define VGUI_TASKBAR_H
+#ifndef VGUI1_TASKBAR_H
+#define VGUI1_TASKBAR_H
 
 #include<VGUI.h>
 #include<VGUI_Panel.h>

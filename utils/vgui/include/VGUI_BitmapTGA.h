@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef VGUI_BITMAPTGA_H
-#define VGUI_BITMAPTGA_H
+#ifndef VGUI1_BITMAPTGA_H
+#define VGUI1_BITMAPTGA_H
 
 #include<VGUI_Bitmap.h>
 

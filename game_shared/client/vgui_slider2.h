@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef VGUI_SLIDER2_H
-#define VGUI_SLIDER2_H
+#ifndef VGUI1_SLIDER2_H
+#define VGUI1_SLIDER2_H
 #ifdef _WIN32
 #pragma once
 #endif
@@ -64,4 +64,4 @@ protected:
 
 }
 
-#endif // VGUI_SLIDER2_H
+#endif // VGUI1_SLIDER2_H

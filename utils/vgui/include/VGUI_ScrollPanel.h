@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef VGUI_SCROLLPANEL_H
-#define VGUI_SCROLLPANEL_H
+#ifndef VGUI1_SCROLLPANEL_H
+#define VGUI1_SCROLLPANEL_H
 
 #include<VGUI.h>
 #include<VGUI_Panel.h>

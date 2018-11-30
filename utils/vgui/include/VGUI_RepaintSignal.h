@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef VGUI_REPAINTSIGNAL_H
-#define VGUI_REPAINTSIGNAL_H
+#ifndef VGUI1_REPAINTSIGNAL_H
+#define VGUI1_REPAINTSIGNAL_H
 
 
 

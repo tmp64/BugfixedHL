@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef VGUI_DAR_H
-#define VGUI_DAR_H
+#ifndef VGUI1_DAR_H
+#define VGUI1_DAR_H
 
 #include<stdlib.h>
 #include<string.h>

@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef VGUI_RAISEDBORDER_H
-#define VGUI_RAISEDBORDER_H
+#ifndef VGUI1_RAISEDBORDER_H
+#define VGUI1_RAISEDBORDER_H
 
 #include<VGUI.h>
 #include<VGUI_Border.h>

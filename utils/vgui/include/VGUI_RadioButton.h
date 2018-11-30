@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef VGUI_RADIOBUTTON_H
-#define VGUI_RADIOBUTTON_H
+#ifndef VGUI1_RADIOBUTTON_H
+#define VGUI1_RADIOBUTTON_H
 
 #include<VGUI.h>
 #include<VGUI_ToggleButton.h>

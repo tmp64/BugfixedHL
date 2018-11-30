@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef VGUI_LOWEREDBORDER_H
-#define VGUI_LOWEREDBORDER_H
+#ifndef VGUI1_LOWEREDBORDER_H
+#define VGUI1_LOWEREDBORDER_H
 
 #include<VGUI.h>
 #include<VGUI_Border.h>

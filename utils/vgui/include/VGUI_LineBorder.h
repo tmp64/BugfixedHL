@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef VGUI_LINEBORDER_H
-#define VGUI_LINEBORDER_H
+#ifndef VGUI1_LINEBORDER_H
+#define VGUI1_LINEBORDER_H
 
 #include<VGUI.h>
 #include<VGUI_Border.h>

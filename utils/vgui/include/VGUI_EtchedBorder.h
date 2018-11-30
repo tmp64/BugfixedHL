@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef VGUI_ETCHEDBORDER_H
-#define VGUI_ETCHEDBORDER_H
+#ifndef VGUI1_ETCHEDBORDER_H
+#define VGUI1_ETCHEDBORDER_H
 
 #include<VGUI.h>
 #include<VGUI_Border.h>

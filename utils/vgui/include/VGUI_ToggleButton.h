@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef VGUI_TOGGLEBUTTON_H
-#define VGUI_TOGGLEBUTTON_H
+#ifndef VGUI1_TOGGLEBUTTON_H
+#define VGUI1_TOGGLEBUTTON_H
 
 #include<VGUI.h>
 #include<VGUI_Button.h>

@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef VGUI_HEADERPANEL_H
-#define VGUI_HEADERPANEL_H
+#ifndef VGUI1_HEADERPANEL_H
+#define VGUI1_HEADERPANEL_H
 
 #include<VGUI.h>
 #include<VGUI_Panel.h>

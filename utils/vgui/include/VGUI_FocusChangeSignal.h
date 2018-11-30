@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef VGUI_FOCUSCHANGESIGNAL_H
-#define VGUI_FOCUSCHANGESIGNAL_H
+#ifndef VGUI1_FOCUSCHANGESIGNAL_H
+#define VGUI1_FOCUSCHANGESIGNAL_H
 
 #include<VGUI.h>
 

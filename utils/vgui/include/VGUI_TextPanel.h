@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef VGUI_TEXTPANEL_H
-#define VGUI_TEXTPANEL_H
+#ifndef VGUI1_TEXTPANEL_H
+#define VGUI1_TEXTPANEL_H
 
 #include<VGUI.h>
 #include<VGUI_Panel.h>

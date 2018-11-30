@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef VGUI_MENUSEPARATOR_H
-#define VGUI_MENUSEPARATOR_H
+#ifndef VGUI1_MENUSEPARATOR_H
+#define VGUI1_MENUSEPARATOR_H
 
 #include<VGUI.h>
 #include<VGUI_Label.h>

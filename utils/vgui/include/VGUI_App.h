@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef VGUI_APP_H
-#define VGUI_APP_H
+#ifndef VGUI1_APP_H
+#define VGUI1_APP_H
 
 #include<VGUI.h>
 #include<VGUI_MouseCode.h>

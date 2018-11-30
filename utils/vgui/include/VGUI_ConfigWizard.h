@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef VGUI_CONFIGWIZARD_H
-#define VGUI_CONFIGWIZARD_H
+#ifndef VGUI1_CONFIGWIZARD_H
+#define VGUI1_CONFIGWIZARD_H
 
 #include<VGUI.h>
 #include<VGUI_Panel.h>

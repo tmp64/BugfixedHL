@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef VGUI_COMBOKEY_H
-#define VGUI_COMBOKEY_H
+#ifndef VGUI1_COMBOKEY_H
+#define VGUI1_COMBOKEY_H
 
 #include<VGUI.h>
 

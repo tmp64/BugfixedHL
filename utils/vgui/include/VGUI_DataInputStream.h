@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef VGUI_DATAINPUTSTREAM_H
-#define VGUI_DATAINPUTSTREAM_H
+#ifndef VGUI1_DATAINPUTSTREAM_H
+#define VGUI1_DATAINPUTSTREAM_H
 
 #include<VGUI.h>
 #include<VGUI_InputStream.h>

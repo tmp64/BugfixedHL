@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef VGUI_SCROLLBAR2_H
-#define VGUI_SCROLLBAR2_H
+#ifndef VGUI1_SCROLLBAR2_H
+#define VGUI1_SCROLLBAR2_H
 #ifdef _WIN32
 #pragma once
 #endif
@@ -59,4 +59,4 @@ protected:
 
 }
 
-#endif // VGUI_SCROLLBAR2_H
+#endif // VGUI1_SCROLLBAR2_H

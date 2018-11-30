@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef VGUI_MESSAGEBOX_H
-#define VGUI_MESSAGEBOX_H
+#ifndef VGUI1_MESSAGEBOX_H
+#define VGUI1_MESSAGEBOX_H
 
 #include<VGUI.h>
 #include<VGUI_Frame.h>

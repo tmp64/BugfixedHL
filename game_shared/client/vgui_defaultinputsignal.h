@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef VGUI_DEFAULTINPUTSIGNAL_H
-#define VGUI_DEFAULTINPUTSIGNAL_H
+#ifndef VGUI1_DEFAULTINPUTSIGNAL_H
+#define VGUI1_DEFAULTINPUTSIGNAL_H
 #ifdef _WIN32
 #pragma once
 #endif
@@ -36,4 +36,4 @@ namespace vgui
 }
 
 
-#endif // VGUI_DEFAULTINPUTSIGNAL_H
+#endif // VGUI1_DEFAULTINPUTSIGNAL_H

@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef VGUI_LAYOUTINFO_H
-#define VGUI_LAYOUTINFO_H
+#ifndef VGUI1_LAYOUTINFO_H
+#define VGUI1_LAYOUTINFO_H
 
 namespace vgui
 {

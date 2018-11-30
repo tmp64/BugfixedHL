@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef VGUI_CURSOR_H
-#define VGUI_CURSOR_H
+#ifndef VGUI1_CURSOR_H
+#define VGUI1_CURSOR_H
 
 #include<VGUI.h>
 

@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef VGUI_PANEL_H
-#define VGUI_PANEL_H
+#ifndef VGUI1_PANEL_H
+#define VGUI1_PANEL_H
 
 
 /*

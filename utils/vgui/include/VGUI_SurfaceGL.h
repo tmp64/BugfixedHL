@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef VGUI_SURFACEGL_H
-#define VGUI_SURFACEGL_H
+#ifndef VGUI1_SURFACEGL_H
+#define VGUI1_SURFACEGL_H
 
 //macros borrowed from GLUT to get rid of win32 dependent junk in gl headers
 #ifdef _WIN32

@@ -5,8 +5,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef VGUI_Point_H
-#define VGUI_Point_H
+#ifndef VGUI1_Point_H
+#define VGUI1_Point_H
 #ifdef _WIN32
 #pragma once
 #endif
@@ -57,7 +57,7 @@ private:
 
 }
 
-#endif // VGUI_Point_H
+#endif // VGUI1_Point_H
 
 
 
