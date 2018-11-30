@@ -32,6 +32,7 @@
 #include "demo_api.h"
 #include "vgui_ScorePanel.h"
 #include "appversion.h"
+#include "memory.h"
 
 //-----------------------------------------------------
 // HUD elements
@@ -1114,6 +1115,7 @@ long long ParseSteamID(const char *pszAuthID)
 }
 
 // A hack to get player_info_t from the engine
+// May not be correct on pre-SDL builds
 engine_player_info_t *GetEnginePlayerInfo(int idx)
 {
 	hud_player_info_t info;
@@ -1126,8 +1128,12 @@ engine_player_info_t *GetEnginePlayerInfo(int idx)
 
 long long GetPlayerSteamID64(int idx)
 {
-	engine_player_info_t *info = GetEnginePlayerInfo(idx);
-	if (info->m_nSteamID / 10000000000000000 == 7)	// Check whether first digit is 7
-		return info->m_nSteamID;
+	// Only use engine_player_info_t if running an SDL build
+	if (g_bNewerBuild)
+	{
+		engine_player_info_t *info = GetEnginePlayerInfo(idx);
+		if (info->m_nSteamID / 10000000000000000 == 7)	// Check whether first digit is 7
+			return info->m_nSteamID;
+	}
 	return ParseSteamID(g_PlayerSteamId[idx]);
 }
