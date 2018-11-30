@@ -294,7 +294,7 @@ void CScorePanel::RecalcItems()
 		m_pPlayerList->AddSection(team, "", m_pPlayerSortFunction);
 		m_pPlayerList->AddColumnToSection(team, "avatar", "", CPlayerListPanel::COLUMN_IMAGE, m_iAvatarWidth + m_iAvatarPaddingLeft + m_iAvatarPaddingRight);
 		snprintf(buf, sizeof(buf), "%s (%d/%d, %.0f%%)", m_pTeamInfo[team].name, m_pTeamInfo[team].players, totalPlayerCount, (double)m_pTeamInfo[team].players / totalPlayerCount * 100.0);
-		m_pPlayerList->AddColumnToSection(team, "name", buf, CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), NAME_WIDTH));
+		m_pPlayerList->AddColumnToSection(team, "name", buf, CPlayerListPanel::COLUMN_BRIGHT | CPlayerListPanel::COLUMN_COLORED, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), NAME_WIDTH));
 		m_pPlayerList->AddColumnToSection(team, "steamid", "", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), STEAMID_WIDTH));
 		snprintf(buf, sizeof(buf), "%.2f", (double)m_pTeamInfo[team].kills / (double)(m_pTeamInfo[team].deaths + 1));
 		m_pPlayerList->AddColumnToSection(team, "eff", buf, CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), DEATH_WIDTH));
@@ -345,7 +345,7 @@ void CScorePanel::UpdateClientInfo(int client, bool autoUpdate)
 	KeyValues *playerData = new KeyValues("data");
 	UpdatePlayerAvatar(client, playerData);	// Also updates mute icon
 	playerData->SetInt("client", client);
-	snprintf(buf, 64, "%s%s", RemoveColorCodes(g_PlayerInfoList[client].name), (g_IsSpectator[client] ? " (spectator)" : ""));
+	snprintf(buf, 64, "%s%s", g_PlayerInfoList[client].name, (g_IsSpectator[client] ? " (spectator)" : ""));
 	playerData->SetString("name", buf);
 	playerData->SetString("steamid", g_PlayerSteamId[client]);
 	snprintf(buf, sizeof(buf), "%.2f", (double)g_PlayerExtraInfo[client].frags / (double)(g_PlayerExtraInfo[client].deaths + 1));

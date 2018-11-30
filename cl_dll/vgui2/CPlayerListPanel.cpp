@@ -362,7 +362,14 @@ public:
 					TextImage *textImage = dynamic_cast<TextImage *>(GetImageAtIndex(i));
 					if (textImage)
 					{
-						textImage->SetText(m_pData->GetString(keyname, ""));
+						if (columnFlags & CPlayerListPanel::COLUMN_COLORED)
+						{
+							wchar_t buf[64];	// Should be enough
+							vgui2::localize()->ConvertANSIToUnicode(m_pData->GetString(keyname, ""), buf, sizeof(buf));
+							textImage->SetColoredText(buf);
+						}
+						else
+							textImage->SetText(m_pData->GetString(keyname, ""));
 						textImage->ResizeImageToContent();
 
 						// set the text color based on the selection state - if one of the children of the CPlayerListPanel has focus, then 'we have focus' if we're selected

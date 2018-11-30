@@ -58,6 +58,7 @@
 #ifdef USE_VGUI2
 #include "vgui2/CHudScoreBoard.h"
 #include "clientsteamcontext.h"
+#include <vgui_controls/TextImage.h>
 #endif
 
 float g_ColorBlue[3]	= { 0.6f, 0.8f, 1.0f };
@@ -475,6 +476,10 @@ void CHud :: Init( void )
 	HUD_ELEM_INIT(Menu);
 	ServersInit();
 	MsgFunc_ResetHUD(0, 0, NULL );
+
+#ifdef USE_VGUI2
+	vgui2::TextImage::SetColorsArrayPointer(&g_iColorsCodes);
+#endif
 }
 
 // CHud constructor

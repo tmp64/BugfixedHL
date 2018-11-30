@@ -30,6 +30,8 @@
 
 using namespace vgui2;
 
+int (*TextImage::_colorCodesArray)[10][3] = nullptr;
+
 //-----------------------------------------------------------------------------
 // Purpose: Constructor
 //-----------------------------------------------------------------------------
@@ -185,19 +187,87 @@ void TextImage::SetText(const wchar_t *unicode)
 		unicode = L"";
 	}
 
+	m_bUseColorCodes = false;
+
 	// reallocate the buffer if necessary
 	_textLen = (short)wcslen(unicode);
 	if (_textLen >= _textBufferLen)
 	{
 		delete [] _utext;
+		delete [] m_pColorMap;
 		_textBufferLen = (short)(_textLen + 1);
 		_utext = new wchar_t[_textBufferLen];
+		m_pColorMap = new SDK_Color[_textBufferLen];
 	}
 
 	m_LineBreaks.RemoveAll();
 
 	// store the text as unicode
 	wcscpy(_utext, unicode);
+	m_bRecalculateTruncation = true;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: sets unicode text and parses color codes
+//-----------------------------------------------------------------------------
+void TextImage::SetColoredText(const wchar_t *text)
+{
+	if (!text)
+	{
+		SetText("");
+		return;
+	}
+
+	m_bUseColorCodes = true;
+
+	// reallocate the buffer if necessary
+	int coloredTextLen = wcslen(text);
+	if (coloredTextLen >= _textBufferLen)
+	{
+		delete[] _utext;
+		_textBufferLen = (short)(coloredTextLen + 1);
+		_utext = new wchar_t[_textBufferLen];
+		m_pColorMap = new SDK_Color[_textBufferLen];
+		ResetColor();
+	}
+
+	int alpha = GetColor().a();
+	int idx = 0;
+	for (const wchar_t *i = text; *i != L'\0'; i++)
+	{
+		if (*i == L'^')
+		{
+			wchar_t colorType = *(i + 1);
+			if (colorType >= L'0' && colorType <= L'9')
+			{
+				int colorId = colorType - L'0';
+				if (_colorCodesArray)	// Make sure we have a pointer to colors
+				{
+					InsertColorChange(idx, SDK_Color(
+						(*_colorCodesArray)[colorId][0],
+						(*_colorCodesArray)[colorId][1],
+						(*_colorCodesArray)[colorId][2],
+						alpha
+					));
+				}
+				i++;
+				continue;	// Do not increment idx
+			}
+			else
+			{
+				// Char is invalid
+				_utext[idx] = *i;
+			}
+		}
+		else
+		{
+			_utext[idx] = *i;
+		}
+		idx++;
+	}
+	_utext[idx] = L'\0';
+	m_LineBreaks.RemoveAll();
+	_textLen = (short)wcslen(_utext);	// Text length without color codes
 	m_bRecalculateTruncation = true;
 }
 
@@ -286,7 +356,8 @@ void TextImage::Paint()
 		RecalculateEllipsesPosition();
 	}
 
-	DrawSetTextColor(GetColor());
+	SDK_Color defColor = GetColor();
+	DrawSetTextColor(defColor);
 	HFont font = GetFont();
 	DrawSetTextFont(font);
 
@@ -297,6 +368,8 @@ void TextImage::Paint()
 	GetPos(px, py);
 
 	int currentLineBreak = 0;
+
+	int charIdx = 0;
 
 	for (wchar_t *wsz = _utext; *wsz != 0; wsz++)
 	{
@@ -358,11 +431,21 @@ void TextImage::Paint()
 
 		if (ch != ' ')
 		{
+			// Set the color
+			if (m_bUseColorCodes)
+			{
+				if (m_pColorMap[charIdx].a() == 0)
+					surface()->DrawSetTextColor(defColor);	// That is not how you fix bugs (but who cares)
+				else
+					surface()->DrawSetTextColor(m_pColorMap[charIdx]);
+			}
+
 			// render the character
 			surface()->DrawSetTextPos(x + px, y + py);
 			surface()->DrawUnicodeChar(ch);
 		}
 		x += surface()->GetCharacterWidth(font, ch);
+		charIdx++;
 	}
 }
 
@@ -549,6 +632,23 @@ void TextImage::RecalculateNewLinePositions()
 	}
 }
 
+void vgui2::TextImage::InsertColorChange(int idx, SDK_Color color)
+{
+	//m_pColorMap[idx] = color;
+	for (int i = idx; i < _textBufferLen; i++)
+	{
+		m_pColorMap[i] = color;
+	}
+}
+
+void vgui2::TextImage::SetColor(SDK_Color color)
+{
+	Image::SetColor(color);
+	if (!m_bUseColorCodes)
+		for (int i = 0; i < _textBufferLen; i++)
+			m_pColorMap[i] = color;
+}
+
 //-----------------------------------------------------------------------------
 // Purpose: Calculates where the text should be truncated
 //-----------------------------------------------------------------------------
@@ -617,6 +717,13 @@ void TextImage::RecalculateEllipsesPosition()
 
 		x += len;
 	}
+}
+
+void vgui2::TextImage::ResetColor()
+{
+	SDK_Color color;
+	for (int i = 0; i < _textBufferLen; i++)
+		m_pColorMap[i] = color;
 }
 
 void TextImage::SetWrap( bool bWrap )

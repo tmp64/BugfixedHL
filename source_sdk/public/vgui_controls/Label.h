@@ -42,6 +42,9 @@ public:
 	// Set unicode text directly
 	virtual void SetText(const wchar_t *unicodeString);
 
+	// sets unicode text and parses color codes
+	virtual void SetColoredText(const wchar_t *text);
+
 	// Get the current text
 	virtual void GetText(char *textOut, int bufferLen);
 	virtual void GetText(wchar_t *textOut, int bufLenInBytes);

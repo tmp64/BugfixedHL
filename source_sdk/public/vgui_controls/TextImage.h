@@ -38,6 +38,8 @@ public:
 	virtual void SetText(const char *text);
 	// sets unicode text directly
 	virtual void SetText(const wchar_t *text);
+	// sets unicode text and parses color codes
+	virtual void SetColoredText(const wchar_t *text);
 	// get the full text in the image
 	virtual void GetText(char *buffer, int bufferSize);
 	virtual void GetText(wchar_t *buffer, int bufferLength);
@@ -71,6 +73,15 @@ public:
 	void SetWrap( bool bWrap );
 	void RecalculateNewLinePositions();
 
+	// Adds a color change at position idx or replaces an existing one
+	virtual void InsertColorChange(int idx, SDK_Color color);
+	virtual void SetColor(SDK_Color color);
+
+	static inline void SetColorsArrayPointer(int(*ptr)[10][3])
+	{
+		_colorCodesArray = ptr;
+	}
+
 protected:
 	// truncate the _text string to fit into the draw width
 	void SizeText(wchar_t *tempText, int stringLength);
@@ -93,6 +104,13 @@ private:
 
 	bool m_bWrap;
 	CUtlVector<wchar_t *>	   m_LineBreaks;		// an array that holds the index in the buffer to wrap lines at
+
+	//std::map<int, SDK_Color> m_pColorMap;
+	SDK_Color *m_pColorMap = nullptr;
+	bool m_bUseColorCodes = false;
+	static int (*_colorCodesArray)[10][3];
+
+	void ResetColor();
 };
 
 } // namespace vgui2

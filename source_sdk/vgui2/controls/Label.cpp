@@ -306,6 +306,17 @@ void Label::SetText(const wchar_t *unicodeString)
 	Repaint();
 }
 
+void vgui2::Label::SetColoredText(const wchar_t * text)
+{
+	_textImage->SetColoredText(text);
+
+	//!! need to calculate hotkey from translated string
+	SetHotkey(CalculateHotkey(text));
+
+	InvalidateLayout();     // possible that the textimage needs to expand
+	Repaint();
+}
+
 //-----------------------------------------------------------------------------
 // Purpose: updates localized text
 //-----------------------------------------------------------------------------

@@ -54,6 +54,7 @@ public:
 		COLUMN_BRIGHT = 0x04,		// set if the column text should be the bright color
 		COLUMN_CENTER = 0x08,		// set to center the text/image in the column
 		COLUMN_RIGHT = 0x10,		// set to right-align the text in the column
+		COLUMN_COLORED = 0x20		// set if need to display text colored
 	};
 	virtual bool AddColumnToSection(int sectionID, const char *columnName, const char *columnText, int columnFlags, int width);
 	virtual bool AddColumnToSection(int sectionID, const char *columnName, const wchar_t *columnText, int columnFlags, int width);
