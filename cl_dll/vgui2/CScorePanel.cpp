@@ -450,7 +450,7 @@ void CScorePanel::AddHeader()
 	m_pPlayerList->AddSection(m_pHeader, "", m_pPlayerSortFunction);
 	m_pPlayerList->SetSectionAlwaysVisible(m_pHeader);
 	m_pPlayerList->AddColumnToSection(m_pHeader, "avatar", "", CPlayerListPanel::COLUMN_IMAGE, m_iAvatarWidth + m_iAvatarPaddingLeft + m_iAvatarPaddingRight);
-	m_pPlayerList->AddColumnToSection(m_pHeader, "name", "#PlayerName", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), NAME_WIDTH));
+	m_pPlayerList->AddColumnToSection(m_pHeader, "name", "#PlayerName", CPlayerListPanel::COLUMN_BRIGHT | CPlayerListPanel::COLUMN_COLORED, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), NAME_WIDTH));
 	m_pPlayerList->AddColumnToSection(m_pHeader, "steamid", "Steam ID", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), STEAMID_WIDTH));
 	m_pPlayerList->AddColumnToSection(m_pHeader, "eff", "Eff", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), DEATH_WIDTH));
 	m_pPlayerList->AddColumnToSection(m_pHeader, "frags", "#PlayerScore", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), SCORE_WIDTH));
