@@ -32,6 +32,8 @@
 #include <Windows.h>
 #endif
 
+extern int g_iColorsCodes[10][3];
+
 DECLARE_MESSAGE_PTR( m_Message, HudText )
 DECLARE_MESSAGE_PTR( m_Message, GameTitle )
 
@@ -66,9 +68,33 @@ void CHudMessage::Reset( void )
 {
  	memset( m_pMessages, 0, sizeof( m_pMessages[0] ) * maxHUDMessages );
 	memset( m_startTime, 0, sizeof( m_startTime[0] ) * maxHUDMessages );
+	for (int i = 0; i < maxHUDMessages; i++)
+		m_sMessageStrings[i].clear();
 	
 	m_gameTitleTime = 0;
 	m_pGameTitle = NULL;
+}
+
+void CHudMessage::CStrToWide(const char *pString, std::wstring &wstr)
+{
+	try
+	{
+		std::wstring_convert<std::codecvt_utf8 <wchar_t>, wchar_t> convert;
+		wstr = convert.from_bytes(pString);
+	}
+	catch (const std::exception &)
+	{
+		// Fall back to MultiByteToWideChar (Win32) or std::mbsrtowcs if std::wstring_convert fails
+		wchar_t wTextBuf[MAX_MESSAGE_TEXT_LENGTH];
+#ifdef _WIN32
+		MultiByteToWideChar(CP_UTF8, 0, pString, -1, wTextBuf, MAX_MESSAGE_TEXT_LENGTH);
+#else
+		const char *strPtr = pString;
+		std::mbstate_t state = std::mbstate_t();
+		std::mbsrtowcs(wTextBuf, &strPtr, MAX_MESSAGE_TEXT_LENGTH, &state);
+#endif
+		wstr = wTextBuf;
+	}
 }
 
 
@@ -198,9 +224,12 @@ void CHudMessage::MessageScanNextChar( void )
 	else if ( blend < 0 )
 		blend = 0;
 
-	m_parms.r = ((srcRed * (255-blend)) + (destRed * blend)) >> 8;
-	m_parms.g = ((srcGreen * (255-blend)) + (destGreen * blend)) >> 8;
-	m_parms.b = ((srcBlue * (255-blend)) + (destBlue * blend)) >> 8;
+	if (!m_bIsColorCoded)
+	{
+		m_cColorNow.r = m_parms.r = ((srcRed * (255 - blend)) + (destRed * blend)) >> 8;
+		m_cColorNow.g = m_parms.g = ((srcGreen * (255 - blend)) + (destGreen * blend)) >> 8;
+		m_cColorNow.b = m_parms.b = ((srcBlue * (255 - blend)) + (destBlue * blend)) >> 8;
+	}
 
 	if ( m_parms.pMessage->effect == 1 && m_parms.charTime != 0 )
 	{
@@ -249,36 +278,13 @@ void CHudMessage::MessageScanStart( void )
 	}
 }
 
-void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
+void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time, const std::wstring &wstr )
 {
 	int i, j, width;
 	wchar_t wLine[MAX_HUD_STRING + 1];
-	wchar_t wTextBuf[MAX_MESSAGE_TEXT_LENGTH + 1];
-	const wchar_t *wText = nullptr;
+	const wchar_t *wText = wstr.c_str();
 	const wchar_t *pwText;
 	int lineHeight = gHUD.m_scrinfo.iCharHeight + ADJUST_MESSAGE;
-
-#ifdef _WIN32
-	MultiByteToWideChar(CP_UTF8, 0, pMessage->pMessage, -1, wTextBuf, MAX_MESSAGE_TEXT_LENGTH);
-	wText = wTextBuf;
-#else
-	std::wstring wstr;
-
-	try
-	{
-		std::wstring_convert<std::codecvt_utf8 <wchar_t>, wchar_t> convert;
-		wstr = convert.from_bytes(pMessage->pMessage);
-		wText = wstr.c_str();
-	}
-	catch (const std::exception &)
-	{
-		// Fall back to std::mbsrtowcs if std::wstring_convert fails
-		const char *strPtr = pMessage->pMessage;
-		std::mbstate_t state = std::mbstate_t();
-		std::mbsrtowcs(wTextBuf, &strPtr, MAX_MESSAGE_TEXT_LENGTH, &state);
-		wText = wTextBuf;
-	}
-#endif
 
 	// Count lines and width
 	m_parms.time = time;
@@ -291,7 +297,11 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 	pwText = wText;
 	while (*pwText)
 	{
-		if (*pwText == '\n')
+		if (gHUD.m_pCvarColorText->value && *pwText == L'^' && *(pwText + 1) >= L'0' && *(pwText + 1) <= L'9')
+		{
+			pwText += 2;
+		}
+		else if (*pwText == '\n')
 		{
 			m_parms.lines++;
 			if (width > m_parms.totalWidth)
@@ -322,7 +332,16 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 			if (m_parms.lineLength < MAX_HUD_STRING)
 			{
 				wLine[m_parms.lineLength] = c;
-				m_parms.width += gHUD.GetHudCharWidth(c);
+				if (gHUD.m_pCvarColorText->value && *pwText == L'^' && *(pwText + 1) >= L'0' && *(pwText + 1) <= L'9')
+				{
+					// Skip two chars when counting line lenght
+					wLine[m_parms.lineLength + 1] = *(pwText + 1);
+					m_parms.lineLength += 2;
+					pwText += 2;
+					continue;
+				}
+				else
+					m_parms.width += gHUD.GetHudCharWidth(c);
 				m_parms.lineLength++;
 			}
 			pwText++;
@@ -331,15 +350,33 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 		wLine[m_parms.lineLength] = 0;
 
 		m_parms.x = XPosition(pMessage->x, m_parms.width, m_parms.totalWidth);
+		m_cColorNow = RGBA(m_parms.r, m_parms.g, m_parms.b);
+		m_bIsColorCoded = false;
 
 		for (j = 0; j < m_parms.lineLength; j++)
 		{
+			if (gHUD.m_pCvarColorText->value && wLine[j] == L'^')
+			{
+				wchar_t colorChar = wLine[j + 1];
+				if (colorChar >= L'0' && colorChar <= L'9')
+				{
+					if (gHUD.m_pCvarColorText->value == 1)
+					{
+						int colorIdx = colorChar - L'0';
+						m_cColorNow = RGBA(g_iColorsCodes[colorIdx][0], g_iColorsCodes[colorIdx][1], g_iColorsCodes[colorIdx][2]);
+						m_bIsColorCoded = true;
+					}
+					j++;
+					continue;
+				}
+			}
+
 			m_parms.currentChar = wLine[j];
 			int nextX = m_parms.x + gHUD.GetHudCharWidth(m_parms.currentChar);
 			MessageScanNextChar();
 
 			if (m_parms.x >= 0 && m_parms.y >= 0 && nextX <= ScreenWidth)
-				TextMessageDrawChar(m_parms.x, m_parms.y, m_parms.currentChar, m_parms.r, m_parms.g, m_parms.b);
+				TextMessageDrawChar(m_parms.x, m_parms.y, m_parms.currentChar, m_cColorNow.r, m_cColorNow.g, m_cColorNow.b);
 			m_parms.x = nextX;
 		}
 
@@ -441,7 +478,7 @@ int CHudMessage::Draw( float fTime )
 			// effect 0 is fade in/fade out
 			// effect 1 is flickery credits
 			// effect 2 is write out (training room)
-			MessageDrawScan( pMessage, messageTime );
+			MessageDrawScan( pMessage, messageTime, m_sMessageStrings[i] );
 
 			drawn++;
 		}
@@ -449,6 +486,7 @@ int CHudMessage::Draw( float fTime )
 		{
 			// The message is over
 			m_pMessages[i] = NULL;
+			m_sMessageStrings[i].clear();
 		}
 	}
 
@@ -510,9 +548,6 @@ void CHudMessage::MessageAdd( const char *pName, float time )
 		}
 #endif
 
-		if (gHUD.m_pCvarColorText->value != 0)
-			RemoveColorCodes(tempMessage->pMessage, true);
-
 		for ( j = 0; j < maxHUDMessages; j++ )
 		{
 			if (!m_pMessages[j]) continue;
@@ -520,6 +555,8 @@ void CHudMessage::MessageAdd( const char *pName, float time )
 			// is this message already in the list
 			if ( !strcmp( tempMessage->pMessage, m_pMessages[j]->pMessage ) )
 			{
+				// Convert the string to std::wstring
+				CStrToWide(m_pMessages[j]->pMessage, m_sMessageStrings[j]);
 				return;
 			}
 
@@ -529,9 +566,13 @@ void CHudMessage::MessageAdd( const char *pName, float time )
 				if ( fabs( tempMessage->x - m_pMessages[j]->x ) < 0.0002 )
 				{
 					m_pMessages[j] = NULL;
+					m_sMessageStrings[j].clear();
 				}
 			}
 		}
+
+		// Convert the string to std::wstring
+		CStrToWide(tempMessage->pMessage, m_sMessageStrings[i]);
 
 		m_pMessages[i] = tempMessage;
 		m_startTime[i] = time;

@@ -1077,7 +1077,7 @@ void ConPrintf(const char *fmt, ...)
 
 	vsnprintf(str, sizeof(str), fmt, args);
 	str[sizeof(str) - 1] = '\0';
-	ConsolePrint(str);
+	gEngfuncs.pfnConsolePrint(str);
 
 	va_end(args);
 }
