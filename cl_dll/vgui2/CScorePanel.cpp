@@ -323,6 +323,7 @@ void CScorePanel::UpdateClientInfo(int client, bool autoUpdate)
 		if (m_pClientItems[client] != -1)
 		{
 			m_pPlayerList->RemoveItem(m_pClientItems[client]);
+			m_pClientItems[client] = -1;
 			m_iPlayerCount--;
 			DebugPrintf("CScorePanel::UpdateClientInfo: client %d removed\n", client);
 		}
