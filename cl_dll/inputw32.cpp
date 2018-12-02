@@ -610,6 +610,15 @@ void IN_MouseMove ( float frametime, usercmd_t *cmd)
 		diffPitch = viewangles[PITCH] + diffPitch - pitch;
 		viewangles[PITCH] = pitch;
 	}
+	else
+	{
+		if (m_input->value == 2 && dinput_mouse_acquired)
+		{
+			// Discard any info when mouse is not active
+			DIMOUSESTATE state;
+			lpdiMouse->GetDeviceState(sizeof(DIMOUSESTATE), (LPVOID)&state);
+		}
+	}
 
 	gEngfuncs.SetViewAngles( (float *)viewangles );
 
