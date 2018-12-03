@@ -5,21 +5,39 @@
 #include <vgui/ISurface.h>
 #include "hud.h"
 #include "CHudScoreBoard.h"
+#include "GameUIPanelNames.h"
+#include "IEngineVgui.h"
+#include "CGameUITestPanel.h"
 
 void CHudViewport::Start()
 {
 	BaseClass::Start();
 }
 
+void CHudViewport::HideScoreBoard()
+{
+	BaseClass::HideScoreBoard();
+	gHUD.m_ScoreBoard->HideScoreBoard(true);
+}
+
 void CHudViewport::ActivateClientUI()
 {
 	BaseClass::ActivateClientUI();
+	if (gHUD.m_iIntermission)
+		gHUD.m_ScoreBoard->ShowScoreBoard();
+}
+
+void CHudViewport::HideClientUI()
+{
+	BaseClass::HideClientUI();
 }
 
 void CHudViewport::CreateDefaultPanels()
 {
 	AddNewPanel( CreatePanelByName( VIEWPORT_PANEL_MOTD ) );
 	AddNewPanel( CreatePanelByName( VIEWPORT_PANEL_SCORE ) );
+
+	AddNewGameUIPanel(CreateGameUIPanelByName(GAMEUI_PANEL_TEST));
 }
 
 IViewportPanel* CHudViewport::CreatePanelByName( const char* pszName )
@@ -33,6 +51,18 @@ IViewportPanel* CHudViewport::CreatePanelByName( const char* pszName )
 	else if (Q_strcmp(VIEWPORT_PANEL_SCORE, pszName) == 0)
 	{
 		pPanel = new CScorePanel(this);
+	}
+
+	return pPanel;
+}
+
+IGameUIPanel *CHudViewport::CreateGameUIPanelByName(const char *pszName)
+{
+	IGameUIPanel *pPanel = nullptr;
+
+	if (Q_strcmp(GAMEUI_PANEL_TEST, pszName) == 0)
+	{
+		pPanel = new CGameUITestPanel(engineVgui()->GetPanel(PANEL_ROOT));
 	}
 
 	return pPanel;

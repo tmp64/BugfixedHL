@@ -25,11 +25,16 @@ public:
 
 	void Start() override;
 
+	void HideScoreBoard() override;
+
 	void ActivateClientUI() override;
+
+	void HideClientUI() override;
 
 	void CreateDefaultPanels() override;
 
 	IViewportPanel* CreatePanelByName( const char* pszName ) override;
+	IGameUIPanel* CreateGameUIPanelByName(const char* pszName) override;
 
 private:
 };

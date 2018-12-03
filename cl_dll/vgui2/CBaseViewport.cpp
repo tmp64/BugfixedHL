@@ -13,14 +13,13 @@
 
 #include "CBackGroundPanel.h"
 #include "IViewportPanel.h"
+#include "IGameUIPanel.h"
 #include "VGUI2Paths.h"
 #include "ViewportPanelNames.h"
 
 #include "CClientVGUI.h"
 
 #include "CBaseViewport.h"
-#include "CHudScoreBoard.h"
-#include "hud.h"
 
 CBaseViewport* g_pViewport = nullptr;
 
@@ -108,7 +107,6 @@ int CBaseViewport::UseVGUI1()
 
 void CBaseViewport::HideScoreBoard()
 {
-	gHUD.m_ScoreBoard->HideScoreBoard(true);
 }
 
 void CBaseViewport::HideAllVGUIMenu()
@@ -117,11 +115,18 @@ void CBaseViewport::HideAllVGUIMenu()
 
 void CBaseViewport::ActivateClientUI()
 {
-	if (gHUD.m_iIntermission) gHUD.m_ScoreBoard->ShowScoreBoard();
+	for (int i = 0; i < m_GameUIPanels.Count(); i++)
+	{
+		m_GameUIPanels[i]->OnGameUIDeactivated();
+	}
 }
 
 void CBaseViewport::HideClientUI()
 {
+	for (int i = 0; i < m_GameUIPanels.Count(); i++)
+	{
+		m_GameUIPanels[i]->OnGameUIActivated();
+	}
 }
 
 void CBaseViewport::Shutdown()
@@ -446,4 +451,41 @@ void CBaseViewport::ReloadScheme( const char* pszFromFile )
 
 	// reset the hud
 	gHUD.MsgFunc_ResetHUD(nullptr, 0, nullptr);
+}
+
+IGameUIPanel *CBaseViewport::CreateGameUIPanelByName(const char *pszName)
+{
+	return nullptr;
+}
+
+bool CBaseViewport::AddNewGameUIPanel(IGameUIPanel *pPanel)
+{
+	if (!pPanel)
+	{
+		gEngfuncs.Con_Printf("CBaseViewport::AddNewGameUIPanel: Null panel!\n");
+		return false;
+	}
+
+	if (FindGameUIPanelByName(pPanel->GetName()))
+	{
+		gEngfuncs.Con_Printf("CBaseViewport::AddNewGameUIPanel: A panel with name '%s' already exists.\n", pPanel->GetName());
+		return false;
+	}
+
+	m_GameUIPanels.AddToTail(pPanel);
+
+	return true;
+}
+
+IGameUIPanel *CBaseViewport::FindGameUIPanelByName(const char *pszName)
+{
+	auto count = m_GameUIPanels.Count();
+
+	for (decltype(count) iIndex = 0; iIndex < count; ++iIndex)
+	{
+		if (Q_strcmp(m_GameUIPanels[iIndex]->GetName(), pszName) == 0)
+			return m_GameUIPanels[iIndex];
+	}
+
+	return nullptr;
 }

@@ -7,8 +7,6 @@ add_sources(
 	CHudViewport.cpp
 	CClientVGUI.h
 	CClientVGUI.cpp
-	CClientMOTD.h
-	CClientMOTD.cpp
 	IViewport.h
 	IViewportPanel.h
 	VGUI2Paths.h
@@ -19,12 +17,23 @@ add_sources(
 	CHudScoreBoard.cpp
 	CPlayerListPanel.h
 	CPlayerListPanel.cpp
-	CScorePanel.h
-	CScorePanel.cpp
 	CVoiceStatus2.h
 	CVoiceStatus2.cpp
 	KeyValuesCompat.h
 	KeyValuesCompat.cpp
 	CPngImage.h
 	CPngImage.cpp
+	IGameUIPanel.h
+	GameUIPanelNames.h
+	IEngineVgui.h
+	
+	# HUD panels
+	CScorePanel.h
+	CScorePanel.cpp
+	CClientMOTD.h
+	CClientMOTD.cpp
+	
+	# GameUI panels
+	CGameUITestPanel.h
+	CGameUITestPanel.cpp
 )

@@ -22,6 +22,7 @@
 #include "KeyValuesCompat.h"
 
 #include "CClientVGUI.h"
+#include "IEngineVgui.h"
 
 namespace
 {
@@ -30,6 +31,8 @@ CClientVGUI g_ClientVGUI;
 IGameUIFuncs* g_GameUIFuncs = nullptr;
 
 IBaseUI* g_pBaseUI = nullptr;
+
+IEngineVGui *g_EngineVgui = nullptr;
 }
 
 CClientVGUI* clientVGUI()
@@ -45,6 +48,11 @@ IGameUIFuncs* gameUIFuncs()
 IBaseUI* baseUI()
 {
 	return g_pBaseUI;
+}
+
+IEngineVGui* engineVgui()
+{
+	return g_EngineVgui;
 }
 
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR( CClientVGUI, IClientVGUI, ICLIENTVGUI_NAME, g_ClientVGUI );
@@ -75,13 +83,11 @@ void CClientVGUI::Initialize( CreateInterfaceFn* pFactories, int iNumFactories )
 		m_FactoryList[ uiIndex + 1 ] = pFactories[ uiIndex ];
 	}
 
-#if USE_VGUI2
 	if( !vgui2::VGui_InitInterfacesList( "CLIENT", m_FactoryList, NUM_FACTORIES ) )
 	{
 		Msg( "Failed to initialize VGUI2\n" );
 		return;
 	}
-#endif
 
 	if( !KV_InitKeyValuesSystem( m_FactoryList, NUM_FACTORIES ) )
 	{
@@ -89,17 +95,14 @@ void CClientVGUI::Initialize( CreateInterfaceFn* pFactories, int iNumFactories )
 		return;
 	}
 
-#if USE_VGUI2
 	g_GameUIFuncs = ( IGameUIFuncs* ) pFactories[ 0 ]( IGAMEUIFUNCS_NAME, nullptr );
 	g_pBaseUI = ( IBaseUI* ) pFactories[ 0 ]( IBASEUI_NAME, nullptr );
+	g_EngineVgui = (IEngineVGui* ) pFactories[ 0 ](VENGINE_VGUI_VERSION, nullptr );
 
 	//Constructor sets itself as the viewport.
 	new CHudViewport();
 
 	g_pViewport->Initialize( pFactories, iNumFactories );
-	
-	
-#endif
 }
 
 void CClientVGUI::Start()
