@@ -1040,7 +1040,9 @@ int CHudAmmo::Draw(float flTime)
 		}
 #endif
 
+#ifdef USE_VGUI2
 		vgui2::surface()->DrawSetColor(r, g, b, a);
+#endif
 
 		// Draw dot
 		if (m_pCustomCrosshair.dot->value)
