@@ -166,6 +166,16 @@ void CScorePanel::ShowPanel(bool state)
 	}
 }
 
+void CScorePanel::MsgFunc_TeamScore(const char *teamName, int frags, int deaths)
+{
+	team_score_t score;
+	score.frags = frags;
+	score.deaths = deaths;
+	m_mTeamNameToScore[std::string(teamName)] = score;
+	if (IsVisible())
+		UpdateTeamScores();
+}
+
 //--------------------------------------------------------------
 // Completeley resets the scoreboard and recalculates everything
 //--------------------------------------------------------------
@@ -277,11 +287,6 @@ void CScorePanel::RecalcItems()
 	{
 		if (m_pTeamInfo[i].players > 0)
 		{
-			if (g_TeamInfo[i].scores_overriden)
-			{
-				m_pTeamInfo[i].kills = g_TeamInfo[i].frags;
-				m_pTeamInfo[i].deaths = g_TeamInfo[i].deaths;
-			}
 			set.insert(i);
 		}
 	}
@@ -298,12 +303,11 @@ void CScorePanel::RecalcItems()
 		m_pPlayerList->AddColumnToSection(team, "steamid", "", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), STEAMID_WIDTH));
 		snprintf(buf, sizeof(buf), "%.2f", (double)m_pTeamInfo[team].kills / (double)(m_pTeamInfo[team].deaths + 1));
 		m_pPlayerList->AddColumnToSection(team, "eff", buf, CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), DEATH_WIDTH));
-		snprintf(buf, sizeof(buf), "%d", m_pTeamInfo[team].kills);
-		m_pPlayerList->AddColumnToSection(team, "frags", buf, CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), SCORE_WIDTH));
-		snprintf(buf, sizeof(buf), "%d", m_pTeamInfo[team].deaths);
-		m_pPlayerList->AddColumnToSection(team, "deaths", buf, CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), DEATH_WIDTH));
+		m_pPlayerList->AddColumnToSection(team, "frags", "???", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), SCORE_WIDTH));
+		m_pPlayerList->AddColumnToSection(team, "deaths", "???", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), DEATH_WIDTH));
 		m_pPlayerList->AddColumnToSection(team, "ping", "", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), PING_WIDTH));
 		m_pPlayerList->SetSectionFgColor(team, gHUD.GetTeamColor(team));
+		UpdateTeamScore(team);
 		DebugPrintf("CScorePanel::RecalItems Team '%s' is %d\n", m_pTeamInfo[team].name, team);
 	}
 
@@ -547,6 +551,47 @@ void CScorePanel::UpdatePlayerAvatar(int playerIndex, KeyValues *kv)
 		if (vgui2::voicemgr()->IsPlayerBlocked(playerIndex))
 			kv->SetInt("avatar", m_iMutedIconIndex);
 	}
+}
+
+void CScorePanel::UpdateTeamScores()
+{
+	for (int i = 1; i <= MAX_TEAMS; i++)
+	{
+		if (!m_pTeamInfo[i].name[0] || m_pTeamInfo[i].players <= 0)
+			continue;	// Team is empty
+		UpdateTeamScore(i);
+	}
+}
+
+void CScorePanel::UpdateTeamScore(int i)
+{
+	auto it = m_mTeamNameToScore.find(std::string(m_pTeamInfo[i].name));
+	team_score_t score;
+	if (it != m_mTeamNameToScore.end())
+		score = it->second;
+	else
+		score = { m_pTeamInfo[i].kills, m_pTeamInfo[i].deaths };
+	wchar_t buf[32];
+
+	// Frags
+#ifdef _WIN32
+	swprintf(buf, // May be unsafe, but 32 chars should be enough
+#else
+	swprintf(buf, sizeof(buf),
+#endif
+		L"%d", score.frags
+	);
+	m_pPlayerList->ModifyColumn(i, "frags", buf);
+
+	// Deaths
+#ifdef _WIN32
+	swprintf(buf, // May be unsafe, but 32 chars should be enough
+#else
+	swprintf(buf, sizeof(buf),
+#endif
+		L"%d", score.deaths
+	);
+	m_pPlayerList->ModifyColumn(i, "deaths", buf);
 }
 
 //--------------------------------------------------------------

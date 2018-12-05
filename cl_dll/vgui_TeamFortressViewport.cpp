@@ -60,6 +60,7 @@
 
 #ifdef USE_VGUI2
 #include "vgui2/CHudScoreBoard.h"
+#include "vgui2/CScorePanel.h"
 #endif
 
 extern int g_iVisibleMouse;
@@ -2346,7 +2347,11 @@ int TeamFortressViewport::MsgFunc_TeamScore( const char *pszName, int iSize, voi
 {
 	BEGIN_READ( pbuf, iSize );
 	char *TeamName = READ_STRING();
-
+#ifdef USE_VGUI2
+	int frags = READ_SHORT();
+	int deaths = READ_SHORT();
+	gHUD.m_ScoreBoard->m_pScorePanel->MsgFunc_TeamScore(TeamName, frags, deaths);
+#else
 	// find the team matching the name
 	int i;
 	for ( i = 1; i <= m_pScoreBoard->m_iNumTeams; i++ )
@@ -2362,6 +2367,7 @@ int TeamFortressViewport::MsgFunc_TeamScore( const char *pszName, int iSize, voi
 	g_TeamInfo[i].scores_overriden = TRUE;
 	g_TeamInfo[i].frags = READ_SHORT();
 	g_TeamInfo[i].deaths = READ_SHORT();
+#endif
 
 	return 1;
 }

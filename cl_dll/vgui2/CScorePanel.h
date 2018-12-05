@@ -1,6 +1,8 @@
 #ifndef CSCOREPANEL_H
 #define CSCOREPANEL_H
 
+#include <string>
+#include <unordered_map>
 #include <functional>
 #include <cdll_dll.h>
 #include <vgui_controls/Frame.h>
@@ -99,6 +101,8 @@ public:
 	MESSAGE_FUNC_INT(OnItemContextMenu, "ItemContextMenu", itemID);
 	MESSAGE_FUNC_INT(OnCheckButtonChecked, "CheckButtonChecked", state);
 
+	void MsgFunc_TeamScore(const char *teamName, int frags, int deaths);
+
 	friend class CHudScoreBoard;
 
 private:
@@ -121,6 +125,12 @@ private:
 		int itemID;
 		int client;
 		long long steamID64;
+	};
+
+	struct team_score_t
+	{
+		int frags = 0;
+		int deaths = 0;
 	};
 
 	static CScorePanel *m_sSingleton;
@@ -151,6 +161,7 @@ private:
 	team_info_t m_pTeamInfo[MAX_TEAMS + 1];
 	int m_pClientItems[MAX_PLAYERS + 1];
 	int m_pClientTeams[MAX_PLAYERS + 1];
+	std::unordered_map<std::string, team_score_t> m_mTeamNameToScore;
 
 	menu_info_t m_pMenuInfo;
 
@@ -160,6 +171,8 @@ private:
 	void AddHeader();
 	void Resize();
 	void UpdatePlayerAvatar(int playerIndex, KeyValues *kv);
+	void UpdateTeamScores();
+	void UpdateTeamScore(int i);
 
 	// Menu
 	void CreatePlayerMenu();
