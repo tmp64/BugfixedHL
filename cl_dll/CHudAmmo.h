@@ -58,7 +58,9 @@ private:
 		cvar_t *gap;
 		cvar_t *size;
 		cvar_t *thickness;
-		//cvar_t *outline_thickness;
+#ifdef USE_VGUI2
+		cvar_t *outline_thickness;
+#endif
 		cvar_t *dot;
 		cvar_t *t;
 	};

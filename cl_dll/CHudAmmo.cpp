@@ -31,6 +31,11 @@
 #include "vgui_TeamFortressViewport.h"
 #include "CHudMenu.h"
 
+#ifdef USE_VGUI2
+#include <vgui/ISurface.h>
+#include <vgui_controls/Controls.h>
+#endif
+
 WEAPON *gpActiveSel;	// NULL means off, 1 means just the menu bar, otherwise
 						// this points to the active weapon menu item
 WEAPON *gpLastSel;		// Last weapon menu selection 
@@ -308,7 +313,9 @@ int CHudAmmo::Init(void)
 	m_pCustomCrosshair.gap			= CVAR_CREATE("cl_crosshair_gap", "8", FCVAR_ARCHIVE);
 	m_pCustomCrosshair.size			= CVAR_CREATE("cl_crosshair_size", "6", FCVAR_ARCHIVE);
 	m_pCustomCrosshair.thickness	= CVAR_CREATE("cl_crosshair_thickness", "2", FCVAR_ARCHIVE);
-	//m_pCustomCrosshair.outline_thickness = CVAR_CREATE("cl_crosshair_outline_thickness", "1", FCVAR_ARCHIVE);
+#ifdef USE_VGUI2
+	m_pCustomCrosshair.outline_thickness = CVAR_CREATE("cl_crosshair_outline_thickness", "0", FCVAR_ARCHIVE);
+#endif
 	m_pCustomCrosshair.dot			= CVAR_CREATE("cl_crosshair_dot", "0", FCVAR_ARCHIVE);
 	m_pCustomCrosshair.t			= CVAR_CREATE("cl_crosshair_t", "0", FCVAR_ARCHIVE);
 
@@ -1012,29 +1019,54 @@ int CHudAmmo::Draw(float flTime)
 		int thick = m_pCustomCrosshair.thickness->value;
 		int size = m_pCustomCrosshair.size->value;
 		bool t = m_pCustomCrosshair.t->value;
-		//int outline = m_pCustomCrosshair.outline_thickness->value;
+
+		// Outline can only be drawn using vgui2 because FillRGBA can't draw anything in black
+#ifdef USE_VGUI2
+		int outline = m_pCustomCrosshair.outline_thickness->value;
+
+		// Draw outline
+		if (outline > 0)
+		{
+			// Don't read that if you don't want eye cancer
+			vgui2::surface()->DrawSetColor(0, 0, 0, a);
+			vgui2::surface()->DrawFilledRect(cx + gap - outline, cy - thick / 2 - outline,
+				cx + gap - outline + size + outline * 2, cy - thick / 2 - outline + thick + outline * 2);
+			vgui2::surface()->DrawFilledRect(cx - gap - size - outline, cy - thick / 2 - outline,
+				cx - gap - size - outline + size + outline * 2, cy - thick / 2 - outline + thick + outline * 2);
+			vgui2::surface()->DrawFilledRect(cx - thick / 2 - outline, cy + gap - outline,
+				cx - thick / 2 - outline + thick + outline * 2, cy + gap - outline + size + outline * 2);
+			vgui2::surface()->DrawFilledRect(cx - thick / 2 - outline, cy - gap - size - outline,
+				cx - thick / 2 - outline + thick + outline * 2, cy - gap - size - outline + size + outline * 2);
+		}
+#endif
+
+		vgui2::surface()->DrawSetColor(r, g, b, a);
 
 		// Draw dot
 		if (m_pCustomCrosshair.dot->value)
 		{
+#ifdef USE_VGUI2
+			vgui2::surface()->DrawFilledRect(cx - thick / 2, cy - thick / 2, thick + cx - thick / 2, thick + cy - thick / 2);
+#else
 			FillRGBA(cx - thick / 2, cy - thick / 2, thick, thick, r, g, b, a);
+#endif
 		}
 
-		// Draw outline
-		/*if (outline > 0)
-		{
-			FillRGBA(cx + gap - outline, cy - thick / 2 - outline, size + outline * 2, thick + outline * 2, 32, 32, 32, 255);
-			FillRGBA(cx - gap - size - outline, cy - thick / 2 - outline, size + outline * 2, thick + outline * 2, 32, 32, 32, 255);
-			FillRGBA(cx - thick / 2 - outline, cy + gap - outline, thick + outline * 2, size + outline * 2, 0, 0, 0, 255);
-			FillRGBA(cx - thick / 2 - outline, cy - gap - size - outline, thick + outline * 2, size + outline * 2, 0, 0, 0, 255);
-		}*/
-
 		// Draw crosshair
+#ifdef USE_VGUI2
+		// Use vgui2::ISurface to get rid of nasty color blending caused by FillRGBA
+		vgui2::surface()->DrawFilledRect(cx + gap, cy - thick / 2, cx + gap + size, cy - thick / 2 + thick);
+		vgui2::surface()->DrawFilledRect(cx - gap - size, cy - thick / 2, cx - gap, cy - thick / 2 + thick);
+		vgui2::surface()->DrawFilledRect(cx - thick / 2, cy + gap, cx - thick / 2 + thick, cy + gap + size);
+		if (!t)
+			vgui2::surface()->DrawFilledRect(cx - thick / 2, cy - gap - size, cx - thick / 2 + thick, cy - gap);
+#else
 		FillRGBA(cx + gap, cy - thick / 2, size, thick, r, g, b, a);
 		FillRGBA(cx - gap - size, cy - thick / 2, size, thick, r, g, b, a);
 		FillRGBA(cx - thick / 2, cy + gap, thick, size, r, g, b, a);
 		if (!t)
 			FillRGBA(cx - thick / 2, cy - gap - size, thick, size, r, g, b, a);
+#endif
 	}
 
 	return 1;
