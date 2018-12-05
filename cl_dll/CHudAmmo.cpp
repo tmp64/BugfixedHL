@@ -647,6 +647,7 @@ int CHudAmmo::MsgFunc_CurWeapon(const char *pszName, int iSize, void *pbuf )
 
 void CHudAmmo::UpdateCrosshair()
 {
+	static wrect_t nullrc;
 	if (m_pWeapon == NULL) return;
 
 	if (gHUD.m_iFOV >= 90)
@@ -657,9 +658,7 @@ void CHudAmmo::UpdateCrosshair()
 			SetCrosshair(m_pWeapon->hCrosshair, m_pWeapon->rcCrosshair, 255, 255, 255);
 		else // Disable crosshair because custom one is enabled
 		{
-			wrect_t rc;
-			memset(&rc, 0, sizeof(wrect_t));
-			SetCrosshair(0, rc, 0, 0, 0);
+			SetCrosshair(0, nullrc, 0, 0, 0);
 		}
 	}
 	else
@@ -1001,7 +1000,7 @@ int CHudAmmo::Draw(float flTime)
 	}
 
 	// Draw custom crosshair if enabled
-	if (m_pCustomCrosshair.enable->value && gHUD.m_iFOV >= 90 && !(m_fOnTarget && m_pWeapon->hAutoaim))
+	if (m_pCustomCrosshair.enable->value && !(m_fOnTarget && m_pWeapon->hAutoaim))
 	{
 		int cx = ScreenWidth / 2;
 		int cy = ScreenHeight / 2;
