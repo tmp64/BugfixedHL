@@ -41,6 +41,12 @@ void CHudScoreBoard::Think()
 	}
 }
 
+void CHudScoreBoard::Reset(void)
+{
+	if (m_pScorePanel)
+		m_pScorePanel->Reset();
+}
+
 void CHudScoreBoard::ShowScoreBoard()
 {
 	if (!m_pScorePanel) return;

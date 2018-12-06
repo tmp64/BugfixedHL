@@ -18,6 +18,7 @@ public:
 	int VidInit(void);
 	int Draw(float flTime);
 	void Think();
+	virtual void Reset(void);
 	void ShowScoreBoard();
 	void HideScoreBoard(bool force = false);
 	void UpdateClientInfo(int client);

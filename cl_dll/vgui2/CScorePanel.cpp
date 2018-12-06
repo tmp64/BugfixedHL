@@ -104,6 +104,9 @@ CScorePanel::~CScorePanel()
 //--------------------------------------------------------------
 void CScorePanel::Reset()
 {
+	if (IsVisible())
+		ShowPanel(false);
+	m_mTeamNameToScore.clear();
 }
 
 void CScorePanel::ApplySchemeSettings(vgui2::IScheme * pScheme)
