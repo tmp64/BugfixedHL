@@ -27,6 +27,7 @@
 #include "CAvatarImage.h"
 #include "CPngImage.h"
 #include "CHudScoreBoard.h"
+#include "../vgui_TeamFortressViewport.h"
 
 #ifdef CSCOREBOARD_DEBUG
 #define DebugPrintf ConPrintf
@@ -270,7 +271,13 @@ void CScorePanel::RecalcItems()
 		if (!g_PlayerInfoList[i].name) continue; // Player is not connected
 		int team = g_PlayerExtraInfo[i].teamnumber;
 		m_pClientTeams[i] = team;
-		if (!m_pTeamInfo[team].name[0]) strncpy(m_pTeamInfo[team].name, g_PlayerExtraInfo[i].teamname, MAX_TEAM_NAME);
+		if (!m_pTeamInfo[team].name[0])
+		{
+			if (gViewPort->m_sTeamNames[team][0])
+				strncpy(m_pTeamInfo[team].name, gViewPort->m_sTeamNames[team], MAX_TEAM_NAME);	// Use team name from MsgFunc_TeamNames
+			else
+				strncpy(m_pTeamInfo[team].name, g_PlayerExtraInfo[i].teamname, MAX_TEAM_NAME);	// Use team name from player info
+		}
 		m_pTeamInfo[team].name[MAX_TEAM_NAME - 1] = '\0';
 		m_pTeamInfo[team].players++;
 		m_pTeamInfo[team].kills += g_PlayerExtraInfo[i].frags;
