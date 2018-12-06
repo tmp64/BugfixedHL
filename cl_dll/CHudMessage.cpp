@@ -628,6 +628,7 @@ void CHudMessage::MessageAdd(client_textmessage_t * newMessage )
 		{
 			m_pMessages[i] = newMessage;
 			m_startTime[i] = gHUD.m_flTime;
+			CStrToWide(newMessage->pMessage, m_sMessageStrings[i]);
 			return;
 		}
 	}
