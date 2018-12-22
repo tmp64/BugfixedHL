@@ -370,7 +370,7 @@ void CScorePanel::UpdateClientInfo(int client, bool autoUpdate)
 	KeyValues *playerData = new KeyValues("data");
 	UpdatePlayerAvatar(client, playerData);	// Also updates mute icon
 	playerData->SetInt("client", client);
-	snprintf(buf, 64, "%s%s", g_PlayerInfoList[client].name, (g_IsSpectator[client] ? " (spectator)" : ""));
+	snprintf(buf, 64, "%s%s", g_PlayerInfoList[client].name, (g_IsSpectator[client] ? " ^0(spectator)" : ""));
 	playerData->SetString("name", buf);
 	playerData->SetString("steamid", g_PlayerSteamId[client]);
 	{
