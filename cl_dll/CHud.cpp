@@ -83,7 +83,7 @@ float *GetClientTeamColor(int clientIndex)
 
 int g_iColorsCodes[10][3] = 
 {
-	{ 0xFF, 0xAA, 0x00 },	// ^0 orange
+	{ 0xFF, 0xAA, 0x00 },	// ^0 orange / reset
 	{ 0xFF, 0x00, 0x00 },	// ^1 red
 	{ 0x00, 0xFF, 0x00 },	// ^2 green
 	{ 0xFF, 0xFF, 0x00 },	// ^3 yellow
@@ -92,7 +92,7 @@ int g_iColorsCodes[10][3] =
 	{ 0xFF, 0x00, 0xFF },	// ^6 magenta
 	{ 0x88, 0x88, 0x88 },	// ^7 grey
 	{ 0xFF, 0xFF, 0xFF },	// ^8 white
-							// ^9 con_color
+							// ^9 orange / reset
 };
 
 class CHLVoiceStatusHelper : public IVoiceStatusHelper
@@ -897,6 +897,10 @@ void GetConsoleStringSize(const char *string, int *width, int *height)
 
 int DrawConsoleString(int x, int y, const char *string, float *color)
 {
+	// How colorcodes work in DrawConsoleString
+	// 1) If float *color is set (e.g. team color), it is used, colorcodes are ignored.
+	// 2) Otherwise, colorcodes ^0 and ^9 reset color to con_color.
+
 	if (!string || !*string)
 		return x;
 
@@ -938,12 +942,19 @@ int DrawConsoleString(int x, int y, const char *string, float *color)
 				return x;
 
 			// Setup color
-			if (color == NULL && colorIndex <= 8 && gHUD.m_pCvarColorText->value == 1)
+			if (color == NULL && colorIndex <= 9 && gHUD.m_pCvarColorText->value == 1)
 			{
-				r = g_iColorsCodes[colorIndex][0] / 256.0;
-				g = g_iColorsCodes[colorIndex][1] / 256.0;
-				b = g_iColorsCodes[colorIndex][2] / 256.0;
-				gEngfuncs.pfnDrawSetTextColor(r, g, b);
+				if (colorIndex == 0 || colorIndex == 9)
+				{
+					gEngfuncs.pfnDrawConsoleString(x, y, " ");	// Reset color to con_color
+				}
+				else
+				{
+					r = g_iColorsCodes[colorIndex][0] / 255.0;
+					g = g_iColorsCodes[colorIndex][1] / 255.0;
+					b = g_iColorsCodes[colorIndex][2] / 255.0;
+					gEngfuncs.pfnDrawSetTextColor(r, g, b);
+				}
 			}
 			else if (color != NULL)
 				gEngfuncs.pfnDrawSetTextColor(color[0], color[1], color[2]);
@@ -1007,6 +1018,10 @@ void CenterPrint( const char *string )
 
 int CHud :: DrawHudStringColorCodes(int x, int y, const char *string, int _r, int _g, int _b)
 {
+	// How colorcodes work in DrawHudStringColorCodes
+	// 1) Colorcodes are not ignored.
+	// 2) Codes ^0 and ^9 reset color to _r, _g, _b.
+
 	if (!string || !*string)
 		return x;
 
@@ -1043,9 +1058,19 @@ int CHud :: DrawHudStringColorCodes(int x, int y, const char *string, int _r, in
 				return x;
 
 			// Setup color
-			r = g_iColorsCodes[colorIndex][0];
-			g = g_iColorsCodes[colorIndex][1];
-			b = g_iColorsCodes[colorIndex][2];
+			if (colorIndex == 0 || colorIndex == 9)
+			{
+				// Reset color
+				r = _r;
+				g = _g;
+				b = _b;
+			}
+			else
+			{
+				r = g_iColorsCodes[colorIndex][0];
+				g = g_iColorsCodes[colorIndex][1];
+				b = g_iColorsCodes[colorIndex][2];
+			}
 			continue;
 		}
 

@@ -224,12 +224,9 @@ void CHudMessage::MessageScanNextChar( void )
 	else if ( blend < 0 )
 		blend = 0;
 
-	if (!m_bIsColorCoded)
-	{
-		m_cColorNow.r = m_parms.r = ((srcRed * (255 - blend)) + (destRed * blend)) >> 8;
-		m_cColorNow.g = m_parms.g = ((srcGreen * (255 - blend)) + (destGreen * blend)) >> 8;
-		m_cColorNow.b = m_parms.b = ((srcBlue * (255 - blend)) + (destBlue * blend)) >> 8;
-	}
+	m_parms.r = ((srcRed * (255 - blend)) + (destRed * blend)) >> 8;
+	m_parms.g = ((srcGreen * (255 - blend)) + (destGreen * blend)) >> 8;
+	m_parms.b = ((srcBlue * (255 - blend)) + (destBlue * blend)) >> 8;
 
 	if ( m_parms.pMessage->effect == 1 && m_parms.charTime != 0 )
 	{
@@ -350,7 +347,7 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time, c
 		wLine[m_parms.lineLength] = 0;
 
 		m_parms.x = XPosition(pMessage->x, m_parms.width, m_parms.totalWidth);
-		m_cColorNow = RGBA(m_parms.r, m_parms.g, m_parms.b);
+		m_cColorNow = RGBA(m_parms.pMessage->r1, m_parms.pMessage->g1, m_parms.pMessage->b1);
 		m_bIsColorCoded = false;
 
 		for (j = 0; j < m_parms.lineLength; j++)
@@ -363,8 +360,16 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time, c
 					if (gHUD.m_pCvarColorText->value == 1)
 					{
 						int colorIdx = colorChar - L'0';
-						m_cColorNow = RGBA(g_iColorsCodes[colorIdx][0], g_iColorsCodes[colorIdx][1], g_iColorsCodes[colorIdx][2]);
-						m_bIsColorCoded = true;
+						if (colorIdx == 0 || colorIdx == 9)
+						{
+							m_cColorNow = RGBA(m_parms.r, m_parms.g, m_parms.b);
+							m_bIsColorCoded = false;
+						}
+						else
+						{
+							m_cColorNow = RGBA(g_iColorsCodes[colorIdx][0], g_iColorsCodes[colorIdx][1], g_iColorsCodes[colorIdx][2]);
+							m_bIsColorCoded = true;
+						}
 					}
 					j++;
 					continue;

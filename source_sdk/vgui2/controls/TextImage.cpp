@@ -243,12 +243,15 @@ void TextImage::SetColoredText(const wchar_t *text)
 				int colorId = colorType - L'0';
 				if (_colorCodesArray)	// Make sure we have a pointer to colors
 				{
-					InsertColorChange(idx, SDK_Color(
-						(*_colorCodesArray)[colorId][0],
-						(*_colorCodesArray)[colorId][1],
-						(*_colorCodesArray)[colorId][2],
-						alpha
-					));
+					if (colorId == 0 || colorId == 9)
+						InsertColorChange(idx, SDK_Color(0, 0, 0, 0));	// Transparent color means reset (hack)
+					else
+						InsertColorChange(idx, SDK_Color(
+							(*_colorCodesArray)[colorId][0],
+							(*_colorCodesArray)[colorId][1],
+							(*_colorCodesArray)[colorId][2],
+							alpha
+						));
 				}
 				i++;
 				continue;	// Do not increment idx
