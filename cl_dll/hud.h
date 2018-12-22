@@ -63,6 +63,7 @@ class CHudStatusIcons;
 
 #ifdef USE_VGUI2
 class CHudScoreBoard;
+class CHudTextVgui;
 #endif
 
 //-----------------------------------------------------
@@ -175,6 +176,7 @@ public:
 	std::shared_ptr<CHudScores>			m_Scores = nullptr;
 #ifdef USE_VGUI2
 	std::shared_ptr<CHudScoreBoard>		m_ScoreBoard = nullptr;		// VGUI2 scoreboard
+	std::shared_ptr<CHudTextVgui>		m_TextVgui = nullptr;
 #endif
 
 	//-----------------------------------------------------

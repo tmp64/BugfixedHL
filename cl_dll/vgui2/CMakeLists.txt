@@ -15,6 +15,8 @@ add_sources(
 	CAvatarImage.cpp
 	CHudScoreBoard.h
 	CHudScoreBoard.cpp
+	CHudTextVgui.h
+	CHudTextVgui.cpp
 	CPlayerListPanel.h
 	CPlayerListPanel.cpp
 	CVoiceStatus2.h

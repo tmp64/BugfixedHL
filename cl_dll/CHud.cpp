@@ -57,6 +57,7 @@
 
 #ifdef USE_VGUI2
 #include "vgui2/CHudScoreBoard.h"
+#include "vgui2/CHudTextVgui.h"
 #include "clientsteamcontext.h"
 #include <vgui_controls/TextImage.h>
 #endif
@@ -455,6 +456,7 @@ void CHud :: Init( void )
 	HUD_ELEM_INIT(Scores);
 #ifdef USE_VGUI2
 	HUD_ELEM_INIT(ScoreBoard);
+	HUD_ELEM_INIT(TextVgui);
 #endif
 
 	if (g_iIsAg)
@@ -612,6 +614,7 @@ void CHud :: VidInit( void )
 	m_Scores->VidInit();
 #ifdef USE_VGUI2
 	m_ScoreBoard->VidInit();
+	m_TextVgui->VidInit();
 #endif
 
 	if (g_iIsAg)

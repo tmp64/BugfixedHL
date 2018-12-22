@@ -9,6 +9,16 @@
 #include "IEngineVgui.h"
 #include "CGameUITestPanel.h"
 
+void CHudViewport::ApplySchemeSettings(vgui2::IScheme *pScheme)
+{
+	BaseClass::ApplySchemeSettings(pScheme);
+
+	SetPaintBackgroundEnabled(false);
+
+	extern vgui2::HFont g_HudTextVgui_TextFont;
+	g_HudTextVgui_TextFont = pScheme->GetFont("Default");
+}
+
 void CHudViewport::Start()
 {
 	BaseClass::Start();

@@ -16,12 +16,7 @@ public:
 public:
 	CHudViewport() = default;
 
-	void ApplySchemeSettings( vgui2::IScheme* pScheme ) override
-	{
-		BaseClass::ApplySchemeSettings( pScheme );
-
-		SetPaintBackgroundEnabled( false );
-	}
+	void ApplySchemeSettings( vgui2::IScheme* pScheme ) override;
 
 	void Start() override;
 
