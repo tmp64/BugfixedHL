@@ -13,6 +13,8 @@ public:
 	cvar_t* m_CvarAvatars = nullptr;
 	cvar_t* m_CvarLoss = nullptr;
 	cvar_t* m_CvarEffSort = nullptr;
+	cvar_t* m_CvarEffType = nullptr;
+	cvar_t* m_CvarEffPercent = nullptr;
 
 	int Init(void);
 	int VidInit(void);

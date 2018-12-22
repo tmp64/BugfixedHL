@@ -311,7 +311,17 @@ void CScorePanel::RecalcItems()
 		snprintf(buf, sizeof(buf), "%s (%d/%d, %.0f%%)", m_pTeamInfo[team].name, m_pTeamInfo[team].players, totalPlayerCount, (double)m_pTeamInfo[team].players / totalPlayerCount * 100.0);
 		m_pPlayerList->AddColumnToSection(team, "name", buf, CPlayerListPanel::COLUMN_BRIGHT | CPlayerListPanel::COLUMN_COLORED, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), NAME_WIDTH));
 		m_pPlayerList->AddColumnToSection(team, "steamid", "", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), STEAMID_WIDTH));
-		snprintf(buf, sizeof(buf), "%.2f", (double)m_pTeamInfo[team].kills / (double)(m_pTeamInfo[team].deaths + 1));
+		{
+			double eff;
+			if (gHUD.m_ScoreBoard->m_CvarEffType->value)
+				eff = (double)m_pTeamInfo[team].kills / (double)(m_pTeamInfo[team].deaths + 1);
+			else
+				eff = (double)m_pTeamInfo[team].kills / (double)((m_pTeamInfo[team].deaths == 0) ? 1 : m_pTeamInfo[team].deaths);
+			if (gHUD.m_ScoreBoard->m_CvarEffPercent->value)
+				snprintf(buf, sizeof(buf), "%.0f%%", eff * 100);
+			else
+				snprintf(buf, sizeof(buf), "%.2f", eff);
+		}
 		m_pPlayerList->AddColumnToSection(team, "eff", buf, CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), DEATH_WIDTH));
 		m_pPlayerList->AddColumnToSection(team, "frags", "???", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), SCORE_WIDTH));
 		m_pPlayerList->AddColumnToSection(team, "deaths", "???", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), DEATH_WIDTH));
@@ -363,7 +373,17 @@ void CScorePanel::UpdateClientInfo(int client, bool autoUpdate)
 	snprintf(buf, 64, "%s%s", g_PlayerInfoList[client].name, (g_IsSpectator[client] ? " (spectator)" : ""));
 	playerData->SetString("name", buf);
 	playerData->SetString("steamid", g_PlayerSteamId[client]);
-	snprintf(buf, sizeof(buf), "%.2f", (double)g_PlayerExtraInfo[client].frags / (double)(g_PlayerExtraInfo[client].deaths + 1));
+	{
+		double eff;
+		if (gHUD.m_ScoreBoard->m_CvarEffType->value)
+			eff = (double)g_PlayerExtraInfo[client].frags / (double)(g_PlayerExtraInfo[client].deaths + 1);
+		else
+			eff = (double)g_PlayerExtraInfo[client].frags / (double)((g_PlayerExtraInfo[client].deaths == 0) ? 1 : g_PlayerExtraInfo[client].deaths);
+		if (gHUD.m_ScoreBoard->m_CvarEffPercent->value)
+			snprintf(buf, sizeof(buf), "%.0f%%", eff * 100);
+		else
+			snprintf(buf, sizeof(buf), "%.2f", eff);
+	}
 	playerData->SetString("eff", buf);
 	playerData->SetInt("frags", g_PlayerExtraInfo[client].frags);
 	playerData->SetInt("deaths", g_PlayerExtraInfo[client].deaths);

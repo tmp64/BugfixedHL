@@ -16,6 +16,8 @@ int CHudScoreBoard::Init(void)
 	m_CvarAvatars = CVAR_CREATE("hud_scoreboard_showavatars", "1", FCVAR_ARCHIVE);
 	m_CvarLoss = CVAR_CREATE("hud_scoreboard_showloss", "1", FCVAR_ARCHIVE);
 	m_CvarEffSort = CVAR_CREATE("hud_scoreboard_effsort", "0", FCVAR_ARCHIVE);
+	m_CvarEffType = CVAR_CREATE("hud_scoreboard_efftype", "1", FCVAR_ARCHIVE);
+	m_CvarEffPercent = CVAR_CREATE("hud_scoreboard_effpercent", "0", FCVAR_ARCHIVE);
 	m_iFlags |= HUD_ACTIVE;
 	gHUD.AddHudElem(this);
 	m_pScorePanel = CScorePanel::m_sSingleton;
