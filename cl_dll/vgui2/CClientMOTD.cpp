@@ -1,6 +1,7 @@
 #include <vgui/ILocalize.h>
 #include <vgui_controls/HTML.h>
 #include <vgui_controls/Label.h>
+#include <vgui_controls/RichText.h>
 #include "FileSystem.h"
 #include "strtools.h"
 
@@ -14,6 +15,9 @@
 
 using namespace vgui2;
 
+extern int g_iVisibleMouse;
+void IN_ResetMouse(void);
+
 class CClientMOTDHTML : public vgui2::HTML
 {
 public:
@@ -21,7 +25,7 @@ public:
 };
 
 CClientMOTD::CClientMOTD( IViewport* pParent )
-	: BaseClass( nullptr, "ClientMOTD" )
+	: BaseClass( nullptr, VIEWPORT_PANEL_MOTD )
 	, m_pViewport( pParent )
 	, m_bFileWritten( false )
 	, m_iScoreBoardKey( 0 )
@@ -31,11 +35,12 @@ CClientMOTD::CClientMOTD( IViewport* pParent )
 	strcpy( m_szTempFileName, "motd_temp.html" );
 
 	SetTitle( "", true );
-	SetScheme( "ClientScheme" );
+	SetScheme( "GameScheme" );
 	SetMoveable( false );
 	SetProportional( true );
 
-	m_pMessage = new CClientMOTDHTML( this, "Message" );
+	m_pMessage = new vgui2::RichText( this, "TextMessage" );
+	m_pMessageHtml = new CClientMOTDHTML( this, "Message" );
 
 	LoadControlSettings( UI_RESOURCE_DIR "/MOTD.res" );
 	InvalidateLayout();
@@ -69,6 +74,15 @@ bool CClientMOTD::IsURL( const char* str )
 	return strncmp( str, "http://", 7 ) == 0;
 }
 
+void CClientMOTD::PerformLayout()
+{
+	int x, y;
+	m_pMessageHtml->GetSize(x, y);
+	m_pMessage->SetSize(x, y);
+	m_pMessageHtml->GetPos(x, y);
+	m_pMessage->SetPos(x, y);
+}
+
 void CClientMOTD::OnKeyCodeTyped( vgui2::KeyCode key )
 {
 	if( key == KEY_PAD_ENTER || key == KEY_ENTER )
@@ -82,9 +96,9 @@ void CClientMOTD::OnKeyCodeTyped( vgui2::KeyCode key )
 			//TODO
 			//if( !gViewPort->IsScoreBoardVisible() )
 			{
-				g_pViewport->ShowBackGround( false );
+				//g_pViewport->ShowBackGround( false );
 				//g_pViewport->ShowScoreBoard();
-				SetVisible( false );
+				//SetVisible( false );
 			}
 		}
 		else
@@ -109,18 +123,35 @@ void CClientMOTD::OnCommand( const char* command )
 void CClientMOTD::Close()
 {
 	BaseClass::Close();
-
 	m_pViewport->ShowBackGround( false );
+	g_iVisibleMouse = 0;
+	IN_ResetMouse();
 }
 
 void CClientMOTD::Activate( const char* title, const char* msg )
 {
-	char localURL[ MAX_HTML_FILENAME_LENGTH + 7 ];
-
+	g_iVisibleMouse = 1;
+	m_pMessage->SetVisible(true);
+	m_pMessageHtml->SetVisible(false);
 	BaseClass::Activate();
 
 	SetTitle( title, false );
-	SetControlString( "serverName", title );
+	//SetControlString( "serverName", title );
+
+	m_pMessage->SetText(msg);
+}
+
+void CClientMOTD::ActivateHtml( const char* title, const char* msg )
+{
+	char localURL[ MAX_HTML_FILENAME_LENGTH + 7 ];
+
+	g_iVisibleMouse = 1;
+	m_pMessage->SetVisible(false);
+	m_pMessageHtml->SetVisible(true);
+	BaseClass::Activate();
+
+	SetTitle( title, false );
+	//SetControlString( "serverName", title );
 
 	const char* pszURL = msg;
 
@@ -150,12 +181,13 @@ void CClientMOTD::Activate( const char* title, const char* msg )
 	}
 
 	if( pszURL )
-		m_pMessage->OpenURL( pszURL, nullptr );
+		m_pMessageHtml->OpenURL( pszURL, nullptr );
 
 	if( m_iScoreBoardKey == KEY_NONE )
 		m_iScoreBoardKey = gameUIFuncs()->GetVGUI2KeyCodeForBind( "showscores" );
 }
 
+#if 0
 void CClientMOTD::Activate( const wchar_t* title, const wchar_t* msg )
 {
 	char localURL[ MAX_HTML_FILENAME_LENGTH + 7 ];
@@ -170,7 +202,7 @@ void CClientMOTD::Activate( const wchar_t* title, const wchar_t* msg )
 
 	if( IsURL( ansiURL ) )
 	{
-		m_pMessage->OpenURL( ansiURL, nullptr );
+		m_pMessageHtml->OpenURL( ansiURL, nullptr );
 	}
 	else
 	{
@@ -188,16 +220,18 @@ void CClientMOTD::Activate( const wchar_t* title, const wchar_t* msg )
 			const size_t uiURLLength = strlen( localURL );
 
 			filesystem()->GetLocalPath( m_szTempFileName, localURL + uiURLLength, sizeof( localURL ) - uiURLLength );
-			m_pMessage->OpenURL( localURL, nullptr );
+			m_pMessageHtml->OpenURL( localURL, nullptr );
 		}
 	}
 
 	SetVisible( true );
 }
+#endif
 
 void CClientMOTD::Reset()
 {
-	m_pMessage->OpenURL( "", nullptr );
+	m_pMessageHtml->OpenURL( "", nullptr );
+	m_pMessage->SetText("");
 
 	RemoveTempFile();
 

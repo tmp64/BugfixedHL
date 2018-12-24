@@ -61,6 +61,8 @@
 #ifdef USE_VGUI2
 #include "vgui2/CHudScoreBoard.h"
 #include "vgui2/CScorePanel.h"
+#include "vgui2/CBaseViewport.h"
+#include "vgui2/CClientMOTD.h"
 #endif
 
 extern int g_iVisibleMouse;
@@ -2270,7 +2272,17 @@ int TeamFortressViewport::MsgFunc_MOTD( const char *pszName, int iSize, void *pb
 	// don't show MOTD for HLTV spectators
 	if ( m_iGotAllMOTD && !gEngfuncs.IsSpectateOnly() )
 	{
+#ifdef USE_VGUI2
+		CClientMOTD *panel = dynamic_cast<CClientMOTD *>(g_pViewport->FindPanelByName(VIEWPORT_PANEL_MOTD));
+		if (panel)
+		{
+			panel->Activate(m_szServerName, m_szMOTD);
+		}
+		else
+			ConPrintf("Error! CClientMOTD is nullptr\n");
+#else
 		ShowVGUIMenu( MENU_INTRO );
+#endif
 	}
 
 	return 1;

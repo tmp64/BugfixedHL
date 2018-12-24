@@ -11,6 +11,7 @@ namespace vgui2
 {
 class HTML;
 class Label;
+class RichText;
 }
 
 class CClientMOTD : public vgui2::Frame, public IViewportPanel
@@ -28,13 +29,15 @@ public:
 
 	virtual bool IsURL( const char* str );
 
+	void PerformLayout() override;
 	void OnKeyCodeTyped( vgui2::KeyCode key ) override;
 	void OnCommand( const char* command ) override;
 
 	void Close() override;
 
 	virtual void Activate( const char* title, const char* msg );
-	virtual void Activate( const wchar_t* title, const wchar_t* msg );
+	virtual void ActivateHtml( const char* title, const char* msg );
+	//virtual void Activate( const wchar_t* title, const wchar_t* msg );
 
 	//IViewportPanel overrides
 	const char *GetName() override
@@ -82,7 +85,8 @@ private:
 private:
 	IViewport* m_pViewport;
 
-	vgui2::HTML* m_pMessage;
+	vgui2::RichText* m_pMessage;
+	vgui2::HTML* m_pMessageHtml;
 	vgui2::Label* m_pServerName;
 	bool m_bFileWritten;
 	char m_szTempFileName[ MAX_HTML_FILENAME_LENGTH ];
