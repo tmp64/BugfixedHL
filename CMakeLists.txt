@@ -196,6 +196,11 @@ if ( USE_VGUI2 )
 	)
 endif()
 
+set ( BUGFIXEDAPI_SRCS )
+add_subdirectory( bugfixedapi )
+get_sources( BUGFIXEDAPI_SRCS )
+clear_sources()
+
 #--------------------------------------------------------------------------------------------------------
 # Client library
 #--------------------------------------------------------------------------------------------------------
@@ -373,6 +378,9 @@ endif()
 #Add in the shared sources
 add_sources( "${SHARED_SRCS}" )
 
+# Add BugfixedHL API sources
+add_sources( "${BUGFIXEDAPI_SRCS}" )
+
 #Add in the server directories
 add_subdirectory( game_shared/server )
 add_subdirectory( dlls )
@@ -419,6 +427,7 @@ target_include_directories( hl PRIVATE
 	${SHARED_INCLUDE_PATHS}
 	${SHARED_EXTERNAL_INCLUDE_PATHS}
 	game_shared/server
+	bugfixedapi
 )
 
 target_compile_definitions( hl PRIVATE
@@ -473,3 +482,114 @@ clear_sources()
 #End server library
 #
 
+#--------------------------------------------------------------------------------------------------------
+# BugfixedAPI AMXX module
+#--------------------------------------------------------------------------------------------------------
+
+# Generate appversion.h during configuration before adding any sources
+if ( WIN32 )
+	execute_process( COMMAND ${CMAKE_SOURCE_DIR}/scripts/GenerateAppVersion.bat "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}\\bugfixedapi_amxx\\appversion.h" )
+else()
+	execute_process( COMMAND ${CMAKE_SOURCE_DIR}/scripts/GenerateAppVersion.sh "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}/bugfixedapi_amxx/appversion.h" )
+endif()
+
+#Add in the shared sources
+add_sources( "${SHARED_SRCS}" )
+
+# Add BugfixedHL API sources
+add_sources( "${BUGFIXEDAPI_SRCS}" )
+
+add_subdirectory( bugfixedapi_amxx )
+
+preprocess_sources()
+
+add_library( bugfixedapi_amxx SHARED ${PREP_SRCS} )
+
+# appversion.h generator target
+# A hack to make PRE_BUILD be actually PRE_BUILD on non-MSVC (non-Windows, generally speaking)
+if ( NOT MSVC )
+	add_custom_target( bugfixedapi_amxx_appversion ${CMAKE_SOURCE_DIR}/scripts/GenerateAppVersion.sh "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}/bugfixedapi_amxx/appversion.h" )
+	add_dependencies( bugfixedapi_amxx bugfixedapi_amxx_appversion )
+endif()
+
+if ( WIN32 )
+	# Generate appversion.h before building the library on Windows
+	add_custom_command( TARGET bugfixedapi_amxx
+		PRE_BUILD
+		COMMAND ${CMAKE_SOURCE_DIR}/scripts/GenerateAppVersion.bat "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}\\bugfixedapi_amxx\\appversion.h"
+	)
+	
+    if ( AUTO_DEPLOY )
+	    add_custom_command( TARGET bugfixedapi_amxx
+		    POST_BUILD
+		    COMMAND ${CMAKE_SOURCE_DIR}/scripts/DeployLibs.bat "${CMAKE_SOURCE_DIR}\\scripts\\PublishPathAMXXModules.txt" "$<TARGET_FILE:bugfixedapi_amxx>" "$<TARGET_PDB_FILE:bugfixedapi_amxx>"
+	    )
+    endif()
+else()
+    if ( AUTO_DEPLOY )
+	    add_custom_command( TARGET bugfixedapi_amxx
+		    POST_BUILD
+		    COMMAND ${CMAKE_SOURCE_DIR}/scripts/DeployLibs.sh "${CMAKE_SOURCE_DIR}/scripts/PublishPathAMXXModules.txt" "$<TARGET_FILE:bugfixedapi_amxx>"
+	    )
+    endif()
+endif()
+
+#Needs static CRT to avoid alloc issues.
+configure_msvc_runtime( bugfixedapi_amxx STATIC )
+
+check_winxp_support( bugfixedapi_amxx )
+
+target_include_directories( bugfixedapi_amxx PRIVATE
+	${SHARED_INCLUDE_PATHS}
+	${SHARED_EXTERNAL_INCLUDE_PATHS}
+	bugfixedapi_amxx
+	bugfixedapi
+	metamod-hl1/metamod
+)
+
+target_compile_definitions( bugfixedapi_amxx PRIVATE
+	${SHARED_DEFS}
+	${SHARED_GAME_DEFS}
+	USE_METAMOD
+	HAVE_STDINT_H
+)
+
+#Set the list of platform specific libraries
+if( WIN32 )
+	set( SERVER_PLAT_LIBS )
+else()
+	set( SERVER_PLAT_LIBS dl )
+endif()
+
+#Link with server dependencies
+target_link_libraries( bugfixedapi_amxx 
+	${SERVER_PLAT_LIBS}
+	${SHARED_DEPENDENCIES}
+	${UNIX_FS_LIB}
+)
+
+set( SERVER_LINK_FLAGS )
+
+if( MSVC )
+	
+else()
+	if( NOT APPLE )
+		#Generate a map file that provides information about the linking stage.
+		set( SERVER_LINK_FLAGS
+			${SERVER_LINK_FLAGS} "-Wl,-Map,hl_map.txt "
+		)
+	endif()
+endif()
+
+set_target_properties( bugfixedapi_amxx PROPERTIES
+	COMPILE_FLAGS "${WARNING_LEVEL}" 
+	LINK_FLAGS "${SHARED_GAME_LINKER_FLAGS} ${SERVER_LINK_FLAGS}"
+)
+
+#No lib prefix
+set_target_properties( bugfixedapi_amxx PROPERTIES PREFIX "" )
+
+#Create filters
+create_source_groups( "${CMAKE_SOURCE_DIR}" )
+
+clear_sources()

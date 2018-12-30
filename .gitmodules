@@ -1,0 +1,3 @@
+[submodule "metamod-hl1"]
+	path = metamod-hl1
+	url = https://github.com/alliedmodders/metamod-hl1.git

@@ -40,6 +40,7 @@
 #include "netadr.h"
 #include "path.h"
 #include <ctype.h>
+#include "CBugfixedServer.h"
 
 extern DLL_GLOBAL ULONG		g_ulModelIndexPlayer;
 extern DLL_GLOBAL BOOL		g_fGameOver;
@@ -81,6 +82,7 @@ called when a player connects to a server
 */
 BOOL ClientConnect( edict_t *pEntity, const char *pszName, const char *pszAddress, char szRejectReason[ 128 ] )
 {
+	gBugfixedServer->ClientConnect(pEntity);
 	return g_pGameRules->ClientConnected( pEntity, pszName, pszAddress, szRejectReason );
 
 // a client connecting during an intermission can cause problems
@@ -1981,4 +1983,11 @@ AllowLagCompensation
 int AllowLagCompensation( void )
 {
 	return 1;
+}
+
+// When the pfnQueryClientCvarValue2() completes it will call pfnCvarValue2() with the
+// request ID you supplied earlier, the name of the cvar you requested and the value of that cvar.
+void CvarValue2(const edict_t *pEnt, int requestID, const char *cvarName, const char *value)
+{
+	gBugfixedServer->CvarValueCallback(pEnt, requestID, cvarName, value);
 }

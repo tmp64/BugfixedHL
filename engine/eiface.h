@@ -36,14 +36,14 @@
 // This is conveniently done for them in extdll.h
 //
 
-// Client's DLLEXPORT is defined in cl_dll/dllexport.h and uses __declspec(dllexport) on Windows
-// Server interface uses __stdcall on Windows
+// Client's DLLEXPORT is defined in cl_dll/dllexport.h
 #ifndef CLIENT_DLL
 
 #ifdef _WIN32
-#define DLLEXPORT __stdcall
+#define DLLEXPORT __declspec(dllexport)
 #else
 #define DLLEXPORT __attribute__ ((visibility("default")))
+#define WINAPI /**/
 #endif
 
 #else
@@ -221,9 +221,9 @@ typedef struct enginefuncs_s
 	void		(*pfnRunPlayerMove)			(edict_t *fakeclient, const float *viewangles, float forwardmove, float sidemove, float upmove, unsigned short buttons, byte impulse, byte msec );
 	int			(*pfnNumberOfEntities)		(void);
 	char*		(*pfnGetInfoKeyBuffer)		(edict_t *e);	// passing in NULL gets the serverinfo
-	char*		(*pfnInfoKeyValue)			(char *infobuffer, char *key);
-	void		(*pfnSetKeyValue)			(char *infobuffer, char *key, char *value);
-	void		(*pfnSetClientKeyValue)		(int clientIndex, char *infobuffer, char *key, char *value);
+	char*		(*pfnInfoKeyValue)			(char *infobuffer, const char *key);
+	void		(*pfnSetKeyValue)			(char *infobuffer, const char *key, const char *value);
+	void		(*pfnSetClientKeyValue)		(int clientIndex, char *infobuffer, const char *key, const char *value);
 	int			(*pfnIsMapValid)			(char *filename);
 	void		(*pfnStaticDecal)			( const float *origin, int decalIndex, int entityIndex, int modelIndex );
 	int			(*pfnPrecacheGeneric)		(char* s);

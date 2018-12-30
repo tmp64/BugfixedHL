@@ -249,6 +249,8 @@ public:
 	cvar_t	*m_pCvarShowSteamId;
 	cvar_t	*m_pCvarColorText;
 	cvar_t	*m_pCvarRDynamicEntLight;
+	cvar_t	*m_pCvarVersion;
+	cvar_t	*m_pCvarSupports;
 
 	int m_iFontHeight;
 	int DrawHudNumber(int x, int y, int iFlags, int iNumber, int r, int g, int b);
@@ -262,6 +264,7 @@ public:
 	int CalculateCharWidth(int c);
 	void GetHudColor(int hudPart, int value, int &r, int &g, int &b);
 	float GetHudTransparency();
+	void UpdateSupportsCvar();
 
 	inline const char *GetServerName()
 	{

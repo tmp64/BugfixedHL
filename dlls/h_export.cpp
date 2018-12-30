@@ -22,8 +22,8 @@
 
 #include "extdll.h"
 #include "util.h"
-
 #include "cbase.h"
+#include "CBugfixedServer.h"
 
 // Holds engine functionality callbacks
 enginefuncs_t g_engfuncs;
@@ -46,31 +46,17 @@ BOOL WINAPI DllMain(
 	return TRUE;
 }
 
-void DLLEXPORT GiveFnptrsToDll(	enginefuncs_t* pengfuncsFromEngine, globalvars_t *pGlobals )
-{
-	memcpy(&g_engfuncs, pengfuncsFromEngine, sizeof(enginefuncs_t));
-	gpGlobals = pGlobals;
-
-	char gd[MAX_PATH];
-	GET_GAME_DIR(gd);
-	g_iIsAg = strcmp(gd, "ag") == 0 ? 1 : 0;
-}
-
-
-#else
-
-extern "C" {
-
-void GiveFnptrsToDll(	enginefuncs_t* pengfuncsFromEngine, globalvars_t *pGlobals )
-{
-	memcpy(&g_engfuncs, pengfuncsFromEngine, sizeof(enginefuncs_t));
-	gpGlobals = pGlobals;
-
-	char gd[MAX_PATH];
-	GET_GAME_DIR(gd);
-	g_iIsAg = strcmp(gd, "ag") == 0 ? 1 : 0;
-}
-
-}
-
 #endif
+
+extern "C" void WINAPI GiveFnptrsToDll(enginefuncs_t *pengfuncsFromEngine, globalvars_t *pGlobals )
+{
+	memcpy(&g_engfuncs, pengfuncsFromEngine, sizeof(enginefuncs_t));
+	gpGlobals = pGlobals;
+
+	char gd[MAX_PATH];
+	GET_GAME_DIR(gd);
+	g_iIsAg = strcmp(gd, "ag") == 0 ? 1 : 0;
+
+	// Create CBugfixedServer instance for API
+	gBugfixedServer = new CBugfixedServer(&g_engfuncs, gpGlobals);
+}

@@ -12,6 +12,9 @@
 *   without written permission from Valve LLC.
 *
 ****/
+
+#ifndef HL_UTIL_H
+#define HL_UTIL_H
 //
 // Misc utility code
 //
@@ -79,10 +82,6 @@ typedef int BOOL;
 // In case this ever changes
 #define M_PI			3.14159265358979323846
 
-// Keeps clutter down a bit, when declaring external entity/global method prototypes
-#define DECLARE_GLOBAL_METHOD(MethodName)  extern void DLLEXPORT MethodName( void )
-#define GLOBAL_METHOD(funcname)					void DLLEXPORT funcname(void)
-
 // This is the glue that hooks .MAP entity class names to our CPP classes
 // The _declspec forces them to be exported by name so we can do a lookup with GetProcAddress()
 // The function is used to intialize / allocate the object for the entity
@@ -134,8 +133,11 @@ inline entvars_t *VARS(edict_t *pent)
 }
 
 inline entvars_t* VARS(EOFFSET eoffset)				{ return VARS(ENT(eoffset)); }
-inline int	  ENTINDEX(edict_t *pEdict)			{ return (*g_engfuncs.pfnIndexOfEdict)(pEdict); }
-inline edict_t* INDEXENT( int iEdictNum )		{ return (*g_engfuncs.pfnPEntityOfEntIndex)(iEdictNum); }
+inline int	  ENTINDEX(edict_t *pEdict)				{ return (*g_engfuncs.pfnIndexOfEdict)(pEdict); }
+#ifndef USE_METAMOD		// Metamod provides that overload so disable it in AMXX module to avoid conflicts
+inline int	  ENTINDEX(const edict_t *pEdict)		{ return (*g_engfuncs.pfnIndexOfEdict)(pEdict); }
+#endif
+inline edict_t* INDEXENT( int iEdictNum )			{ return (*g_engfuncs.pfnPEntityOfEntIndex)(iEdictNum); }
 inline void MESSAGE_BEGIN( int msg_dest, int msg_type, const float *pOrigin, entvars_t *ent ) {
 	(*g_engfuncs.pfnMessageBegin)(msg_dest, msg_type, pOrigin, ENT(ent));
 }
@@ -540,3 +542,5 @@ int UTIL_SharedRandomLong( unsigned int seed, int low, int high );
 float UTIL_SharedRandomFloat( unsigned int seed, float low, float high );
 
 float UTIL_WeaponTimeBase( void );
+
+#endif

@@ -34,6 +34,8 @@
 #include "appversion.h"
 #include "memory.h"
 
+#include "../bugfixedapi/IBugfixedServer.h"
+
 //-----------------------------------------------------
 // HUD elements
 //-----------------------------------------------------
@@ -419,6 +421,9 @@ void CHud :: Init( void )
 	m_pCvarShowSteamId = CVAR_CREATE( "hud_showsteamidinscore", "1", FCVAR_ARCHIVE );	// controls whether or not to show SteamId in scoreboard table
 	m_pCvarColorText = CVAR_CREATE( "hud_colortext", "1", FCVAR_ARCHIVE );
 	m_pCvarRDynamicEntLight = CVAR_CREATE("r_dynamic_ent_light", "1", FCVAR_ARCHIVE);
+	m_pCvarVersion = CVAR_CREATE("aghl_version", APP_VERSION, 0);
+	m_pCvarSupports = CVAR_CREATE("aghl_supports", "0", 0);
+	UpdateSupportsCvar();
 
 	cl_lw = gEngfuncs.pfnGetCvarPointer( "cl_lw" );
 
@@ -888,6 +893,18 @@ float CHud::GetHudTransparency()
 	if (hud_draw < 0) hud_draw = 0;
 
 	return hud_draw;
+}
+
+void CHud::UpdateSupportsCvar()
+{
+	E_ClientSupports supports = AGHL_SUPPORTS_NONE;
+#ifdef USE_VGUI2
+	supports |= AGHL_SUPPORTS_UNICODE_MOTD;
+#endif
+
+	char buf[32];
+	snprintf(buf, sizeof(buf), "aghl_supports %u", (unsigned int)supports);
+	ClientCmd(buf);
 }
 
 void GetConsoleStringSize(const char *string, int *width, int *height)

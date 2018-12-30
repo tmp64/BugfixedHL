@@ -7,5 +7,4 @@
 /.vscode
 /BugfixedHL-*.zip
 /BugfixedHL-*.tar.gz
-/scripts/PublishPathClient.txt
-/scripts/PublishPathServer.txt
+/scripts/PublishPath*.txt

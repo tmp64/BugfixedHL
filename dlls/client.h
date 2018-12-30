@@ -61,4 +61,6 @@ extern int	InconsistentFile( const edict_t *player, const char *filename, char *
 
 extern int AllowLagCompensation( void );
 
+extern void CvarValue2(const edict_t *pEnt, int requestID, const char *cvarName, const char *value);
+
 #endif		// CLIENT_H

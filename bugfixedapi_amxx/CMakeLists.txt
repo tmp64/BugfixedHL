@@ -1,0 +1,11 @@
+add_sources(
+	../dlls/globals.cpp
+	amxxmodule.cpp
+	amxxmodule.h
+	moduleconfig.h
+	IGameConfigs.h
+	ITextParsers.h
+	bugfixedapi_amxx.cpp
+	bugfixedapi_amxx.def
+	appversion.h
+)
