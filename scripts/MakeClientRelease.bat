@@ -10,7 +10,8 @@
 SET BUILD_DIR=build_auto_client
 SET APPVERSION_PATH=..\cl_dll\appversion.h
 SET SUFFIX=client
-SET TARGET_FILE=Release\client.dll
+SET TARGET_FILE=RelWithDebInfo\client.dll
+SET TARGET_FILE_PDB=RelWithDebInfo\client.pdb
 SET MAKE_TARGET=client
 SET CMAKE_OPTIONS=
 SET MS_BUILD="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\MSBuild.exe"
@@ -38,7 +39,7 @@ IF NOT EXIST "BugfixedHL.sln" (
 :: Build
 ::
 echo ---------------- Building target %MAKE_TARGET%
-%MS_BUILD% BugfixedHL.sln /t:%MAKE_TARGET% /p:PlatformTarget=x86 /p:Configuration=Release
+%MS_BUILD% BugfixedHL.sln /t:%MAKE_TARGET% /p:PlatformTarget=x86 /p:Configuration=RelWithDebInfo
 
 IF NOT EXIST "%TARGET_FILE%" (
 	echo Error! %TARGET_FILE% was not created by the compiler. Check error log, fix the errors and run the script again.
@@ -86,6 +87,7 @@ RMDIR /s /q %TMPDIR%\ui
 :: Copy target file
 IF NOT EXIST "%TMPDIR%\cl_dlls" MKDIR "%TMPDIR%\cl_dlls"
 COPY /y "%TARGET_FILE%" "%TMPDIR%\cl_dlls\client.dll"
+COPY /y "%TARGET_FILE_PDB%" "%TMPDIR%\cl_dlls\client.pdb"
 COPY ..\README.md "%TMPDIR%\README.txt"
 
 ::

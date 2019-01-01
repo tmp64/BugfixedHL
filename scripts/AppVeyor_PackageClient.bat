@@ -1,5 +1,6 @@
 SET APPVERSION_PATH=..\cl_dll\appversion.h
-SET TARGET_FILE=Release\client.dll
+SET TARGET_FILE=RelWithDebInfo\client.dll
+SET TARGET_FILE_PDB=RelWithDebInfo\client.pdb
 SET SUFFIX=client
 
 ::
@@ -43,6 +44,7 @@ RMDIR /s /q %TMPDIR%\ui
 :: Copy target file
 IF NOT EXIST "%TMPDIR%\cl_dlls" MKDIR "%TMPDIR%\cl_dlls"
 COPY /y "%TARGET_FILE%" "%TMPDIR%\cl_dlls\client.dll"
+COPY /y "%TARGET_FILE_PDB%" "%TMPDIR%\cl_dlls\client.pdb"
 
 ::
 :: Create ZIP
