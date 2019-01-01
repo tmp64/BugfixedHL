@@ -76,6 +76,7 @@ bool CClientMOTD::IsURL( const char* str )
 
 void CClientMOTD::PerformLayout()
 {
+	BaseClass::PerformLayout();
 	int x, y;
 	m_pMessageHtml->GetSize(x, y);
 	m_pMessage->SetSize(x, y);
