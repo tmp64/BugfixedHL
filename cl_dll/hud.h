@@ -240,6 +240,9 @@ public:
 	int		m_iFOV;
 	int		m_Teamplay;
 	int		m_iRes;
+#ifdef USE_VGUI2
+	bool	m_bIsHtmlMotdEnabled = true;
+#endif
 	cvar_t	*m_pCvarBunnyHop;
 	cvar_t	*m_pCvarStealMouse;
 	cvar_t	*m_pCvarDraw;
@@ -251,6 +254,9 @@ public:
 	cvar_t	*m_pCvarRDynamicEntLight;
 	cvar_t	*m_pCvarVersion;
 	cvar_t	*m_pCvarSupports;
+#ifdef USE_VGUI2
+	cvar_t	*m_pCvarEnableHtmlMotd;
+#endif
 
 	int m_iFontHeight;
 	int DrawHudNumber(int x, int y, int iFlags, int iNumber, int r, int g, int b);

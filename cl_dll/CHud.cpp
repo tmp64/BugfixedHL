@@ -301,6 +301,15 @@ int __MsgFunc_MOTD(const char *pszName, int iSize, void *pbuf)
 	return 0;
 }
 
+#ifdef USE_VGUI2
+int __MsgFunc_HtmlMOTD(const char *pszName, int iSize, void *pbuf)
+{
+	if (gViewPort)
+		return gViewPort->MsgFunc_HtmlMOTD(pszName, iSize, pbuf);
+	return 0;
+}
+#endif
+
 int __MsgFunc_BuildSt(const char *pszName, int iSize, void *pbuf)
 {
 	if (gViewPort)
@@ -385,6 +394,9 @@ void CHud :: Init( void )
 	HOOK_MESSAGE( Feign );
 	HOOK_MESSAGE( Detpack );
 	HOOK_MESSAGE( MOTD );
+#ifdef USE_VGUI2
+	HOOK_MESSAGE( HtmlMOTD );
+#endif
 	HOOK_MESSAGE( BuildSt );
 	HOOK_MESSAGE( RandomPC );
 	HOOK_MESSAGE( ServerName );
@@ -423,6 +435,9 @@ void CHud :: Init( void )
 	m_pCvarRDynamicEntLight = CVAR_CREATE("r_dynamic_ent_light", "1", FCVAR_ARCHIVE);
 	m_pCvarVersion = CVAR_CREATE("aghl_version", APP_VERSION, 0);
 	m_pCvarSupports = CVAR_CREATE("aghl_supports", "0", 0);
+#ifdef USE_VGUI2
+	m_pCvarEnableHtmlMotd = CVAR_CREATE("cl_enable_html_motd", "1", 0);
+#endif
 	UpdateSupportsCvar();
 
 	cl_lw = gEngfuncs.pfnGetCvarPointer( "cl_lw" );
@@ -900,6 +915,7 @@ void CHud::UpdateSupportsCvar()
 	E_ClientSupports supports = AGHL_SUPPORTS_NONE;
 #ifdef USE_VGUI2
 	supports |= AGHL_SUPPORTS_UNICODE_MOTD;
+	if (m_bIsHtmlMotdEnabled) supports |= AGHL_SUPPORTS_HTML_MOTD;
 #endif
 
 	char buf[32];

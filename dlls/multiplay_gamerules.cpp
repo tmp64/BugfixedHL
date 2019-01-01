@@ -30,11 +30,14 @@
 
 #include	<ctype.h>
 
+#include	<CBugfixedServer.h>
+
 extern DLL_GLOBAL CGameRules	*g_pGameRules;
 extern DLL_GLOBAL BOOL	g_fGameOver;
 extern int gmsgDeathMsg;	// client dll messages
 extern int gmsgScoreInfo;
 extern int gmsgMOTD;
+extern int gmsgHtmlMOTD;
 extern int gmsgServerName;
 
 extern int g_teamplay;
@@ -502,7 +505,13 @@ void CHalfLifeMultiplay :: InitHUD( CBasePlayer *pl )
 		WRITE_BYTE( pl->IsObserver() );
 	MESSAGE_END();
 
-	SendMOTDToClient( pl->edict() );
+	E_ClientSupports supports = gBugfixedServer->GetPlayerSupports(ENTINDEX(pl->edict()));
+	if (supports & AGHL_SUPPORTS_HTML_MOTD)
+		SendHtmlMOTDToClient(pl->edict());
+	else if (supports & AGHL_SUPPORTS_UNICODE_MOTD)
+		SendUnicodeMOTDToClient(pl->edict());
+	else
+		SendMOTDToClient(pl->edict());
 
 	// loop through all active players and send their score and team info to the new client
 	for ( int i = 1; i <= gpGlobals->maxClients; i++ )
@@ -1794,5 +1803,109 @@ void CHalfLifeMultiplay :: SendMOTDToClient( edict_t *client )
 
 	FREE_FILE( aFileList );
 }
-	
 
+#define MAX_UNICODE_MOTD_LENGTH   (MAX_MOTD_LENGTH * 2) // Some Unicode charachters take two or more bytes in UTF8
+
+void CHalfLifeMultiplay::SendUnicodeMOTDToClient(edict_t *client)
+{
+	// read from the MOTD.txt file
+	int length, char_count = 0;
+	char *pFileList;
+	char *aFileList = pFileList = (char*)LOAD_FILE_FOR_ME((char *)CVAR_GET_STRING("motdfile_unicode"), &length);
+
+	if (!pFileList)		// File doesn't exist, send default MOTD
+	{
+		SendMOTDToClient(client);
+		return;
+	}
+
+	// send the server name
+	MESSAGE_BEGIN(MSG_ONE, gmsgServerName, NULL, client);
+	WRITE_STRING(CVAR_GET_STRING("hostname"));
+	MESSAGE_END();
+
+	// Send the message of the day
+	// read it chunk-by-chunk,  and send it in parts
+
+	while (pFileList && *pFileList && char_count < MAX_UNICODE_MOTD_LENGTH)
+	{
+		char chunk[MAX_MOTD_CHUNK + 1];
+
+		if (strlen(pFileList) < MAX_MOTD_CHUNK)
+		{
+			strcpy(chunk, pFileList);
+		}
+		else
+		{
+			strncpy(chunk, pFileList, MAX_MOTD_CHUNK);
+			chunk[MAX_MOTD_CHUNK] = 0;		// strncpy doesn't always append the null terminator
+		}
+
+		char_count += strlen(chunk);
+		if (char_count < MAX_UNICODE_MOTD_LENGTH)
+			pFileList = aFileList + char_count;
+		else
+			*pFileList = 0;
+
+		MESSAGE_BEGIN(MSG_ONE, gmsgMOTD, NULL, client);
+		WRITE_BYTE(*pFileList ? FALSE : TRUE);	// FALSE means there is still more message to come
+		WRITE_STRING(chunk);
+		MESSAGE_END();
+	}
+
+	FREE_FILE(aFileList);
+}
+
+void CHalfLifeMultiplay::SendHtmlMOTDToClient(edict_t *client)
+{
+	// read from the MOTD.txt file
+	int length, char_count = 0;
+	char *pFileList;
+	char *aFileList = pFileList = (char*)LOAD_FILE_FOR_ME((char *)CVAR_GET_STRING("motdfile_html"), &length);
+
+	if (!pFileList)		// File doesn't exist, send unicode or default MOTD
+	{
+		E_ClientSupports supports = gBugfixedServer->GetPlayerSupports(ENTINDEX(client));
+		if (supports & AGHL_SUPPORTS_UNICODE_MOTD)
+			SendUnicodeMOTDToClient(client);
+		else
+			SendMOTDToClient(client);
+		return;
+	}
+
+	// send the server name
+	MESSAGE_BEGIN(MSG_ONE, gmsgServerName, NULL, client);
+	WRITE_STRING(CVAR_GET_STRING("hostname"));
+	MESSAGE_END();
+
+	// Send the message of the day
+	// read it chunk-by-chunk,  and send it in parts
+
+	while (pFileList && *pFileList && char_count < MAX_UNICODE_MOTD_LENGTH)
+	{
+		char chunk[MAX_MOTD_CHUNK + 1];
+
+		if (strlen(pFileList) < MAX_MOTD_CHUNK)
+		{
+			strcpy(chunk, pFileList);
+		}
+		else
+		{
+			strncpy(chunk, pFileList, MAX_MOTD_CHUNK);
+			chunk[MAX_MOTD_CHUNK] = 0;		// strncpy doesn't always append the null terminator
+		}
+
+		char_count += strlen(chunk);
+		if (char_count < MAX_UNICODE_MOTD_LENGTH)
+			pFileList = aFileList + char_count;
+		else
+			*pFileList = 0;
+
+		MESSAGE_BEGIN(MSG_ONE, gmsgHtmlMOTD, NULL, client);
+		WRITE_BYTE(*pFileList ? FALSE : TRUE);	// FALSE means there is still more message to come
+		WRITE_STRING(chunk);
+		MESSAGE_END();
+	}
+
+	FREE_FILE(aFileList);
+}

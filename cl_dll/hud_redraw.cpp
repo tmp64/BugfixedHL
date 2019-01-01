@@ -88,6 +88,15 @@ void CHud::Think(void)
 
 	// Refresh bunnyhop
 	g_bBunnyHop = m_pCvarBunnyHop->value != 0.0;
+
+	// Update aghl_supports cvar
+#ifdef USE_VGUI2
+	if (!!m_pCvarEnableHtmlMotd->value != m_bIsHtmlMotdEnabled)
+	{
+		m_bIsHtmlMotdEnabled = !!m_pCvarEnableHtmlMotd->value;
+		UpdateSupportsCvar();
+	}
+#endif
 }
 
 // Redraw

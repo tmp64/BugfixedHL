@@ -29,6 +29,7 @@
 
 #define MAX_HUD_STRING			80
 #define MAX_MOTD_LENGTH			1536
+#define MAX_UNICODE_MOTD_LENGTH (MAX_MOTD_LENGTH * 2)	// Some Unicode charachters take two or more bytes in UTF8
 #define MAX_STEAMID				32	// 0:0:4294967295, STEAM_ID_PENDING
 #define MAX_MAP_NAME			64
 

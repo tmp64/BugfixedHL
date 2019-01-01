@@ -2288,6 +2288,41 @@ int TeamFortressViewport::MsgFunc_MOTD( const char *pszName, int iSize, void *pb
 	return 1;
 }
 
+#ifdef USE_VGUI2
+int TeamFortressViewport::MsgFunc_HtmlMOTD(const char *pszName, int iSize, void *pbuf)
+{
+	if (m_iGotAllHtmlMotd)
+		m_szHtmlMotd[0] = 0;
+
+	BEGIN_READ(pbuf, iSize);
+
+	m_iGotAllHtmlMotd = READ_BYTE();
+
+	int roomInArray = sizeof(m_szHtmlMotd) - strlen(m_szHtmlMotd) - 1;
+
+	strncat(m_szHtmlMotd, READ_STRING(), roomInArray >= 0 ? roomInArray : 0);
+	m_szHtmlMotd[sizeof(m_szHtmlMotd) - 1] = '\0';
+
+	// don't show MOTD for HLTV spectators
+	if (m_iGotAllHtmlMotd && !gEngfuncs.IsSpectateOnly())
+	{
+
+		CClientMOTD *panel = dynamic_cast<CClientMOTD *>(g_pViewport->FindPanelByName(VIEWPORT_PANEL_MOTD));
+		if (panel)
+		{
+			if (gHUD.m_bIsHtmlMotdEnabled)
+				panel->ActivateHtml(m_szServerName, m_szHtmlMotd);
+			else
+				panel->Activate(m_szServerName, m_szHtmlMotd);
+		}
+		else
+			ConPrintf("Error! CClientMOTD is nullptr\n");
+	}
+
+	return 1;
+}
+#endif
+
 int TeamFortressViewport::MsgFunc_BuildSt( const char *pszName, int iSize, void *pbuf )
 {
 	BEGIN_READ( pbuf, iSize );

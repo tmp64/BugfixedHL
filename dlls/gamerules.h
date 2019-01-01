@@ -355,6 +355,8 @@ protected:
 	float m_flIntermissionEndTime;
 	BOOL m_iEndIntermissionButtonHit;
 	void SendMOTDToClient( edict_t *client );
+	void SendUnicodeMOTDToClient( edict_t *client );
+	void SendHtmlMOTDToClient( edict_t *client );
 };
 
 extern DLL_GLOBAL CGameRules*	g_pGameRules;
