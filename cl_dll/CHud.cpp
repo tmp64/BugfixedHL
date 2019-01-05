@@ -56,6 +56,7 @@
 #include "CHudTimer.h"
 #include "CHudScores.h"
 #include "CHudStatusIcons.h"
+#include "CHudCrosshair.h"
 
 #ifdef USE_VGUI2
 #include "vgui2/CHudScoreBoard.h"
@@ -474,6 +475,7 @@ void CHud :: Init( void )
 	HUD_ELEM_INIT(StatusIcons);
 	HUD_ELEM_INIT(Timer);
 	HUD_ELEM_INIT(Scores);
+	HUD_ELEM_INIT(Crosshair);
 #ifdef USE_VGUI2
 	HUD_ELEM_INIT(ScoreBoard);
 	HUD_ELEM_INIT(TextVgui);
@@ -632,6 +634,7 @@ void CHud :: VidInit( void )
 	m_StatusIcons->VidInit();
 	m_Timer->VidInit();
 	m_Scores->VidInit();
+	m_Crosshair->VidInit();
 #ifdef USE_VGUI2
 	m_ScoreBoard->VidInit();
 	m_TextVgui->VidInit();

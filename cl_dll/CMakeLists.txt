@@ -38,6 +38,8 @@ add_sources(
     CHudBattery.cpp
     CHudBattery.h
     CHud.cpp
+	CHudCrosshair.h
+	CHudCrosshair.cpp
     CHudDeathNotice.cpp
     CHudDeathNotice.h
     CHudFlashlight.cpp

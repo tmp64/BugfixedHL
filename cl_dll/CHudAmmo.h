@@ -4,6 +4,8 @@
 #include "CHudBase.h"
 #include "ammo.h"
 
+class CHudCrosshair;
+
 class CHudAmmo : public CHudBase
 {
 public:
@@ -48,23 +50,7 @@ private:
 
 	cvar_t	*m_pCvarHudWeapon;
 
-	// Custom crosshair cvars
-	struct custom_crosshair_cvars_t
-	{
-		cvar_t *enable;
-		cvar_t *red;
-		cvar_t *green;
-		cvar_t *blue;
-		cvar_t *gap;
-		cvar_t *size;
-		cvar_t *thickness;
-#ifdef USE_VGUI2
-		cvar_t *outline_thickness;
-#endif
-		cvar_t *dot;
-		cvar_t *t;
-	};
-	custom_crosshair_cvars_t m_pCustomCrosshair;
+	friend class CHudCrosshair;
 };
 
 #endif

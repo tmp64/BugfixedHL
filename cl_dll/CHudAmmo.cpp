@@ -30,11 +30,7 @@
 #include "ammohistory.h"
 #include "vgui_TeamFortressViewport.h"
 #include "CHudMenu.h"
-
-#ifdef USE_VGUI2
-#include <vgui/ISurface.h>
-#include <vgui_controls/Controls.h>
-#endif
+#include "CHudCrosshair.h"
 
 WEAPON *gpActiveSel;	// NULL means off, 1 means just the menu bar, otherwise
 						// this points to the active weapon menu item
@@ -304,20 +300,6 @@ int CHudAmmo::Init(void)
 	CVAR_CREATE( "hud_drawhistory_time", HISTORY_DRAW_TIME, 0 );
 	CVAR_CREATE( "hud_fastswitch", "0", FCVAR_ARCHIVE );		// controls whether or not weapons can be selected in one keypress
 	m_pCvarHudWeapon = CVAR_CREATE( "hud_weapon", "0", FCVAR_ARCHIVE );			// controls displaying sprite of currently selected weapon
-
-	// Custom crosshair cvars
-	m_pCustomCrosshair.enable		= CVAR_CREATE("cl_crosshair_custom", "0", FCVAR_ARCHIVE);
-	m_pCustomCrosshair.red			= CVAR_CREATE("cl_crosshair_red", "0", FCVAR_ARCHIVE);
-	m_pCustomCrosshair.green		= CVAR_CREATE("cl_crosshair_green", "255", FCVAR_ARCHIVE);
-	m_pCustomCrosshair.blue			= CVAR_CREATE("cl_crosshair_blue", "255", FCVAR_ARCHIVE);
-	m_pCustomCrosshair.gap			= CVAR_CREATE("cl_crosshair_gap", "8", FCVAR_ARCHIVE);
-	m_pCustomCrosshair.size			= CVAR_CREATE("cl_crosshair_size", "6", FCVAR_ARCHIVE);
-	m_pCustomCrosshair.thickness	= CVAR_CREATE("cl_crosshair_thickness", "2", FCVAR_ARCHIVE);
-#ifdef USE_VGUI2
-	m_pCustomCrosshair.outline_thickness = CVAR_CREATE("cl_crosshair_outline_thickness", "0", FCVAR_ARCHIVE);
-#endif
-	m_pCustomCrosshair.dot			= CVAR_CREATE("cl_crosshair_dot", "0", FCVAR_ARCHIVE);
-	m_pCustomCrosshair.t			= CVAR_CREATE("cl_crosshair_t", "0", FCVAR_ARCHIVE);
 
 	m_iFlags |= HUD_ACTIVE; //!!!
 
@@ -655,17 +637,21 @@ int CHudAmmo::MsgFunc_CurWeapon(const char *pszName, int iSize, void *pbuf )
 void CHudAmmo::UpdateCrosshair()
 {
 	static wrect_t nullrc;
-	if (m_pWeapon == NULL) return;
-
+	if (m_pWeapon == NULL)
+	{
+		SetCrosshair(0, nullrc, 0, 0, 0);
+		return;
+	}
 	if (gHUD.m_iFOV >= 90)
 	{ // normal crosshairs
 		if (m_fOnTarget && m_pWeapon->hAutoaim)
 			SetCrosshair(m_pWeapon->hAutoaim, m_pWeapon->rcAutoaim, 255, 255, 255);
-		else if(!m_pCustomCrosshair.enable->value)
-			SetCrosshair(m_pWeapon->hCrosshair, m_pWeapon->rcCrosshair, 255, 255, 255);
-		else // Disable crosshair because custom one is enabled
+		else
 		{
-			SetCrosshair(0, nullrc, 0, 0, 0);
+			if (!gHUD.m_Crosshair->m_CustomCrosshair.enable->value)
+				SetCrosshair(m_pWeapon->hCrosshair, m_pWeapon->rcCrosshair, 255, 255, 255);
+			else // Disable crosshair because custom one is enabled
+				SetCrosshair(0, nullrc, 0, 0, 0);
 		}
 	}
 	else
@@ -1004,71 +990,6 @@ int CHudAmmo::Draw(float flTime)
 			int iOffset = (m_pWeapon->rcAmmo2.bottom - m_pWeapon->rcAmmo2.top)/8;
 			SPR_DrawAdditive(0, x, y - iOffset, &m_pWeapon->rcAmmo2);
 		}
-	}
-
-	// Draw custom crosshair if enabled
-	if (m_pCustomCrosshair.enable->value && !(m_fOnTarget && m_pWeapon->hAutoaim))
-	{
-		int cx = ScreenWidth / 2;
-		int cy = ScreenHeight / 2;
-		int r = m_pCustomCrosshair.red->value;
-		int g = m_pCustomCrosshair.green->value;
-		int b = m_pCustomCrosshair.blue->value;
-		int a = 255;
-		int gap = m_pCustomCrosshair.gap->value / 2;
-		int thick = m_pCustomCrosshair.thickness->value;
-		int size = m_pCustomCrosshair.size->value;
-		bool t = m_pCustomCrosshair.t->value;
-
-		// Outline can only be drawn using vgui2 because FillRGBA can't draw anything in black
-#ifdef USE_VGUI2
-		int outline = m_pCustomCrosshair.outline_thickness->value;
-
-		// Draw outline
-		if (outline > 0)
-		{
-			// Don't read that if you don't want eye cancer
-			vgui2::surface()->DrawSetColor(0, 0, 0, a);
-			vgui2::surface()->DrawFilledRect(cx + gap - outline, cy - thick / 2 - outline,
-				cx + gap - outline + size + outline * 2, cy - thick / 2 - outline + thick + outline * 2);
-			vgui2::surface()->DrawFilledRect(cx - gap - size - outline, cy - thick / 2 - outline,
-				cx - gap - size - outline + size + outline * 2, cy - thick / 2 - outline + thick + outline * 2);
-			vgui2::surface()->DrawFilledRect(cx - thick / 2 - outline, cy + gap - outline,
-				cx - thick / 2 - outline + thick + outline * 2, cy + gap - outline + size + outline * 2);
-			vgui2::surface()->DrawFilledRect(cx - thick / 2 - outline, cy - gap - size - outline,
-				cx - thick / 2 - outline + thick + outline * 2, cy - gap - size - outline + size + outline * 2);
-		}
-#endif
-
-#ifdef USE_VGUI2
-		vgui2::surface()->DrawSetColor(r, g, b, a);
-#endif
-
-		// Draw dot
-		if (m_pCustomCrosshair.dot->value)
-		{
-#ifdef USE_VGUI2
-			vgui2::surface()->DrawFilledRect(cx - thick / 2, cy - thick / 2, thick + cx - thick / 2, thick + cy - thick / 2);
-#else
-			FillRGBA(cx - thick / 2, cy - thick / 2, thick, thick, r, g, b, a);
-#endif
-		}
-
-		// Draw crosshair
-#ifdef USE_VGUI2
-		// Use vgui2::ISurface to get rid of nasty color blending caused by FillRGBA
-		vgui2::surface()->DrawFilledRect(cx + gap, cy - thick / 2, cx + gap + size, cy - thick / 2 + thick);
-		vgui2::surface()->DrawFilledRect(cx - gap - size, cy - thick / 2, cx - gap, cy - thick / 2 + thick);
-		vgui2::surface()->DrawFilledRect(cx - thick / 2, cy + gap, cx - thick / 2 + thick, cy + gap + size);
-		if (!t)
-			vgui2::surface()->DrawFilledRect(cx - thick / 2, cy - gap - size, cx - thick / 2 + thick, cy - gap);
-#else
-		FillRGBA(cx + gap, cy - thick / 2, size, thick, r, g, b, a);
-		FillRGBA(cx - gap - size, cy - thick / 2, size, thick, r, g, b, a);
-		FillRGBA(cx - thick / 2, cy + gap, thick, size, r, g, b, a);
-		if (!t)
-			FillRGBA(cx - thick / 2, cy - gap - size, thick, size, r, g, b, a);
-#endif
 	}
 
 	return 1;
