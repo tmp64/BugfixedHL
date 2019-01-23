@@ -333,15 +333,13 @@ set ( CLIENT_COMPILE_FLAGS )
 if( MSVC )
 	set( CLIENT_LINK_FLAGS "${CLIENT_LINK_FLAGS} " )
 elseif( NOT APPLE )
-	# Link statically with standart libraries to avoid any issues
-	# May be overkill
 	set( CLIENT_COMPILE_FLAGS
-		${CLIENT_COMPILE_FLAGS} "-static-libgcc -static-libstdc++"
+		${CLIENT_COMPILE_FLAGS} ""
 	)
 
 	#Generate a map file that provides information about the linking stage.
 	set( CLIENT_LINK_FLAGS
-		${CLIENT_LINK_FLAGS} "-Wl,-Map,client_map.txt -static-libgcc -static-libstdc++ -fno-stack-protector"
+		${CLIENT_LINK_FLAGS} "-Wl,-Map,client_map.txt -fno-stack-protector"
 	)
 endif()
 
