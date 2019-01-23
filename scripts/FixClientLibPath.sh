@@ -2,6 +2,19 @@
 
 # Usage: FixClientLibPath.sh [path to client.so]
 
+# Purpose: for some reason ld writes full absolute path to .so to the resulting ELF binary.
+# That causes dynamic linker to look for that file in the location it was when compiling
+# instead of the game directory.
+#
+# Example:
+# $ ldd client.so
+# ...
+# /home/tmp64/projects/HL_Dev/BugfixedHL/lib/public/libtier0.so (0xf7900000)
+# libtier0.so => not found
+# ...
+# See that full path?
+# This script replaces it with just lib_name.so (libtier0.so in that case)
+
 LIB=$1
 
 if [ -z "$LIB" ]; then
@@ -28,25 +41,26 @@ if [ ! -f "$LIB" ]; then
 fi
 
 # Fix vgui.so
-ORIGINAL=$(ldd ${LIB} | grep vgui.so | awk -F" " '{print $1}')
+ORIGINAL=$(ldd ${LIB} | grep -m 1 vgui.so | awk -F" " '{print $1}')
 if [ ! -z "$ORIGINAL" ]; then
-    echo "[${LIB}] Fixing vgui.so path"
     REPLACEMENT="vgui.so"
+    echo "[${LIB}] ${ORIGINAL} -> ${REPLACEMENT}"
     $PATCHELF --replace-needed ${ORIGINAL} ${REPLACEMENT} ${LIB}
 fi
 
 # Fix libtier0.so
-ORIGINAL=$(ldd ${LIB} | grep libtier0.so | awk -F" " '{print $1}')
+ORIGINAL=$(ldd ${LIB} | grep -m 1 libtier0.so | awk -F" " '{print $1}')
 if [ ! -z "$ORIGINAL" ]; then
-    echo "[${LIB}] Fixing libtier0.so path"
     REPLACEMENT="libtier0.so"
+    echo "[${LIB}] ${ORIGINAL} -> ${REPLACEMENT}"
     $PATCHELF --replace-needed ${ORIGINAL} ${REPLACEMENT} ${LIB}
 fi
 
 # Fix libvstdlib.so
-ORIGINAL=$(ldd ${LIB} | grep libvstdlib.so | awk -F" " '{print $1}')
+ORIGINAL=$(ldd ${LIB} | grep -m 1 libvstdlib.so | awk -F" " '{print $1}')
 if [ ! -z "$ORIGINAL" ]; then
-    echo "[${LIB}] Fixing libvstdlib.so path"
     REPLACEMENT="libvstdlib.so"
+    echo "[${LIB}] ${ORIGINAL} -> ${REPLACEMENT}"
     $PATCHELF --replace-needed ${ORIGINAL} ${REPLACEMENT} ${LIB}
 fi
+
