@@ -125,8 +125,10 @@ endif()
 if( MSVC )
 	set( WARNING_LEVEL " " )
 else()
-	set( WARNING_LEVEL "-Wno-write-strings -Wno-unknown-pragmas -Wno-endif-labels -Wno-switch -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-value" )
-    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-delete-non-virtual-dtor" )
+	set( WARNING_LEVEL "-Wno-write-strings -Wno-unknown-pragmas -Wno-endif-labels -Wno-switch -Wno-unused-variable" )
+	set( WARNING_LEVEL "${WARNING_LEVEL} -Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-value" )
+	set( WARNING_LEVEL "${WARNING_LEVEL} -Wno-pointer-arith" )
+    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-delete-non-virtual-dtor -Wno-invalid-offsetof -Wno-conversion-null" )
 endif()
 
 #Shared directories
