@@ -588,6 +588,9 @@ set_target_properties( bugfixedapi_amxx PROPERTIES
 
 #No lib prefix
 set_target_properties( bugfixedapi_amxx PROPERTIES PREFIX "" )
+if ( NOT MSVC )
+	set_target_properties( bugfixedapi_amxx PROPERTIES OUTPUT_NAME "bugfixedapi_amxx_i386" )
+endif()
 
 #Create filters
 create_source_groups( "${CMAKE_SOURCE_DIR}" )

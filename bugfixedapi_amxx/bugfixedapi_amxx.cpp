@@ -3,7 +3,7 @@
 #ifdef _WIN32
 #include <Windows.h>
 #else
-// TODO
+#include <dlfcn.h>
 #endif
 
 static IBugfixedServer *gServer = nullptr;
@@ -105,6 +105,8 @@ AMX_NATIVE_INFO bugfixedapi_Exports[] =
 
 bool GetInterfaceFromServer()
 {
+    GetServerInterfaceFunc pIfaceFunc = nullptr;
+    
 #ifdef _WIN32
 	HMODULE hSrvDll = GetModuleHandle("hl.dll");
 	if (!hSrvDll)
@@ -114,14 +116,45 @@ bool GetInterfaceFromServer()
 		return false;
 	}
 
-	GetServerInterfaceFunc pIfaceFunc = (GetServerInterfaceFunc)GetProcAddress(hSrvDll, "AGHL_GetServerInterface");
+	pIfaceFunc = (GetServerInterfaceFunc)GetProcAddress(hSrvDll, "AGHL_GetServerInterface");
 	if (!pIfaceFunc)
 	{
 		LOG_ERROR(PLID, "Failed to get IBugfixedServer from hl.dll:");
-		LOG_ERROR(PLID, "\tAGHL_GetServerInterface not found.");
+		LOG_ERROR(PLID, "\tAGHL_GetServerInterface not found (GetProcAddress returned null).");
 		return false;
 	}
-
+#else
+	void *pSrvDll = nullptr;
+	
+	const char *fileNames[] = {
+		"hl.so", "hl_i386.so", nullptr
+	};
+	
+	for (int i = 0; fileNames[i]; i++)
+	{
+		pSrvDll = dlopen(fileNames[i], RTLD_NOW);
+		if (pSrvDll)
+		{
+			LOG_MESSAGE(PLID, "dlopen('%s') successfully", fileNames[i]);
+			break;
+		}
+		LOG_ERROR(PLID, "dlopen('%s') failed: %s", fileNames[i], dlerror());
+	}
+	
+	if (!pSrvDll)
+	return false;
+	
+	pIfaceFunc = (GetServerInterfaceFunc)dlsym(pSrvDll, "AGHL_GetServerInterface");
+	
+	if (!pIfaceFunc)
+	{
+		LOG_ERROR(PLID, "Failed to get AGHL_GetServerInterface from hl.so:");
+		LOG_ERROR(PLID, "\t%s.", dlerror());
+		return false;
+	}
+    
+#endif
+    
 	int srvVersion = 0;
 	gServer = (IBugfixedServer *)pIfaceFunc(BUGFIXEDSERVERIFACE_VERSION, &srvVersion);
 
@@ -131,16 +164,11 @@ bool GetInterfaceFromServer()
 		LOG_ERROR(PLID, "\tAGHL_GetServerInterface returned nullptr.");
 		LOG_ERROR(PLID, "Is server DLL too old?");
 		LOG_ERROR(PLID, "Server interface version: %d", srvVersion);
-		LOG_ERROR(PLID, "AMXX interface version: %d", BUGFIXEDSERVERIFACE_VERSION);
+		LOG_ERROR(PLID, "AMXX module interface version: %d", BUGFIXEDSERVERIFACE_VERSION);
 		return false;
 	}
-
+	
 	return true;
-
-#else
-	LOG_ERROR(PLID, "Linux is not supported yet\n");
-	return false;
-#endif
 }
 
 void OnAmxxAttach()

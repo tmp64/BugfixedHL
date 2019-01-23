@@ -45,7 +45,7 @@ native bhl_get_client_version_string(idx, buf[], size = sizeof(buf));
 native bhl_get_client_version(idx, &major, &minor, &patch);
 
 /**
- * Returns whether or not player's client build is dirty
+ * Returns whether or not player's client build is dirty (has uncommited changes)
  * @param idx			Player's index
  * @return				0 or 1
  */
