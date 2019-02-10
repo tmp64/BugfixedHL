@@ -1,11 +1,11 @@
 mkdir "%CMAKE_BUILD_DIR%"
 cd "%CMAKE_BUILD_DIR%"
 cmake -DAUTO_DEPLOY=0 %CMAKE_OPTIONS% ..
-IF %errorlevel% neq 0 EXIT /b %errorlevel%
+IF ERRORLEVEL 1 EXIT /b 1
 
 IF "%SERVER_BUILD%"=="0" (
 	MSBuild.exe BugfixedHL.sln /t:client /p:PlatformTarget=x86 /p:Configuration=RelWithDebInfo /m
-	IF %errorlevel% neq 0 EXIT /b %errorlevel%
+	IF ERRORLEVEL 1 EXIT /b 1
 	IF "%VGUI2_BUILD%"=="1" (
 		..\scripts\AppVeyor_PackageClientVGUI2.bat
 	) ELSE (
@@ -13,6 +13,6 @@ IF "%SERVER_BUILD%"=="0" (
 	)
 ) ELSE (
 	MSBuild.exe BugfixedHL.sln /t:hl /p:PlatformTarget=x86 /p:Configuration=RelWithDebInfo /m
-	IF %errorlevel% neq 0 EXIT /b %errorlevel%
+	IF ERRORLEVEL 1 EXIT /b 1
 	..\scripts\AppVeyor_PackageServer.bat
 )
