@@ -371,6 +371,7 @@ int __MsgFunc_AllowSpec(const char *pszName, int iSize, void *pbuf)
 	return 0;
 }
 
+#ifdef USE_UPDATER
 void __CmdFunc_Updater_CheckUpdates()
 {
 	ConPrintf("Checking for updates...\n");
@@ -387,6 +388,7 @@ void __CmdFunc_Updater_PrintChangelog()
 	}
 	ConPrintf("Update changelog:\n%s\n", changelog.c_str());
 }
+#endif
 
 // This is called every time the DLL is loaded
 void CHud :: Init( void )

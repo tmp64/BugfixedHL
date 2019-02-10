@@ -50,6 +50,11 @@ option( AUTO_DEPLOY "Whether to automatically deploy to deploy paths" 1 )
 # Updater option
 option( USE_UPDATER "Enable autoupdater module" 0 )
 ternary( USE_UPDATER_DEFINE USE_UPDATER 1 0 )
+if( USE_UPDATER )
+	set( USE_UPDATER_DEFINE "USE_UPDATER=${USE_UPDATER_DEFINE}" )
+else()
+	set( USE_UPDATER_DEFINE "" )
+endif()
 
 #Shared preprocessor definitions
 set( SHARED_DEFS 
@@ -291,7 +296,7 @@ target_compile_definitions( client PRIVATE
 	HAVE_CONFIG_H
 	${SOURCE_SDK_DEFINES}
 	LODEPNG_NO_COMPILE_CPP
-	USE_UPDATER=${USE_UPDATER_DEFINE}
+	${USE_UPDATER_DEFINE}
 )
 
 #Find client dependencies
@@ -451,6 +456,7 @@ target_compile_definitions( hl PRIVATE
 	SERVER_DLL
 	VALVE_DLL
     CLIENT_WEAPONS
+	${USE_UPDATER_DEFINE}
 )
 
 #Set the list of platform specific libraries
