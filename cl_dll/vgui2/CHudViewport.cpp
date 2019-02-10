@@ -8,6 +8,8 @@
 #include "GameUIPanelNames.h"
 #include "IEngineVgui.h"
 #include "CGameUITestPanel.h"
+#include "CUpdaterDebugDialog.h"
+#include "CUpdateNotificationDialog.h"
 
 void CHudViewport::ApplySchemeSettings(vgui2::IScheme *pScheme)
 {
@@ -48,6 +50,8 @@ void CHudViewport::CreateDefaultPanels()
 	AddNewPanel( CreatePanelByName( VIEWPORT_PANEL_SCORE ) );
 
 	AddNewGameUIPanel(CreateGameUIPanelByName(GAMEUI_PANEL_TEST));
+	AddNewGameUIPanel(CreateGameUIPanelByName(GAMEUI_UPDATER_DEBUG));
+	AddNewGameUIPanel(CreateGameUIPanelByName(GAMEUI_UPDATE_NOTIF));
 }
 
 IViewportPanel* CHudViewport::CreatePanelByName( const char* pszName )
@@ -73,6 +77,14 @@ IGameUIPanel *CHudViewport::CreateGameUIPanelByName(const char *pszName)
 	if (Q_strcmp(GAMEUI_PANEL_TEST, pszName) == 0)
 	{
 		pPanel = new CGameUITestPanel(engineVgui()->GetPanel(PANEL_ROOT));
+	}
+	else if (Q_strcmp(GAMEUI_UPDATER_DEBUG, pszName) == 0)
+	{
+		pPanel = new CUpdaterDebugDialog(engineVgui()->GetPanel(PANEL_ROOT));
+	}
+	else if (Q_strcmp(GAMEUI_UPDATE_NOTIF, pszName) == 0)
+	{
+		pPanel = new CUpdateNotificationDialog(engineVgui()->GetPanel(PANEL_ROOT));
 	}
 
 	return pPanel;

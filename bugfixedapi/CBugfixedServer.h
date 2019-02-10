@@ -1,6 +1,7 @@
 #ifndef CBUGFIXEDSERVER_H
 #define CBUGFIXEDSERVER_H
 
+#include <CGameVersion.h>
 #include "IBugfixedServer.h"
 #include "eiface.h"
 #include "progdefs.h"
@@ -12,34 +13,6 @@
 #ifdef SERVER_DLL
 extern "C" DLLEXPORT void *AGHL_GetServerInterface(int version, int *srvVersion = nullptr);
 #endif
-
-class CClientVersion
-{
-public:
-	inline CClientVersion() {}
-	inline CClientVersion(const char *str) { TryParse(str); }
-
-	bool TryParse(const char *str);
-	inline bool IsValid() { return m_bIsValid; }
-	inline bool IsModified() { return m_bIsModified; }
-	inline const char *GetFullString() { return m_szString; }
-	inline const char *GetVersionString() { return m_szVersion; }
-	inline const char *GetCommitString() { return m_szCommit; }
-	inline void GetVersion(int &major, int &minor, int &patch)
-	{
-		major = m_iMajor;
-		minor = m_iMinor;
-		patch = m_iPatch;
-	}
-
-private:
-	bool m_bIsValid = false;
-	bool m_bIsModified = false;
-	char m_szString[64] = "";
-	char m_szVersion[16] = "";
-	char m_szCommit[16] = "";
-	int m_iMajor = 0, m_iMinor = 0, m_iPatch = 0;
-};
 
 class CBugfixedServer : public IBugfixedServer
 {
@@ -67,7 +40,7 @@ private:
 
 	struct bhl_client_info_t
 	{
-		CClientVersion version;
+		CGameVersion version;
 		E_ClientSupports supports;
 		bool isColorEnabled = false;
 	};

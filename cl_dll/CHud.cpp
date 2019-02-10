@@ -64,6 +64,10 @@
 #include "clientsteamcontext.h"
 #include <vgui_controls/TextImage.h>
 #endif
+#ifdef USE_UPDATER
+#include <CGameUpdater.h>
+#include "CUpdateNotification.h"
+#endif
 
 float g_ColorBlue[3]	= { 0.6f, 0.8f, 1.0f };
 float g_ColorRed[3]		= { 1.0f, 0.25f, 0.25f };
@@ -367,6 +371,23 @@ int __MsgFunc_AllowSpec(const char *pszName, int iSize, void *pbuf)
 	return 0;
 }
 
+void __CmdFunc_Updater_CheckUpdates()
+{
+	ConPrintf("Checking for updates...\n");
+	gGameUpdater->CheckForUpdates();
+}
+
+void __CmdFunc_Updater_PrintChangelog()
+{
+	std::string changelog = gGameUpdater->GetChangeLog();
+	if (changelog.size() == 0)
+	{
+		ConPrintf("Changelog not loaded yet.\n");
+		return;
+	}
+	ConPrintf("Update changelog:\n%s\n", changelog.c_str());
+}
+
 // This is called every time the DLL is loaded
 void CHud :: Init( void )
 {
@@ -437,7 +458,10 @@ void CHud :: Init( void )
 	m_pCvarVersion = CVAR_CREATE("aghl_version", APP_VERSION, 0);
 	m_pCvarSupports = CVAR_CREATE("aghl_supports", "0", 0);
 #ifdef USE_VGUI2
-	m_pCvarEnableHtmlMotd = CVAR_CREATE("cl_enable_html_motd", "1", 0);
+	m_pCvarEnableHtmlMotd = CVAR_CREATE("cl_enable_html_motd", "1", FCVAR_ARCHIVE);
+#endif
+#ifdef USE_UPDATER
+	m_pCvarCheckUpdates = CVAR_CREATE("cl_check_for_updates", "1", FCVAR_ARCHIVE);
 #endif
 	UpdateSupportsCvar();
 
@@ -504,6 +528,41 @@ void CHud :: Init( void )
 #ifdef USE_VGUI2
 	vgui2::TextImage::SetColorsArrayPointer(&g_iColorsCodes);
 #endif
+#ifdef USE_UPDATER
+	gGameUpdater = new CGameUpdater();
+	gUpdateNotif = new CUpdateNotification();
+	HOOK_COMMAND("update_check", Updater_CheckUpdates);
+	HOOK_COMMAND("update_changelog", Updater_PrintChangelog);
+#endif
+}
+
+void CHud :: Shutdown()
+{
+#ifdef USE_UPDATER
+	if (gUpdateNotif)
+	{
+		delete gUpdateNotif;
+		gUpdateNotif = nullptr;
+	}
+
+	if (gGameUpdater)
+	{
+		delete gGameUpdater;
+		gGameUpdater = nullptr;
+	}
+#endif
+}
+
+void CHud::Frame(double time)
+{
+#ifdef USE_UPDATER
+	if (!m_bUpdatesChecked && time >= 0.05 )		// Wait for config.cfg to be executed
+	{
+		m_bUpdatesChecked = true;
+		if (m_pCvarCheckUpdates->value)
+			gGameUpdater->CheckForUpdates();
+	}
+#endif
 }
 
 // CHud constructor
@@ -530,6 +589,20 @@ CHud :: ~CHud()
 	}
 
 	ServersShutdown();
+
+#ifdef USE_UPDATER
+	if (gUpdateNotif)
+	{
+		delete gUpdateNotif;
+		gUpdateNotif = nullptr;
+	}
+
+	if (gGameUpdater)
+	{
+		delete gGameUpdater;
+		gGameUpdater = nullptr;
+	}
+#endif
 }
 
 // GetSpriteIndex()

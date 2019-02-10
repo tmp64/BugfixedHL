@@ -47,6 +47,10 @@ ternary( USE_VGUI2_DEFINE USE_VGUI2 1 0 )
 # Autodeploy option
 option( AUTO_DEPLOY "Whether to automatically deploy to deploy paths" 1 )
 
+# Updater option
+option( USE_UPDATER "Enable autoupdater module" 0 )
+ternary( USE_UPDATER_DEFINE USE_UPDATER 1 0 )
+
 #Shared preprocessor definitions
 set( SHARED_DEFS 
 )
@@ -287,11 +291,20 @@ target_compile_definitions( client PRIVATE
 	HAVE_CONFIG_H
 	${SOURCE_SDK_DEFINES}
 	LODEPNG_NO_COMPILE_CPP
+	USE_UPDATER=${USE_UPDATER_DEFINE}
 )
 
 #Find client dependencies
 find_package( vgui MODULE REQUIRED )
 find_package( SDL2 MODULE REQUIRED )
+
+set( UPDATER_LIBS )
+if( USE_UPDATER )
+	find_package( CURL MODULE REQUIRED )
+	set( UPDATER_LIBS
+		CURL::libcurl
+	)
+endif()
 
 if ( MSVC )
 	# DInput for direct mouse input
@@ -325,6 +338,7 @@ target_link_libraries( client
 	${SOURCE_SDK_DEPENDENCIES}
 	Threads::Threads
 	${UNIX_FS_LIB}
+	${UPDATER_LIBS}
 )
 
 set( CLIENT_LINK_FLAGS )
@@ -356,6 +370,7 @@ create_source_groups( "${CMAKE_SOURCE_DIR}" )
 
 #Set the startup project to the client
 #TODO: does this even work?
+set_property( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT client )
 set_property( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT client )
 
 clear_sources()
@@ -450,6 +465,7 @@ target_link_libraries( hl
 	${SERVER_PLAT_LIBS}
 	${SHARED_DEPENDENCIES}
 	${UNIX_FS_LIB}
+	${UPDATER_LIBS}
 )
 
 set( SERVER_LINK_FLAGS )
@@ -566,6 +582,7 @@ target_link_libraries( bugfixedapi_amxx
 	${SERVER_PLAT_LIBS}
 	${SHARED_DEPENDENCIES}
 	${UNIX_FS_LIB}
+	${UPDATER_LIBS}
 )
 
 set( SERVER_LINK_FLAGS )

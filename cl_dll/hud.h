@@ -197,10 +197,12 @@ public:
 	AgHudVote			m_Vote;
 
 	void Init(void);
+	void Shutdown();
 	void VidInit(void);
 	void Think(void);
 	int Redraw(float flTime, int intermission);
 	int UpdateClientData(client_data_t *cdata, float time);
+	void Frame(double time);
 
 	CHud();
 	~CHud();			// destructor, frees allocated memory
@@ -258,6 +260,9 @@ public:
 	cvar_t	*m_pCvarSupports;
 #ifdef USE_VGUI2
 	cvar_t	*m_pCvarEnableHtmlMotd;
+#endif
+#ifdef USE_UPDATER
+	cvar_t	*m_pCvarCheckUpdates;
 #endif
 
 	int m_iFontHeight;
@@ -331,6 +336,9 @@ private:
 		SDK_Color(225, 205, 45, 255),	// Yellow
 		SDK_Color(145, 215, 140, 255)	// Green
 	};
+#endif
+#ifdef USE_UPDATER
+	bool m_bUpdatesChecked = false;
 #endif
 };
 

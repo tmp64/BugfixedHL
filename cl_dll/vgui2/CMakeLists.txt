@@ -39,3 +39,12 @@ add_sources(
 	CGameUITestPanel.h
 	CGameUITestPanel.cpp
 )
+
+if( USE_UPDATER )
+	add_sources(
+		CUpdaterDebugDialog.h
+		CUpdaterDebugDialog.cpp
+		CUpdateNotificationDialog.h
+		CUpdateNotificationDialog.cpp
+	)
+endif()

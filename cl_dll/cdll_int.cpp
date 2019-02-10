@@ -49,6 +49,9 @@ extern "C"
 #ifdef USE_VGUI2
 #include "clientsteamcontext.h"
 #endif
+#ifdef USE_UPDATER
+#include <CGameUpdater.h>
+#endif
 
 cl_enginefunc_t gEngfuncs;
 CHud gHUD;
@@ -407,6 +410,7 @@ Called at game exit.
 
 void _DLLEXPORT HUD_Shutdown( void )
 {
+	gHUD.Shutdown();
 	ShutdownInput();
 #ifdef USE_VGUI2
 	ClientSteamContext().Shutdown();
@@ -423,9 +427,13 @@ Called by engine every frame that client .dll is loaded
 
 void _DLLEXPORT HUD_Frame( double time )
 {
+	gHUD.Frame(time);
 	Memory::OnFrame();
 #ifdef _WIN32
 	ResultsFrame(time);
+#endif
+#ifdef USE_UPDATER
+	gGameUpdater->Frame();
 #endif
 
 	ServersThink( time );

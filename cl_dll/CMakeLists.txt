@@ -193,3 +193,10 @@ if( USE_VGUI2 )
 
 	add_subdirectory( vgui2 )
 endif()
+
+if( USE_UPDATER )
+	add_sources(
+		CUpdateNotification.h
+		CUpdateNotification.cpp
+	)
+endif()
