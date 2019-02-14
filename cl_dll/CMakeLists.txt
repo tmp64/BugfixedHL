@@ -62,6 +62,8 @@ add_sources(
     CHudStatusBar.h
     CHudStatusIcons.cpp
     CHudStatusIcons.h
+	CHudSpeedometer.cpp
+	CHudSpeedometer.h
     CHudTextMessage.cpp
     CHudTextMessage.h
     CHudTimer.cpp

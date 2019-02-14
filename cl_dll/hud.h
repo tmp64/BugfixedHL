@@ -50,6 +50,7 @@ class CHudHealth;
 class CHudGeiger;
 class CHudTrain;
 class CHudStatusBar;
+class CHudSpeedometer;
 class CHudDeathNotice;
 class CHudMenu;
 class CHudSayText;
@@ -167,6 +168,7 @@ public:
 	std::shared_ptr<CHudFlashlight>		m_Flash = nullptr;
 	std::shared_ptr<CHudMessage>		m_Message = nullptr;
 	std::shared_ptr<CHudStatusBar>		m_StatusBar = nullptr;
+	std::shared_ptr<CHudSpeedometer>	m_Speedometer = nullptr;
 	std::shared_ptr<CHudDeathNotice>	m_DeathNotice = nullptr;
 	std::shared_ptr<CHudSayText>		m_SayText = nullptr;
 	std::shared_ptr<CHudMenu>			m_Menu = nullptr;
@@ -267,6 +269,8 @@ public:
 
 	int m_iFontHeight;
 	int DrawHudNumber(int x, int y, int iFlags, int iNumber, int r, int g, int b);
+	int DrawHudNumber(int x, int y, int number, int r, int g, int b);
+	int DrawHudNumberCentered(int x, int y, int number, int r, int g, int b);
 	int DrawHudString(int x, int y, const char *szString, int r, int g, int b);
 	int DrawHudStringReverse(int xpos, int ypos, const char *szString, int r, int g, int b);
 	int DrawHudStringColorCodes(int x, int y, const char *string, int _r, int _g, int _b);

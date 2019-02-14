@@ -46,6 +46,7 @@
 #include "CHudGeiger.h"
 #include "CHudTrain.h"
 #include "CHudStatusBar.h"
+#include "CHudSpeedometer.h"
 #include "CHudDeathNotice.h"
 #include "CHudMenu.h"
 #include "CHudSayText.h"
@@ -495,6 +496,7 @@ void CHud :: Init( void )
 	HUD_ELEM_INIT_FULL(CHudFlashlight, m_Flash);
 	HUD_ELEM_INIT(Message);
 	HUD_ELEM_INIT(StatusBar);
+	HUD_ELEM_INIT(Speedometer);
 	HUD_ELEM_INIT(DeathNotice);
 	HUD_ELEM_INIT(AmmoSecondary);
 	HUD_ELEM_INIT(TextMessage);
@@ -701,6 +703,7 @@ void CHud :: VidInit( void )
 	m_Flash->VidInit();
 	m_Message->VidInit();
 	m_StatusBar->VidInit();
+	m_Speedometer->VidInit();
 	m_DeathNotice->VidInit();
 	m_SayText->VidInit();
 	m_Menu->VidInit();
