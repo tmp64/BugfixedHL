@@ -39,7 +39,6 @@
 #define PING "#PlayerPing"
 #define PING_LOSS "Ping/Loss"
 
-extern int g_iVisibleMouse;
 void IN_ResetMouse(void);
 CScorePanel *CScorePanel::m_sSingleton = nullptr;
 
@@ -235,14 +234,6 @@ void CScorePanel::EnableMousePointer(bool enable)
 	{
 		ShowExtraControls();
 	}
-	else
-	{
-		if (!gEngfuncs.pDemoAPI->IsPlayingback())
-		{
-			IN_ResetMouse();
-		}
-	}
-	g_iVisibleMouse = enable;
 }
 
 //--------------------------------------------------------------

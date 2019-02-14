@@ -22,6 +22,11 @@
 #include "windows.h"
 #include "dinput/dinput.h"
 
+#ifdef USE_VGUI2
+#include <vgui/ISurface.h>
+#include <vgui_controls/Controls.h>
+#endif
+
 #define MOUSE_BUTTON_COUNT 5
 
 int g_iVisibleMouse = 1;	// Set this to 1 to show mouse cursor.  Experimental
@@ -418,7 +423,11 @@ IN_MouseEvent
 */
 void DLLEXPORT IN_MouseEvent (int mstate)
 {
-	if ( iMouseInUse || g_iVisibleMouse )
+	if ( iMouseInUse || g_iVisibleMouse
+#ifdef USE_VGUI2
+		 || vgui2::surface()->IsCursorVisible()
+#endif
+	)
 	{
 		// Allow to release keys if they were pressed before mouse became used
 		for (int i = 0; i < mouse_buttons; i++)
@@ -522,7 +531,11 @@ void IN_MouseMove ( float frametime, usercmd_t *cmd)
 
 	//jjb - this disbles normal mouse control if the user is trying to 
 	//      move the camera, or if the mouse cursor is visible or if we're in intermission
-	if ( !iMouseInUse && !g_iVisibleMouse && !gHUD.m_iIntermission && ( g_iMouseInGame || CheckIsMouseInGame() ) )
+	if ( !iMouseInUse && !g_iVisibleMouse && !gHUD.m_iIntermission && ( g_iMouseInGame || CheckIsMouseInGame() )
+#ifdef USE_VGUI2
+		 && !vgui2::surface()->IsCursorVisible()
+#endif
+	)
 	{
 		if (m_input->value == 2 && dinput_mouse_acquired)
 		{
@@ -643,7 +656,11 @@ IN_Accumulate
 void DLLEXPORT IN_Accumulate (void)
 {
 	// Only accumulate mouse if we are not moving the camera with the mouse
-	if ( iMouseInUse || g_iVisibleMouse )
+	if ( iMouseInUse || g_iVisibleMouse
+#ifdef USE_VGUI2
+		 || vgui2::surface()->IsCursorVisible()
+#endif
+	)
 		return;
 	if (!mouseactive)
 		return;
