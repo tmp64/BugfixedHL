@@ -561,6 +561,12 @@ void IN_ScoreUp(void)
 {
 	KeyUp(&in_score);
 	gHUD.m_ScoreBoard->HideScoreBoard();
+
+	// Without that mouse is broken (game probably thinks VGUI1 is using it)
+	if (gViewPort)
+	{
+		gViewPort->HideScoreBoard();
+	}
 }
 #endif
 
