@@ -804,8 +804,13 @@ void CScorePanel::OnCommandOverride(const char *command)
 	{
 		if (m_pMenuInfo.steamID64 > 0)
 		{
+#ifndef NO_STEAM
 			CSteamID steamId = CSteamID((uint64)m_pMenuInfo.steamID64);
 			ClientSteamContext().SteamFriends()->ActivateGameOverlayToUser("steamid", steamId);
+#else
+			std::string url = STEAM_PROFILE_URL + std::to_string(m_pMenuInfo.steamID64);
+			vgui2::system()->ShellExecute("open", url.c_str());
+#endif
 		}
 	}
 	else if (!stricmp(command, "MenuSteamURL"))

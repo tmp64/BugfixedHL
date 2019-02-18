@@ -177,9 +177,10 @@ set( SOURCE_SDK_INCLUDE_PATHS )
 set( SOURCE_SDK_DEFINES )
 
 if ( USE_VGUI2 )
+	option( VGUI2_BUILD_4554 "Support game build 4554" )
+
 	find_package( tier0 MODULE REQUIRED )
 	find_package( vstdlib MODULE REQUIRED )
-	find_package( SteamAPI MODULE REQUIRED )
 	
 	add_subdirectory( public )
 	add_subdirectory( source_sdk )
@@ -190,8 +191,16 @@ if ( USE_VGUI2 )
 		tier1
 		tier0
 		vstdlib
-		SteamAPI
 	)
+	
+	# steam_api.dll in 4554 is too old to use headers from Source SDK 2013
+	if( NOT VGUI2_BUILD_4554 )
+		find_package( SteamAPI MODULE REQUIRED )
+		set( SOURCE_SDK_DEPENDENCIES
+			${SOURCE_SDK_DEPENDENCIES}
+			SteamAPI
+		)
+	endif()
 	
 	set( SOURCE_SDK_INCLUDE_PATHS
 		public
@@ -204,6 +213,18 @@ if ( USE_VGUI2 )
 	set( SOURCE_SDK_DEFINES
 		VERSION_SAFE_STEAM_API_INTERFACES
 		USE_VGUI2=${USE_VGUI2_DEFINE}
+	)
+	
+	if( VGUI2_BUILD_4554 )
+		set( SOURCE_SDK_DEFINES 
+		${SOURCE_SDK_DEFINES} 
+		VGUI2_BUILD_4554
+		NO_STEAM
+	)
+	endif()
+else()
+	set( SOURCE_SDK_DEFINES
+		NO_STEAM
 	)
 endif()
 

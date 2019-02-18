@@ -246,7 +246,7 @@ public:
 	int		m_iFOV;
 	int		m_Teamplay;
 	int		m_iRes;
-#ifdef USE_VGUI2
+#if defined(USE_VGUI2) && !defined(VGUI2_BUILD_4554)
 	bool	m_bIsHtmlMotdEnabled = true;
 #endif
 	cvar_t	*m_pCvarBunnyHop;
@@ -260,7 +260,7 @@ public:
 	cvar_t	*m_pCvarRDynamicEntLight;
 	cvar_t	*m_pCvarVersion;
 	cvar_t	*m_pCvarSupports;
-#ifdef USE_VGUI2
+#if defined(USE_VGUI2) && !defined(VGUI2_BUILD_4554)
 	cvar_t	*m_pCvarEnableHtmlMotd;
 #endif
 #ifdef USE_UPDATER

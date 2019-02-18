@@ -31,6 +31,21 @@
 			"maxchars"		"-1"
 			"NumericInputOnly"		"0"
 		}
+		"TextMessage"
+		{
+			"fieldName"		"TextMessage"
+			"xpos"		"11"
+			"ypos"		"34"
+			"wide"		"532"
+			"tall"		"365"
+			"autoResize"		"3"
+			"pinCorner"		"0"
+			"visible"		"1"
+			"enabled"		"1"
+			"tabPosition"		"0"
+			"textHidden"		"0"
+			"editable"		"0"
+		}
 		"ok"
 		{
 			"ControlName"		"Button"

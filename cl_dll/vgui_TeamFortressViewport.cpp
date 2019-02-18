@@ -2288,7 +2288,7 @@ int TeamFortressViewport::MsgFunc_MOTD( const char *pszName, int iSize, void *pb
 	return 1;
 }
 
-#ifdef USE_VGUI2
+#if defined(USE_VGUI2) && !defined(VGUI2_BUILD_4554)
 int TeamFortressViewport::MsgFunc_HtmlMOTD(const char *pszName, int iSize, void *pbuf)
 {
 	if (m_iGotAllHtmlMotd)

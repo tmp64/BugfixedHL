@@ -36,7 +36,9 @@ public:
 	void Close() override;
 
 	virtual void Activate( const char* title, const char* msg );
+#ifndef VGUI2_BUILD_4554
 	virtual void ActivateHtml( const char* title, const char* msg );
+#endif
 	//virtual void Activate( const wchar_t* title, const wchar_t* msg );
 
 	//IViewportPanel overrides
@@ -86,7 +88,9 @@ private:
 	IViewport* m_pViewport;
 
 	vgui2::RichText* m_pMessage;
+#ifndef VGUI2_BUILD_4554
 	vgui2::HTML* m_pMessageHtml;
+#endif
 	vgui2::Label* m_pServerName;
 	bool m_bFileWritten;
 	char m_szTempFileName[ MAX_HTML_FILENAME_LENGTH ];

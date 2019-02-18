@@ -445,7 +445,7 @@ private:
 	int		m_iGotAllMOTD;
 	char	m_szMOTD[MAX_UNICODE_MOTD_LENGTH];
 
-#ifdef USE_VGUI2
+#if defined(USE_VGUI2) && !defined(VGUI2_BUILD_4554)
 	// HTML MOTD
 	int		m_iGotAllHtmlMotd = 0;
 	char	m_szHtmlMotd[MAX_UNICODE_MOTD_LENGTH];
@@ -537,7 +537,7 @@ public:
 	int MsgFunc_Detpack(const char *pszName, int iSize, void *pbuf );
 	int MsgFunc_VGUIMenu(const char *pszName, int iSize, void *pbuf );
 	int MsgFunc_MOTD( const char *pszName, int iSize, void *pbuf );
-#ifdef USE_VGUI2
+#if defined(USE_VGUI2) && !defined(VGUI2_BUILD_4554)
 	int MsgFunc_HtmlMOTD(const char *pszName, int iSize, void *pbuf);
 #endif
 	int MsgFunc_BuildSt( const char *pszName, int iSize, void *pbuf );

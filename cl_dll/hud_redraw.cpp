@@ -90,7 +90,7 @@ void CHud::Think(void)
 	g_bBunnyHop = m_pCvarBunnyHop->value != 0.0;
 
 	// Update aghl_supports cvar
-#ifdef USE_VGUI2
+#if defined(USE_VGUI2) && !defined(VGUI2_BUILD_4554)
 	if (!!m_pCvarEnableHtmlMotd->value != m_bIsHtmlMotdEnabled)
 	{
 		m_bIsHtmlMotdEnabled = !!m_pCvarEnableHtmlMotd->value;

@@ -471,11 +471,11 @@ void _DLLEXPORT HUD_DirectorMessage( int iSize, void *pbuf )
 
 #ifdef USE_VGUI2
 /**
-*	This function is never called, but it has to exist in order for the engine to load stuff from the client. - Solokiller
+*	This function is only called in pre-SteamPipe builds
 */
 extern "C" DLLEXPORT void* ClientFactory()
 {
-	return nullptr;
+	return CreateInterface;
 }
 #endif
 

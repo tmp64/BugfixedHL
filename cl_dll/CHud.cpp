@@ -358,7 +358,7 @@ int __MsgFunc_MOTD(const char *pszName, int iSize, void *pbuf)
 	return 0;
 }
 
-#ifdef USE_VGUI2
+#if defined(USE_VGUI2) && !defined(VGUI2_BUILD_4554)
 int __MsgFunc_HtmlMOTD(const char *pszName, int iSize, void *pbuf)
 {
 	if (gViewPort)
@@ -471,7 +471,7 @@ void CHud :: Init( void )
 	HOOK_MESSAGE( Feign );
 	HOOK_MESSAGE( Detpack );
 	HOOK_MESSAGE( MOTD );
-#ifdef USE_VGUI2
+#if defined(USE_VGUI2) && !defined(VGUI2_BUILD_4554)
 	HOOK_MESSAGE( HtmlMOTD );
 #endif
 	HOOK_MESSAGE( BuildSt );
@@ -512,7 +512,7 @@ void CHud :: Init( void )
 	m_pCvarRDynamicEntLight = CVAR_CREATE("r_dynamic_ent_light", "1", FCVAR_ARCHIVE);
 	m_pCvarVersion = CVAR_CREATE("aghl_version", APP_VERSION, 0);
 	m_pCvarSupports = CVAR_CREATE("aghl_supports", "0", 0);
-#ifdef USE_VGUI2
+#if defined(USE_VGUI2) && !defined(VGUI2_BUILD_4554)
 	m_pCvarEnableHtmlMotd = CVAR_CREATE("cl_enable_html_motd", "1", FCVAR_ARCHIVE);
 #endif
 #ifdef USE_UPDATER
@@ -786,22 +786,6 @@ void CHud :: VidInit( void )
 	}
 
 	GetClientVoiceMgr()->VidInit();
-
-#ifdef USE_VGUI2
-	if (SteamAPI_IsSteamRunning())
-	{
-		ConsolePrintColor("Steam is running\n", RGBA(0x1E, 0xE6, 0x32));
-		if (SteamClient())
-		{
-			uint64_t id = ClientSteamContext().SteamUser()->GetSteamID().ConvertToUint64();
-			const char *name = ClientSteamContext().SteamFriends()->GetPersonaName();
-			ConPrintf("Steam ID: %lld\n", id);
-			ConPrintf("Steam nickname: %s\n", name);
-		}
-		else ConsolePrintColor("Steam API is not available\n", RGBA(0xF7, 0x33, 0x33));
-	}
-	else ConsolePrintColor("Steam is not running. How is that possible?", RGBA(0xF7, 0x33, 0x33));
-#endif
 }
 
 void CHud::AddSprite(client_sprite_t *p)
@@ -1048,7 +1032,9 @@ void CHud::UpdateSupportsCvar()
 	E_ClientSupports supports = AGHL_SUPPORTS_NONE;
 #ifdef USE_VGUI2
 	supports |= AGHL_SUPPORTS_UNICODE_MOTD;
+#ifndef VGUI2_BUILD_4554
 	if (m_bIsHtmlMotdEnabled) supports |= AGHL_SUPPORTS_HTML_MOTD;
+#endif
 #endif
 
 	char buf[32];

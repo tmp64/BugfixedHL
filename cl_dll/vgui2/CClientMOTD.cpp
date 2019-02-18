@@ -37,7 +37,9 @@ CClientMOTD::CClientMOTD( IViewport* pParent )
 	SetProportional( true );
 
 	m_pMessage = new vgui2::RichText( this, "TextMessage" );
+#ifndef VGUI2_BUILD_4554
 	m_pMessageHtml = new CClientMOTDHTML( this, "Message" );
+#endif
 
 	LoadControlSettings( UI_RESOURCE_DIR "/MOTD.res" );
 	InvalidateLayout();
@@ -74,11 +76,6 @@ bool CClientMOTD::IsURL( const char* str )
 void CClientMOTD::PerformLayout()
 {
 	BaseClass::PerformLayout();
-	int x, y;
-	m_pMessageHtml->GetSize(x, y);
-	m_pMessage->SetSize(x, y);
-	m_pMessageHtml->GetPos(x, y);
-	m_pMessage->SetPos(x, y);
 }
 
 void CClientMOTD::OnKeyCodeTyped( vgui2::KeyCode key )
@@ -127,7 +124,9 @@ void CClientMOTD::Close()
 void CClientMOTD::Activate( const char* title, const char* msg )
 {
 	m_pMessage->SetVisible(true);
+#ifndef VGUI2_BUILD_4554
 	m_pMessageHtml->SetVisible(false);
+#endif
 	BaseClass::Activate();
 
 	SetTitle( title, false );
@@ -136,6 +135,7 @@ void CClientMOTD::Activate( const char* title, const char* msg )
 	m_pMessage->SetText(msg);
 }
 
+#ifndef VGUI2_BUILD_4554
 void CClientMOTD::ActivateHtml( const char* title, const char* msg )
 {
 	char localURL[ MAX_HTML_FILENAME_LENGTH + 7 ];
@@ -180,6 +180,7 @@ void CClientMOTD::ActivateHtml( const char* title, const char* msg )
 	if( m_iScoreBoardKey == KEY_NONE )
 		m_iScoreBoardKey = gameUIFuncs()->GetVGUI2KeyCodeForBind( "showscores" );
 }
+#endif
 
 #if 0
 void CClientMOTD::Activate( const wchar_t* title, const wchar_t* msg )
@@ -224,7 +225,9 @@ void CClientMOTD::Activate( const wchar_t* title, const wchar_t* msg )
 
 void CClientMOTD::Reset()
 {
+#ifndef VGUI2_BUILD_4554
 	m_pMessageHtml->OpenURL( "", nullptr );
+#endif
 	m_pMessage->SetText("");
 
 	RemoveTempFile();
