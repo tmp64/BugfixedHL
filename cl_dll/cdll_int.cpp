@@ -91,6 +91,31 @@ int		_DLLEXPORT HUD_GetHullBounds( int hullnumber, float *mins, float *maxs );
 void	_DLLEXPORT HUD_Frame( double time );
 void	_DLLEXPORT HUD_VoiceStatus(int entindex, qboolean bTalking);
 void	_DLLEXPORT HUD_DirectorMessage( int iSize, void *pbuf );
+void	_DLLEXPORT IN_ActivateMouse( void );
+void	_DLLEXPORT IN_DeactivateMouse( void );
+void	_DLLEXPORT IN_MouseEvent( int mstate );
+void	_DLLEXPORT IN_Accumulate( void );
+void	_DLLEXPORT IN_ClearStates( void );
+struct kbutton_s _DLLEXPORT *KB_Find(const char *name);
+void	_DLLEXPORT CL_CreateMove(float frametime, struct usercmd_s *cmd, int active);
+int		_DLLEXPORT HUD_Key_Event(int eventcode, int keynum, const char *pszCurrentBinding);
+void	_DLLEXPORT CAM_Think(void);
+int		_DLLEXPORT CL_IsThirdPerson(void);
+void	_DLLEXPORT CL_CameraOffset(float *ofs);
+void	_DLLEXPORT V_CalcRefdef(struct ref_params_s *pparams);
+int		_DLLEXPORT HUD_AddEntity(int type, struct cl_entity_s *ent, const char *modelname);
+void	_DLLEXPORT HUD_CreateEntities(void);
+void	_DLLEXPORT HUD_StudioEvent(const struct mstudioevent_s *event, const struct cl_entity_s *entity);
+void	_DLLEXPORT HUD_TxferLocalOverrides(struct entity_state_s *state, const struct clientdata_s *client);
+void	_DLLEXPORT HUD_ProcessPlayerState(struct entity_state_s *dst, const struct entity_state_s *src);
+void	_DLLEXPORT HUD_TxferPredictionData(struct entity_state_s *ps, const struct entity_state_s *pps, struct clientdata_s *pcd, const struct clientdata_s *ppcd, struct weapon_data_s *wd, const struct weapon_data_s *pwd);
+void	_DLLEXPORT HUD_TempEntUpdate(double frametime, double client_time, double cl_gravity, struct tempent_s **ppTempEntFree, struct tempent_s **ppTempEntActive, int(*Callback_AddVisibleEntity)(struct cl_entity_s *pEntity), void(*Callback_TempEntPlaySound)(struct tempent_s *pTemp, float damp));
+struct cl_entity_s _DLLEXPORT *HUD_GetUserEntity(int index);
+void	_DLLEXPORT HUD_DrawNormalTriangles(void);
+void	_DLLEXPORT HUD_DrawTransparentTriangles(void);
+void	_DLLEXPORT HUD_PostRunCmd(struct local_state_s *from, struct local_state_s *to, struct usercmd_s *cmd, int runfuncs, double time, unsigned int random_seed);
+void	_DLLEXPORT Demo_ReadBuffer(int size, unsigned char *buffer);
+int		_DLLEXPORT HUD_GetStudioModelInterface(int version, struct r_studio_interface_s **ppinterface, struct engine_studio_api_s *pstudio);
 }
 
 /*
@@ -523,3 +548,59 @@ public:
 };
 
 EXPOSE_SINGLE_INTERFACE(CClientExports, IGameClientExports, GAMECLIENTEXPORTS_INTERFACE_VERSION);
+
+extern "C" void DLLEXPORT F(void *pv)
+{
+	cldll_func_t *pcldll_func = (cldll_func_t *)pv;
+
+	cldll_func_t cldll_func =
+	{
+	Initialize,
+	HUD_Init,
+	HUD_VidInit,
+	HUD_Redraw,
+	HUD_UpdateClientData,
+	HUD_Reset,
+	HUD_PlayerMove,
+	HUD_PlayerMoveInit,
+	HUD_PlayerMoveTexture,
+	IN_ActivateMouse,
+	IN_DeactivateMouse,
+	IN_MouseEvent,
+	IN_ClearStates,
+	IN_Accumulate,
+	CL_CreateMove,
+	CL_IsThirdPerson,
+	CL_CameraOffset,
+	KB_Find,
+	CAM_Think,
+	V_CalcRefdef,
+	HUD_AddEntity,
+	HUD_CreateEntities,
+	HUD_DrawNormalTriangles,
+	HUD_DrawTransparentTriangles,
+	HUD_StudioEvent,
+	HUD_PostRunCmd,
+	HUD_Shutdown,
+	HUD_TxferLocalOverrides,
+	HUD_ProcessPlayerState,
+	HUD_TxferPredictionData,
+	Demo_ReadBuffer,
+	HUD_ConnectionlessPacket,
+	HUD_GetHullBounds,
+	HUD_Frame,
+	HUD_Key_Event,
+	HUD_TempEntUpdate,
+	HUD_GetUserEntity,
+	HUD_VoiceStatus,
+	HUD_DirectorMessage,
+	HUD_GetStudioModelInterface,
+	nullptr,	// pChatInputPosition
+	nullptr,	// pGetPlayerTeam
+#ifdef USE_VGUI2
+	ClientFactory
+#endif
+	};
+
+	*pcldll_func = cldll_func;
+}
