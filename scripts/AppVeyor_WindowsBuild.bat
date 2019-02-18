@@ -12,7 +12,13 @@ IF "%SERVER_BUILD%"=="0" (
 		..\scripts\AppVeyor_PackageClient.bat
 	)
 ) ELSE (
-	MSBuild.exe BugfixedHL.sln /t:hl /p:PlatformTarget=x86 /p:Configuration=RelWithDebInfo /m
-	IF ERRORLEVEL 1 EXIT /b 1
-	..\scripts\AppVeyor_PackageServer.bat
+	IF "%AMXX_BUILD%"=="0" (
+		MSBuild.exe BugfixedHL.sln /t:hl /p:PlatformTarget=x86 /p:Configuration=RelWithDebInfo /m
+		IF ERRORLEVEL 1 EXIT /b 1
+		..\scripts\AppVeyor_PackageServer.bat
+	) ELSE (
+		MSBuild.exe BugfixedHL.sln /t:bugfixedhl_amxx /p:PlatformTarget=x86 /p:Configuration=RelWithDebInfo /m
+		IF ERRORLEVEL 1 EXIT /b 1
+		..\scripts\AppVeyor_PackageAmxxModule.bat
+	)
 )

@@ -10,16 +10,25 @@ environment:
       CMAKE_OPTIONS:
       VGUI2_BUILD: 0
       SERVER_BUILD: 0
+      AMXX_BUILD: 0
       
     - CMAKE_BUILD_DIR: build_auto_client_vgui2
       CMAKE_OPTIONS: -DUSE_VGUI2=1
       VGUI2_BUILD: 1
       SERVER_BUILD: 0
+      AMXX_BUILD: 0
       
     - CMAKE_BUILD_DIR: build_auto_server
       CMAKE_OPTIONS:
       VGUI2_BUILD: 0
       SERVER_BUILD: 1
+      AMXX_BUILD: 0
+      
+    - CMAKE_BUILD_DIR: build_auto_amxx
+      CMAKE_OPTIONS:
+      VGUI2_BUILD: 0
+      SERVER_BUILD: 0
+      AMXX_BUILD: 1
 
 install:
   - sh: sudo dpkg --add-architecture i386
