@@ -29,7 +29,7 @@ class CAvatarImage;
 class CScorePanel : public vgui2::Frame, public IViewportPanel
 {
 public:
-	DECLARE_CLASS_SIMPLE(CScorePanel, vgui2::Frame);
+	DECLARE_CLASS_SIMPLE(CScorePanel, Frame);
 
 	// column widths at 640
 	enum
@@ -97,7 +97,7 @@ public:
 	}
 
 	// Messages
-	MESSAGE_FUNC_CHARPTR(OnCommandOverride, "Command", command);	// For some reason, virtual function override doesn't work
+	virtual void OnCommand(const char *command) override;
 	MESSAGE_FUNC_INT(OnItemContextMenu, "ItemContextMenu", itemID);
 	MESSAGE_FUNC_INT(OnCheckButtonChecked, "CheckButtonChecked", state);
 

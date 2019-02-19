@@ -760,7 +760,7 @@ void CScorePanel::HideExtraControls()
 //--------------------------------------------------------------
 // Commands
 //--------------------------------------------------------------
-void CScorePanel::OnCommandOverride(const char *command)
+void CScorePanel::OnCommand(const char *command)
 {
 	DebugPrintf("CScorePanel::OnCommand(command = '%s')\n", command);
 	//-----------------------------------------------------------------------
