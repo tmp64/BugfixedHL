@@ -280,6 +280,7 @@ public:
 	int GetHudCharWidth(int c);
 	int CalculateCharWidth(int c);
 	void GetHudColor(int hudPart, int value, int &r, int &g, int &b);
+	void GetHudAmmoColor(int value, int maxvalue, int &r, int &g, int &b);
 	float GetHudTransparency();
 	void UpdateSupportsCvar();
 
