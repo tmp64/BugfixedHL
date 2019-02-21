@@ -900,6 +900,10 @@ void CScorePanel::SetSortByEff()
 		if (m_pTeamInfo[lhs].deaths < m_pTeamInfo[rhs].deaths) return true;
 		else if (m_pTeamInfo[lhs].deaths > m_pTeamInfo[rhs].deaths) return false;
 
+		// Comapre kills if deaths are equal
+		if (m_pTeamInfo[lhs].kills > m_pTeamInfo[rhs].kills) return true;
+		else if (m_pTeamInfo[lhs].kills < m_pTeamInfo[rhs].kills) return false;
+
 		// Comapre idx if everything is equal
 		return lhs > rhs;
 	};
