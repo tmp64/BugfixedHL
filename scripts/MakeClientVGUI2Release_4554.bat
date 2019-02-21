@@ -13,7 +13,6 @@ SET SUFFIX=client-vgui2-4554
 SET TARGET_FILE=RelWithDebInfo\client.dll
 SET TARGET_FILE_PDB=RelWithDebInfo\client.pdb
 SET MAKE_TARGET=client
-SET CMAKE_OPTIONS="-DUSE_VGUI2=1 -DVGUI2_BUILD_4554=1"
 SET MS_BUILD="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\MSBuild.exe"
 
 ::
@@ -27,7 +26,7 @@ IF EXIST "%BUILD_DIR%" RMDIR /S /Q "%BUILD_DIR%"
 echo ---------------- Generating Visual Studio projects using CMake
 mkdir "%BUILD_DIR%"
 cd "%BUILD_DIR%"
-cmake -G"Visual Studio 15 2017" -T"v141_xp" -DAUTO_DEPLOY=0 %CMAKE_OPTIONS% ..
+cmake -G"Visual Studio 15 2017" -T"v141_xp" -DAUTO_DEPLOY=0 -DUSE_VGUI2=1 -DVGUI2_BUILD_4554=1 ..
 
 IF NOT EXIST "BugfixedHL.sln" (
 	echo Error: failed to create BugfixedHL.sln
