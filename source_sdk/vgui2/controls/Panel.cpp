@@ -6591,9 +6591,9 @@ private:
 
 char const *CPanelMessageMapDictionary::StripNamespace( char const *className )
 {
-	if ( !strnicmp( className, "vgui2::", 6 ) )
+	if ( !strnicmp( className, "vgui2::", 7 ) )
 	{
-		return className + 6;
+		return className + 7;
 	}
 	return className;
 }
