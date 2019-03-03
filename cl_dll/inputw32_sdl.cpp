@@ -27,8 +27,7 @@
 #include <SDL2/SDL_gamecontroller.h>
 
 #ifdef USE_VGUI2
-#include <vgui/ISurface.h>
-#include <vgui_controls/Controls.h>
+bool VGUI2_IsCursorVisible();
 #endif
 
 #define MOUSE_BUTTON_COUNT 5
@@ -396,7 +395,7 @@ void _DLLEXPORT IN_MouseEvent (int mstate)
 
 	if ( iMouseInUse || g_iVisibleMouse
 #ifdef USE_VGUI2
-		|| vgui2::surface()->IsCursorVisible()
+		|| VGUI2_IsCursorVisible()
 #endif
 	)
 		return;
@@ -490,7 +489,7 @@ void IN_MouseMove ( float frametime, usercmd_t *cmd)
 	//      move the camera, or if the mouse cursor is visible or if we're in intermission
 	if ( !iMouseInUse && !gHUD.m_iIntermission && !g_iVisibleMouse
 #ifdef USE_VGUI2
-		&& !vgui2::surface()->IsCursorVisible()
+		&& !VGUI2_IsCursorVisible()
 #endif
 	)
 	{
@@ -617,7 +616,7 @@ void _DLLEXPORT IN_Accumulate (void)
 	//only accumulate mouse if we are not moving the camera with the mouse
 	if ( !iMouseInUse && !g_iVisibleMouse
 #ifdef USE_VGUI2
-		&& !vgui2::surface()->IsCursorVisible()
+		&& !VGUI2_IsCursorVisible()
 #endif
 	)
 	{

@@ -63,6 +63,8 @@
 #include "vgui2/CHudScoreBoard.h"
 #include "vgui2/CHudTextVgui.h"
 #include "clientsteamcontext.h"
+#include <vgui/ISurface.h>
+#include <vgui_controls/Controls.h>
 #include <vgui_controls/TextImage.h>
 #endif
 #ifdef USE_UPDATER
@@ -1352,4 +1354,9 @@ long long GetPlayerSteamID64(int idx)
 			return info->m_nSteamID;
 	}
 	return ParseSteamID(g_PlayerSteamId[idx]);
+}
+
+bool VGUI2_IsCursorVisible()
+{
+	return vgui2::surface()->IsCursorVisible();
 }

@@ -500,7 +500,11 @@ void _DLLEXPORT HUD_DirectorMessage( int iSize, void *pbuf )
 */
 extern "C" DLLEXPORT void* ClientFactory()
 {
+#ifdef WIN32
 	return CreateInterface;
+#else
+	return nullptr;		// Not called on Linux and CreateInterface causes a compilation error
+#endif
 }
 #endif
 
