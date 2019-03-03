@@ -704,6 +704,8 @@ void Panel::Init( int x, int y, int wide, int tall )
 
 	REGISTER_COLOR_AS_OVERRIDABLE( _fgColor, "fgcolor_override" );
 	REGISTER_COLOR_AS_OVERRIDABLE( _bgColor, "bgcolor_override" );
+
+	LoadCorners();
 }
 
 
@@ -6755,5 +6757,34 @@ PanelKeyBindingMap *FindPanelKeyBindingMap( char const *className )
 	return GetPanelKeyBindingMapDictionary().FindPanelKeyBindingMap( className );
 }
 #endif // VGUI_USEKEYBINDINGMAPS
+
+//-----------------------------------------------------------------------------
+// Purpose: Load 800cornerX textures. CPanelAnimationVarAliasType doesn't do its job properly.
+//-----------------------------------------------------------------------------
+int Panel::m_siCorner1 = -1, Panel::m_siCorner2 = -1, Panel::m_siCorner3 = -1, Panel::m_siCorner4 = -1;
+bool Panel::m_sbAreCornersLoaded = false;
+void Panel::LoadCorners()
+{
+	if (!m_sbAreCornersLoaded)
+	{
+		// Load corners
+		auto LoadTexture = [](int &var, const char *filename)
+		{
+			var = vgui2::surface()->CreateNewTextureID(true);
+			vgui2::surface()->DrawSetTextureFile(var, filename, false, false);
+		};
+
+		LoadTexture(m_siCorner1, "ui/gfx/800corner1");
+		LoadTexture(m_siCorner2, "ui/gfx/800corner2");
+		LoadTexture(m_siCorner3, "ui/gfx/800corner3");
+		LoadTexture(m_siCorner4, "ui/gfx/800corner4");
+
+		m_sbAreCornersLoaded = true;
+	}
+	if (m_nBgTextureId1 == -1) m_nBgTextureId1 = m_siCorner1;
+	if (m_nBgTextureId2 == -1) m_nBgTextureId2 = m_siCorner2;
+	if (m_nBgTextureId3 == -1) m_nBgTextureId3 = m_siCorner3;
+	if (m_nBgTextureId4 == -1) m_nBgTextureId4 = m_siCorner4;
+}
 
 }

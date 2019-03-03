@@ -20,6 +20,7 @@ public:
 	virtual ~CGameUITestPanel();
 	void OnCommand(const char* command) override;
 	void Activate() override;
+	void ApplySchemeSettings(vgui2::IScheme *pScheme) override;
 
 	// IGameUIPanel overrides
 	const char *GetName() override;

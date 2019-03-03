@@ -84,6 +84,12 @@ void CGameUITestPanel::Activate()
 	BaseClass::Activate();
 }
 
+void CGameUITestPanel::ApplySchemeSettings(vgui2::IScheme *pScheme)
+{
+	SetPaintBackgroundType(2);
+	BaseClass::ApplySchemeSettings(pScheme);
+}
+
 const char *CGameUITestPanel::GetName()
 {
 	return GAMEUI_PANEL_TEST;
