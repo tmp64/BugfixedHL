@@ -1356,7 +1356,9 @@ long long GetPlayerSteamID64(int idx)
 	return ParseSteamID(g_PlayerSteamId[idx]);
 }
 
+#ifdef USE_VGUI2
 bool VGUI2_IsCursorVisible()
 {
 	return vgui2::surface()->IsCursorVisible();
 }
+#endif
