@@ -29,6 +29,10 @@
 #include "results.h"
 #include "vgui_TeamFortressViewport.h"
 
+#ifdef USE_VGUI2
+#include "vgui2/CHudChat.h"
+#endif
+
 #undef PlaySound
 
 // FIXME: Windows only
@@ -52,13 +56,17 @@ static float flScrollTime = 0;  // the time at which the lines next scroll up
 static int Y_START = 0;
 static int line_height = 0;
 
+#ifndef USE_VGUI2
 DECLARE_MESSAGE_PTR( m_SayText, SayText );
+#endif
 
 int CHudSayText :: Init( void )
 {
 	gHUD.AddHudElem( this );
 
+#ifndef USE_VGUI2
 	HOOK_MESSAGE( SayText );
+#endif
 
 	InitHUDData();
 
@@ -212,6 +220,15 @@ void CHudSayText :: SayTextPrint( const char *pszBuf, int iBufSize, int clientIn
 		return;
 	}
 
+#ifdef USE_VGUI2
+	static char buf[1024];
+	int strLen = strlen(pszBuf + 1);
+	strncpy(buf, pszBuf, min(sizeof(buf), strLen));
+	buf[sizeof(buf) - 1] = '\0';
+
+	gHUD.m_Location.ParseAndEditSayString(clientIndex, buf, min(sizeof(buf), strLen));
+	gHUD.m_Chat->ChatPrintf(clientIndex, CHAT_FILTER_NONE, "%s", pszBuf);
+#else
 	// find an empty string slot
 	int i;
 	for ( i = 0; i < MAX_LINES; i++ )
@@ -245,7 +262,6 @@ void CHudSayText :: SayTextPrint( const char *pszBuf, int iBufSize, int clientIn
 		}
 	}
 
-
 	strncpy( g_szLineBuffer[i], pszBuf, max(iBufSize -1, MAX_CHARS_PER_LINE-1) );
 
 	// Substitute location
@@ -261,13 +277,15 @@ void CHudSayText :: SayTextPrint( const char *pszBuf, int iBufSize, int clientIn
 	}
 
 	m_iFlags |= HUD_ACTIVE;
-	PlaySound( "misc/talk.wav", 1 );
 
 	if ( ScreenHeight >= 480 )
 		Y_START = ScreenHeight - 60;
 	else
 		Y_START = ScreenHeight - 45;
 	Y_START -= (line_height * (MAX_LINES+1));
+#endif
+
+	PlaySound("misc/talk.wav", 1);
 }
 
 void CHudSayText :: EnsureTextFitsInOneLineAndWrapIfHaveTo( int line )

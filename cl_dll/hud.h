@@ -66,7 +66,10 @@ class CHudCrosshair;
 #ifdef USE_VGUI2
 class CHudScoreBoard;
 class CHudTextVgui;
+class CHudChat;
 #endif
+
+extern int g_iColorsCodes[10][3];
 
 //-----------------------------------------------------
 // Game info structures declaration
@@ -181,6 +184,7 @@ public:
 #ifdef USE_VGUI2
 	std::shared_ptr<CHudScoreBoard>		m_ScoreBoard = nullptr;		// VGUI2 scoreboard
 	std::shared_ptr<CHudTextVgui>		m_TextVgui = nullptr;
+	std::shared_ptr<CHudChat>			m_Chat = nullptr;
 #endif
 
 	//-----------------------------------------------------

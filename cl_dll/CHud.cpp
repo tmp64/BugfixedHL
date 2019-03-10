@@ -60,8 +60,10 @@
 #include "CHudCrosshair.h"
 
 #ifdef USE_VGUI2
+#include "vgui2/CBaseViewport.h"
 #include "vgui2/CHudScoreBoard.h"
 #include "vgui2/CHudTextVgui.h"
+#include "vgui2/CHudChat.h"
 #include "clientsteamcontext.h"
 #include <vgui/ISurface.h>
 #include <vgui_controls/Controls.h>
@@ -561,6 +563,11 @@ void CHud :: Init( void )
 #ifdef USE_VGUI2
 	HUD_ELEM_INIT(ScoreBoard);
 	HUD_ELEM_INIT(TextVgui);
+	
+	// FIXME ?
+	m_Chat = std::shared_ptr<CHudChat>(new CHudChat());
+	m_Chat->m_isDeletable = true;
+	m_Chat->Init();
 #endif
 
 	if (g_iIsAg)
@@ -585,6 +592,7 @@ void CHud :: Init( void )
 
 #ifdef USE_VGUI2
 	vgui2::TextImage::SetColorsArrayPointer(&g_iColorsCodes);
+	g_pViewport->ReloadScheme();
 #endif
 #ifdef USE_UPDATER
 	gGameUpdater = new CGameUpdater();
@@ -770,6 +778,7 @@ void CHud :: VidInit( void )
 #ifdef USE_VGUI2
 	m_ScoreBoard->VidInit();
 	m_TextVgui->VidInit();
+	m_Chat->VidInit();
 #endif
 
 	if (g_iIsAg)

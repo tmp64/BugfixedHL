@@ -32,8 +32,6 @@
 #include <Windows.h>
 #endif
 
-extern int g_iColorsCodes[10][3];
-
 DECLARE_MESSAGE_PTR( m_Message, HudText )
 DECLARE_MESSAGE_PTR( m_Message, GameTitle )
 

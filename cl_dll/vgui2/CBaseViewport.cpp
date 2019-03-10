@@ -442,7 +442,7 @@ void CBaseViewport::ReloadScheme( const char* pszFromFile )
 	SetProportional( true );
 
 	// reload the .res file from disk
-	//LoadControlSettings( UI_HUDLAYOUT_FILENAME );
+	LoadControlSettings( UI_HUDLAYOUT_FILENAME );
 
 	//TODO: implement - Solokiller
 	//Hud().RefreshHudTextures();

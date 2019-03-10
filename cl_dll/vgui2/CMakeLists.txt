@@ -34,6 +34,10 @@ add_sources(
 	CScorePanel.cpp
 	CClientMOTD.h
 	CClientMOTD.cpp
+	CBaseHudChat.h
+	CBaseHudChat.cpp
+	CHudChat.h
+	CHudChat.cpp
 	
 	# GameUI panels
 	CGameUITestPanel.h

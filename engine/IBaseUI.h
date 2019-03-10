@@ -5,7 +5,7 @@
 
 #include "interface.h"
 
-struct cl_enginefunc_t;
+typedef struct cl_enginefuncs_s cl_enginefunc_t;
 
 /**
 *	Interface to the engine's game UI controls.

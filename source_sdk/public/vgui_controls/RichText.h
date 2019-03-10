@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -32,8 +32,8 @@ public:
 	~RichText();
 
 	// text manipulation
-	void SetText(const char *text);
-	void SetText(const wchar_t *text);
+	virtual void SetText(const char *text);
+	virtual void SetText(const wchar_t *text);
 	void GetText(int offset, wchar_t *buf, int bufLenInBytes);
 	void GetText(int offset, char *pch, int bufLenInBytes);
 
@@ -52,6 +52,12 @@ public:
 	MESSAGE_FUNC( CutSelected, "DoCutSelected" );
 	MESSAGE_FUNC( CopySelected, "DoCopySelected" );
 
+	// sets the RichText control interactive or not (meaning you can select/copy text in the window)
+	void SetPanelInteractive( bool bInteractive ){ m_bInteractive = bInteractive; }
+
+	// sets the RichText scrollbar invisible if it's not going to be used
+	void SetUnusedScrollbarInvisible( bool bInvis ){ m_bUnusedScrollbarInvis = bInvis; }
+
 	// cursor movement
 	void GotoTextStart();	// go to start of text buffer
 	void GotoTextEnd();	// go to end of text buffer
@@ -64,7 +70,7 @@ public:
 	void SetMaximumCharCount(int maxChars);
 
 	// rich edit commands
-	void InsertColorChange( SDK_Color col);
+	void InsertColorChange(SDK_Color col);
 	// IndentChange doesn't take effect until the next newline character
 	void InsertIndentChange(int pixelsIndent);
 	// clickable text
@@ -73,6 +79,10 @@ public:
 	void InsertClickableTextEnd();
 	// inserts a string that needs to be scanned for urls/mailto commands to be made clickable
 	void InsertPossibleURLString(const char *text, SDK_Color URLTextColor, SDK_Color normalTextColor);
+
+	void InsertFade( float flSustain, float flLength );
+
+	void ResetAllFades( bool bHold, bool bOnlyExpired = false, float flNewSustain = -1.0f );
 
 	// sets the height of the window so all text is visible.
 	// used by tooltips
@@ -101,6 +111,17 @@ public:
 	virtual void SetFgColor( SDK_Color color );
 	virtual void SetDrawOffsets( int ofsx, int ofsy );
 	bool IsScrollbarVisible();
+
+	// sets how URL's are handled
+	// if set, a "URLClicked" "url" "<data>" message will be sent to that panel
+	void SetURLClickedHandler( Panel *pPanelToHandleClickMsg );
+
+	void SetUnderlineFont( HFont font );
+
+	bool IsAllTextAlphaZero() const;
+	bool HasText() const;
+
+	void SetDrawTextOnly();
 
 protected:
 	virtual void OnThink();
@@ -133,14 +154,21 @@ protected:
 	virtual void OnSetFocus();
 
 	// clickable url handling
-	int ParseTextStringForUrls(const char *text, int startPos, char *resultBuffer, int resultBufferSize, bool &clickable);
+	int ParseTextStringForUrls(const char *text, int startPos, char *pchURLText, int cchURLText, char *pchURL, int cchURL, bool &clickable);
 	virtual void OnTextClicked(const wchar_t *text);
 
 #ifdef DBGFLAG_VALIDATE
 	virtual void Validate( CValidator &validator, char *pchName );
 #endif // DBGFLAG_VALIDATE
+	
+protected:
+	ScrollBar			*_vertScrollBar;	// the scroll bar used in the window
 
 private:
+	int GetLineHeight();
+	HFont GetDefaultFont();
+
+	const wchar_t *ResolveLocalizedTextAndVariables( char const *pchLookup, wchar_t *outbuf, size_t outbufsizeinbytes );
 	void CheckRecalcLineBreaks();
 
 	void GotoWordRight();	// move cursor to start of next word
@@ -159,13 +187,23 @@ private:
 	// Returns the character index the drawing should Start at
 	int GetStartDrawIndex(int &lineBreakIndexIndex);
 	int GetCursorLine();
-	void MoveScrollBar(int delta);
 	int GetClickableTextIndexStart(int startIndex); 
 	void CreateEditMenu(); // create copy/cut/paste menu
+
+	MESSAGE_FUNC_INT( MoveScrollBar, "MoveScrollBar", delta );
+	MESSAGE_FUNC_INT( MoveScrollBarDirect, "MoveScrollBarDirect", delta );
 
 	// linebreak stream functions
 	void InvalidateLineBreakStream();
 	void RecalculateLineBreaks();
+
+	struct TFade
+	{
+		float flFadeStartTime;
+		float flFadeLength;
+		float flFadeSustain;
+		int  iOriginalAlpha;
+	};
 
 	// format stream - describes changes in formatting for the text stream
 	struct TFormatStream
@@ -176,9 +214,16 @@ private:
 		bool textClickable;
 		CUtlSymbol m_sClickableTextAction;
 
+		TFade fade;
+
 		// position in TextStream that these changes take effect
 		int textStreamIndex;
 	};
+
+	bool m_bResetFades;
+	bool m_bInteractive;
+	bool m_bUnusedScrollbarInvis;
+	bool m_bAllTextAlphaIsZero;
 
 	// data
 	CUtlVector<wchar_t>   m_TextStream;		// the text in the text window is stored in this buffer
@@ -197,20 +242,21 @@ private:
 	int				   _pixelsIndent;
 	int				   _maxCharCount;		// max number of chars that can be in the text buffer
 	HFont              _font;				// font of chars in the text buffer
+	HFont			   m_hFontUnderline;
 	SDK_Color		   _selectionColor;
 	SDK_Color		   _selectionTextColor;	// color of the highlighted text
 	bool			   _currentTextClickable;
 	CUtlVector<ClickPanel *>  _clickableTextPanels;
 	int				   _clickableTextIndex;
-	SDK_Color		   _defaultTextColor;
+	SDK_Color			_defaultTextColor;
 	int					_drawOffsetX;
 	int					_drawOffsetY;
 
 	Panel				*m_pInterior;
+	PHandle				m_hPanelToHandleClickingURLs;
 
 
 	// sub-controls
-	ScrollBar			*_vertScrollBar;	// the scroll bar used in the window
 	Menu				*m_pEditMenu;		// cut/copy/paste popup
 
 	char				*m_pszInitialText;	// initial text
@@ -236,6 +282,7 @@ private:
 	// updates a render state based on the formatting and color streams
 	// returns true if any state changed
 	bool UpdateRenderState(int textStreamPos, TRenderState &renderState);
+	void CalculateFade( TRenderState &renderState );
 
 	void GenerateRenderStateForTextStreamIndex(int textStreamIndex, TRenderState &renderState);
 	int FindFormatStreamIndexForTextStreamPos(int textStreamIndex);
@@ -244,7 +291,7 @@ private:
 	int DrawString(int iFirst, int iLast, TRenderState &renderState, HFont font);
 };
 
-} // namespace vgui2
+} // namespace vgui
 
 
 #endif // RICHTEXT_H
