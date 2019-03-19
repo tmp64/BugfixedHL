@@ -47,6 +47,7 @@ public:
 	*	@param pUserData User data associated with the event. Ignored.
 	*/
 	//virtual void CallEngineSurfaceAppHandler( SDL_Event* pEvent, void* pUserData ) = 0;
+	virtual void CallEngineSurfaceAppHandler(void* pEvent, void* pUserData) = 0;
 
 	/**
 	*	Draw the section of the VGUI2 UI that is contained in the given rectangle.

@@ -331,13 +331,12 @@ private:
 	int				m_iFilterFlags;
 	bool			m_bEnteringVoice;
 
-
 public:
 	// memory handling, uses calloc so members are zero'd out on instantiation
 	void *operator new(size_t stAllocateBlock)
 	{
 		Assert(stAllocateBlock != 0);
-		void *pMem = malloc(stAllocateBlock);
+		void *pMem = ::operator new(stAllocateBlock);
 		memset(pMem, 0, stAllocateBlock);
 		return pMem;
 	}
@@ -348,7 +347,7 @@ public:
 		int size = _msize(pMem);
 		memset(pMem, 0xcd, size);
 #endif
-		free(pMem);
+		::operator delete(pMem);
 	}
 };
 

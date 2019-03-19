@@ -76,6 +76,7 @@ else()
 		POSIX
 		_stricmp=strcasecmp
 		_strnicmp=strncasecmp
+		_alloca=alloca
 	)
 
 	if( APPLE )

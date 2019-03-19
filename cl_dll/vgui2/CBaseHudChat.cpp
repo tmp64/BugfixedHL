@@ -24,6 +24,7 @@
 #include "cl_dll.h"
 #include "parsemsg.h"
 #include "IBaseUI.h"
+#include "CClientVGUI.h"
 //#include "voice_status.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -620,7 +621,7 @@ CBaseHudChat::CBaseHudChat() : CHudBase(), BaseClass( NULL, "HudChat" )
 	SetScheme(scheme);
 	SetPaintBackgroundEnabled(true);
 
-	vgui2::localize()->AddFile( vgui2::filesystem(), "resource/chat_english.txt" );		// FIXME
+	vgui2::localize()->AddFile( vgui2::filesystem(), UI_LANGUAGE_DIR "/chat_%language%.txt" );
 
 	m_nMessageMode = 0;
 
@@ -1138,8 +1139,6 @@ void CBaseHudChat::StartMessageMode( int iMessageModeType )
 	m_flHistoryFadeTime = gHUD.m_flTime + CHAT_HISTORY_FADE_TIME;
 
 	m_pFilterPanel->SetVisible( false );
-
-	//engine->ClientCmd_Unrestricted( "gameui_preventescapetoshow\n" );
 		
 #endif
 }
@@ -1150,8 +1149,7 @@ void CBaseHudChat::StartMessageMode( int iMessageModeType )
 void CBaseHudChat::StopMessageMode( void )
 {
 #ifndef _XBOX
-
-	//engine->ClientCmd_Unrestricted( "gameui_allowescapetoshow\n" );
+	baseUI()->HideGameUI();
 
 	SetKeyBoardInputEnabled( false );
 	SetMouseInputEnabled( false );

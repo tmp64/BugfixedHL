@@ -66,6 +66,13 @@ static void __CmdFunc_MessageModeVgui2()
 	gHUD.m_Chat->StartMessageMode(MM_SAY);
 }
 
+static void __CmdFunc_MessageMode2Vgui2()
+{
+	if (gEngfuncs.GetMaxClients() == 1)
+		return;
+	gHUD.m_Chat->StartMessageMode(MM_SAY_TEAM);
+}
+
 int CHudChat::Init( void )
 {
 	BaseClass::Init();
@@ -73,6 +80,7 @@ int CHudChat::Init( void )
 	HOOK_MESSAGE(SayText);
 	//HOOK_HUD_MESSAGE( CHudChat, TextMsg );
 	HOOK_COMMAND("messagemode_vgui2", MessageModeVgui2);
+	HOOK_COMMAND("messagemode2_vgui2", MessageMode2Vgui2);
 
 	return 1;
 }
