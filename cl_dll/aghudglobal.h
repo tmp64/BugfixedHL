@@ -6,10 +6,10 @@
 class AgHudGlobal : public CHudBase
 {
 public:
-	int Init(void) override;
-	int VidInit(void) override;
-	int Draw(float flTime) override;
-	void Reset(void) override;
+	void Init() override;
+	void VidInit() override;
+	void Draw(float flTime) override;
+	void Reset() override;
 
 	static int MsgFunc_PlaySound(const char *pszName, int iSize, void *pbuf);
 	static int MsgFunc_CheatCheck(const char *pszName, int iSize, void *pbuf);

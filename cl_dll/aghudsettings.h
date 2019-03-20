@@ -8,10 +8,10 @@ class AgHudSettings : public CHudBase
 public:
 	AgHudSettings() : m_flTurnoff(0), m_iMatch(0), m_iTimeLimit(0), m_iFragLimit(0), m_iFriendlyFire(0), m_iWeaponstay(0), m_pCvarHudSettings(NULL) { }
 
-	int Init(void) override;
-	int VidInit(void) override;
-	int Draw(float flTime) override;
-	void Reset(void) override;
+	void Init() override;
+	void VidInit() override;
+	void Draw(float flTime) override;
+	void Reset() override;
 
 	int MsgFunc_Settings(const char *pszName, int iSize, void *pbuf);
 

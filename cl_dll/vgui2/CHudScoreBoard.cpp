@@ -10,7 +10,7 @@
 #include "vgui2/CBaseViewport.h"
 #include "CScorePanel.h"
 
-int CHudScoreBoard::Init(void)
+void CHudScoreBoard::Init()
 {
 	m_CvarMouseBtn = CVAR_CREATE("hud_scoreboard_mousebtn", "1", FCVAR_ARCHIVE);
 	m_CvarAvatars = CVAR_CREATE("hud_scoreboard_showavatars", "1", FCVAR_ARCHIVE);
@@ -21,17 +21,14 @@ int CHudScoreBoard::Init(void)
 	m_iFlags |= HUD_ACTIVE;
 	gHUD.AddHudElem(this);
 	m_pScorePanel = CScorePanel::m_sSingleton;
-	return 1;
 }
 
-int CHudScoreBoard::VidInit(void)
+void CHudScoreBoard::VidInit()
 {
-	return 1;
 }
 
-int CHudScoreBoard::Draw(float flTime)
+void CHudScoreBoard::Draw(float flTime)
 {
-	return 0;
 }
 
 void CHudScoreBoard::Think()

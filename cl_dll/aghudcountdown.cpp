@@ -6,7 +6,7 @@
 
 DECLARE_MESSAGE(m_Countdown, Countdown)
 
-int AgHudCountdown::Init(void)
+void AgHudCountdown::Init()
 {
 	HOOK_MESSAGE(Countdown);
 
@@ -14,25 +14,22 @@ int AgHudCountdown::Init(void)
 
 	m_iFlags = 0;
 	m_btCountdown = -1;
-
-	return 1;
 }
 
-int AgHudCountdown::VidInit(void)
+void AgHudCountdown::VidInit()
 {
-	return 1;
 }
 
-void AgHudCountdown::Reset(void)
+void AgHudCountdown::Reset()
 {
 	m_iFlags &= ~HUD_ACTIVE;
 	m_btCountdown = -1;
 }
 
-int AgHudCountdown::Draw(float fTime)
+void AgHudCountdown::Draw(float fTime)
 {
 	if (gHUD.m_iIntermission)
-		return 0;
+		return;
 
 	char szText[128];
 
@@ -73,8 +70,6 @@ int AgHudCountdown::Draw(float fTime)
 			AgDrawHudStringCentered(ScreenWidth / 2, gHUD.m_scrinfo.iCharHeight * 7, ScreenWidth, szText, r, g, b);
 		}
 	}
-
-	return 0;
 }
 
 int AgHudCountdown::MsgFunc_Countdown(const char *pszName, int iSize, void *pbuf)

@@ -755,10 +755,9 @@ CHudChatHistory *CBaseHudChat::GetChatHistory( void )
 
 
 
-int CBaseHudChat::Init( void )
+void CBaseHudChat::Init( void )
 {
 	gHUD.AddHudElem(this);
-	return 1;
 }
 
 //-----------------------------------------------------------------------------

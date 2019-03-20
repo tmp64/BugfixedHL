@@ -48,7 +48,7 @@ public:
 	virtual void	CreateChatInputLine( void );
 	virtual void	CreateChatLines( void );
 
-	virtual int		Init( void );
+	virtual void	Init( void );
 	virtual void	Reset( void );
 	virtual void	ApplySchemeSettings(vgui2::IScheme *pScheme);
 	int				MsgFunc_SayText(const char *pszName, int iSize, void *pbuf);

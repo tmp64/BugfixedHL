@@ -18,7 +18,7 @@ DECLARE_COMMAND(m_Location, AddLocation);
 DECLARE_COMMAND(m_Location, DeleteLocation);
 DECLARE_COMMAND(m_Location, ShowLocations);
 
-int AgHudLocation::Init(void)
+void AgHudLocation::Init()
 {
 	m_fAt = 0;
 	m_fNear = 0;
@@ -38,23 +38,19 @@ int AgHudLocation::Init(void)
 	HOOK_COMMAND("aglistloc", ShowLocations);
 
 	m_pCvarLocationKeywords = gEngfuncs.pfnRegisterVariable("cl_location_keywords", "0", FCVAR_ARCHIVE);
-
-	return 1;
 }
 
-int AgHudLocation::VidInit(void)
+void AgHudLocation::VidInit()
 {
-	return 1;
 }
 
-void AgHudLocation::Reset(void)
+void AgHudLocation::Reset()
 {
 	m_iFlags &= ~HUD_ACTIVE;
 }
 
-int AgHudLocation::Draw(float fTime)
+void AgHudLocation::Draw(float fTime)
 {
-	return 0;
 }
 
 void AgHudLocation::UserCmd_AddLocation()

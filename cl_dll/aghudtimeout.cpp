@@ -6,7 +6,7 @@
 
 DECLARE_MESSAGE(m_Timeout, Timeout)
 
-int AgHudTimeout::Init(void)
+void AgHudTimeout::Init()
 {
 	HOOK_MESSAGE(Timeout);
 
@@ -15,14 +15,11 @@ int AgHudTimeout::Init(void)
 	m_iFlags = 0;
 	m_State = Inactive;
 	m_iTime = 0;
-
-	return 1;
 }
 
-int AgHudTimeout::VidInit(void)
+void AgHudTimeout::VidInit()
 {
 	m_State = Inactive;
-	return 1;
 }
 
 void AgHudTimeout::Reset(void)
@@ -30,12 +27,12 @@ void AgHudTimeout::Reset(void)
 	m_iFlags &= ~HUD_ACTIVE;
 }
 
-int AgHudTimeout::Draw(float fTime)
+void AgHudTimeout::Draw(float fTime)
 {
 	if (Inactive == m_State)
 	{
 		Reset();
-		return 1;
+		return;
 	}
 
 	char szText[64];
@@ -51,11 +48,9 @@ int AgHudTimeout::Draw(float fTime)
 	else if (Countdown == m_State)
 		sprintf(szText, "Timeout, starting in %d seconds.", m_iTime);
 	else
-		return 0;
+		return;
 
 	AgDrawHudStringCentered(ScreenWidth / 2, gHUD.m_scrinfo.iCharHeight * 6, ScreenWidth, szText, r, g, b);
-
-	return 0;
 }
 
 int AgHudTimeout::MsgFunc_Timeout(const char *pszName, int iSize, void *pbuf)

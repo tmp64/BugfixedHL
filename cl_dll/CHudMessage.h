@@ -25,9 +25,9 @@ struct message_parms_t
 class CHudMessage : public CHudBase
 {
 public:
-	int Init(void);
-	int VidInit(void);
-	int Draw(float flTime);
+	void Init();
+	void VidInit();
+	void Draw(float flTime);
 	int MsgFunc_HudText(const char *pszName, int iSize, void *pbuf);
 	int MsgFunc_GameTitle(const char *pszName, int iSize, void *pbuf);
 

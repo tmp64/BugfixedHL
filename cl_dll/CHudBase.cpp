@@ -1,18 +1,18 @@
 #include "CHudBase.h"
 
-int CHudBase::Init(void)
+void CHudBase::Init()
 {
-	return 0;
+	return;
 }
 
-int CHudBase::VidInit(void)
+void CHudBase::VidInit()
 {
-	return 0;
+	return;
 }
 
-int CHudBase::Draw(float flTime)
+void CHudBase::Draw(float flTime)
 {
-	return 0;
+	return;
 }
 
 void CHudBase::Think(void)

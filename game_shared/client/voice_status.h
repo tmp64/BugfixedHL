@@ -93,7 +93,7 @@ public:
 		vgui::Panel **pParentPanel);
 	
 	// ackPosition is the bottom position of where CVoiceStatus will draw the voice acknowledgement labels.
-	virtual int VidInit();
+	virtual void VidInit();
 
 
 public:

@@ -19,10 +19,10 @@ public:
 		m_locations[HLARRAYSIZE(m_locations) - 1].m_nextLocation = NULL;
 	}
 
-	int Init(void) override;
-	int VidInit(void) override;
-	int Draw(float flTime) override;
-	void Reset(void) override;
+	void Init() override;
+	void VidInit() override;
+	void Draw(float flTime) override;
+	void Reset() override;
 
 private:
 	float m_fAt;

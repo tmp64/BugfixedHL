@@ -46,31 +46,27 @@ static int DEATHNOTICE_DISPLAY_TIME = 6;
 
 DeathNoticeItem rgDeathNoticeList[ MAX_DEATHNOTICES + 1 ];
 
-int CHudDeathNotice :: Init( void )
+void CHudDeathNotice :: Init()
 {
 	gHUD.AddHudElem( this );
 
 	HOOK_MESSAGE( DeathMsg );
 
 	CVAR_CREATE( "hud_deathnotice_time", "6", 0 );
-
-	return 1;
 }
 
 
-void CHudDeathNotice :: InitHUDData( void )
+void CHudDeathNotice :: InitHUDData()
 {
 	memset( rgDeathNoticeList, 0, sizeof(rgDeathNoticeList) );
 }
 
-int CHudDeathNotice :: VidInit( void )
+void CHudDeathNotice :: VidInit()
 {
 	m_HUD_d_skull = gHUD.GetSpriteIndex( "d_skull" );
-
-	return 1;
 }
 
-int CHudDeathNotice :: Draw( float flTime )
+void CHudDeathNotice :: Draw( float flTime )
 {
 	int x, y, r, g, b;
 
@@ -127,8 +123,6 @@ int CHudDeathNotice :: Draw( float flTime )
 			}
 		}
 	}
-
-	return 1;
 }
 
 // This message handler may be better off elsewhere

@@ -7,7 +7,7 @@
 
 DECLARE_MESSAGE(m_Nextmap, Nextmap)
 
-int AgHudNextmap::Init(void)
+void AgHudNextmap::Init()
 {
 	HOOK_MESSAGE(Nextmap);
 
@@ -16,26 +16,23 @@ int AgHudNextmap::Init(void)
 	m_iFlags = 0;
 	m_szNextmap[0] = '\0';
 	m_flTurnoff = 0;
-
-	return 1;
 }
 
-int AgHudNextmap::VidInit(void)
+void AgHudNextmap::VidInit()
 {
-	return 1;
 }
 
-void AgHudNextmap::Reset(void)
+void AgHudNextmap::Reset()
 {
 	m_iFlags &= ~HUD_ACTIVE;
 }
 
-int AgHudNextmap::Draw(float fTime)
+void AgHudNextmap::Draw(float fTime)
 {
 	if (gHUD.m_flTime > m_flTurnoff)
 	{
 		Reset();
-		return 1;
+		return;
 	}
 
 	char szText[64];
@@ -47,8 +44,6 @@ int AgHudNextmap::Draw(float fTime)
 
 	sprintf(szText, "Nextmap is %s", m_szNextmap);
 	AgDrawHudStringCentered(ScreenWidth / 2, gHUD.m_scrinfo.iCharHeight * 5, ScreenWidth, szText, r, g, b);
-
-	return 0;
 }
 
 int AgHudNextmap::MsgFunc_Nextmap(const char *pszName, int iSize, void *pbuf)

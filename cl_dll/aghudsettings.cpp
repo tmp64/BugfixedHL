@@ -8,7 +8,7 @@ DECLARE_MESSAGE(m_Settings, Settings)
 
 int g_iMatch = 0;
 
-int AgHudSettings::Init(void)
+void AgHudSettings::Init()
 {
 	HOOK_MESSAGE(Settings);
 
@@ -29,27 +29,24 @@ int AgHudSettings::Init(void)
 	m_flTurnoff = 0.0;
 
 	m_pCvarHudSettings = gEngfuncs.pfnRegisterVariable("hud_settings", "1", FCVAR_ARCHIVE);
-
-	return 1;
 }
 
-int AgHudSettings::VidInit(void)
+void AgHudSettings::VidInit()
 {
-	return 1;
 }
 
-void AgHudSettings::Reset(void)
+void AgHudSettings::Reset()
 {
 	m_iFlags &= ~HUD_ACTIVE;
 	m_flTurnoff = 0;
 }
 
-int AgHudSettings::Draw(float fTime)
+void AgHudSettings::Draw(float fTime)
 {
 	if (gHUD.m_flTime > m_flTurnoff || m_pCvarHudSettings->value == 0)
 	{
 		Reset();
-		return 1;
+		return;
 	}
 
 	char szText[128];
@@ -111,8 +108,6 @@ int AgHudSettings::Draw(float fTime)
 	}
 
 	AgDrawHudStringCentered(ScreenWidth / 2, gHUD.m_scrinfo.iCharHeight * 3, ScreenWidth, gHUD.m_Location.m_szMap, r, g, b);
-
-	return 0;
 }
 
 int AgHudSettings::MsgFunc_Settings(const char *pszName, int iSize, void *pbuf)

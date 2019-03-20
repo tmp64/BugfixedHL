@@ -6,10 +6,10 @@
 class CHudStatusBar : public CHudBase
 {
 public:
-	int Init(void);
-	int VidInit(void);
-	int Draw(float flTime);
-	void Reset(void);
+	void Init();
+	void VidInit();
+	void Draw(float flTime);
+	void Reset();
 	void ParseStatusString(int line_num);
 
 	int MsgFunc_StatusText(const char *pszName, int iSize, void *pbuf);

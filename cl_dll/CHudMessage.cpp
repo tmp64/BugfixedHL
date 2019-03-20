@@ -41,7 +41,7 @@ client_textmessage_t	g_pCustomMessage;
 char *g_pCustomName = "Custom";
 char g_pCustomText[MAX_MESSAGE_TEXT_LENGTH];
 
-int CHudMessage::Init(void)
+void CHudMessage::Init()
 {
 	HOOK_MESSAGE( HudText );
 	HOOK_MESSAGE( GameTitle );
@@ -49,20 +49,16 @@ int CHudMessage::Init(void)
 	gHUD.AddHudElem(this);
 
 	Reset();
-
-	return 1;
 };
 
-int CHudMessage::VidInit( void )
+void CHudMessage::VidInit()
 {
 	m_HUD_title_half = gHUD.GetSpriteIndex( "title_half" );
 	m_HUD_title_life = gHUD.GetSpriteIndex( "title_life" );
-
-	return 1;
 };
 
 
-void CHudMessage::Reset( void )
+void CHudMessage::Reset()
 {
  	memset( m_pMessages, 0, sizeof( m_pMessages[0] ) * maxHUDMessages );
 	memset( m_startTime, 0, sizeof( m_startTime[0] ) * maxHUDMessages );
@@ -388,7 +384,7 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time, c
 }
 
 
-int CHudMessage::Draw( float fTime )
+void CHudMessage::Draw( float fTime )
 {
 	int i, drawn;
 	client_textmessage_t *pMessage;
@@ -498,8 +494,6 @@ int CHudMessage::Draw( float fTime )
 	// Don't call until we get another message
 	if ( !drawn )
 		m_iFlags &= ~HUD_ACTIVE;
-
-	return 1;
 }
 
 

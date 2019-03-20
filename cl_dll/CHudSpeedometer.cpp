@@ -4,29 +4,26 @@
 #include "CHudSpeedometer.h"
 #include <cmath>
 
-int CHudSpeedometer::Init(void)
+void CHudSpeedometer::Init()
 {
 	m_iFlags = HUD_ACTIVE;
 	
 	m_pCvarSpeedometer = CVAR_CREATE("hud_speedometer", "0", FCVAR_ARCHIVE);
 
 	gHUD.AddHudElem(this);
-
-	return 0;
 }
 
-int CHudSpeedometer::VidInit()
+void CHudSpeedometer::VidInit()
 {
-	return 1;
 }
 
-int CHudSpeedometer::Draw(float time)
+void CHudSpeedometer::Draw(float time)
 {
 	if ((gHUD.m_iHideHUDDisplay & HIDEHUD_HEALTH) || gEngfuncs.IsSpectateOnly())
-		return 0;
+		return;
 
 	if (m_pCvarSpeedometer->value == 0.0f)
-		return 0;
+		return;
 
 	if (m_iOldSpeed != m_iSpeed)
 		m_fFade = HUD_FADE_TIME;
@@ -52,8 +49,6 @@ int CHudSpeedometer::Draw(float time)
 	gHUD.DrawHudNumberCentered(ScreenWidth / 2, ScreenHeight - gHUD.m_iFontHeight - gHUD.m_iFontHeight / 2, m_iSpeed, r, g, b);
 
 	m_iOldSpeed = m_iSpeed;
-
-	return 0;
 }
 
 void CHudSpeedometer::UpdateSpeed(const float velocity[2])

@@ -6,17 +6,17 @@
 class CHudTimer : public CHudBase
 {
 public:
-	int Init(void);
-	int VidInit(void);
-	void Think(void);
-	int Draw(float flTime);
+	void Init();
+	void VidInit();
+	void Think();
+	void Draw(float flTime);
 
 #ifdef _WIN32
 	int MsgFunc_Timer(const char *pszName, int iSize, void *pbuf);
 
-	void DoResync(void);
+	void DoResync();
 	void ReadDemoTimerBuffer(int type, const unsigned char *buffer);
-	void CustomTimerCommand(void);
+	void CustomTimerCommand();
 
 	enum {
 		SV_AG_NONE = -1,

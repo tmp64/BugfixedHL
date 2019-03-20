@@ -12,7 +12,7 @@ CHudCrosshair::CHudCrosshair()
 {
 }
 
-int CHudCrosshair::Init()
+void CHudCrosshair::Init()
 {
 	gHUD.AddHudElem(this);
 
@@ -30,23 +30,21 @@ int CHudCrosshair::Init()
 	m_CustomCrosshair.t = CVAR_CREATE("cl_crosshair_t", "0", FCVAR_ARCHIVE);
 
 	m_iFlags |= HUD_ACTIVE; //!!!
-
-	return 1;
 }
 
-int CHudCrosshair::Draw(float flTime)
+void CHudCrosshair::Draw(float flTime)
 {
 	if (!(gHUD.m_iWeaponBits & (1 << (WEAPON_SUIT))))
-		return 1;
+		return;
 
 	if ((gHUD.m_iHideHUDDisplay & (HIDEHUD_WEAPONS | HIDEHUD_ALL)))
-		return 1;
+		return;
 
 	if (!(m_iFlags & HUD_ACTIVE))
-		return 0;
+		return;
 
 	if (!gHUD.m_Ammo->m_pWeapon)
-		return 0;
+		return;
 
 	// Draw custom crosshair if enabled
 	if (m_CustomCrosshair.enable->value && !(gHUD.m_Ammo->m_fOnTarget &&gHUD.m_Ammo->m_pWeapon->hAutoaim))
@@ -112,5 +110,4 @@ int CHudCrosshair::Draw(float flTime)
 			FillRGBA(cx - thick / 2, cy - gap - size, thick, size, r, g, b, a);
 #endif
 	}
-	return 1;
 }

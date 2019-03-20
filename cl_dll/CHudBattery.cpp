@@ -27,7 +27,7 @@
 
 DECLARE_MESSAGE_PTR(m_Battery, Battery)
 
-int CHudBattery::Init(void)
+void CHudBattery::Init()
 {
 	m_iBat = 0;
 	m_fFade = 0;
@@ -36,11 +36,9 @@ int CHudBattery::Init(void)
 	HOOK_MESSAGE(Battery);
 
 	gHUD.AddHudElem(this);
-
-	return 1;
 };
 
-int CHudBattery::VidInit(void)
+void CHudBattery::VidInit()
 {
 	int HUD_suit_empty = gHUD.GetSpriteIndex( "suit_empty" );
 	int HUD_suit_full = gHUD.GetSpriteIndex( "suit_full" );
@@ -50,7 +48,6 @@ int CHudBattery::VidInit(void)
 	m_prc2 = &gHUD.GetSpriteRect( HUD_suit_full );
 	m_iHeight = m_prc2->bottom - m_prc1->top;
 	m_fFade = 0;
-	return 1;
 };
 
 int CHudBattery:: MsgFunc_Battery(const char *pszName,  int iSize, void *pbuf )
@@ -70,10 +67,10 @@ int CHudBattery:: MsgFunc_Battery(const char *pszName,  int iSize, void *pbuf )
 	return 1;
 }
 
-int CHudBattery::Draw(float flTime)
+void CHudBattery::Draw(float flTime)
 {
 	if ( gHUD.m_iHideHUDDisplay & HIDEHUD_HEALTH )
-		return 1;
+		return;
 
 	int r, g, b, x, y;
 	float a;
@@ -83,7 +80,7 @@ int CHudBattery::Draw(float flTime)
 	rc.top  += m_iHeight * ((float)(100 - (min(100, m_iBat))) * 0.01);	// battery can go from 0 to 100 so * 0.01 goes from 0 to 1
 
 	if (!(gHUD.m_iWeaponBits & (1<<(WEAPON_SUIT)) ))
-		return 1;
+		return;
 
 	if (gHUD.m_pCvarDim->value == 0)
 		a = MIN_ALPHA + ALPHA_POINTS_MAX;
@@ -124,6 +121,4 @@ int CHudBattery::Draw(float flTime)
 
 	x += (m_prc1->right - m_prc1->left);
 	x = gHUD.DrawHudNumber(x, y, DHN_3DIGITS | DHN_DRAWZERO, m_iBat, r, g, b);
-
-	return 1;
 }

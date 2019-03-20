@@ -16,9 +16,9 @@ public:
 	cvar_t* m_CvarEffType = nullptr;
 	cvar_t* m_CvarEffPercent = nullptr;
 
-	int Init(void);
-	int VidInit(void);
-	int Draw(float flTime);
+	void Init();
+	void VidInit();
+	void Draw(float flTime);
 	void Think();
 	virtual void Reset(void);
 	void ShowScoreBoard();

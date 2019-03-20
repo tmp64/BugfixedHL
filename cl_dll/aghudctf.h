@@ -8,10 +8,10 @@ class AgHudCTF : public CHudBase
 public:
 	AgHudCTF(): m_iFlagStatus1(0), m_iFlagStatus2(0), m_pCvarClCtfVolume(NULL) { }
 
-	int Init(void) override;
-	int VidInit(void) override;
-	int Draw(float flTime) override;
-	void Reset(void) override;
+	void Init() override;
+	void VidInit() override;
+	void Draw(float flTime) override;
+	void Reset() override;
 
 	int MsgFunc_CTF(const char *pszName, int iSize, void *pbuf);
 	int MsgFunc_CTFSound(const char *pszName, int iSize, void *pbuf) const;

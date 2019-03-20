@@ -269,7 +269,7 @@ DECLARE_COMMAND_PTR(m_Ammo, PrevWeapon);
 
 #define HISTORY_DRAW_TIME	"5"
 
-int CHudAmmo::Init(void)
+void CHudAmmo::Init()
 {
 	gHUD.AddHudElem(this);
 
@@ -305,8 +305,6 @@ int CHudAmmo::Init(void)
 
 	gWR.Init();
 	gHR.Init();
-
-	return 1;
 };
 
 void CHudAmmo::Reset(void)
@@ -327,7 +325,7 @@ void CHudAmmo::Reset(void)
 	m_iMaxSlot = 4;
 }
 
-int CHudAmmo::VidInit(void)
+void CHudAmmo::VidInit()
 {
 	// Load sprites for buckets (top row of weapon menu)
 	m_HUD_bucket0 = gHUD.GetSpriteIndex( "bucket1" );
@@ -352,8 +350,6 @@ int CHudAmmo::VidInit(void)
 		giABWidth = 10;
 		giABHeight = 2;
 	}
-
-	return 1;
 }
 
 //
@@ -864,17 +860,17 @@ void CHudAmmo::UserCmd_PrevWeapon(void)
 // Drawing code
 //-------------------------------------------------------------------------
 
-int CHudAmmo::Draw(float flTime)
+void CHudAmmo::Draw(float flTime)
 {
 	int x, y, r, g, b;
 	float a;
 	int AmmoWidth;
 
 	if (!(gHUD.m_iWeaponBits & (1<<(WEAPON_SUIT)) ))
-		return 1;
+		return;
 
 	if ( (gHUD.m_iHideHUDDisplay & ( HIDEHUD_WEAPONS | HIDEHUD_ALL )) )
-		return 1;
+		return;
 
 	// Draw Weapon Menu
 	DrawWList(flTime);
@@ -883,10 +879,10 @@ int CHudAmmo::Draw(float flTime)
 	gHR.DrawAmmoHistory( flTime );
 
 	if (!(m_iFlags & HUD_ACTIVE))
-		return 0;
+		return;
 
 	if (!m_pWeapon)
-		return 0;
+		return;
 
 	WEAPON *pw = m_pWeapon; // shorthand
 
@@ -922,7 +918,7 @@ int CHudAmmo::Draw(float flTime)
 
 	// SPR_Draw Ammo
 	if ((pw->iAmmoType < 0) && (pw->iAmmo2Type < 0))
-		return 0;
+		return;
 
 	int iFlags = DHN_DRAWZERO; // draw 0 values
 
@@ -1003,8 +999,6 @@ int CHudAmmo::Draw(float flTime)
 			SPR_DrawAdditive(0, x, y - iOffset, &m_pWeapon->rcAmmo2);
 		}
 	}
-
-	return 1;
 }
 
 

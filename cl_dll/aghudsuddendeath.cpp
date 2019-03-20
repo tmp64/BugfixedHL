@@ -6,7 +6,7 @@
 
 DECLARE_MESSAGE(m_SuddenDeath, SuddenDeath)
 
-int AgHudSuddenDeath::Init(void)
+void AgHudSuddenDeath::Init()
 {
 	HOOK_MESSAGE(SuddenDeath);
 
@@ -14,21 +14,18 @@ int AgHudSuddenDeath::Init(void)
 
 	m_iFlags = 0;
 	m_iSuddenDeath = 0;
-
-	return 1;
 }
 
-int AgHudSuddenDeath::VidInit(void)
+void AgHudSuddenDeath::VidInit()
 {
-	return 1;
 }
 
-void AgHudSuddenDeath::Reset(void)
+void AgHudSuddenDeath::Reset()
 {
 	m_iFlags &= ~HUD_ACTIVE;
 }
 
-int AgHudSuddenDeath::Draw(float fTime)
+void AgHudSuddenDeath::Draw(float fTime)
 {
 	if (gHUD.m_iIntermission)
 		Reset();
@@ -39,8 +36,6 @@ int AgHudSuddenDeath::Draw(float fTime)
 	ScaleColors(r, g, b, a);
 
 	AgDrawHudStringCentered(ScreenWidth / 2, gHUD.m_scrinfo.iCharHeight * 2, ScreenWidth, "Sudden death!", r, g, b);
-
-	return 0;
 }
 
 int AgHudSuddenDeath::MsgFunc_SuddenDeath(const char *pszName, int iSize, void *pbuf)

@@ -48,9 +48,10 @@ union RGBA {
 	void Set(unsigned char r1, unsigned char g1, unsigned char b1) { r = r1; g = g1; b = b1; a = 255; }
 };
 
-typedef struct {
+struct POSITION 
+{
 	int x, y;
-} POSITION;
+};
 
 typedef struct cvar_s cvar_t;
 
@@ -61,12 +62,12 @@ public:
 	int   m_type;
 	int	  m_iFlags; // active, moving, 
 	virtual		~CHudBase() {}
-	virtual int Init(void);
-	virtual int VidInit(void);
-	virtual int Draw(float flTime);
-	virtual void Think(void);
-	virtual void Reset(void);
-	virtual void InitHUDData(void);		// called every time a server is connected to
+	virtual void Init();
+	virtual void VidInit();
+	virtual void Draw(float flTime);
+	virtual void Think();
+	virtual void Reset();
+	virtual void InitHUDData();		// called every time a server is connected to
 	bool m_isDeletable = false;
 };
 

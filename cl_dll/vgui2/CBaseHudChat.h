@@ -241,7 +241,7 @@ public:
 	virtual void	CreateChatInputLine( void );
 	virtual void	CreateChatLines( void );
 	
-	virtual int		Init( void );
+	virtual void	Init( void );
 
 	void			LevelInit( const char *newmap );
 	void			LevelShutdown( void );

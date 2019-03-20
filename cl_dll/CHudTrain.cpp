@@ -28,25 +28,21 @@
 DECLARE_MESSAGE_PTR(m_Train, Train )
 
 
-int CHudTrain::Init(void)
+void CHudTrain::Init()
 {
 	HOOK_MESSAGE( Train );
 
 	m_iPos = 0;
 	m_iFlags = 0;
 	gHUD.AddHudElem(this);
-
-	return 1;
 };
 
-int CHudTrain::VidInit(void)
+void CHudTrain::VidInit()
 {
 	m_hSprite = 0;
-
-	return 1;
 };
 
-int CHudTrain::Draw(float fTime)
+void CHudTrain::Draw(float fTime)
 {
 	if ( !m_hSprite )
 		m_hSprite = LoadSprite("sprites/%d_train.spr");
@@ -69,8 +65,6 @@ int CHudTrain::Draw(float fTime)
 		SPR_DrawAdditive( m_iPos - 1,  x, y, NULL);
 
 	}
-
-	return 1;
 }
 
 

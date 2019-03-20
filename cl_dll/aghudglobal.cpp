@@ -18,7 +18,7 @@ DECLARE_MESSAGE(m_Global, Splash)
 
 int g_GameType = GT_STANDARD;
 
-int AgHudGlobal::Init(void)
+void AgHudGlobal::Init()
 {
 	HOOK_MESSAGE(PlaySound);
 	HOOK_MESSAGE(CheatCheck);
@@ -33,13 +33,10 @@ int AgHudGlobal::Init(void)
 	gHUD.AddHudElem(this);
 
 	m_iFlags = 0;
-
-	return 1;
 }
 
-int AgHudGlobal::VidInit(void)
+void AgHudGlobal::VidInit()
 {
-	return 1;
 }
 
 void AgHudGlobal::Reset(void)
@@ -47,9 +44,8 @@ void AgHudGlobal::Reset(void)
 	m_iFlags |= HUD_ACTIVE;
 }
 
-int AgHudGlobal::Draw(float fTime)
+void AgHudGlobal::Draw(float fTime)
 {
-	return 1;
 }
 
 int AgHudGlobal::MsgFunc_PlaySound(const char *pszName, int iSize, void *pbuf)

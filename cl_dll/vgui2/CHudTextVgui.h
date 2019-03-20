@@ -5,8 +5,8 @@
 class CHudTextVgui : public CHudBase
 {
 public:
-	virtual int Init(void);
-	virtual void Think(void);
+	virtual void Init();
+	virtual void Think();
 
 private:
 	typedef int (*DrawStringFunc_t)		(int x, int y, const char* string, int r, int g, int b);
