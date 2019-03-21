@@ -684,9 +684,9 @@ void CHudTimer::DrawTimerInternal(int time, float ypos, int r, int g, int b, boo
 #else
 
 // Empty implementation
-int CHudTimer::Init(void) { return 1; }
-int CHudTimer::VidInit(void) { return 1; }
-void CHudTimer::Think(void) {}
-int CHudTimer::Draw(float) { return 0; }
+void CHudTimer::Init() {}
+void CHudTimer::VidInit() {}
+void CHudTimer::Think() {}
+void CHudTimer::Draw(float) {}
 
 #endif

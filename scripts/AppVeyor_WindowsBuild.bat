@@ -23,7 +23,7 @@ if "%BUILD_TYPE%"=="0" (
 	
 ) ELSE IF "%BUILD_TYPE%"=="3" (
 
-	MSBuild.exe BugfixedHL.sln /t:bugfixedhl_amxx /p:PlatformTarget=x86 /p:Configuration=RelWithDebInfo /m
+	MSBuild.exe BugfixedHL.sln /t:bugfixedapi_amxx /p:PlatformTarget=x86 /p:Configuration=RelWithDebInfo /m
 	IF ERRORLEVEL 1 EXIT /b 1
 	..\scripts\AppVeyor_PackageAmxxModule.bat
 	
