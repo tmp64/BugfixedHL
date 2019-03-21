@@ -694,6 +694,7 @@ CHud :: ~CHud()
 	while (m_HudList.size() > 0)
 	{
 		CHudBase * i = *m_HudList.rbegin();
+#ifdef USE_VGUI2
 		// Do not delete VGUI2 HUD elements because CHud::Shutdown() and
 		// CHud::~CHud() are called after VGUI2 subsystem is shutdown
 		// Deatructors of VGUI2 panels call VGUI2 interfaces which are invalid
@@ -702,6 +703,7 @@ CHud :: ~CHud()
 			i->EraseFromHudList();
 		}
 		else
+#endif
 		{
 			delete i;
 		}

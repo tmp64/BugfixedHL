@@ -216,10 +216,10 @@ void CHudSayText :: SayTextPrint( const char *pszBuf, int iBufSize, int clientIn
 #ifdef USE_VGUI2
 	static char buf[1024];
 	int strLen = strlen(pszBuf + 1);
-	strncpy(buf, pszBuf, min(sizeof(buf), strLen));
+	strncpy(buf, pszBuf, min<int>(sizeof(buf), strLen));
 	buf[sizeof(buf) - 1] = '\0';
 
-	gHUD.m_Location->ParseAndEditSayString(clientIndex, buf, min(sizeof(buf), strLen));
+	gHUD.m_Location->ParseAndEditSayString(clientIndex, buf, min<int>(sizeof(buf), strLen));
 	gHUD.m_Chat->ChatPrintf(clientIndex, CHAT_FILTER_NONE, "%s", pszBuf);
 #else
 	// find an empty string slot
