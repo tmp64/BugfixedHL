@@ -19,6 +19,7 @@
 //
 
 #include <string.h>
+#include <exception>
 #ifdef _WIN32
 #include <windows.h>
 #include <psapi.h>
@@ -340,12 +341,20 @@ Called whenever the client connects to a server.
 
 int _DLLEXPORT HUD_VidInit( void )
 {
-	gHUD.VidInit();
-	VGui_Startup();
-	g_StudioRenderer.InitOnConnect();
+	try
+	{
+		gHUD.VidInit();
+		VGui_Startup();
+		g_StudioRenderer.InitOnConnect();
 #ifdef _WIN32
-	ResultsStop();
+		ResultsStop();
 #endif
+	}
+	catch (const std::exception &e)
+	{
+		ConPrintf(RGBA(249, 54, 54), "HUD_VidInit: C++ exception thrown.\n");
+		ConPrintf(RGBA(249, 54, 54), "HUD_VidInit: %s.\n", e.what());
+	}
 	return 1;
 }
 
@@ -360,17 +369,25 @@ Reinitializes all the hud variables.
 
 void _DLLEXPORT HUD_Init( void )
 {
+	try
+	{
 #ifdef USE_VGUI2
-	ClientSteamContext().Activate();
+		ClientSteamContext().Activate();
 #endif
-	InitInput();
-	gHUD.Init();
-	Scheme_Init();
-	Memory::OnHudInit();
+		InitInput();
+		gHUD.Init();
+		Scheme_Init();
+		Memory::OnHudInit();
 #ifdef _WIN32
-	SvcMessagesInit();
-	ResultsInit();
+		SvcMessagesInit();
+		ResultsInit();
 #endif
+	}
+	catch (const std::exception &e)
+	{
+		ConPrintf(RGBA(249, 54, 54), "HUD_Init: C++ exception thrown.\n");
+		ConPrintf(RGBA(249, 54, 54), "HUD_Init: %s.\n", e.what());
+	}
 }
 
 
@@ -385,7 +402,15 @@ redraw the HUD.
 
 int _DLLEXPORT HUD_Redraw( float time, int intermission )
 {
-	gHUD.Redraw( time, intermission );
+	try
+	{
+		gHUD.Redraw(time, intermission);
+	}
+	catch (const std::exception &e)
+	{
+		ConPrintf(RGBA(249, 54, 54), "HUD_Redraw: C++ exception thrown.\n");
+		ConPrintf(RGBA(249, 54, 54), "HUD_Redraw: %s.\n", e.what());
+	}
 
 	return 1;
 }
@@ -406,9 +431,18 @@ returns 1 if anything has been changed, 0 otherwise.
 
 int _DLLEXPORT HUD_UpdateClientData(client_data_t *pcldata, float flTime )
 {
-	IN_Commands();
+	try
+	{
+		IN_Commands();
 
-	return gHUD.UpdateClientData(pcldata, flTime );
+		return gHUD.UpdateClientData(pcldata, flTime);
+	}
+	catch (const std::exception &e)
+	{
+		ConPrintf(RGBA(249, 54, 54), "HUD_UpdateClientData: C++ exception thrown.\n");
+		ConPrintf(RGBA(249, 54, 54), "HUD_UpdateClientData: %s.\n", e.what());
+		return 0;
+	}
 }
 
 /*
@@ -435,11 +469,19 @@ Called at game exit.
 
 void _DLLEXPORT HUD_Shutdown( void )
 {
-	gHUD.Shutdown();
-	ShutdownInput();
+	try
+	{
+		gHUD.Shutdown();
+		ShutdownInput();
 #ifdef USE_VGUI2
-	ClientSteamContext().Shutdown();
+		ClientSteamContext().Shutdown();
 #endif
+	}
+	catch (const std::exception &e)
+	{
+		ConPrintf(RGBA(249, 54, 54), "HUD_Shutdown: C++ exception thrown.\n");
+		ConPrintf(RGBA(249, 54, 54), "HUD_Shutdown: %s.\n", e.what());
+	}
 }
 
 /*
@@ -452,18 +494,26 @@ Called by engine every frame that client .dll is loaded
 
 void _DLLEXPORT HUD_Frame( double time )
 {
-	gHUD.Frame(time);
-	Memory::OnFrame();
+	try
+	{
+		gHUD.Frame(time);
+		Memory::OnFrame();
 #ifdef _WIN32
-	ResultsFrame(time);
+		ResultsFrame(time);
 #endif
 #ifdef USE_UPDATER
-	gGameUpdater->Frame();
+		gGameUpdater->Frame();
 #endif
 
-	ServersThink( time );
+		ServersThink(time);
 
-	GetClientVoiceMgr()->Frame(time);
+		GetClientVoiceMgr()->Frame(time);
+	}
+	catch (const std::exception &e)
+	{
+		ConPrintf(RGBA(249, 54, 54), "HUD_Frame: C++ exception thrown.\n");
+		ConPrintf(RGBA(249, 54, 54), "HUD_Frame: %s.\n", e.what());
+	}
 }
 
 
