@@ -69,6 +69,22 @@
 #include <vgui_controls/Controls.h>
 #include <vgui_controls/TextImage.h>
 #endif
+
+//-----------------------------------------------------
+// AG hud elements
+//-----------------------------------------------------
+#include "aghudglobal.h"
+#include "aghudcountdown.h"
+#include "aghudctf.h"
+#include "aghudlocation.h"
+#include "aghudlongjump.h"
+#include "aghudnextmap.h"
+#include "aghudplayerid.h"
+#include "aghudsettings.h"
+#include "aghudsuddendeath.h"
+#include "aghudtimeout.h"
+#include "aghudvote.h"
+
 #ifdef USE_UPDATER
 #include <CGameUpdater.h>
 #include "CUpdateNotification.h"
@@ -449,6 +465,9 @@ void __CmdFunc_Updater_PrintChangelog()
 // This is called every time the DLL is loaded
 void CHud :: Init( void )
 {
+	// Init should never be called more than once
+	assert(m_HudList.size() == 0);
+
 	HOOK_MESSAGE( Logo );
 	HOOK_MESSAGE( ResetHUD );
 	HOOK_MESSAGE( GameMode );
@@ -530,10 +549,6 @@ void CHud :: Init( void )
 	m_iFOV = 0;
 	m_pSpriteList = NULL;
 
-	// Clear any old HUD list
-	for (CHudBase *i : m_HudList) if (i->m_isDeletable) delete i;
-	m_HudList.clear();
-
 	// In case we get messages before the first update -- time will be valid
 	m_flTime = 1.0;
 
@@ -542,58 +557,63 @@ void CHud :: Init( void )
 	m_hudColor2.Set(255, 160, 0);
 	m_hudColor3.Set(255, 96, 0);
 
-	HUD_ELEM_INIT(Ammo);
-	HUD_ELEM_INIT(Health);
-	HUD_ELEM_INIT(SayText);
-	HUD_ELEM_INIT(Spectator);
-	HUD_ELEM_INIT(Geiger);
-	HUD_ELEM_INIT(Train);
-	HUD_ELEM_INIT(Battery);
-	HUD_ELEM_INIT_FULL(CHudFlashlight, m_Flash);
-	HUD_ELEM_INIT(Message);
-	HUD_ELEM_INIT(StatusBar);
-	HUD_ELEM_INIT(Speedometer);
-	HUD_ELEM_INIT(DeathNotice);
-	HUD_ELEM_INIT(AmmoSecondary);
-	HUD_ELEM_INIT(TextMessage);
-	HUD_ELEM_INIT(StatusIcons);
-	HUD_ELEM_INIT(Timer);
-	HUD_ELEM_INIT(Scores);
-	HUD_ELEM_INIT(Crosshair);
+
+	// Create all HUD elments
+	m_Ammo = new CHudAmmo();
+	m_Health = new CHudHealth();
+	m_SayText = new CHudSayText();
+	m_Spectator = new CHudSpectator();
+	m_Geiger = new CHudGeiger();
+	m_Train = new CHudTrain();
+	m_Battery = new CHudBattery();
+	m_Flash = new CHudFlashlight();
+	m_Message = new CHudMessage();
+	m_StatusBar = new CHudStatusBar();
+	m_Speedometer = new CHudSpeedometer();
+	m_DeathNotice = new CHudDeathNotice();
+	m_AmmoSecondary = new CHudAmmoSecondary();
+	m_TextMessage = new CHudTextMessage();
+	m_StatusIcons = new CHudStatusIcons();
+	m_Timer = new CHudTimer();
+	m_Scores = new CHudScores();
+	m_Crosshair = new CHudCrosshair();
+	m_Menu = new CHudMenu();
 #ifdef USE_VGUI2
-	HUD_ELEM_INIT(ScoreBoard);
-	HUD_ELEM_INIT(TextVgui);
-	
-	// FIXME ?
-	m_Chat = std::shared_ptr<CHudChat>(new CHudChat());
-	m_Chat->m_isDeletable = true;
-	m_Chat->Init();
+	m_ScoreBoard = new CHudScoreBoard();;
+	m_TextVgui = new CHudTextVgui();;
+	m_Chat = new CHudChat();
 #endif
 
-	if (g_iIsAg)
-	{
-		m_Global.Init();
-		m_Countdown.Init();
-		m_CTF.Init();
-		m_Location.Init();
-		m_Longjump.Init();
-		m_Nextmap.Init();
-		m_PlayerId.Init();
-		m_Settings.Init();
-		m_SuddenDeath.Init();
-		m_Timeout.Init();
-		m_Vote.Init();
-	}
+	// AG HUD - enabled on all clients. Should work with miniAG as well (not confirmed)
+	m_Global = new AgHudGlobal();
+	m_Countdown = new AgHudCountdown();
+	m_CTF = new AgHudCTF();
+	m_Location = new AgHudLocation();
+	m_Longjump = new AgHudLongjump();
+	m_Nextmap = new AgHudNextmap();
+	m_PlayerId = new AgHudPlayerId();
+	m_Settings = new AgHudSettings();
+	m_SuddenDeath = new AgHudSuddenDeath();
+	m_Timeout = new AgHudTimeout();
+	m_Vote = new AgHudVote();
 
+	CreateClientVoiceMgr();
+
+	// Init all HUD elements
+	for (CHudBase *i : m_HudList)
+		i->Init();
+
+	// Init other stuff
 	GetClientVoiceMgr()->Init(&g_VoiceStatusHelper, (vgui::Panel**)&gViewPort);
-	HUD_ELEM_INIT(Menu);
 	ServersInit();
-	MsgFunc_ResetHUD(0, 0, NULL );
 
 #ifdef USE_VGUI2
 	vgui2::TextImage::SetColorsArrayPointer(&g_iColorsCodes);
 	g_pViewport->ReloadScheme();
 #endif
+
+	MsgFunc_ResetHUD(0, 0, NULL);
+
 #ifdef USE_UPDATER
 	gGameUpdater = new CGameUpdater();
 	gUpdateNotif = new CUpdateNotification();
@@ -669,6 +689,23 @@ CHud :: ~CHud()
 		gGameUpdater = nullptr;
 	}
 #endif
+
+	// Delete all HUD elements
+	while (m_HudList.size() > 0)
+	{
+		CHudBase * i = *m_HudList.rbegin();
+		// Do not delete VGUI2 HUD elements because CHud::Shutdown() and
+		// CHud::~CHud() are called after VGUI2 subsystem is shutdown
+		// Deatructors of VGUI2 panels call VGUI2 interfaces which are invalid
+		if (dynamic_cast<vgui2::Panel *>(i))
+		{
+			i->EraseFromHudList();
+		}
+		else
+		{
+			delete i;
+		}
+	}
 }
 
 // GetSpriteIndex()
@@ -756,47 +793,9 @@ void CHud :: VidInit( void )
 
 	m_iFontHeight = m_rgrcRects[m_HUD_number_0].bottom - m_rgrcRects[m_HUD_number_0].top;
 
-	m_Ammo->VidInit();
-	m_Health->VidInit();
-	m_Spectator->VidInit();
-	m_Geiger->VidInit();
-	m_Train->VidInit();
-	m_Battery->VidInit();
-	m_Flash->VidInit();
-	m_Message->VidInit();
-	m_StatusBar->VidInit();
-	m_Speedometer->VidInit();
-	m_DeathNotice->VidInit();
-	m_SayText->VidInit();
-	m_Menu->VidInit();
-	m_AmmoSecondary->VidInit();
-	m_TextMessage->VidInit();
-	m_StatusIcons->VidInit();
-	m_Timer->VidInit();
-	m_Scores->VidInit();
-	m_Crosshair->VidInit();
-#ifdef USE_VGUI2
-	m_ScoreBoard->VidInit();
-	m_TextVgui->VidInit();
-	m_Chat->VidInit();
-#endif
-
-	if (g_iIsAg)
-	{
-		m_Global.VidInit();
-		m_Countdown.VidInit();
-		m_CTF.VidInit();
-		m_Location.VidInit();
-		m_Longjump.VidInit();
-		m_Nextmap.VidInit();
-		m_PlayerId.VidInit();
-		m_Settings.VidInit();
-		m_SuddenDeath.VidInit();
-		m_Timeout.VidInit();
-		m_Vote.VidInit();
-	}
-
-	GetClientVoiceMgr()->VidInit();
+	// VidInit all HUD elements
+	for (CHudBase *i : m_HudList)
+		i->VidInit();
 }
 
 void CHud::AddSprite(client_sprite_t *p)
@@ -979,13 +978,6 @@ int CHud::MsgFunc_SetFOV(const char *pszName,  int iSize, void *pbuf)
 	}
 
 	return 1;
-}
-
-
-void CHud::AddHudElem(CHudBase *elem)
-{
-	if (!elem) return;
-	m_HudList.push_back(elem);
 }
 
 float CHud::GetSensitivity( void )

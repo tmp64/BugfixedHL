@@ -23,7 +23,7 @@
 #include "cl_util.h"
 #include "vgui_TeamFortressViewport.h"
 #include "vgui_ScorePanel.h"
-
+#include "aghudglobal.h"
 
 void CHudScores::Init()
 {
@@ -31,8 +31,6 @@ void CHudScores::Init()
 	m_pCvarHudScoresPos = CVAR_CREATE("hud_scores_pos", "30 50", FCVAR_ARCHIVE);
 
 	m_iFlags |= HUD_ACTIVE;
-
-	gHUD.AddHudElem(this);
 }
 
 void CHudScores::VidInit()

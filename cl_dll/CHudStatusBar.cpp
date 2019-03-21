@@ -35,8 +35,6 @@ DECLARE_MESSAGE_PTR( m_StatusBar, StatusValue );
 
 void CHudStatusBar :: Init()
 {
-	gHUD.AddHudElem( this );
-
 	HOOK_MESSAGE( StatusText );
 	HOOK_MESSAGE( StatusValue );
 

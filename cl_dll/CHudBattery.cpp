@@ -34,8 +34,6 @@ void CHudBattery::Init()
 	m_iFlags = 0;
 
 	HOOK_MESSAGE(Battery);
-
-	gHUD.AddHudElem(this);
 };
 
 void CHudBattery::VidInit()

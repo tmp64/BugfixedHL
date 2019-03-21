@@ -3,14 +3,14 @@
 #include "hud.h"
 #include "cl_util.h"
 #include "parsemsg.h"
+#include "aghudvote.h"
+#include "aghudglobal.h"
 
-DECLARE_MESSAGE(m_Vote, Vote)
+DECLARE_MESSAGE_PTR(m_Vote, Vote)
 
 void AgHudVote::Init()
 {
 	HOOK_MESSAGE(Vote);
-
-	gHUD.AddHudElem(this);
 
 	m_iFlags = 0;
 	m_flTurnoff = 0.0;

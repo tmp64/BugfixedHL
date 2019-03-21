@@ -66,11 +66,16 @@ extern BitmapTGA *LoadTGA( const char* pImageName );
 // ---------------------------------------------------------------------- //
 // The voice manager for the client.
 // ---------------------------------------------------------------------- //
-CVoiceStatus g_VoiceStatus;
+static CVoiceStatus *g_VoiceStatus;
+
+void CreateClientVoiceMgr()
+{
+	g_VoiceStatus = new CVoiceStatus();
+}
 
 CVoiceStatus* GetClientVoiceMgr()
 {
-	return &g_VoiceStatus;
+	return g_VoiceStatus;
 }
 
 
@@ -250,7 +255,6 @@ int CVoiceStatus::Init(
 
 	m_pHelper = pHelper;
 	m_pParentPanel = pParentPanel;
-	gHUD.AddHudElem(this);
 	m_iFlags = HUD_ACTIVE;
 	HOOK_MESSAGE(VoiceMask);
 	HOOK_MESSAGE(ReqState);

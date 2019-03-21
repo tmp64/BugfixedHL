@@ -40,7 +40,6 @@ static int DrawCharVGUI2(int x, int y, int number, int r, int g, int b)
 
 void CHudTextVgui::Init()
 {
-	gHUD.AddHudElem(this);
 	m_pEngDrawString = gEngfuncs.pfnDrawString;
 	m_pEngDrawChar = gEngfuncs.pfnDrawCharacter;
 	m_pCvarVguiText = CVAR_CREATE("hud_textvgui", "0", FCVAR_ARCHIVE);

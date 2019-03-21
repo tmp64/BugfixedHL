@@ -4,6 +4,7 @@
 #include "cl_entity.h"
 #include "cl_util.h"
 #include "parsemsg.h"
+#include "aghudlocation.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -11,12 +12,12 @@
 #define MAX_PATH 1024
 #endif
 
-DECLARE_MESSAGE(m_Location, Location)
-DECLARE_MESSAGE(m_Location, InitLoc)
+DECLARE_MESSAGE_PTR(m_Location, Location)
+DECLARE_MESSAGE_PTR(m_Location, InitLoc)
 
-DECLARE_COMMAND(m_Location, AddLocation);
-DECLARE_COMMAND(m_Location, DeleteLocation);
-DECLARE_COMMAND(m_Location, ShowLocations);
+DECLARE_COMMAND_PTR(m_Location, AddLocation);
+DECLARE_COMMAND_PTR(m_Location, DeleteLocation);
+DECLARE_COMMAND_PTR(m_Location, ShowLocations);
 
 void AgHudLocation::Init()
 {
@@ -27,8 +28,6 @@ void AgHudLocation::Init()
 
 	for (int i = 1; i <= MAX_PLAYERS; i++)
 		m_vPlayerLocations[i] = Vector(0, 0, 0);
-
-	gHUD.AddHudElem(this);
 
 	HOOK_MESSAGE(Location);
 	HOOK_MESSAGE(InitLoc);

@@ -5,6 +5,7 @@
 #define _cdecl 
 #endif
 
+#include <list>
 #include "cl_dll.h"
 #include "wrect.h"
 #include "cvardef.h"
@@ -61,14 +62,22 @@ public:
 	POSITION  m_pos;
 	int   m_type;
 	int	  m_iFlags; // active, moving, 
-	virtual		~CHudBase() {}
+	CHudBase();
+	virtual		~CHudBase();
 	virtual void Init();
 	virtual void VidInit();
 	virtual void Draw(float flTime);
 	virtual void Think();
 	virtual void Reset();
 	virtual void InitHUDData();		// called every time a server is connected to
-	bool m_isDeletable = false;
+
+private:
+	bool m_bIsIteratorValid = false;
+	std::list<CHudBase *>::iterator m_ThisIterator;
+
+	void EraseFromHudList();
+
+	friend class CHud;
 };
 
 #endif

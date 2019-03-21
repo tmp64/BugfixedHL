@@ -3,14 +3,14 @@
 #include "hud.h"
 #include "cl_util.h"
 #include "parsemsg.h"
+#include "aghudlongjump.h"
+#include "aghudglobal.h"
 
-DECLARE_MESSAGE(m_Longjump, Longjump)
+DECLARE_MESSAGE_PTR(m_Longjump, Longjump)
 
 void AgHudLongjump::Init()
 {
 	HOOK_MESSAGE(Longjump);
-
-	gHUD.AddHudElem(this);
 
 	m_iFlags = 0;
 	m_flTurnoff = 0;

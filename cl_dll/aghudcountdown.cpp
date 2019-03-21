@@ -3,14 +3,14 @@
 #include "hud.h"
 #include "cl_util.h"
 #include "parsemsg.h"
+#include "aghudcountdown.h"
+#include "aghudglobal.h"
 
-DECLARE_MESSAGE(m_Countdown, Countdown)
+DECLARE_MESSAGE_PTR(m_Countdown, Countdown)
 
 void AgHudCountdown::Init()
 {
 	HOOK_MESSAGE(Countdown);
-
-	gHUD.AddHudElem(this);
 
 	m_iFlags = 0;
 	m_btCountdown = -1;

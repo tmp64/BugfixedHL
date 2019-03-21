@@ -3,16 +3,17 @@
 #include "hud.h"
 #include "cl_util.h"
 #include "parsemsg.h"
+#include "aghudsettings.h"
+#include "aghudglobal.h"
+#include "aghudlocation.h"
 
-DECLARE_MESSAGE(m_Settings, Settings)
+DECLARE_MESSAGE_PTR(m_Settings, Settings)
 
 int g_iMatch = 0;
 
 void AgHudSettings::Init()
 {
 	HOOK_MESSAGE(Settings);
-
-	gHUD.AddHudElem(this);
 
 	g_iMatch = 0;
 
@@ -107,7 +108,7 @@ void AgHudSettings::Draw(float fTime)
 		AgDrawHudStringCentered(ScreenWidth / 2, gHUD.m_scrinfo.iCharHeight * 2, ScreenWidth, szText, r, g, b);
 	}
 
-	AgDrawHudStringCentered(ScreenWidth / 2, gHUD.m_scrinfo.iCharHeight * 3, ScreenWidth, gHUD.m_Location.m_szMap, r, g, b);
+	AgDrawHudStringCentered(ScreenWidth / 2, gHUD.m_scrinfo.iCharHeight * 3, ScreenWidth, gHUD.m_Location->m_szMap, r, g, b);
 }
 
 int AgHudSettings::MsgFunc_Settings(const char *pszName, int iSize, void *pbuf)

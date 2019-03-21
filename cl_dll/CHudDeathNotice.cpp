@@ -48,9 +48,7 @@ DeathNoticeItem rgDeathNoticeList[ MAX_DEATHNOTICES + 1 ];
 
 void CHudDeathNotice :: Init()
 {
-	gHUD.AddHudElem( this );
-
-	HOOK_MESSAGE( DeathMsg );
+HOOK_MESSAGE( DeathMsg );
 
 	CVAR_CREATE( "hud_deathnotice_time", "6", 0 );
 }

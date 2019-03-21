@@ -33,7 +33,6 @@ void CHudAmmoSecondary :: Init()
 	HOOK_MESSAGE( SecAmmoVal );
 	HOOK_MESSAGE( SecAmmoIcon );
 
-	gHUD.AddHudElem(this);
 	m_HUD_ammoicon = 0;
 
 	for ( int i = 0; i < MAX_SEC_AMMO_VALUES; i++ )

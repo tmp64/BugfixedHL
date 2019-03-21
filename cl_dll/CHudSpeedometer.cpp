@@ -9,8 +9,6 @@ void CHudSpeedometer::Init()
 	m_iFlags = HUD_ACTIVE;
 	
 	m_pCvarSpeedometer = CVAR_CREATE("hud_speedometer", "0", FCVAR_ARCHIVE);
-
-	gHUD.AddHudElem(this);
 }
 
 void CHudSpeedometer::VidInit()

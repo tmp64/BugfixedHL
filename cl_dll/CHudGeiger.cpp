@@ -34,8 +34,6 @@ void CHudGeiger::Init()
 	m_iGeigerRange = 0;
 	m_iFlags = 0;
 
-	gHUD.AddHudElem(this);
-
 	srand( (unsigned)time( NULL ) );
 };
 

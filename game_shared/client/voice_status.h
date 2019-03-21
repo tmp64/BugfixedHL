@@ -225,6 +225,9 @@ public:
 };
 
 
+// Create the voice manager
+void CreateClientVoiceMgr();
+
 // Get the (global) voice manager. 
 CVoiceStatus* GetClientVoiceMgr();
 

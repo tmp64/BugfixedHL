@@ -3,14 +3,14 @@
 #include "hud.h"
 #include "cl_util.h"
 #include "parsemsg.h"
+#include "aghudsuddendeath.h"
+#include "aghudglobal.h"
 
-DECLARE_MESSAGE(m_SuddenDeath, SuddenDeath)
+DECLARE_MESSAGE_PTR(m_SuddenDeath, SuddenDeath)
 
 void AgHudSuddenDeath::Init()
 {
 	HOOK_MESSAGE(SuddenDeath);
-
-	gHUD.AddHudElem(this);
 
 	m_iFlags = 0;
 	m_iSuddenDeath = 0;

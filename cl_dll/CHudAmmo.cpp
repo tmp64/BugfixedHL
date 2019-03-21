@@ -271,8 +271,6 @@ DECLARE_COMMAND_PTR(m_Ammo, PrevWeapon);
 
 void CHudAmmo::Init()
 {
-	gHUD.AddHudElem(this);
-
 	HOOK_MESSAGE(CurWeapon);
 	HOOK_MESSAGE(WeaponList);
 	HOOK_MESSAGE(AmmoPickup);

@@ -39,8 +39,6 @@ void CHudFlashlight::Init()
 	HOOK_MESSAGE(FlashBat);
 
 	m_iFlags |= HUD_ACTIVE;
-
-	gHUD.AddHudElem(this);
 };
 
 void CHudFlashlight::Reset()

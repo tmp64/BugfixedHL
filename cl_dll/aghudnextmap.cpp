@@ -4,14 +4,14 @@
 #include "cl_util.h"
 #include "parsemsg.h"
 #include "CHudTimer.h"
+#include "aghudnextmap.h"
+#include "aghudglobal.h"
 
-DECLARE_MESSAGE(m_Nextmap, Nextmap)
+DECLARE_MESSAGE_PTR(m_Nextmap, Nextmap)
 
 void AgHudNextmap::Init()
 {
 	HOOK_MESSAGE(Nextmap);
-
-	gHUD.AddHudElem(this);
 
 	m_iFlags = 0;
 	m_szNextmap[0] = '\0';

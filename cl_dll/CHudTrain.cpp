@@ -34,7 +34,6 @@ void CHudTrain::Init()
 
 	m_iPos = 0;
 	m_iFlags = 0;
-	gHUD.AddHudElem(this);
 };
 
 void CHudTrain::VidInit()

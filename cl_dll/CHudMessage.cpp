@@ -46,8 +46,6 @@ void CHudMessage::Init()
 	HOOK_MESSAGE( HudText );
 	HOOK_MESSAGE( GameTitle );
 
-	gHUD.AddHudElem(this);
-
 	Reset();
 };
 

@@ -52,10 +52,8 @@ DECLARE_MESSAGE_PTR(m_Timer, Timer)
 
 void CHudTimer::Init()
 {
-	if (g_iIsAg)
+	//if (g_iIsAg)
 		HOOK_MESSAGE(Timer);
-
-	gHUD.AddHudElem(this);
 
 	m_iFlags |= HUD_ACTIVE;
 

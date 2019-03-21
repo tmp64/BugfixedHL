@@ -140,8 +140,6 @@ void ToggleScores( void )
 //-----------------------------------------------------------------------------
 void CHudSpectator::Init()
 {
-	gHUD.AddHudElem(this);
-
 	m_iFlags |= HUD_ACTIVE;
 	m_flNextObserverInput = 0.0f;
 	m_zoomDelta	= 0.0f;

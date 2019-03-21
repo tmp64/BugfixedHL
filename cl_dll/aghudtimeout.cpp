@@ -3,14 +3,14 @@
 #include "hud.h"
 #include "cl_util.h"
 #include "parsemsg.h"
+#include "aghudtimeout.h"
+#include "aghudglobal.h"
 
-DECLARE_MESSAGE(m_Timeout, Timeout)
+DECLARE_MESSAGE_PTR(m_Timeout, Timeout)
 
 void AgHudTimeout::Init()
 {
 	HOOK_MESSAGE(Timeout);
-
-	gHUD.AddHudElem(this);
 
 	m_iFlags = 0;
 	m_State = Inactive;

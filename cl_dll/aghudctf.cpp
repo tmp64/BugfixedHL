@@ -4,10 +4,12 @@
 #include "cl_util.h"
 #include "parsemsg.h"
 #include "vgui_TeamFortressViewport.h"
+#include "aghudctf.h"
+#include "aghudglobal.h"
 
-DECLARE_MESSAGE(m_CTF, CTF)
-DECLARE_MESSAGE(m_CTF, CTFSound)
-DECLARE_MESSAGE(m_CTF, CTFFlag)
+DECLARE_MESSAGE_PTR(m_CTF, CTF)
+DECLARE_MESSAGE_PTR(m_CTF, CTFSound)
+DECLARE_MESSAGE_PTR(m_CTF, CTFFlag)
 
 int g_iPlayerFlag1 = 0;
 int g_iPlayerFlag2 = 0;
@@ -37,8 +39,6 @@ void AgHudCTF::Init()
 	HOOK_MESSAGE(CTF);
 	HOOK_MESSAGE(CTFSound);
 	HOOK_MESSAGE(CTFFlag);
-
-	gHUD.AddHudElem(this);
 
 	m_iFlags = 0;
 	m_iFlagStatus1 = 0;

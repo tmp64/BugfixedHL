@@ -14,8 +14,6 @@ CHudCrosshair::CHudCrosshair()
 
 void CHudCrosshair::Init()
 {
-	gHUD.AddHudElem(this);
-
 	m_CustomCrosshair.enable = CVAR_CREATE("cl_crosshair_custom", "0", FCVAR_ARCHIVE);
 	m_CustomCrosshair.red = CVAR_CREATE("cl_crosshair_red", "0", FCVAR_ARCHIVE);
 	m_CustomCrosshair.green = CVAR_CREATE("cl_crosshair_green", "255", FCVAR_ARCHIVE);

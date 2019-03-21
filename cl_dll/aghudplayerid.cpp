@@ -3,14 +3,14 @@
 #include "hud.h"
 #include "cl_util.h"
 #include "parsemsg.h"
+#include "aghudplayerid.h"
+#include "aghudglobal.h"
 
-DECLARE_MESSAGE(m_PlayerId, PlayerId)
+DECLARE_MESSAGE_PTR(m_PlayerId, PlayerId)
 
 void AgHudPlayerId::Init()
 {
 	HOOK_MESSAGE(PlayerId);
-
-	gHUD.AddHudElem(this);
 
 	m_iFlags = 0;
 	m_flTurnoff = 0.0;

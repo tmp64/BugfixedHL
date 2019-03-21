@@ -6,15 +6,15 @@
 #include "parsemsg.h"
 #include "aghudglobal.h"
 
-DECLARE_MESSAGE(m_Global, PlaySound)
-DECLARE_MESSAGE(m_Global, CheatCheck)
-DECLARE_MESSAGE(m_Global, WhString)
-DECLARE_MESSAGE(m_Global, SpikeCheck)
-DECLARE_MESSAGE(m_Global, Gametype)
-DECLARE_MESSAGE(m_Global, AuthID)
-DECLARE_MESSAGE(m_Global, MapList)
-DECLARE_MESSAGE(m_Global, CRC32)
-DECLARE_MESSAGE(m_Global, Splash)
+DECLARE_MESSAGE_PTR(m_Global, PlaySound)
+DECLARE_MESSAGE_PTR(m_Global, CheatCheck)
+DECLARE_MESSAGE_PTR(m_Global, WhString)
+DECLARE_MESSAGE_PTR(m_Global, SpikeCheck)
+DECLARE_MESSAGE_PTR(m_Global, Gametype)
+DECLARE_MESSAGE_PTR(m_Global, AuthID)
+DECLARE_MESSAGE_PTR(m_Global, MapList)
+DECLARE_MESSAGE_PTR(m_Global, CRC32)
+DECLARE_MESSAGE_PTR(m_Global, Splash)
 
 int g_GameType = GT_STANDARD;
 
@@ -29,8 +29,6 @@ void AgHudGlobal::Init()
 	HOOK_MESSAGE(MapList);
 	HOOK_MESSAGE(CRC32);
 	HOOK_MESSAGE(Splash);
-
-	gHUD.AddHudElem(this);
 
 	m_iFlags = 0;
 }

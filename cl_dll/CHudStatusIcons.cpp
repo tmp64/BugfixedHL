@@ -32,8 +32,6 @@ void CHudStatusIcons::Init( void )
 {
 	HOOK_MESSAGE( StatusIcon );
 
-	gHUD.AddHudElem( this );
-
 	Reset();
 }
 

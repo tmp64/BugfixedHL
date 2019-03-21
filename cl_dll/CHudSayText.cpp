@@ -28,6 +28,7 @@
 #include "parsemsg.h"
 #include "results.h"
 #include "vgui_TeamFortressViewport.h"
+#include "aghudlocation.h"
 
 #ifdef USE_VGUI2
 #include "vgui2/CHudChat.h"
@@ -62,8 +63,6 @@ DECLARE_MESSAGE_PTR( m_SayText, SayText );
 
 void CHudSayText :: Init( void )
 {
-	gHUD.AddHudElem( this );
-
 #ifndef USE_VGUI2
 	HOOK_MESSAGE( SayText );
 #endif
@@ -220,7 +219,7 @@ void CHudSayText :: SayTextPrint( const char *pszBuf, int iBufSize, int clientIn
 	strncpy(buf, pszBuf, min(sizeof(buf), strLen));
 	buf[sizeof(buf) - 1] = '\0';
 
-	gHUD.m_Location.ParseAndEditSayString(clientIndex, buf, min(sizeof(buf), strLen));
+	gHUD.m_Location->ParseAndEditSayString(clientIndex, buf, min(sizeof(buf), strLen));
 	gHUD.m_Chat->ChatPrintf(clientIndex, CHAT_FILTER_NONE, "%s", pszBuf);
 #else
 	// find an empty string slot
@@ -259,7 +258,7 @@ void CHudSayText :: SayTextPrint( const char *pszBuf, int iBufSize, int clientIn
 	strncpy( g_szLineBuffer[i], pszBuf, max(iBufSize -1, MAX_CHARS_PER_LINE-1) );
 
 	// Substitute location
-	gHUD.m_Location.ParseAndEditSayString(clientIndex, g_szLineBuffer[i], HLARRAYSIZE(g_szLineBuffer[i]));
+	gHUD.m_Location->ParseAndEditSayString(clientIndex, g_szLineBuffer[i], HLARRAYSIZE(g_szLineBuffer[i]));
 
 	// make sure the text fits in one line
 	EnsureTextFitsInOneLineAndWrapIfHaveTo( i );

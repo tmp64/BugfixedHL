@@ -37,8 +37,6 @@ DECLARE_MESSAGE_PTR( m_Menu, ShowMenu );
 
 void CHudMenu :: Init( void )
 {
-	gHUD.AddHudElem( this );
-
 	HOOK_MESSAGE( ShowMenu );
 
 	InitHUDData();
