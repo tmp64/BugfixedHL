@@ -20,6 +20,7 @@
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
+#include <ctype.h>
 
 #if defined( DMC_BUILD )
 	#include "../dmc/cl_dll/parsemsg.h"
@@ -114,14 +115,10 @@ void ForEachBannedPlayer(char id[16])
 		id[8], id[9], id[10], id[11], 
 		id[12], id[13], id[14], id[15]
 		);
-#ifdef _WIN32
-	strupr(str);
-#else
-	{
-		for (char *i = str; *i != '\0'; i++)
-			*i = toupper(*i);
-	}
-#endif
+
+	for (char *i = str; *i != '\0'; i++)
+		*i = toupper(*i);
+
 	gEngfuncs.pfnConsolePrint(str);
 }
 
