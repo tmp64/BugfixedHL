@@ -1296,6 +1296,24 @@ void ConPrintf(const char *fmt, ...)
 	va_end(args);
 }
 
+void ConPrintf(RGBA color, const char *fmt, ...)
+{
+	static char str[1024];
+
+	RGBA oldcolor = SetConsoleColor(color);
+
+	va_list args;
+	va_start(args, fmt);
+
+	vsnprintf(str, sizeof(str), fmt, args);
+	str[sizeof(str) - 1] = '\0';
+	gEngfuncs.pfnConsolePrint(str);
+
+	va_end(args);
+
+	SetConsoleColor(oldcolor);
+}
+
 // Code by voogru
 // https://forums.alliedmods.net/showthread.php?t=60899?t=60899
 long long ParseSteamID(const char *pszAuthID)
