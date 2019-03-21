@@ -6,29 +6,21 @@ image:
 
 environment:
   matrix:
-    - CMAKE_BUILD_DIR: build_auto_client
+    - CMAKE_BUILD_DIR: build_client
       CMAKE_OPTIONS:
-      VGUI2_BUILD: 0
-      SERVER_BUILD: 0
-      AMXX_BUILD: 0
+      BUILD_TYPE: 0
       
-    - CMAKE_BUILD_DIR: build_auto_client_vgui2
+    - CMAKE_BUILD_DIR: build_client_vgui2
       CMAKE_OPTIONS: -DUSE_VGUI2=1
-      VGUI2_BUILD: 1
-      SERVER_BUILD: 0
-      AMXX_BUILD: 0
+      BUILD_TYPE: 1
       
-    - CMAKE_BUILD_DIR: build_auto_server
+    - CMAKE_BUILD_DIR: build_server
       CMAKE_OPTIONS:
-      VGUI2_BUILD: 0
-      SERVER_BUILD: 1
-      AMXX_BUILD: 0
+      BUILD_TYPE: 2
       
-    - CMAKE_BUILD_DIR: build_auto_amxx
+    - CMAKE_BUILD_DIR: build_amxx
       CMAKE_OPTIONS:
-      VGUI2_BUILD: 0
-      SERVER_BUILD: 0
-      AMXX_BUILD: 1
+      BUILD_TYPE: 3
 
 install:
   - sh: sudo dpkg --add-architecture i386
@@ -38,14 +30,14 @@ install:
 build_script:
   - cmd: scripts/AppVeyor_WindowsBuild.bat
   - sh: |
-      if [ "$SERVER_BUILD" -eq "0" ]; then
-        if [ "$VGUI2_BUILD" -eq "0" ]; then
-          ./scripts/MakeClientRelease.sh
-        else
-          ./scripts/MakeClientVGUI2Release.sh
-        fi
-      else
+      if [ "$BUILD_TYPE" -eq "0" ]; then
+        ./scripts/MakeClientRelease.sh
+      elif [ "$BUILD_TYPE" -eq "1" ]; then
+        ./scripts/MakeClientVGUI2Release.sh
+      elif [ "$BUILD_TYPE" -eq "2" ]; then
         ./scripts/MakeServerRelease.sh
+      elif [ "$BUILD_TYPE" -eq "3" ]; then
+        ./scripts/MakeAmxxRelease.sh
       fi
 
 artifacts:
