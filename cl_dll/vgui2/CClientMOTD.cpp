@@ -35,6 +35,7 @@ CClientMOTD::CClientMOTD( IViewport* pParent )
 	SetScheme( "GameScheme" );
 	SetMoveable( false );
 	SetProportional( true );
+	SetSizeable( false );
 
 	m_pMessage = new vgui2::RichText( this, "TextMessage" );
 #ifndef VGUI2_BUILD_4554
