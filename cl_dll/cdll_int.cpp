@@ -117,6 +117,7 @@ void	_DLLEXPORT HUD_DrawTransparentTriangles(void);
 void	_DLLEXPORT HUD_PostRunCmd(struct local_state_s *from, struct local_state_s *to, struct usercmd_s *cmd, int runfuncs, double time, unsigned int random_seed);
 void	_DLLEXPORT Demo_ReadBuffer(int size, unsigned char *buffer);
 int		_DLLEXPORT HUD_GetStudioModelInterface(int version, struct r_studio_interface_s **ppinterface, struct engine_studio_api_s *pstudio);
+void	_DLLEXPORT ChatInputPosition(int *x, int *y);
 }
 
 /*
@@ -649,7 +650,7 @@ extern "C" void DLLEXPORT F(void *pv)
 	HUD_VoiceStatus,
 	HUD_DirectorMessage,
 	HUD_GetStudioModelInterface,
-	nullptr,	// pChatInputPosition
+	ChatInputPosition,
 	nullptr,	// pGetPlayerTeam
 #ifdef USE_VGUI2
 	ClientFactory

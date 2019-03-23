@@ -29,6 +29,7 @@
 #include "results.h"
 #include "vgui_TeamFortressViewport.h"
 #include "aghudlocation.h"
+#include "dllexport.h"
 
 #ifdef USE_VGUI2
 #include "vgui2/CHudChat.h"
@@ -61,6 +62,20 @@ static int line_height = 0;
 DECLARE_MESSAGE_PTR( m_SayText, SayText );
 #endif
 
+extern "C" void DLLEXPORT ChatInputPosition(int *x, int *y)
+{
+	if (!gHUD.m_SayText->m_pCvarOldInputPos || !gHUD.m_SayText->m_pCvarOldInputPos->value)
+	{
+		*x = LINE_START;
+		*y = Y_START + line_height * MAX_LINES;
+	}
+	else
+	{
+		*x = 0;
+		*y = 0;
+	}
+}
+
 void CHudSayText :: Init( void )
 {
 #ifndef USE_VGUI2
@@ -72,6 +87,7 @@ void CHudSayText :: Init( void )
 	m_HUD_saytext = CVAR_CREATE( "hud_saytext", "1", 0 );
 	m_HUD_saytext_time = CVAR_CREATE( "hud_saytext_time", "5", 0 );
 	m_pCvarConSayColor = CVAR_CREATE( "con_say_color", "30 230 50", FCVAR_ARCHIVE );
+	m_pCvarOldInputPos = CVAR_CREATE("hud_saytext_oldpos", "0", FCVAR_ARCHIVE);
 
 	m_iFlags |= HUD_INTERMISSION; // is always drawn during an intermission
 }

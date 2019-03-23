@@ -3,6 +3,8 @@
 
 #include "CHudBase.h"
 
+extern "C" void DLLEXPORT ChatInputPosition(int *x, int *y);
+
 class CHudSayText : public CHudBase
 {
 public:
@@ -19,6 +21,9 @@ private:
 	struct cvar_s *	m_HUD_saytext;
 	struct cvar_s *	m_HUD_saytext_time;
 	cvar_t	*m_pCvarConSayColor;
+	cvar_t	*m_pCvarOldInputPos = nullptr;
+
+	friend void ChatInputPosition(int *x, int *y);
 };
 
 #endif
