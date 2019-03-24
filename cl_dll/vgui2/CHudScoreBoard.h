@@ -15,6 +15,8 @@ public:
 	cvar_t* m_CvarEffSort = nullptr;
 	cvar_t* m_CvarEffType = nullptr;
 	cvar_t* m_CvarEffPercent = nullptr;
+	cvar_t* m_CvarShowSteamId = nullptr;
+	cvar_t* m_CvarShowEff = nullptr;
 
 	void Init();
 	void VidInit();
