@@ -71,8 +71,7 @@ extern "C" void DLLEXPORT ChatInputPosition(int *x, int *y)
 	}
 	else
 	{
-		*x = 0;
-		*y = 0;
+		// Default position
 	}
 }
 
