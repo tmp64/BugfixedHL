@@ -226,10 +226,9 @@ void CScorePanel::FullUpdate()
 void CScorePanel::EnableMousePointer(bool enable)
 {
 	if (enable && !IsVisible()) return;
-	dynamic_cast<vgui2::EditablePanel *>(m_pViewport)->SetMouseInputEnabled(enable);
-	dynamic_cast<vgui2::EditablePanel *>(m_pViewport)->SetKeyBoardInputEnabled(enable);
+	dynamic_cast<vgui2::EditablePanel *>(m_pViewport)->SetMouseInputEnabled(enable);	// Removing that line breaks chatbox (lol)
 	SetMouseInputEnabled(enable);
-	SetKeyBoardInputEnabled(enable);
+	SetKeyBoardInputEnabled(false);
 	if (enable)
 	{
 		ShowExtraControls();
