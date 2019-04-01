@@ -8,7 +8,6 @@
 //
 // Engine messages handlers
 //
-#ifdef _WIN32
 
 #include <string.h>
 #include <time.h>
@@ -220,7 +219,7 @@ void SvcPrint(void)
 		if (!strncmp(str, "\"mp_timelimit\" changed to \"", 27) ||
 			!strncmp(str, "\"amx_nextmap\" changed to \"", 26))
 		{
-			gHUD.m_Timer->DoResync();
+			//gHUD.m_Timer->DoResync();
 		}
 		else if (gViewPort && gViewPort->m_pScoreBoard && gViewPort->m_pScoreBoard->m_iStatusRequestState != STATUS_REQUEST_IDLE)
 		{
@@ -509,5 +508,3 @@ void SvcMessagesInit(void)
 	m_pCvarClProtectBlockCvar = gEngfuncs.pfnRegisterVariable("cl_protect_block_cvar", "", FCVAR_ARCHIVE);
 	gEngfuncs.pfnAddCommand("cl_protect", ProtectHelp);
 }
-
-#endif

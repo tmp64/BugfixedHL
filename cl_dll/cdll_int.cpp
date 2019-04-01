@@ -379,8 +379,8 @@ void _DLLEXPORT HUD_Init( void )
 		gHUD.Init();
 		Scheme_Init();
 		Memory::OnHudInit();
-#ifdef _WIN32
 		SvcMessagesInit();
+#ifdef _WIN32
 		ResultsInit();
 #endif
 	}
