@@ -730,6 +730,8 @@ void CBaseHudChat::ApplySchemeSettings( vgui2::IScheme *pScheme )
 
 void CBaseHudChat::Reset( void )
 {
+	m_nVisibleHeight = 0;
+	Clear();
 }
 
 #ifdef _XBOX
@@ -1688,9 +1690,10 @@ void CBaseHudChat::Clear( void )
 // Purpose: 
 // Input  : *newmap - 
 //-----------------------------------------------------------------------------
-void CBaseHudChat::LevelInit( const char *newmap )
+void CBaseHudChat::InitHUDData()
 {
 	Clear();
+	m_flHistoryFadeTime = 0;
 
 	//=============================================================================
 	// HPE_BEGIN:

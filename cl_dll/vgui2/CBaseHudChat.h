@@ -243,7 +243,7 @@ public:
 	
 	virtual void	Init( void );
 
-	void			LevelInit( const char *newmap );
+	virtual void	InitHUDData();
 	void			LevelShutdown( void );
 	
 	virtual void	Printf( int iFilter, const char *fmt, ... );
