@@ -132,8 +132,6 @@ private:
 		int frags = 0;
 		int deaths = 0;
 	};
-
-	static CScorePanel *m_sSingleton;
 	IViewport *m_pViewport;
 	CPlayerListPanel *m_pPlayerList = nullptr;
 	vgui2::Label *m_pServerNameLabel = nullptr;

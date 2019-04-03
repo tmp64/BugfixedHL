@@ -40,7 +40,6 @@
 #define PING_LOSS "Ping/Loss"
 
 void IN_ResetMouse(void);
-CScorePanel *CScorePanel::m_sSingleton = nullptr;
 
 //--------------------------------------------------------------
 // Constructor & destructor
@@ -48,7 +47,6 @@ CScorePanel *CScorePanel::m_sSingleton = nullptr;
 CScorePanel::CScorePanel(IViewport *pParent) : BaseClass(nullptr, VIEWPORT_PANEL_SCORE),
 												m_pViewport(pParent)
 {
-	m_sSingleton = this;
 	SetTitle("", true);
 	SetCloseButtonVisible(false);
 	SetScheme("GameScheme");

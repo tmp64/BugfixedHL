@@ -30,6 +30,10 @@ public:
 	bool IsVisible();
 	void UpdateServerName();
 
+	// Sends the key event to the scoreboard
+	// Returns true if event was handled and should not be passed to the engine (HUD_Key_Event returns 0)
+	bool HandleKeyEvent(int down, int keynum, const char *pszCurrentBinding);
+
 private:
 	float m_flScoreBoardLastUpdated = 0;
 };

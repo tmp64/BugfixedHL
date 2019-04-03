@@ -4,6 +4,7 @@
 // implementation of CHudScoreBoard class, a VGUI2-based scorebard
 //
 
+#include <keydefs.h>
 #include "CHudScoreBoard.h"
 #include "hud.h"
 #include "cl_util.h"
@@ -21,7 +22,8 @@ void CHudScoreBoard::Init()
 	m_CvarShowSteamId = CVAR_CREATE("hud_scoreboard_showsteamid", "1", FCVAR_ARCHIVE);
 	m_CvarShowEff = CVAR_CREATE("hud_scoreboard_showeff", "1", FCVAR_ARCHIVE);
 	m_iFlags |= HUD_ACTIVE;
-	m_pScorePanel = CScorePanel::m_sSingleton;
+	m_pScorePanel = dynamic_cast<CScorePanel *>(g_pViewport->FindPanelByName(VIEWPORT_PANEL_SCORE));
+	Assert(m_pScorePanel);
 }
 
 void CHudScoreBoard::VidInit()
@@ -89,4 +91,32 @@ bool CHudScoreBoard::IsVisible()
 void CHudScoreBoard::UpdateServerName()
 {
 	m_pScorePanel->UpdateServerName();
+}
+
+bool CHudScoreBoard::HandleKeyEvent(int down, int keynum, const char * pszCurrentBinding)
+{
+	int constexpr WHEEL_DELTA = 20;
+
+	if (!down)
+		return false;
+
+	if (!gHUD.m_ScoreBoard->IsVisible())
+		return false;
+
+	if ((keynum == K_MOUSE1 && m_CvarMouseBtn->value == 1) || (keynum == K_MOUSE2 && m_CvarMouseBtn->value == 2))
+	{
+		EnableMousePointer(true);
+	}
+	else if (keynum == K_MWHEELDOWN)
+	{
+		m_pScorePanel->OnMouseWheeled(WHEEL_DELTA);
+	}
+	else if (keynum == K_MWHEELUP)
+	{
+		m_pScorePanel->OnMouseWheeled(-WHEEL_DELTA);
+	}
+	else
+		return false;
+
+	return true;
 }

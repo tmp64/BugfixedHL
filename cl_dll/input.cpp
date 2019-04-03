@@ -397,6 +397,11 @@ Return 1 to allow engine to process the key, otherwise, act on it as needed
 */
 int DLLEXPORT HUD_Key_Event( int down, int keynum, const char *pszCurrentBinding )
 {
+#ifdef USE_VGUI2
+	if (gHUD.m_ScoreBoard && gHUD.m_ScoreBoard->HandleKeyEvent(down, keynum, pszCurrentBinding))
+		return 0;	// Event was handled by the scoreboard
+#endif
+
 	if (gViewPort)
 		return gViewPort->KeyInput(down, keynum, pszCurrentBinding);
 	
@@ -479,13 +484,6 @@ extern void __CmdFunc_InputPlayerSpecial(void);
 
 void IN_Attack2Down(void) 
 {
-#ifdef USE_VGUI2
-	if (gHUD.m_ScoreBoard->m_CvarMouseBtn->value == 2 && gHUD.m_ScoreBoard->IsVisible())
-	{
-		gHUD.m_ScoreBoard->EnableMousePointer(true);
-		return;
-	}
-#endif
 	KeyDown(&in_attack2);
 	gHUD.m_Spectator->HandleButtonsDown( IN_ATTACK2 );
 }
@@ -522,13 +520,6 @@ void IN_GraphUp(void) {KeyUp(&in_graph);}
 
 void IN_AttackDown(void)
 {
-#ifdef USE_VGUI2
-	if (gHUD.m_ScoreBoard->m_CvarMouseBtn->value == 1 && gHUD.m_ScoreBoard->IsVisible())
-	{
-		gHUD.m_ScoreBoard->EnableMousePointer(true);
-		return;
-	}
-#endif
 	KeyDown( &in_attack );
 	gHUD.m_Spectator->HandleButtonsDown( IN_ATTACK );
 }
