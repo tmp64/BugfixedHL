@@ -509,13 +509,45 @@ void CHalfLifeMultiplay :: InitHUD( CBasePlayer *pl )
 		WRITE_BYTE( pl->IsObserver() );
 	MESSAGE_END();
 
-	E_ClientSupports supports = gBugfixedServer->GetPlayerSupports(ENTINDEX(pl->edict()));
-	if (supports & AGHL_SUPPORTS_HTML_MOTD)
-		SendHtmlMOTDToClient(pl->edict());
-	else if (supports & AGHL_SUPPORTS_UNICODE_MOTD)
-		SendUnicodeMOTDToClient(pl->edict());
-	else
-		SendMOTDToClient(pl->edict());
+	// Send server name
+	SendServerNameToClient(pl->edict());
+
+	// Send MOTD
+	// 1. Check if motd TYPE is supported by the client
+	// 2. If it is, then check if it is enabled in API. If not, do nothing.
+	// 3. Try to send MOTD type TYPE. If failed, send the MOTD of next type.
+	// 4. Repeat
+	bool motdret = false;
+	bhl::E_ClientSupports supports = serverapi()->GetClientSupports(ENTINDEX(pl->edict()));
+	if (IsEnumFlagSet(supports, bhl::E_ClientSupports::HtmlMotd))
+	{
+		if (serverapi()->GetAutomaticMotd(bhl::E_MotdType::Html))
+		{
+			motdret = SendHtmlMOTDFileToClient(pl->edict());
+		}
+		else
+			motdret = true;	// Handled by Metamod/AMXX/etc, do not send anything
+	}
+	
+	if (!motdret && IsEnumFlagSet(supports, bhl::E_ClientSupports::UnicodeMotd))
+	{
+		if (serverapi()->GetAutomaticMotd(bhl::E_MotdType::Unicode))
+		{
+			motdret = SendUnicodeMOTDFileToClient(pl->edict());
+		}
+		else
+			motdret = true;	// Handled by Metamod/AMXX/etc, do not send anything
+	}
+	
+	if (!motdret)
+	{
+		if (serverapi()->GetAutomaticMotd(bhl::E_MotdType::Plain))
+		{
+			motdret = SendMOTDFileToClient(pl->edict());
+		}
+		else
+			motdret = true;	// Handled by Metamod/AMXX/etc, do not send anything
+	}
 
 	// loop through all active players and send their score and team info to the new client
 	for ( int i = 1; i <= gpGlobals->maxClients; i++ )
@@ -1763,77 +1795,37 @@ void CHalfLifeMultiplay :: ChangeLevel( void )
 	}
 }
 
+void CHalfLifeMultiplay::SendServerNameToClient(edict_t *client)
+{
+	MESSAGE_BEGIN(MSG_ONE, gmsgServerName, NULL, client);
+		WRITE_STRING(CVAR_GET_STRING("hostname"));
+	MESSAGE_END();
+}
+
 #define MAX_MOTD_CHUNK	  60
 #define MAX_MOTD_LENGTH   1536 // (MAX_MOTD_CHUNK * 4)
 
-void CHalfLifeMultiplay :: SendMOTDToClient( edict_t *client )
+bool CHalfLifeMultiplay::SendMOTDFileToClient(edict_t *client, const char *file /*= nullptr*/)
 {
-	// read from the MOTD.txt file
-	int length, char_count = 0;
-	char *pFileList;
-	char *aFileList = pFileList = (char*)LOAD_FILE_FOR_ME( (char *)CVAR_GET_STRING( "motdfile" ), &length );
+	if (!file)
+		file = (char *)CVAR_GET_STRING("motdfile");
 
-	// send the server name
-	MESSAGE_BEGIN( MSG_ONE, gmsgServerName, NULL, client );
-		WRITE_STRING( CVAR_GET_STRING("hostname") );
-	MESSAGE_END();
-
-	// Send the message of the day
-	// read it chunk-by-chunk,  and send it in parts
-
-	while ( pFileList && *pFileList && char_count < MAX_MOTD_LENGTH )
-	{
-		char chunk[MAX_MOTD_CHUNK+1];
-		
-		if ( strlen( pFileList ) < MAX_MOTD_CHUNK )
-		{
-			strcpy( chunk, pFileList );
-		}
-		else
-		{
-			strncpy( chunk, pFileList, MAX_MOTD_CHUNK );
-			chunk[MAX_MOTD_CHUNK] = 0;		// strncpy doesn't always append the null terminator
-		}
-
-		char_count += strlen( chunk );
-		if ( char_count < MAX_MOTD_LENGTH )
-			pFileList = aFileList + char_count; 
-		else
-			*pFileList = 0;
-
-		MESSAGE_BEGIN( MSG_ONE, gmsgMOTD, NULL, client );
-			WRITE_BYTE( *pFileList ? FALSE : TRUE );	// FALSE means there is still more message to come
-			WRITE_STRING( chunk );
-		MESSAGE_END();
-	}
-
+	int length;
+	char *aFileList = (char*)LOAD_FILE_FOR_ME( const_cast<char *>(file), &length );
+	if (!aFileList)
+		return false;
+	SendMOTDToClient(client, aFileList);
 	FREE_FILE( aFileList );
+	return true;
 }
 
-#define MAX_UNICODE_MOTD_LENGTH   (MAX_MOTD_LENGTH * 2) // Some Unicode charachters take two or more bytes in UTF8
-
-void CHalfLifeMultiplay::SendUnicodeMOTDToClient(edict_t *client)
+void CHalfLifeMultiplay::SendMOTDToClient(edict_t *client, char *string)
 {
-	// read from the MOTD.txt file
-	int length, char_count = 0;
-	char *pFileList;
-	char *aFileList = pFileList = (char*)LOAD_FILE_FOR_ME((char *)CVAR_GET_STRING("motdfile_unicode"), &length);
-
-	if (!pFileList)		// File doesn't exist, send default MOTD
-	{
-		SendMOTDToClient(client);
-		return;
-	}
-
-	// send the server name
-	MESSAGE_BEGIN(MSG_ONE, gmsgServerName, NULL, client);
-	WRITE_STRING(CVAR_GET_STRING("hostname"));
-	MESSAGE_END();
-
+	int char_count = 0;
+	char *pFileList = string;
 	// Send the message of the day
 	// read it chunk-by-chunk,  and send it in parts
-
-	while (pFileList && *pFileList && char_count < MAX_UNICODE_MOTD_LENGTH)
+	while (pFileList && *pFileList && char_count < MAX_MOTD_LENGTH)
 	{
 		char chunk[MAX_MOTD_CHUNK + 1];
 
@@ -1848,8 +1840,8 @@ void CHalfLifeMultiplay::SendUnicodeMOTDToClient(edict_t *client)
 		}
 
 		char_count += strlen(chunk);
-		if (char_count < MAX_UNICODE_MOTD_LENGTH)
-			pFileList = aFileList + char_count;
+		if (char_count < MAX_MOTD_LENGTH)
+			pFileList = string + char_count;
 		else
 			*pFileList = 0;
 
@@ -1858,35 +1850,30 @@ void CHalfLifeMultiplay::SendUnicodeMOTDToClient(edict_t *client)
 		WRITE_STRING(chunk);
 		MESSAGE_END();
 	}
-
-	FREE_FILE(aFileList);
 }
 
-void CHalfLifeMultiplay::SendHtmlMOTDToClient(edict_t *client)
+#define MAX_UNICODE_MOTD_LENGTH   (MAX_MOTD_LENGTH * 2) // Some Unicode charachters take two or more bytes in UTF8
+
+bool CHalfLifeMultiplay::SendUnicodeMOTDFileToClient(edict_t *client, const char *file /*= nullptr*/)
 {
-	// read from the MOTD.txt file
-	int length, char_count = 0;
-	char *pFileList;
-	char *aFileList = pFileList = (char*)LOAD_FILE_FOR_ME((char *)CVAR_GET_STRING("motdfile_html"), &length);
+	if (!file)
+		file = (char *)CVAR_GET_STRING("motdfile_unicode");
 
-	if (!pFileList)		// File doesn't exist, send unicode or default MOTD
-	{
-		E_ClientSupports supports = gBugfixedServer->GetPlayerSupports(ENTINDEX(client));
-		if (supports & AGHL_SUPPORTS_UNICODE_MOTD)
-			SendUnicodeMOTDToClient(client);
-		else
-			SendMOTDToClient(client);
-		return;
-	}
+	int length;
+	char *aFileList = (char*)LOAD_FILE_FOR_ME(const_cast<char *>(file), &length);
+	if (!aFileList)
+		return false;
+	SendUnicodeMOTDToClient(client, aFileList);
+	FREE_FILE(aFileList);
+	return true;
+}
 
-	// send the server name
-	MESSAGE_BEGIN(MSG_ONE, gmsgServerName, NULL, client);
-	WRITE_STRING(CVAR_GET_STRING("hostname"));
-	MESSAGE_END();
-
+void CHalfLifeMultiplay::SendUnicodeMOTDToClient(edict_t *client, char *string)
+{
+	int char_count = 0;
+	char *pFileList = string;
 	// Send the message of the day
 	// read it chunk-by-chunk,  and send it in parts
-
 	while (pFileList && *pFileList && char_count < MAX_UNICODE_MOTD_LENGTH)
 	{
 		char chunk[MAX_MOTD_CHUNK + 1];
@@ -1903,7 +1890,54 @@ void CHalfLifeMultiplay::SendHtmlMOTDToClient(edict_t *client)
 
 		char_count += strlen(chunk);
 		if (char_count < MAX_UNICODE_MOTD_LENGTH)
-			pFileList = aFileList + char_count;
+			pFileList = string + char_count;
+		else
+			*pFileList = 0;
+
+		MESSAGE_BEGIN(MSG_ONE, gmsgMOTD, NULL, client);
+		WRITE_BYTE(*pFileList ? FALSE : TRUE);	// FALSE means there is still more message to come
+		WRITE_STRING(chunk);
+		MESSAGE_END();
+	}
+}
+
+bool CHalfLifeMultiplay::SendHtmlMOTDFileToClient(edict_t *client, const char *file /*= nullptr*/)
+{
+	if (!file)
+		file = (char *)CVAR_GET_STRING("motdfile_html");
+
+	int length;
+	char *aFileList = (char*)LOAD_FILE_FOR_ME(const_cast<char *>(file), &length);
+	if (!aFileList)
+		return false;
+	SendHtmlMOTDToClient(client, aFileList);
+	FREE_FILE(aFileList);
+	return true;
+}
+
+void CHalfLifeMultiplay::SendHtmlMOTDToClient(edict_t *client, char *string)
+{
+	int char_count = 0;
+	char *pFileList = string;
+	// Send the message of the day
+	// read it chunk-by-chunk,  and send it in parts
+	while (pFileList && *pFileList && char_count < MAX_UNICODE_MOTD_LENGTH)
+	{
+		char chunk[MAX_MOTD_CHUNK + 1];
+
+		if (strlen(pFileList) < MAX_MOTD_CHUNK)
+		{
+			strcpy(chunk, pFileList);
+		}
+		else
+		{
+			strncpy(chunk, pFileList, MAX_MOTD_CHUNK);
+			chunk[MAX_MOTD_CHUNK] = 0;		// strncpy doesn't always append the null terminator
+		}
+
+		char_count += strlen(chunk);
+		if (char_count < MAX_UNICODE_MOTD_LENGTH)
+			pFileList = string + char_count;
 		else
 			*pFileList = 0;
 
@@ -1912,6 +1946,4 @@ void CHalfLifeMultiplay::SendHtmlMOTDToClient(edict_t *client)
 		WRITE_STRING(chunk);
 		MESSAGE_END();
 	}
-
-	FREE_FILE(aFileList);
 }

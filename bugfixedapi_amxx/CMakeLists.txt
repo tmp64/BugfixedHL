@@ -8,4 +8,6 @@ add_sources(
 	bugfixedapi_amxx.cpp
 	bugfixedapi_amxx.def
 	appversion.h
+	bhl_api.h
+	bhl_api.cpp
 )

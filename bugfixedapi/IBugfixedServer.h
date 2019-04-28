@@ -1,44 +1,112 @@
 #ifndef IBUGFIXEDAPI_H
 #define IBUGFIXEDAPI_H
+#include <interface.h>
+#include <ClientSupportsFlags.h>
+#include <enum_utils.h>
 
-typedef void *(*GetServerInterfaceFunc)(int version, int *srvVersion);
+#define IBUGFIXEDSERVER_NAME "IBugfixedServer"
+#define IBUGFIXEDSERVER_MAJOR 1
+#define IBUGFIXEDSERVER_MINOR 0
 
-enum E_ClientSupports : unsigned int
+class CGameRules;
+class CGameVersion;
+
+namespace bhl
 {
-	AGHL_SUPPORTS_NONE = 0,
-	AGHL_SUPPORTS_UNICODE_MOTD = (1 << 0),
-	AGHL_SUPPORTS_HTML_MOTD = (1 << 1)
+enum class E_MotdType : unsigned int
+{
+	None = 0,
+	Plain = 1 << 0,
+	Unicode = 1 << 1,
+	Html = 1 << 2,
+	All = Plain | Unicode | Html
 };
 
-inline E_ClientSupports operator|(E_ClientSupports lhs, E_ClientSupports rhs)
-{
-	return (E_ClientSupports)((unsigned int)lhs | (unsigned int)rhs);
-}
-
-inline E_ClientSupports operator|=(E_ClientSupports &lhs, E_ClientSupports rhs)
-{
-	return (lhs = (E_ClientSupports)((unsigned int)lhs | (unsigned int)rhs));
-}
-
-class IBugfixedServer001
+class IBugfixedServer : public IBaseInterface
 {
 public:
-	virtual ~IBugfixedServer001() {}
+	/**
+	 * @brief Sets major and minor to the version of implemented interface.
+	 *
+	 * Major is incremented every time API-breaking changes occur and MUST equal to IBUGFIXEDSERVER_MAJOR.
+	 * Minor is incremented every time a new feature is added that doesn't break compatibility.
+	 * It should be >= IBUGFIXEDSERVER_MINOR.
+	 *
+	 * If major is zero, minor version should match exactly.
+	 *
+	 * This method must be the first one in this class.
+	 * New methods must be added to the end and should increment minor each time new update with them is released.
+	 * Any changes to existing methods may/will break compatibility.
+	 */
+	virtual void GetInterfaceVersion(int &major, int &minor) = 0;
 
-	// Returns a pointer to g_pGameRules that contains a pointer to CGameRules
-	virtual void *GetGameRulesPtr() = 0;
+	/**
+	 * Returns a pointer to g_pGameRules that contains a pointer to CGameRules.
+	 */
+	virtual CGameRules **GetGameRulesPtr() = 0;
 
-	virtual E_ClientSupports GetPlayerSupports(int idx) = 0;
-	virtual bool IsColoredTextEnabled(int idx) = 0;
+	/**
+	 * Returns server DLL version.
+	 */
+	virtual const CGameVersion &GetServerVersion() = 0;
 
-	// Client library version parsing
-	virtual bool GetClientVersionString(int idx, char *buf, int bufSize) = 0;
-	virtual bool GetClientVersion(int idx, int &major, int &minor, int &patch) = 0;
-	virtual bool IsClientDirty(int idx) = 0;
-	virtual bool GetClientVersionCommit(int idx, char *buf, int bufSize) = 0;
+	/**
+	 * Returns bitfield with BugfixedHL features the client's game supports.
+	 * Use bitwise AND to check:
+	 * if (server()->GetClientSupports(idx) & AGHL_SUPPORTS_UNICODE_MOTD) { ... }
+	 */
+	virtual bhl::E_ClientSupports GetClientSupports(int idx) = 0;
+
+	/**
+	 * Returns true if client has color code parsing (^1, ^2, ...) enabled (BugfixedHL or Rofi's client DLL).
+	 */
+	virtual bool GetColorSupport(int idx) = 0;
+
+	/**
+	 * Returns true if server knows client's game DLL version.
+	 */
+	virtual bool IsClientVersionValid(int idx) = 0;
+
+	/**
+	 * If IsClientVersionValid(idx) == true then sets ver to a valid version and returns true.
+	 * Otherwise returns false.
+	 */
+	virtual bool GetClientVersion(int idx, CGameVersion &ver) = 0;
+
+	/**
+	 * @see SetAutomaticMotd
+	 */
+	virtual bool GetAutomaticMotd(bhl::E_MotdType type) = 0;
+
+	/**
+	 * Enables or disables automatic send of MOTD to connecting clients.
+	 *
+	 * The server checks support for HTML MOTD, then Unicode MOTD.
+	 * If HTML MOTD is supported, the server will read it from file int `motdfile_html`.
+	 * If not, if Unicode MOTD is supported, the server will read it from file in `motdfile_unicode`.
+	 * Otherwise, file `motdfile` is sent.
+	 *
+	 * If a MOTD file is supported but it is disabled with SetAutomaticMotd, no MOTD is sent.
+	 *
+	 * @see CHalfLifeMultiplay::InitHUD for details
+	 */
+	virtual void SetAutomaticMotd(bhl::E_MotdType type, bool state) = 0;
+
+	/**
+	 * Sends a MOTD to the client from a string
+	 * @param type MOTD type
+	 * @param idx Client index [1; (maxplayers)]
+	 * @param str The string
+	 */
+	virtual void ShowMotdFromString(bhl::E_MotdType type, int idx, const char *str) = 0;
+
+	/**
+	 * Sends a MOTD to the client from a file
+	 * @param type MOTD type
+	 * @param idx Client index [1; (maxplayers)]
+	 * @param file Path to the file relative from gamedir
+	 */
+	virtual void ShowMotdFromFile(bhl::E_MotdType type, int idx, const char *file) = 0;
 };
-
-typedef IBugfixedServer001 IBugfixedServer;
-#define BUGFIXEDSERVERIFACE_VERSION 001
-
+}
 #endif

@@ -30,7 +30,7 @@
 #include "hud.h"
 #include "cl_util.h"
 #include "netadr.h"
-#include "../public/interface.h"
+#include <interface.h>
 #include "vgui_SchemeManager.h"
 #include "GameStudioModelRenderer.h"
 #include "CHudSpectator.h"

@@ -146,6 +146,8 @@ add_sources(
     wxdebug.h
     xen.cpp
     zombie.cpp
+	CBugfixedServer.h
+	CBugfixedServer.cpp
 )
 
 if(WIN32)

@@ -2,7 +2,7 @@
 #define CBUGFIXEDSERVER_H
 
 #include <CGameVersion.h>
-#include "IBugfixedServer.h"
+#include <IBugfixedServer.h>
 #include "eiface.h"
 #include "progdefs.h"
 
@@ -14,10 +14,15 @@
 extern "C" DLLEXPORT void *AGHL_GetServerInterface(int version, int *srvVersion = nullptr);
 #endif
 
-class CBugfixedServer : public IBugfixedServer
+/**
+ * Implementation of IBugfixedServer
+ * @see IBugfixedServer
+ */
+class CBugfixedServer : public bhl::IBugfixedServer
 {
 public:
-	CBugfixedServer(enginefuncs_t *engfuncs, globalvars_t *globalvars);
+	CBugfixedServer();
+	void Init();
 	void ClientConnect(edict_t *pEntity);
 	void CvarValueCallback(const edict_t *pEnt, int requestID, const char *cvarName, const char *value);
 	//void Think();
@@ -41,20 +46,13 @@ private:
 	struct bhl_client_info_t
 	{
 		CGameVersion version;
-		E_ClientSupports supports;
+		bhl::E_ClientSupports supports;
 		bool isColorEnabled = false;
 	};
 
-	/*struct cvar_request_t
-	{
-		int client_idx;
-		int request;
-		E_RequestType type;
-	};*/
-
-	enginefuncs_t *m_pEngFuncs = nullptr;
-	globalvars_t *m_pGlobalVars = nullptr;
-	bhl_client_info_t m_pClientInfo[33];
+	bhl_client_info_t m_pClientInfo[MAX_PLAYERS + 1];
+	CGameVersion m_ServerVersion;
+	bhl::E_MotdType m_nMotdType = bhl::E_MotdType::All;
 	
 	void ResetPlayerData(int idx);
 	//int strcopy(char *to, const char *from, int toSize);
@@ -63,19 +61,19 @@ public:
 	//----------------------------------------------------------------------------------------------------
 	// IBugfixedServer methods
 	//----------------------------------------------------------------------------------------------------
-	// Returns a pointer to g_pGameRules that contains a pointer to CGameRules
-	virtual void *GetGameRulesPtr();
-
-	virtual E_ClientSupports GetPlayerSupports(int idx);
-	virtual bool IsColoredTextEnabled(int idx);
-
-	// Client library version parsing
-	virtual bool GetClientVersionString(int idx, char *buf, int bufSize);
-	virtual bool GetClientVersion(int idx, int &major, int &minor, int &patch);
-	virtual bool IsClientDirty(int idx);
-	virtual bool GetClientVersionCommit(int idx, char *buf, int bufSize);
+	virtual void GetInterfaceVersion(int &major, int &minor);
+	virtual CGameRules **GetGameRulesPtr();
+	virtual const CGameVersion &GetServerVersion();
+	virtual bhl::E_ClientSupports GetClientSupports(int idx);
+	virtual bool GetColorSupport(int idx);
+	virtual bool IsClientVersionValid(int idx);
+	virtual bool GetClientVersion(int idx, CGameVersion &ver);
+	virtual bool GetAutomaticMotd(bhl::E_MotdType type);
+	virtual void SetAutomaticMotd(bhl::E_MotdType type, bool state);
+	virtual void ShowMotdFromString(bhl::E_MotdType type, int idx, const char *str);
+	virtual void ShowMotdFromFile(bhl::E_MotdType type, int idx, const char *file);
 };
 
-extern CBugfixedServer *gBugfixedServer;
+CBugfixedServer *serverapi();
 
 #endif

@@ -3,6 +3,7 @@ add_sources(
     bitvec.h
 	CGameVersion.h
 	CGameVersion.cpp
+	ClientSupportsFlags.h
 )
 
 if( USE_UPDATER )

@@ -20,6 +20,7 @@ add_sources(
     hltv.h
     in_buttons.h
     interface.h
+	interface.cpp
     ivoicetweak.h
     mathlib.h
     netadr.h
@@ -36,10 +37,5 @@ add_sources(
     triangleapi.h
     usercmd.h
     weaponinfo.h
+	enum_utils.h
 )
-
-if ( NOT USE_VGUI2 )
-	add_sources(
-		interface.cpp	# tier1 uses interface.cpp from /public
-	)
-endif()

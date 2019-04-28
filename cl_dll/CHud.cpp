@@ -34,7 +34,7 @@
 #include "appversion.h"
 #include "memory.h"
 
-#include "../bugfixedapi/IBugfixedServer.h"
+#include <ClientSupportsFlags.h>
 
 //-----------------------------------------------------
 // HUD elements
@@ -1065,16 +1065,18 @@ float CHud::GetHudTransparency()
 
 void CHud::UpdateSupportsCvar()
 {
-	E_ClientSupports supports = AGHL_SUPPORTS_NONE;
+	bhl::E_ClientSupports supports = bhl::E_ClientSupports::None;
 #ifdef USE_VGUI2
-	supports |= AGHL_SUPPORTS_UNICODE_MOTD;
+	//supports |= bhl::AGHL_SUPPORTS_UNICODE_MOTD;
+	SetEnumFlag(supports, bhl::E_ClientSupports::UnicodeMotd);
 #ifndef VGUI2_BUILD_4554
-	if (m_bIsHtmlMotdEnabled) supports |= AGHL_SUPPORTS_HTML_MOTD;
+	if (m_bIsHtmlMotdEnabled)
+		SetEnumFlag(supports, bhl::E_ClientSupports::HtmlMotd);
 #endif
 #endif
 
 	char buf[32];
-	snprintf(buf, sizeof(buf), "aghl_supports %u", (unsigned int)supports);
+	snprintf(buf, sizeof(buf), "aghl_supports %u", static_cast<unsigned int>(supports));
 	ClientCmd(buf);
 }
 
