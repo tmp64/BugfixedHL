@@ -9,16 +9,12 @@
 // Functions for storing game results files.
 //
 
-#ifdef _WIN32
-#define NOMINMAX
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#elif !defined(MAX_PATH)
+#if !defined(_WIN32) && !defined(MAX_PATH)
 #define MAX_PATH 1024
 #endif
 
 #ifdef _WIN32
-bool GetResultsFilename(const char *extension, char fileName[MAX_PATH], char fullPath[MAX_PATH]);
+bool GetResultsFilename(const char *extension, char *fileName, char *fullPath);
 void ResultsAddLog(const char *line, bool chat);
 void ResultsStop(void);
 void ResultsFrame(double time);

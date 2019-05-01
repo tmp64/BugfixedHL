@@ -23,6 +23,9 @@
 #include "demo_api.h"
 #include "vgui_TeamFortressViewport.h"
 #include "memory.h"
+
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
 #include <windows.h>
 
 bool g_bFormatError = false;
@@ -87,7 +90,7 @@ bool DoSubstitutions(char filename[MAX_PATH], char fullpath[MAX_PATH], const cha
 }
 
 // Returns new results file name in relative to mod directory and rooted formats.
-bool GetResultsFilename(const char *extension, char filename[MAX_PATH], char fullpath[MAX_PATH])
+bool GetResultsFilename(const char *extension, char *filename, char *fullpath)
 {
 	// Get map name
 	if (g_szCurrentMap[0] == 0)
