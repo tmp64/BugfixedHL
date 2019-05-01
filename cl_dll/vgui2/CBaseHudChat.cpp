@@ -5,6 +5,7 @@
 // $NoKeywords: $
 //=============================================================================//
 
+#include <ctime>
 #include "CClientVGUI.h"
 #include "CBaseViewport.h"
 #include "VGUI2Paths.h"
@@ -25,7 +26,8 @@
 #include "parsemsg.h"
 #include "IBaseUI.h"
 #include "CClientVGUI.h"
-//#include "voice_status.h"
+#include "CHudSayText.h"
+#include "results.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -48,6 +50,10 @@ SDK_Color g_SdkColorDarkGreen( 64, 255, 64, 255 );
 SDK_Color g_SdkColorYellow( 255, 178, 0, 255 );
 SDK_Color g_SdkColorGrey( 204, 204, 204, 255 );
 
+// FIXME: Windows only
+#ifndef _WIN32
+#define ResultsAddLog(...)
+#endif
 
 // removes all color markup characters, so Msg can deal with the string properly
 // returns a pointer to str
@@ -774,6 +780,46 @@ int CBaseHudChat::MsgFunc_SayText( const char *pszName, int iSize, void *pbuf )
 	BEGIN_READ( pbuf, iSize );
 	int client = READ_BYTE();
 	strncpy(szString, READ_STRING(), sizeof(szString));
+
+	// Print to the console
+	if (szString[0] == 2 && client > 0 || szString[0] == 1 && client == 0)
+	{
+		RGBA color;
+		bool colored = ParseColor(gHUD.m_SayText->m_pCvarConSayColor->string, color);
+
+		// Prepend time for say messages from players and the server
+		time_t now;
+		time(&now);
+		if (now)
+		{
+			struct tm *current = localtime(&now);
+			char time_buf[32];
+			sprintf(time_buf, "[%02i:%02i:%02i] ", current->tm_hour, current->tm_min, current->tm_sec);
+			if (colored)
+				ConsolePrintColor(time_buf, color);
+			else
+				ConsolePrint(time_buf);
+			sprintf(time_buf, "[%04i-%02i-%02i %02i:%02i:%02i] ", current->tm_year + 1900, current->tm_mon + 1, current->tm_mday, current->tm_hour, current->tm_min, current->tm_sec);
+			ResultsAddLog(time_buf, true);
+		}
+
+		// Cut indicator in first byte
+		if (colored)
+			ConsolePrintColor(szString + 1, color);
+		else
+			ConsolePrint(szString + 1);
+
+		int strLen = strlen(szString + 1);
+		if (szString[strLen] != '\n')
+			ConsolePrint("\n");
+		ResultsAddLog(szString + 1, true);
+	}
+	else
+	{
+		ConsolePrint(szString);
+		ResultsAddLog(szString, false);
+	}
+
 	ChatPrintf(client, CHAT_FILTER_NONE, "%s", szString);
 	PlaySound("misc/talk.wav", 1);
 	Msg( "%s", szString );

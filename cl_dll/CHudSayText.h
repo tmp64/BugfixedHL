@@ -24,6 +24,7 @@ private:
 	cvar_t	*m_pCvarOldInputPos = nullptr;
 
 	friend void ChatInputPosition(int *x, int *y);
+	friend class CBaseHudChat;
 };
 
 #endif
