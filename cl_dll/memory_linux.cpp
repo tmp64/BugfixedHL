@@ -467,6 +467,12 @@ void Memory::OnLibraryDeinit()
 
 void Memory::OnHudInit()
 {
+	if (gEngfuncs.CheckParm("-nomempatch", nullptr) != 0)
+	{
+		MemConPrintf("Memory patching is disabled via '-nomempatch'\n");
+		return;
+	}
+	
 	MemConPrintf("Loading mprotect data from /proc/self/maps\n");
 	LoadProtectFromProc();
 	MemConPrintf("Loaded %u entries\n", g_AddrToProtect.size());
