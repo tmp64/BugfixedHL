@@ -43,20 +43,9 @@ void CBugfixedServer::ClientConnect(edict_t *pEntity)
 	// Reset player data
 	ResetPlayerData(idx);
 
-	// Query vars
-	entvars_t *pev = &pEntity->v;
-	CBasePlayer *pl = GetClassPtr<CBasePlayer>((CBasePlayer *)pev);
-
-	// Check if bot (QueryClientCvarValue2 crashes the server on bots)
-	bool isBot = false;
-	const char *auth = nullptr;
-	if ((pl->pev->flags & FL_FAKECLIENT) == FL_FAKECLIENT ||
-		(auth = GETPLAYERAUTHID(pl->edict())) && strcmp(auth, "BOT") == 0)
-	{
-		isBot = true;
-	}
-
-	if (!isBot)	// Don't query bots
+	// Query vars but don't query bots
+	const char *auth = GETPLAYERAUTHID(pEntity);
+	if (!auth || strcmp(auth, "BOT") != 0)
 	{
 		g_engfuncs.pfnQueryClientCvarValue2(pEntity, "aghl_version", REQUESTID_VERSION + idx);
 		g_engfuncs.pfnQueryClientCvarValue2(pEntity, "aghl_supports", REQUESTID_SUPPORTS + idx);
