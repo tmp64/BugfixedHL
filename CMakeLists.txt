@@ -398,7 +398,6 @@ create_source_groups( "${CMAKE_SOURCE_DIR}" )
 #Set the startup project to the client
 #TODO: does this even work?
 set_property( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT client )
-set_property( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT client )
 
 clear_sources()
 
