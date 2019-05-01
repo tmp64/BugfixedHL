@@ -217,12 +217,24 @@ int __MsgFunc_GameMode(const char *pszName, int iSize, void *pbuf )
 
 void __CmdFunc_About(void)
 {
-	char *ver = APP_VERSION;
-	ConsolePrint("Fixed and improved HLSDK client.dll.\n");
-	ConsolePrint("File version: ");
-	ConsolePrint(ver);
-	ConsolePrint(".\n");
-	ConsolePrint("Visit http://aghl.ru/forum for more info on this dll.\n");
+	ConPrintf("Bugfixed and improved Half-Life client\n");
+	ConPrintf("Version: " APP_VERSION "\n");
+	ConPrintf("Build options: ");
+#ifdef USE_VGUI2
+	ConPrintf("VGUI2 support    ");
+#ifdef VGUI2_BUILD_4554
+	ConPrintf("game build 4554    ");
+#endif
+#endif
+#ifdef USE_UPDATER
+	ConPrintf("auto-updater    ");
+#endif
+#ifdef _DEBUG
+	ConPrintf("debug build    ");
+#endif
+	ConPrintf("\n");
+	ConPrintf("Github: https://github.com/tmp64/BugfixedHL\n");
+	ConPrintf("Discussion forum: http://aghl.ru/forum/viewtopic.php?f=36&t=686\n");
 }
 
 // TFFree Command Menu
