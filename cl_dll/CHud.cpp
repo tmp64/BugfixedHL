@@ -1037,7 +1037,7 @@ void CHud::GetHudColor( int hudPart, int value, int &r, int &g, int &b )
 void CHud::GetHudAmmoColor(int value, int maxvalue, int &r, int &g, int &b)
 {
 	RGBA *c;
-	if (maxvalue == -1) // if you are using custom weapons, then default colors are going to be used....
+	if (maxvalue == -1 || maxvalue == 0) // if you are using custom weapons, then default colors are going to be used....
 	{
 		ParseColor(m_pCvarColor->string, m_hudColor); c = &m_hudColor;
 	}
