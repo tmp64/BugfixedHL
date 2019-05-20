@@ -24,6 +24,8 @@
 #include <windows.h>
 #include <psapi.h>
 #include <dbghelp.h>
+#include <time.h>
+#include "appversion.h"
 #endif
 
 #include "dllexport.h"
@@ -226,6 +228,24 @@ LONG NTAPI VectoredExceptionsHandler(PEXCEPTION_POINTERS pExceptionInfo)
 			sprintf(buffer, "Exception 0x%08X at address 0x%08X.\n", exceptionCode, exceptionAddress);
 			fputs(buffer, file);
 
+			// Write some usefull info
+			time_t rawtime;
+			struct tm *timeinfo;
+			time(&rawtime);
+
+			timeinfo = localtime(&rawtime);
+			strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S (%Z)", timeinfo);
+			fprintf(file, "Local time: %s\n", buffer);
+
+			timeinfo = gmtime(&rawtime);
+			strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", timeinfo);
+			fprintf(file, "UTC time: %s\n", buffer);
+
+			fputs("Game version: " APP_VERSION "\n", file);
+#ifdef USE_VGUI2
+			fputs("VGUI2 support enabled\n", file);
+#endif
+
 			// Dump modules info
 			fputs("Modules:\n", file);
 			fputs("  Base     Size     Path (Exception Offset)\n", file);
@@ -275,12 +295,26 @@ LONG NTAPI VectoredExceptionsHandler(PEXCEPTION_POINTERS pExceptionInfo)
 		moduleSize = (long)moduleInfo.SizeOfImage;
 		if (moduleBase <= exceptionAddress && exceptionAddress <= (moduleBase + moduleSize))
 		{
-			sprintf(buffer, "Exception in client.dll at offset 0x%08X.\n\nCrash dump and log files were created in game directory.\nPlease report them to http://aghl.ru/forum.", exceptionAddress - moduleBase);
+			sprintf(buffer,"Exception in client.dll at offset 0x%08X.", exceptionAddress - moduleBase);
 		}
 		else
 		{
-			sprintf(buffer, "Exception in the game.\n\nCrash dump and log files were created in game directory.\nPlease report them to http://aghl.ru/forum.");
+			sprintf(buffer, "Exception in the game.");
 		}
+
+		snprintf(buffer, sizeof(buffer),
+			"%s\n\n"
+			"Game version: " APP_VERSION "\n"
+#ifdef USE_VGUI2
+			"VGUI2 support enabled.\n"
+#endif
+			"\n"
+			"Crash dump and log files were created in game directory.\n"
+			"Please report them to https://github.com/tmp64/BugfixedHL/issues\n"
+			"or http://aghl.ru/forum.",
+			buffer
+		);
+
 		MessageBox(GetActiveWindow(), buffer, "Error!", MB_OK | MB_ICONEXCLAMATION | MB_SETFOREGROUND | MB_TOPMOST);
 
 		// Application will die anyway, so futher exceptions are not interesting to us
