@@ -24,10 +24,24 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+set( SHARED_GAME_LINKER_FLAGS
+)
+
 if( CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU" )
 	# Always build as 32 bit
 	# Additional debug info for GDB.
 	set( SHARED_COMPILER_FLAGS "${SHARED_COMPILER_FLAGS} -m32 -g" )
+	
+	option( GCC_NO_OPTIMIZE "GCC: Disable optimizations (-O0)" )
+	if( GCC_NO_OPTIMIZE )
+		set( SHARED_COMPILER_FLAGS "${SHARED_COMPILER_FLAGS} -O0" )
+	endif()
+	
+	option( GCC_CHECK_FOR_UB "GCC: Enable run-time checks for undefined behavior" )
+	if( GCC_CHECK_FOR_UB )
+		set( SHARED_COMPILER_FLAGS       "${SHARED_COMPILER_FLAGS} -fsanitize=address,undefined -fstack-protector" )
+		set( SHARED_GAME_LINKER_FLAGS "${SHARED_GAME_LINKER_FLAGS} -fsanitize=address,undefined -fstack-protector" )
+	endif()
 endif()
 
 if( MSVC )
@@ -105,27 +119,19 @@ set( SHARED_GAME_DEFS
 )
 
 #Shared linker flags
-set( SHARED_GAME_LINKER_FLAGS
-)
-
 if( MSVC )
 	#Set Windows subsystem
-	set( SHARED_GAME_LINKER_FLAGS
-		${SHARED_GAME_LINKER_FLAGS} "/SUBSYSTEM:WINDOWS "
+	set( SHARED_GAME_LINKER_FLAGS "${SHARED_GAME_LINKER_FLAGS} /SUBSYSTEM:WINDOWS "
 )
 elseif( UNIX )
 	#From the Github 2013 Makefile, match the settings for Unix environments.
 	# force 387 for FP math so the precision between win32 and linux and osx match
 	# Trigger an error if any code tries to use an implicit return type
 	# Default visibility is hidden unless explicitly altered with __attribute__( visibility() )
-	set( SHARED_GAME_LINKER_FLAGS
-		${SHARED_GAME_LINKER_FLAGS} "-mfpmath=387 -Werror=return-type -fvisibility=hidden "
-	)
+	set( SHARED_GAME_LINKER_FLAGS "${SHARED_GAME_LINKER_FLAGS} -mfpmath=387 -Werror=return-type -fvisibility=hidden" )
 
 	if( APPLE )
-		set( SHARED_GAME_LINKER_FLAGS
-			${SHARED_GAME_LINKER_FLAGS} "-momit-leaf-frame-pointer -mtune=core2 "
-		)
+		set( SHARED_GAME_LINKER_FLAGS "${SHARED_GAME_LINKER_FLAGS} -momit-leaf-frame-pointer -mtune=core2" )
 	else()
 		#Linux, Cygwin, etc.
 	endif()
@@ -380,7 +386,7 @@ elseif( NOT APPLE )
 
 	#Generate a map file that provides information about the linking stage.
 	set( CLIENT_LINK_FLAGS
-		${CLIENT_LINK_FLAGS} "-Wl,-Map,client_map.txt -fno-stack-protector"
+		${CLIENT_LINK_FLAGS} "-Wl,-Map,client_map.txt"
 	)
 endif()
 
