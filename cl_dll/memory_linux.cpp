@@ -502,6 +502,8 @@ void Memory::OnFrame()
 
 RGBA SetConsoleColor(RGBA color)
 {
+	if (!Memory::g_pPrintColor)
+		return color;
 	RGBA oldcolor = *Memory::g_pPrintColor;
 	*Memory::g_pPrintColor = color;
 	return oldcolor;
