@@ -147,10 +147,13 @@ class CHud
 public:
 	inline HLHSPRITE GetSprite(int index)
 	{
-		return (index < 0) ? 0 : m_rghSprites[index];
+		return (index < 0 || index >= m_iSpriteCountAlloc) ? 0 : m_rghSprites[index];
 	}
 	inline wrect_t& GetSpriteRect(int index)
 	{
+		static wrect_t empty = wrect_t();
+		if (index < 0 || index >= m_iSpriteCountAlloc)
+			return empty;
 		return m_rgrcRects[index];
 	}
 	int GetSpriteIndex(const char *SpriteName);	// gets a sprite index, for use in the m_rghSprites[] array

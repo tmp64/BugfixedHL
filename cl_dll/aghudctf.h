@@ -2,6 +2,7 @@
 
 #ifndef __AGHUDCTF_H__
 #define __AGHUDCTF_H__
+#include "CHudBase.h"
 
 class AgHudCTF : public CHudBase
 {
