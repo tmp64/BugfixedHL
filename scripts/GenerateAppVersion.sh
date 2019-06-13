@@ -9,6 +9,8 @@ suffix=$3
 # Get old version information from appversion.h
 if [ -e ${srcfile} ]; then
 	old_version=$(cat ${srcfile} | grep -i '#define APP_VERSION ' | sed -e 's/#define APP_VERSION \(.*\)/\1/i')
+	old_version=${old_version//\"/}
+	# "}		# This fixes xed's coloring
 	# fix MC coloring '
 	if [ $? -ne 0 ]; then
 		old_version=""
