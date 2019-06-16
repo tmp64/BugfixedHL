@@ -276,7 +276,6 @@ void CScorePanel::RecalcItems()
 	// Sort teams
 	auto cmp = [this](int lhs, int rhs)
 	{
-		Assert(m_pTeamSortFunction);
 		return m_pTeamSortFunction(lhs, rhs);
 	};
 	std::set<int, decltype(cmp)> set(cmp);
