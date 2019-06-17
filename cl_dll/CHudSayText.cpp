@@ -101,6 +101,10 @@ void CHudSayText :: InitHUDData( void )
 
 void CHudSayText :: VidInit( void )
 {
+	if (ScreenHeight >= 480)
+		Y_START = ScreenHeight - 60;
+	else
+		Y_START = ScreenHeight - 45;
 }
 
 
