@@ -275,7 +275,6 @@ public:
 	float					m_flHistoryFadeTime;
 	float					m_flHistoryIdleTime;
 
-	virtual int				MsgFunc_SayText( const char *pszName, int iSize, void *pbuf );
 	//virtual void			MsgFunc_SayText2( bf_read &msg );
 	//virtual void			MsgFunc_TextMsg( const char *pszName, int iSize, void *pbuf );
 	//virtual void			MsgFunc_VoiceSubtitle( bf_read &msg );

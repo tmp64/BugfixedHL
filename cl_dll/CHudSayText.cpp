@@ -58,9 +58,7 @@ static float flScrollTime = 0;  // the time at which the lines next scroll up
 static int Y_START = 0;
 static int line_height = 0;
 
-#ifndef USE_VGUI2
 DECLARE_MESSAGE_PTR( m_SayText, SayText );
-#endif
 
 extern "C" void DLLEXPORT ChatInputPosition(int *x, int *y)
 {
@@ -77,9 +75,7 @@ extern "C" void DLLEXPORT ChatInputPosition(int *x, int *y)
 
 void CHudSayText :: Init( void )
 {
-#ifndef USE_VGUI2
 	HOOK_MESSAGE( SayText );
-#endif
 
 	InitHUDData();
 
@@ -87,6 +83,9 @@ void CHudSayText :: Init( void )
 	m_HUD_saytext_time = CVAR_CREATE( "hud_saytext_time", "5", 0 );
 	m_pCvarConSayColor = CVAR_CREATE( "con_say_color", "30 230 50", FCVAR_ARCHIVE );
 	m_pCvarOldInputPos = CVAR_CREATE("hud_saytext_oldpos", "0", FCVAR_ARCHIVE);
+#ifdef USE_VGUI2
+	m_pCvarOldChat = CVAR_CREATE("hud_saytext_oldchat", "0", FCVAR_ARCHIVE);
+#endif
 
 	m_iFlags |= HUD_INTERMISSION; // is always drawn during an intermission
 }
@@ -233,68 +232,73 @@ void CHudSayText :: SayTextPrint( const char *pszBuf, int iBufSize, int clientIn
 	}
 
 #ifdef USE_VGUI2
-	static char buf[1024];
-	int strLen = strlen(pszBuf + 1);
-	strncpy(buf, pszBuf, min<int>(sizeof(buf), strLen));
-	buf[sizeof(buf) - 1] = '\0';
-
-	gHUD.m_Location->ParseAndEditSayString(clientIndex, buf, min<int>(sizeof(buf), strLen));
-	gHUD.m_Chat->ChatPrintf(clientIndex, CHAT_FILTER_NONE, "%s", pszBuf);
-#else
-	// find an empty string slot
-	int i;
-	for ( i = 0; i < MAX_LINES; i++ )
+	if (m_pCvarOldChat->value)
+#endif
 	{
-		if ( ! *g_szLineBuffer[i] )
-			break;
-	}
-	if ( i == MAX_LINES )
-	{
-		// force scroll buffer up
-		ScrollTextUp();
-		i = MAX_LINES - 1;
-	}
-
-	g_iNameLengths[i] = 0;
-	g_pflNameColors[i] = NULL;
-
-	// if it's a say message, search for the players name in the string
-	if (*pszBuf == 2 && clientIndex > 0)
-	{
-		GetPlayerInfo(clientIndex, &g_PlayerInfoList[clientIndex]);
-		const char *pName = g_PlayerInfoList[clientIndex].name;
-		if (pName)
+		// find an empty string slot
+		int i;
+		for (i = 0; i < MAX_LINES; i++)
 		{
-			const char *nameInString = strstr(pszBuf, pName);
-			if (nameInString)
+			if (!*g_szLineBuffer[i])
+				break;
+		}
+		if (i == MAX_LINES)
+		{
+			// force scroll buffer up
+			ScrollTextUp();
+			i = MAX_LINES - 1;
+		}
+
+		g_iNameLengths[i] = 0;
+		g_pflNameColors[i] = NULL;
+
+		// if it's a say message, search for the players name in the string
+		if (*pszBuf == 2 && clientIndex > 0)
+		{
+			GetPlayerInfo(clientIndex, &g_PlayerInfoList[clientIndex]);
+			const char* pName = g_PlayerInfoList[clientIndex].name;
+			if (pName)
 			{
-				g_iNameLengths[i] = strlen( pName ) + (nameInString - pszBuf);
-				g_pflNameColors[i] = GetClientTeamColor(clientIndex);
+				const char* nameInString = strstr(pszBuf, pName);
+				if (nameInString)
+				{
+					g_iNameLengths[i] = strlen(pName) + (nameInString - pszBuf);
+					g_pflNameColors[i] = GetClientTeamColor(clientIndex);
+				}
 			}
 		}
+
+		strncpy(g_szLineBuffer[i], pszBuf, max(iBufSize - 1, MAX_CHARS_PER_LINE - 1));
+
+		// Substitute location
+		gHUD.m_Location->ParseAndEditSayString(clientIndex, g_szLineBuffer[i], HLARRAYSIZE(g_szLineBuffer[i]));
+
+		// make sure the text fits in one line
+		EnsureTextFitsInOneLineAndWrapIfHaveTo(i);
+
+		// Set scroll time
+		if (i == 0)
+		{
+			flScrollTime = gHUD.m_flTime + m_HUD_saytext_time->value;
+		}
+
+		m_iFlags |= HUD_ACTIVE;
+
+		if (ScreenHeight >= 480)
+			Y_START = ScreenHeight - 60;
+		else
+			Y_START = ScreenHeight - 45;
+		Y_START -= (line_height * (MAX_LINES + 1));
 	}
-
-	strncpy( g_szLineBuffer[i], pszBuf, max(iBufSize -1, MAX_CHARS_PER_LINE-1) );
-
-	// Substitute location
-	gHUD.m_Location->ParseAndEditSayString(clientIndex, g_szLineBuffer[i], HLARRAYSIZE(g_szLineBuffer[i]));
-
-	// make sure the text fits in one line
-	EnsureTextFitsInOneLineAndWrapIfHaveTo( i );
-
-	// Set scroll time
-	if ( i == 0 )
-	{
-		flScrollTime = gHUD.m_flTime + m_HUD_saytext_time->value;
-	}
-
-	m_iFlags |= HUD_ACTIVE;
-
-	if ( ScreenHeight >= 480 )
-		Y_START = ScreenHeight - 60;
+#ifdef USE_VGUI2
 	else
-		Y_START = ScreenHeight - 45;
-	Y_START -= (line_height * (MAX_LINES+1));
+	{
+		char szBuf[1024];
+		strncpy(szBuf, pszBuf, sizeof(szBuf));
+		szBuf[sizeof(szBuf) - 1] = '\0';
+		gHUD.m_Location->ParseAndEditSayString(clientIndex, szBuf, sizeof(szBuf));	// Substitute location
+		gHUD.m_Chat->ChatPrintf(clientIndex, CHAT_FILTER_NONE, "%s", szBuf);
+	}
 #endif
 
 	PlaySound("misc/talk.wav", 1);

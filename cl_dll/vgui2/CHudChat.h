@@ -51,7 +51,6 @@ public:
 	virtual void	Init( void );
 	virtual void	Reset( void );
 	virtual void	ApplySchemeSettings(vgui2::IScheme *pScheme);
-	int				MsgFunc_SayText(const char *pszName, int iSize, void *pbuf);
 
 	int				GetChatInputOffset( void );
 

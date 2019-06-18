@@ -8,6 +8,10 @@ extern "C" void DLLEXPORT ChatInputPosition(int *x, int *y);
 class CHudSayText : public CHudBase
 {
 public:
+#ifdef USE_VGUI2
+	cvar_t *m_pCvarOldChat = nullptr;
+#endif
+
 	void Init();
 	void InitHUDData();
 	void VidInit();

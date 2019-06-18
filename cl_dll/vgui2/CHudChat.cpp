@@ -8,9 +8,9 @@
 #include "cl_util.h"
 #include "CHudChat.h"
 #include "CHudTextMessage.h"
+#include "CHudSayText.h"
 #include "vgui/ILocalize.h"
-
-DECLARE_MESSAGE_PTR(m_Chat, SayText);
+#include "memory.h"	// For struct CommandLink
 
 //=====================
 //CHudChatLine
@@ -59,28 +59,63 @@ void CHudChat::ApplySchemeSettings( vgui2::IScheme *pScheme )
 //-----------------------------------------------------------------------------
 // Purpose: Shows chat input box
 //-----------------------------------------------------------------------------
-static void __CmdFunc_MessageModeVgui2()
+static void (*gfnEngineMsgMode)(void) = nullptr;
+static void (*gfnEngineMsgMode2)(void) = nullptr;
+static void MessageModeVgui2()
 {
-	if (gEngfuncs.GetMaxClients() == 1)
-		return;
-	gHUD.m_Chat->StartMessageMode(MM_SAY);
+	if (gHUD.m_SayText->m_pCvarOldChat->value)
+		gfnEngineMsgMode();
+	else
+	{
+		if (gEngfuncs.GetMaxClients() == 1)
+			return;
+		gHUD.m_Chat->StartMessageMode(MM_SAY);
+	}
 }
 
-static void __CmdFunc_MessageMode2Vgui2()
+static void MessageMode2Vgui2()
 {
-	if (gEngfuncs.GetMaxClients() == 1)
-		return;
-	gHUD.m_Chat->StartMessageMode(MM_SAY_TEAM);
+	if (gHUD.m_SayText->m_pCvarOldChat->value)
+		gfnEngineMsgMode2();
+	else
+	{
+		if (gEngfuncs.GetMaxClients() == 1)
+			return;
+		gHUD.m_Chat->StartMessageMode(MM_SAY_TEAM);
+	}
 }
 
 void CHudChat::Init( void )
 {
 	BaseClass::Init();
 
-	HOOK_MESSAGE(SayText);
-	//HOOK_HUD_MESSAGE( CHudChat, TextMsg );
-	HOOK_COMMAND("messagemode_vgui2", MessageModeVgui2);
-	HOOK_COMMAND("messagemode2_vgui2", MessageMode2Vgui2);
+	// Hook messagemode and messagemode2
+	if (!gfnEngineMsgMode && !gfnEngineMsgMode2)
+	{
+		CommandLink *item = gEngfuncs.pfnGetCommandsList();
+		CommandLink *msgMode = nullptr, *msgMode2 = nullptr;
+
+		while (item)
+		{
+			if (!strcmp(item->commandName, "messagemode"))
+				msgMode = item;
+			else if (!strcmp(item->commandName, "messagemode2"))
+				msgMode2 = item;
+			item = item->nextCommand;
+		}
+
+		if (!msgMode || !msgMode2)
+			ConPrintf("Failed to hook messagemode and messagemode2\n");
+		else
+		{
+			gfnEngineMsgMode = msgMode->handler;
+			msgMode->handler = MessageModeVgui2;
+			gfnEngineMsgMode2 = msgMode2->handler;
+			msgMode2->handler = MessageMode2Vgui2;
+		}
+	}
+	else
+		ConPrintf("messagemode and messagemode2 already hooked\n");
 }
 
 //-----------------------------------------------------------------------------
@@ -113,9 +148,4 @@ SDK_Color CHudChat::GetClientColor(int clientIndex)
 	}
 
 	return gHUD.GetTeamColor(0);
-}
-
-int CHudChat::MsgFunc_SayText(const char *pszName, int iSize, void * pbuf)
-{
-	return CBaseHudChat::MsgFunc_SayText(pszName, iSize, pbuf);
 }

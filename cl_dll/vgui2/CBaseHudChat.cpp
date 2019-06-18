@@ -767,66 +767,6 @@ void CBaseHudChat::Init( void )
 {
 }
 
-//-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : *pszName - 
-//			iSize - 
-//			*pbuf - 
-//-----------------------------------------------------------------------------
-int CBaseHudChat::MsgFunc_SayText( const char *pszName, int iSize, void *pbuf )
-{
-	char szString[256];
-
-	BEGIN_READ( pbuf, iSize );
-	int client = READ_BYTE();
-	strncpy(szString, READ_STRING(), sizeof(szString));
-
-	// Print to the console
-	if (szString[0] == 2 && client > 0 || szString[0] == 1 && client == 0)
-	{
-		RGBA color;
-		bool colored = ParseColor(gHUD.m_SayText->m_pCvarConSayColor->string, color);
-
-		// Prepend time for say messages from players and the server
-		time_t now;
-		time(&now);
-		if (now)
-		{
-			struct tm *current = localtime(&now);
-			char time_buf[32];
-			sprintf(time_buf, "[%02i:%02i:%02i] ", current->tm_hour, current->tm_min, current->tm_sec);
-			if (colored)
-				ConsolePrintColor(time_buf, color);
-			else
-				ConsolePrint(time_buf);
-			sprintf(time_buf, "[%04i-%02i-%02i %02i:%02i:%02i] ", current->tm_year + 1900, current->tm_mon + 1, current->tm_mday, current->tm_hour, current->tm_min, current->tm_sec);
-			ResultsAddLog(time_buf, true);
-		}
-
-		// Cut indicator in first byte
-		if (colored)
-			ConsolePrintColor(szString + 1, color);
-		else
-			ConsolePrint(szString + 1);
-
-		int strLen = strlen(szString + 1);
-		if (szString[strLen] != '\n')
-			ConsolePrint("\n");
-		ResultsAddLog(szString + 1, true);
-	}
-	else
-	{
-		ConsolePrint(szString);
-		ResultsAddLog(szString, false);
-	}
-
-	ChatPrintf(client, CHAT_FILTER_NONE, "%s", szString);
-	PlaySound("misc/talk.wav", 1);
-	Msg( "%s", szString );
-
-	return 1;
-}
-
 int CBaseHudChat::GetFilterForString( const char *pString )
 {
 	if ( !Q_stricmp( pString, "#HL_Name_Change" ) ) 
