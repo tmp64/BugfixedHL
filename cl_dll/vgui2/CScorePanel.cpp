@@ -184,8 +184,15 @@ void CScorePanel::FullUpdate()
 {
 	DebugPrintf("CScoreBoard::FullUpdate: Full update called\n");
 
+	// Update line spacing
+	if (gHUD.m_ScoreBoard->m_CvarSpacing->value > 0)
+		m_pPlayerList->SetLineSpacingOverride(gHUD.m_ScoreBoard->m_CvarSpacing->value);
+	else
+		m_pPlayerList->SetLineSpacingOverride(GetLineSpacingForHeight(ScreenHeight));
+
+	// Update avatar size
 	if (gHUD.m_ScoreBoard->m_CvarAvatars->value)
-		m_iAvatarWidth = AVATAR_WIDTH;
+		m_iAvatarWidth = GetAvatarSize();
 	else
 		m_iAvatarWidth = AVATAR_OFF_WIDTH;
 
@@ -579,6 +586,8 @@ void CScorePanel::UpdatePlayerAvatar(int playerIndex, KeyValues *kv)
 
 		CAvatarImage *pAvIm = (CAvatarImage *)m_pImageList->GetImage(iImageIndex);
 		pAvIm->UpdateFriendStatus();
+		int avSize = GetAvatarSize();
+		pAvIm->SetSize(avSize, avSize);
 
 		if (vgui2::voicemgr()->IsPlayerBlocked(playerIndex))
 			pAvIm->SetSecondImage(m_pMutedIcon);
@@ -631,6 +640,32 @@ void CScorePanel::UpdateTeamScore(int i)
 		L"%d", score.deaths
 	);
 	m_pPlayerList->ModifyColumn(i, "deaths", buf);
+}
+
+//--------------------------------------------------------------
+// Returns line spacing for given screen height
+//--------------------------------------------------------------
+int CScorePanel::GetLineSpacingForHeight(int h)
+{
+	if (h < 600)
+		return 18; // (0; 600)
+	if (h < 720)
+		return 22; // [600; 720]
+	if (h < 800)
+		return 24; // [720; 800)
+	if (h < 1024)
+		return 26; // [800; 1024)
+	if (h < 1080)
+		return 28; // [1024; 1080)
+
+	return 28;	   // >= 1080
+}
+
+int CScorePanel::GetAvatarSize()
+{
+	int avSize = m_pPlayerList->GetLineSpacingOverride() - 2;
+	avSize = clamp(avSize, 0, 32);
+	return avSize;
 }
 
 //--------------------------------------------------------------

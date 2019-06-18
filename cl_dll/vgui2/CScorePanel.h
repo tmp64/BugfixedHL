@@ -35,7 +35,6 @@ public:
 	enum
 	{
 		AVATAR_OFFSET = 4,
-		AVATAR_WIDTH = 34,
 		AVATAR_OFF_WIDTH = 22,
 		NAME_WIDTH = 184,
 		STEAMID_WIDTH = 100,
@@ -171,6 +170,8 @@ private:
 	void UpdatePlayerAvatar(int playerIndex, KeyValues *kv);
 	void UpdateTeamScores();
 	void UpdateTeamScore(int i);
+	int GetLineSpacingForHeight(int h);
+	int GetAvatarSize();
 
 	// Menu
 	void CreatePlayerMenu();
