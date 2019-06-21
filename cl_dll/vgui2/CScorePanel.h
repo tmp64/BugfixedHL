@@ -150,6 +150,7 @@ private:
 	int m_iMargin = 100;
 	int m_iMinHeight = 320;
 	int m_iMutedIconIndex = 0;
+	int m_iSpectatorSection = -1;
 
 	vgui2::ImageList *m_pImageList;
 	CUtlMap<CSteamID, int> m_mapAvatarsToImageList;

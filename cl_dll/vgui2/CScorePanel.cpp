@@ -38,6 +38,7 @@
 #define STEAM_PROFILE_URL "http://steamcommunity.com/profiles/"
 #define PING "#PlayerPing"
 #define PING_LOSS "Ping/Loss"
+#define SPECTATOR_TEAM (MAX_TEAMS + 1)
 
 void IN_ResetMouse(void);
 
@@ -248,6 +249,7 @@ void CScorePanel::RecalcItems()
 	m_pPlayerList->DeleteAllItems();
 	m_pPlayerList->RemoveAllSections();
 	m_iPlayerCount = 0;
+	m_iSpectatorSection = -1;
 	memset(m_pTeamInfo, 0, sizeof(m_pTeamInfo));
 	memset(m_pClientItems, -1, sizeof(m_pClientItems));
 	memset(m_pClientTeams, 0, sizeof(m_pClientTeams));
@@ -258,6 +260,10 @@ void CScorePanel::RecalcItems()
 	int spectatorFrags = 0;
 	int spectatorDeaths = 0;
 	int totalPlayerCount = 0;
+
+	// If iEmptyTeamNum > 0 and iNonEmptyTeamNum > 0, then specatator team will be created.
+	// All players with empty g_PlayerExtraInfo[i].teamname will be put there
+	int iEmptyTeamNum = 0, iNonEmptyTeamNum = 0;
 
 	// Fill team info from player info
 	for (int i = 1; i <= MAX_PLAYERS; i++)
@@ -278,6 +284,11 @@ void CScorePanel::RecalcItems()
 		m_pTeamInfo[team].kills += g_PlayerExtraInfo[i].frags;
 		m_pTeamInfo[team].deaths += g_PlayerExtraInfo[i].deaths;
 		totalPlayerCount++;
+
+		if (g_PlayerExtraInfo[i].teamname[0] != '\0')
+			iNonEmptyTeamNum++;
+		else
+			iEmptyTeamNum++;
 	}
 
 	// Sort teams
@@ -336,6 +347,25 @@ void CScorePanel::RecalcItems()
 		m_pPlayerList->SetSectionFgColor(team, gHUD.GetTeamColor(team));
 		UpdateTeamScore(team);
 		DebugPrintf("CScorePanel::RecalItems Team '%s' is %d\n", m_pTeamInfo[team].name, team);
+	}
+
+	if (iEmptyTeamNum > 0 && iNonEmptyTeamNum > 0)
+	{
+		m_iSpectatorSection = SPECTATOR_TEAM;
+		m_pPlayerList->AddSection(m_iSpectatorSection, "", m_pPlayerSortFunction);
+		m_pPlayerList->AddColumnToSection(m_iSpectatorSection, "avatar", "", CPlayerListPanel::COLUMN_IMAGE, m_iAvatarWidth + m_iAvatarPaddingLeft + m_iAvatarPaddingRight);
+		m_pPlayerList->AddColumnToSection(m_iSpectatorSection, "name", "#Spectators", CPlayerListPanel::COLUMN_BRIGHT | CPlayerListPanel::COLUMN_COLORED, nameWidth);
+
+		if (gHUD.m_ScoreBoard->m_CvarShowSteamId->value)
+			m_pPlayerList->AddColumnToSection(m_iSpectatorSection, "steamid", "", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), STEAMID_WIDTH));
+
+		if (gHUD.m_ScoreBoard->m_CvarShowEff->value)
+			m_pPlayerList->AddColumnToSection(m_iSpectatorSection, "eff", "", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), DEATH_WIDTH));
+
+		m_pPlayerList->AddColumnToSection(m_iSpectatorSection, "frags", "", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), SCORE_WIDTH));
+		m_pPlayerList->AddColumnToSection(m_iSpectatorSection, "deaths", "", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), DEATH_WIDTH));
+		m_pPlayerList->AddColumnToSection(m_iSpectatorSection, "ping", "", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), PING_WIDTH));
+		m_pPlayerList->SetSectionFgColor(m_iSpectatorSection, gHUD.GetTeamColor(0));
 	}
 
 	// Add players to sections
@@ -402,10 +432,14 @@ void CScorePanel::UpdateClientInfo(int client, bool autoUpdate)
 	else playerData->SetInt("ping", g_PlayerInfoList[client].ping);
 	if (g_PlayerInfoList[client].thisplayer) playerData->SetInt("thisPlayer", 1);
 
+	int iSectionId = team;
+	if (m_iSpectatorSection != -1 && g_PlayerExtraInfo[client].teamname[0] == '\0')
+		iSectionId = SPECTATOR_TEAM;
+
 	if (m_pClientItems[client] == -1)
 	{
 		// Create new item
-		m_pClientItems[client] = m_pPlayerList->AddItem(team, playerData);
+		m_pClientItems[client] = m_pPlayerList->AddItem(iSectionId, playerData);
 		m_pPlayerList->SetItemFgColor(m_pClientItems[client], gHUD.GetTeamColor(team));
 		m_iPlayerCount++;
 		DebugPrintf("CScorePanel::UpdateClientInfo: client %d added\n", client);
@@ -413,7 +447,7 @@ void CScorePanel::UpdateClientInfo(int client, bool autoUpdate)
 	else
 	{
 		// Modify existing item
-		m_pPlayerList->ModifyItem(m_pClientItems[client], team, playerData);
+		m_pPlayerList->ModifyItem(m_pClientItems[client], iSectionId, playerData);
 		DebugPrintf("CScorePanel::UpdateClientInfo: client %d modified\n", client);
 	}
 	
