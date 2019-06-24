@@ -2,6 +2,7 @@
 #include <vgui_controls/Label.h>
 #include <vgui_controls/Button.h>
 #include <vgui_controls/CheckButton.h>
+#include <vgui/ILocalize.h>
 #include "CUpdateNotificationDialog.h"
 #include "GameUIPanelNames.h"
 #include "VGUI2Paths.h"
@@ -42,7 +43,11 @@ public:
 
 	virtual void Activate()
 	{
-		m_pChangelogText->SetText(gGameUpdater->GetChangeLog().c_str());
+		// SetText(const char *) uses a tiny buffer (1 KB) to convert UTF-8 to UTF-16
+		wchar_t *buf = new wchar_t[16 * 1024];	// 16 KB should probably be enough
+		vgui2::localize()->ConvertANSIToUnicode(gGameUpdater->GetChangeLog().c_str(), buf, 16 * 1024);
+		m_pChangelogText->SetText(buf);
+		delete[] buf;
 		BaseClass::Activate();
 	}
 
