@@ -561,9 +561,12 @@ private:
 /////////////////////////////////////////////////////////////////
 CGameUpdater::CGameUpdater()
 {
-	if (!m_GameVersion.TryParse(APP_VERSION))
+	const char *version;
+	if (!gEngfuncs.CheckParm("-veroverride", const_cast<char **>(&version)))
+		version = APP_VERSION;
+	if (!m_GameVersion.TryParse(version))
 	{
-		logf("Version is invalid: '%s'. Using '0.0.0+eeeeeee'.", APP_VERSION);
+		logf("Version is invalid: '%s'. Using '0.0.0+eeeeeee'.", version);
 		m_GameVersion.TryParse("0.0.0+eeeeeee");
 	}
 }
