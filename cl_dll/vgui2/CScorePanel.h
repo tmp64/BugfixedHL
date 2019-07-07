@@ -174,6 +174,15 @@ private:
 	int GetLineSpacingForHeight(int h);
 	int GetAvatarSize();
 
+	int GetLineSpacingForNormal();
+	int GetLineSpacingForCompact();
+
+	// Mode:
+	// - 0 -- compact if overflows
+	// - 1 -- always big
+	// - 2 -- always compact
+	int GetSizeMode();
+
 	// Menu
 	void CreatePlayerMenu();
 	void OpenPlayerMenu(int itemID);

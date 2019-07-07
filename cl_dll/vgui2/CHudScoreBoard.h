@@ -17,7 +17,9 @@ public:
 	cvar_t* m_CvarEffPercent = nullptr;
 	cvar_t* m_CvarShowSteamId = nullptr;
 	cvar_t* m_CvarShowEff = nullptr;
-	cvar_t *m_CvarSpacing = nullptr;
+	cvar_t *m_CvarSize = nullptr;
+	cvar_t *m_CvarSpacingNormal = nullptr;
+	cvar_t *m_CvarSpacingCompact = nullptr;
 
 	void Init();
 	void VidInit();

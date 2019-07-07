@@ -21,7 +21,9 @@ void CHudScoreBoard::Init()
 	m_CvarEffPercent = CVAR_CREATE("hud_scoreboard_effpercent", "0", FCVAR_ARCHIVE);
 	m_CvarShowSteamId = CVAR_CREATE("hud_scoreboard_showsteamid", "1", FCVAR_ARCHIVE);
 	m_CvarShowEff = CVAR_CREATE("hud_scoreboard_showeff", "1", FCVAR_ARCHIVE);
-	m_CvarSpacing = CVAR_CREATE("hud_scoreboard_spacing", "0", FCVAR_ARCHIVE);
+	m_CvarSize = CVAR_CREATE("hud_scoreboard_size", "0", FCVAR_ARCHIVE);
+	m_CvarSpacingNormal = CVAR_CREATE("hud_scoreboard_spacing_normal", "0", FCVAR_ARCHIVE);
+	m_CvarSpacingCompact = CVAR_CREATE("hud_scoreboard_spacing_compact", "0", FCVAR_ARCHIVE);
 	m_iFlags |= HUD_ACTIVE;
 	m_pScorePanel = dynamic_cast<CScorePanel *>(g_pViewport->FindPanelByName(VIEWPORT_PANEL_SCORE));
 	Assert(m_pScorePanel);

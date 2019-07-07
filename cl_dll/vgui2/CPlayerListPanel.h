@@ -150,6 +150,7 @@ public:
 
 	virtual void SetProportional(bool state);
 
+	int GetLineSpacing();
 	int GetLineSpacingOverride();
 	void SetLineSpacingOverride(int value);	// Set to 0 to restore default
 

@@ -1688,6 +1688,13 @@ int CPlayerListPanel::GetNewItemButton()
 	return itemID;
 }
 
+int CPlayerListPanel::GetLineSpacing()
+{
+	if (m_iLineSpacingOverride)
+		return m_iLineSpacingOverride;
+	return m_iLineSpacing;
+}
+
 int CPlayerListPanel::GetLineSpacingOverride()
 {
 	return m_iLineSpacingOverride;

@@ -186,10 +186,11 @@ void CScorePanel::FullUpdate()
 	DebugPrintf("CScoreBoard::FullUpdate: Full update called\n");
 
 	// Update line spacing
-	if (gHUD.m_ScoreBoard->m_CvarSpacing->value > 0)
-		m_pPlayerList->SetLineSpacingOverride(gHUD.m_ScoreBoard->m_CvarSpacing->value);
+	int iSizeMode = GetSizeMode();
+	if (iSizeMode == 0 || iSizeMode == 1)
+		m_pPlayerList->SetLineSpacingOverride(GetLineSpacingForNormal());
 	else
-		m_pPlayerList->SetLineSpacingOverride(GetLineSpacingForHeight(ScreenHeight));
+		m_pPlayerList->SetLineSpacingOverride(GetLineSpacingForCompact());
 
 	// Update avatar size
 	if (gHUD.m_ScoreBoard->m_CvarAvatars->value)
@@ -548,28 +549,60 @@ void CScorePanel::AddHeader()
 //--------------------------------------------------------------
 void CScorePanel::Resize()
 {
-	int wide, tall, x, y;
-	int height = 0, listHeight = 0, addHeight = 0;
-	m_pPlayerList->GetPos(x, y);
-	addHeight = y + vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), 4);	// Header + bottom padding // TODO: Get padding in runtime
-	height += addHeight;
-	m_pPlayerList->GetContentSize(wide, tall);
-	listHeight = max(m_iMinHeight, tall);
-	height += listHeight;
+	int mode = GetSizeMode();
 
-	if (ScreenHeight - height < m_iMargin * 2)
+	// Returns true if scrollbas was enabled
+	auto fnUpdateSize = [&](int &height)
 	{
-		// It didn't fit
-		height = ScreenHeight - m_iMargin * 2;
-		listHeight = height - addHeight;
-		m_pPlayerList->SetVerticalScrollbar(true);
-	}
-	else
+		int wide, tall, x, y;
+		int listHeight = 0, addHeight = 0;
+		bool bIsOverflowed = false;
+		height = 0;
+
+		m_pPlayerList->GetPos(x, y);
+		addHeight = y + vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), 4);	// Header + bottom padding // TODO: Get padding in runtime
+		height += addHeight;
+		m_pPlayerList->GetContentSize(wide, tall);
+		listHeight = max(m_iMinHeight, tall);
+		height += listHeight;
+
+		if (ScreenHeight - height < m_iMargin * 2)
+		{
+			// It didn't fit
+			height = ScreenHeight - m_iMargin * 2;
+			listHeight = height - addHeight;
+			m_pPlayerList->SetVerticalScrollbar(true);
+			bIsOverflowed = true;
+		}
+		else
+		{
+			m_pPlayerList->SetVerticalScrollbar(false);
+		}
+
+		m_pPlayerList->GetSize(wide, tall);
+		m_pPlayerList->SetSize(wide, listHeight);
+
+		return bIsOverflowed;
+	};
+	
+	int wide, tall, x, y;
+	int height;
+	if (fnUpdateSize(height) && mode == 0)
 	{
-		m_pPlayerList->SetVerticalScrollbar(false);
+		// Content overflowed, scrollbar is now visible. Set comapct line spacing
+		m_pPlayerList->SetLineSpacingOverride(GetLineSpacingForCompact());
+
+		// Refresh player info to update avatar sizes
+		for (int i = 1; i <= MAX_PLAYERS; i++)
+		{
+			UpdateClientInfo(i, false);
+		}
+		UpdatePlayerCount();
+
+		// Resie again
+		fnUpdateSize(height);
 	}
-	m_pPlayerList->GetSize(wide, tall);
-	m_pPlayerList->SetSize(wide, listHeight);
+
 	GetSize(wide, tall);
 	SetSize(wide, height);
 
@@ -697,9 +730,28 @@ int CScorePanel::GetLineSpacingForHeight(int h)
 
 int CScorePanel::GetAvatarSize()
 {
-	int avSize = m_pPlayerList->GetLineSpacingOverride() - 2;
+	int avSize = m_pPlayerList->GetLineSpacing() - 2;
 	avSize = clamp(avSize, 0, 32);
 	return avSize;
+}
+
+int CScorePanel::GetLineSpacingForNormal()
+{
+	if (gHUD.m_ScoreBoard->m_CvarSpacingNormal->value)
+		return gHUD.m_ScoreBoard->m_CvarSpacingNormal->value;
+	return 0;
+}
+
+int CScorePanel::GetLineSpacingForCompact()
+{
+	if (gHUD.m_ScoreBoard->m_CvarSpacingCompact->value)
+		return gHUD.m_ScoreBoard->m_CvarSpacingCompact->value;
+	return GetLineSpacingForHeight(ScreenHeight);
+}
+
+int CScorePanel::GetSizeMode()
+{
+	return clamp<int>(gHUD.m_ScoreBoard->m_CvarSize->value, 0, 2);
 }
 
 //--------------------------------------------------------------
