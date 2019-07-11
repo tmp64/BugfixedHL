@@ -75,7 +75,7 @@ public:
 	CGameVersion GetLatestVersion();
 
 private:
-	std::atomic<E_UpdateStatus>	m_iUpdateStatus	= NONE;
+	std::atomic<E_UpdateStatus>	m_iUpdateStatus	= { NONE };
 	E_UpdateModule	m_iUpdateModule;
 	CUpdateWorker  *m_pWorker = nullptr;
 	std::thread		m_WorkerThread;

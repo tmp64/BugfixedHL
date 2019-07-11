@@ -335,7 +335,7 @@ set( UPDATER_LIBS )
 if( USE_UPDATER )
 	find_package( CURL MODULE REQUIRED )
 	set( UPDATER_LIBS
-		CURL::libcurl
+		${CURL_LIBRARIES}
 	)
 endif()
 

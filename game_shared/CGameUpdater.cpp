@@ -308,7 +308,7 @@ private:
 	CGameUpdater *m_pUpdater;
 	std::queue<command_t> m_CmdQueue;
 	std::mutex m_CmdQueueMutex, m_StatusMutex, m_ChangelogMutex;
-	std::atomic_bool m_bIsThreadRunning = false, m_bStopThread = false;
+	std::atomic_bool m_bIsThreadRunning = { false }, m_bStopThread = { false };
 	std::string m_ChangeLog;
 	nlohmann::json m_jReleases;
 
