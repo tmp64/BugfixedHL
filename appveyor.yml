@@ -6,21 +6,16 @@ image:
 
 environment:
   matrix:
-    - CMAKE_BUILD_DIR: build_client
-      CMAKE_OPTIONS:
-      BUILD_TYPE: 0
-      
-    - CMAKE_BUILD_DIR: build_client_vgui2
-      CMAKE_OPTIONS: -DUSE_VGUI2=1
-      BUILD_TYPE: 1
-      
-    - CMAKE_BUILD_DIR: build_server
-      CMAKE_OPTIONS:
-      BUILD_TYPE: 2
-      
-    - CMAKE_BUILD_DIR: build_amxx
-      CMAKE_OPTIONS:
-      BUILD_TYPE: 3
+    - TARGET: Client
+    - TARGET: ClientVGUI2
+    - TARGET: Client4554
+    - TARGET: Server
+    - TARGET: Amxx
+
+matrix:
+  exclude:
+    - image: Ubuntu1804
+      TARGET: Client4554
 
 install:
   - sh: sudo dpkg --add-architecture i386
@@ -30,18 +25,8 @@ install:
   - cmd: git submodule update --init --recursive
 
 build_script:
-  - cmd: scripts/AppVeyor_WindowsBuild.bat
-  - sh: |
-      if [ "$BUILD_TYPE" -eq "0" ]; then
-        ./scripts/MakeClientRelease.sh
-      elif [ "$BUILD_TYPE" -eq "1" ]; then
-        ./scripts/MakeClientVGUI2Release.sh
-      elif [ "$BUILD_TYPE" -eq "2" ]; then
-        ./scripts/MakeServerRelease.sh
-      elif [ "$BUILD_TYPE" -eq "3" ]; then
-        ./scripts/MakeAmxxRelease.sh
-      fi
+  - ps: |
+			./scripts/BuildRelease.ps1 -Target $env:TARGET -MakeZip
 
 artifacts:
-  - path: BugfixedHL-*.zip
-  - path: BugfixedHL-*.tar.gz
+  - path: autobuild/BugfixedHL-*.zip
