@@ -1,4 +1,4 @@
-#!/bin/false FIXME
+#!/usr/bin/pwsh
 
 
 # BuildRelease.ps1 -Target [target] -Out [path] -MakeZip -CleanUp
@@ -145,10 +145,27 @@ if ($Updater)
     $CMAKE_UPDATER_FLAG = '-DUSE_UPDATER=1'
 }
 
-$CMAKE_ARGS = "-B `"${CMAKE_BUILD_DIR}`" -S `"${ROOT_DIR}`" -DAUTO_DEPLOY=0 ${CMAKE_UPDATER_FLAG} ${PLATFORM_ARGS} ${TARGET_FLAGS}";
+# CMake supports -B flag from 3.13, but CMake in Ubuntu 18.04 (latest
+# LTS at the moment of writing) is only 3.10
+# So we emulate it with *-Location
+# It will break if there are build files in repo's root
+
+Push-Location;
+Set-Location $CMAKE_BUILD_DIR;
+
+$CMAKE_ARGS = "-DAUTO_DEPLOY=0 ${CMAKE_UPDATER_FLAG} ${PLATFORM_ARGS} ${TARGET_FLAGS} `"${ROOT_DIR}`"";
 Write-Host "Running cmake ${CMAKE_ARGS}";
 $CMAKE_CMD = "& `"$CMAKE`" $CMAKE_ARGS";
 Invoke-Expression $CMAKE_CMD;
+
+if ($LastExitCode -ne 0)
+{
+    Pop-Location;
+    Write-Host "Failed to generate build files via CMake.";
+    exit 1;
+}
+
+Pop-Location;
 
 # Build
 Invoke-PlatformBuild -BuildDir $CMAKE_BUILD_DIR;
@@ -163,12 +180,14 @@ foreach ($i in Get-TargetGameFiles)
 {
     $from = "${ROOT_DIR}/" + $i[0];
     $to = "${OUT_GAME_DIR}/" + $i[1];
+
+    Write-Host "${from} -> ${to}"
+
     if ((Get-Item $from) -is [System.IO.FileInfo])
     {
         New-Item -ItemType File -Path $to -Force | Out-Null; # Workaround to create directory structure
     }
     Copy-Item $from -Destination $to -Recurse -Force | Out-Null;
-    Write-Host "${from} -> ${to}"
 }
 
 
