@@ -99,6 +99,13 @@ function Invoke-PlatformBuild
     $MSBUILD = Get-MSBuildPath;
     & $MSBUILD BugfixedHL.sln -nologo /t:${target} /p:PlatformTarget=x86 /p:Configuration=RelWithDebInfo
 
+    if ($LastExitCode -ne 0)
+    {
+        Pop-Location;
+        Write-Host "Build failed.";
+        exit 1;
+    }
+
     Pop-Location
 }
 
