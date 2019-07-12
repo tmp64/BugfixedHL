@@ -5,10 +5,3 @@ add_sources(
 	CGameVersion.cpp
 	ClientSupportsFlags.h
 )
-
-if( USE_UPDATER )
-	add_sources(
-		CGameUpdater.h
-		CGameUpdater.cpp
-	)
-endif()

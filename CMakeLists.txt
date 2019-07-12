@@ -240,6 +240,20 @@ add_subdirectory( bugfixedapi )
 get_sources( BUGFIXEDAPI_SRCS )
 clear_sources()
 
+# Find CURL for updater
+set( UPDATER_LIBS )
+set( UPDATER_INCLUDE_PATHS )
+if( USE_UPDATER )
+	find_package( CURL MODULE REQUIRED )
+	set( UPDATER_LIBS
+		${CURL_LIBRARIES}
+	)
+	set( UPDATER_INCLUDE_PATHS
+		${CURL_INCLUDE_DIRS}
+		game_shared/updater
+	)
+endif()
+
 #--------------------------------------------------------------------------------------------------------
 # Client library
 #--------------------------------------------------------------------------------------------------------
@@ -257,8 +271,10 @@ add_sources( "${SHARED_SRCS}" )
 #Add in the client directories
 add_subdirectory( game_shared/client )
 add_subdirectory( cl_dll )
-#add_subdirectory( source_sdk/common )
-#add_subdirectory( source_sdk/public )
+
+if( USE_UPDATER )
+	add_subdirectory( game_shared/updater )
+endif()
 
 preprocess_sources()
 
@@ -314,6 +330,7 @@ target_include_directories( client PRIVATE
 	${SHARED_INCLUDE_PATHS}
 	${SHARED_EXTERNAL_INCLUDE_PATHS}
 	${SOURCE_SDK_INCLUDE_PATHS}
+	${UPDATER_INCLUDE_PATHS}
 )
 
 target_compile_definitions( client PRIVATE
@@ -330,14 +347,6 @@ target_compile_definitions( client PRIVATE
 #Find client dependencies
 find_package( vgui MODULE REQUIRED )
 find_package( SDL2 MODULE REQUIRED )
-
-set( UPDATER_LIBS )
-if( USE_UPDATER )
-	find_package( CURL MODULE REQUIRED )
-	set( UPDATER_LIBS
-		${CURL_LIBRARIES}
-	)
-endif()
 
 if ( MSVC )
 	# DInput for direct mouse input
@@ -483,7 +492,6 @@ target_compile_definitions( hl PRIVATE
 	SERVER_DLL
 	VALVE_DLL
     CLIENT_WEAPONS
-	${USE_UPDATER_DEFINE}
 )
 
 #Set the list of platform specific libraries
@@ -498,7 +506,6 @@ target_link_libraries( hl
 	${SERVER_PLAT_LIBS}
 	${SHARED_DEPENDENCIES}
 	${UNIX_FS_LIB}
-	${UPDATER_LIBS}
 )
 
 set( SERVER_LINK_FLAGS )
@@ -615,7 +622,6 @@ target_link_libraries( bugfixedapi_amxx
 	${SERVER_PLAT_LIBS}
 	${SHARED_DEPENDENCIES}
 	${UNIX_FS_LIB}
-	${UPDATER_LIBS}
 )
 
 set( SERVER_LINK_FLAGS )
