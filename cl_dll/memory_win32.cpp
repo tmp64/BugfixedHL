@@ -14,6 +14,8 @@
 #include <process.h>
 #include <tlhelp32.h>
 #include <Winternl.h>
+#include <dbghelp.h>
+#include <time.h>
 
 #include "hud.h"
 #include "memory.h"
@@ -23,6 +25,8 @@
 #include "results.h"
 #include "parsemsg.h"
 #include "com_utils.h"
+#include "appversion.h"
+#include "svc_messages.h"
 
 using namespace Memory;
 
@@ -1586,6 +1590,171 @@ void SetAffinity(void)
 	}
 }
 
+//---------------------------------------------------------------
+// Vectored Exceptions Handler
+//---------------------------------------------------------------
+static PVOID hVehHandler = NULL;
+static bool g_bDllDetaching = false;
+
+static LONG NTAPI VectoredExceptionsHandler(PEXCEPTION_POINTERS pExceptionInfo)
+{
+	long exceptionCode = pExceptionInfo->ExceptionRecord->ExceptionCode;
+	long exceptionAddress = (long)pExceptionInfo->ExceptionRecord->ExceptionAddress;
+
+	if (exceptionCode == 0xE06D7363)	// SEH
+		return EXCEPTION_CONTINUE_SEARCH;
+
+	// We will handle all fatal unexpected exceptions, like STATUS_ACCESS_VIOLATION
+	// But skip DLL Not Found exception, which happen on old non-steam when steam is running
+	// Also skip while detach is in process, cos we can't write files (not sure about message boxes, but anyway...)
+	if ((exceptionCode & 0xF0000000L) == 0xC0000000L && exceptionCode != 0xC0000139 && !g_bDllDetaching)
+	{
+		char buffer[1024];
+		long moduleBase, moduleSize;
+
+		HANDLE hProcess = GetCurrentProcess();
+		MODULEINFO moduleInfo;
+
+		// Get modules info
+		HMODULE hMods[1024];
+		DWORD cbNeeded;
+		EnumProcessModules(hProcess, hMods, sizeof(hMods), &cbNeeded);
+		int count = cbNeeded / sizeof(HMODULE);
+
+		// Write exception info to log
+		FILE *file = fopen("crash.log", "a");
+		if (file)
+		{
+			fputs("------------------------------------------------------------\n", file);
+			sprintf(buffer, "Exception 0x%08X at address 0x%08X.\n", exceptionCode, exceptionAddress);
+			fputs(buffer, file);
+
+			// Write some usefull info
+			time_t rawtime;
+			struct tm *timeinfo;
+			time(&rawtime);
+
+			timeinfo = localtime(&rawtime);
+			strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S (%Z)", timeinfo);
+			fprintf(file, "Local time: %s\n", buffer);
+
+			timeinfo = gmtime(&rawtime);
+			strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", timeinfo);
+			fprintf(file, "UTC time: %s\n", buffer);
+
+			fputs("Game version: " APP_VERSION "\n", file);
+#ifdef USE_VGUI2
+			fputs("VGUI2 support enabled\n", file);
+#endif
+
+			// Dump modules info
+			fputs("Modules:\n", file);
+			fputs("  Base     Size     Path (Exception Offset)\n", file);
+			for (int i = 0; i < count; i++)
+			{
+				GetModuleInformation(hProcess, hMods[i], &moduleInfo, sizeof(moduleInfo));
+				moduleBase = (long)moduleInfo.lpBaseOfDll;
+				moduleSize = (long)moduleInfo.SizeOfImage;
+				// Get the full path to the module's file.
+				TCHAR szModName[MAX_PATH];
+				if (GetModuleFileNameEx(hProcess, hMods[i], szModName, sizeof(szModName) / sizeof(TCHAR)))
+				{
+					if (moduleBase <= exceptionAddress && exceptionAddress <= (moduleBase + moduleSize))
+						sprintf(buffer, "=>%08X %08X %s  <==  %08X\n", moduleBase, moduleSize, szModName, exceptionAddress - moduleBase);
+					else
+						sprintf(buffer, "  %08X %08X %s\n", moduleBase, moduleSize, szModName);
+				}
+				else
+				{
+					if (moduleBase <= exceptionAddress && exceptionAddress <= (moduleBase + moduleSize))
+						sprintf(buffer, "=>%08X %08X  <==  %08X\n", moduleBase, moduleSize, exceptionAddress - moduleBase);
+					else
+						sprintf(buffer, "  %08X %08X\n", moduleBase, moduleSize);
+				}
+				fputs(buffer, file);
+			}
+
+			fclose(file);
+		}
+
+		// Create mini-dump
+		HANDLE hMiniDumpFile = CreateFile("crash.dmp", GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_WRITE_THROUGH, NULL);
+		if (hMiniDumpFile != INVALID_HANDLE_VALUE)
+		{
+			MINIDUMP_EXCEPTION_INFORMATION eInfo;
+			eInfo.ThreadId = GetCurrentThreadId();
+			eInfo.ExceptionPointers = pExceptionInfo;
+			eInfo.ClientPointers = FALSE;
+			MiniDumpWriteDump(hProcess, GetCurrentProcessId(), hMiniDumpFile, MiniDumpNormal, &eInfo, NULL, NULL);
+			CloseHandle(hMiniDumpFile);
+		}
+
+		// Display a message
+		HMODULE hModuleDll = GetModuleHandle("client.dll");
+		GetModuleInformation(hProcess, hModuleDll, &moduleInfo, sizeof(moduleInfo));
+		moduleBase = (long)moduleInfo.lpBaseOfDll;
+		moduleSize = (long)moduleInfo.SizeOfImage;
+		if (moduleBase <= exceptionAddress && exceptionAddress <= (moduleBase + moduleSize))
+		{
+			sprintf(buffer, "Exception in client.dll at offset 0x%08X.", exceptionAddress - moduleBase);
+		}
+		else
+		{
+			sprintf(buffer, "Exception in the game.");
+		}
+
+		snprintf(buffer, sizeof(buffer),
+			"%s\n\n"
+			"Game version: " APP_VERSION "\n"
+#ifdef USE_VGUI2
+			"VGUI2 support enabled.\n"
+#endif
+			"\n"
+			"Crash dump and log files were created in game directory.\n"
+			"Please report them to https://github.com/tmp64/BugfixedHL/issues\n"
+			"or http://aghl.ru/forum.",
+			buffer
+		);
+
+		MessageBox(GetActiveWindow(), buffer, "Error!", MB_OK | MB_ICONEXCLAMATION | MB_SETFOREGROUND | MB_TOPMOST);
+
+		// Application will die anyway, so futher exceptions are not interesting to us
+		RemoveVectoredExceptionHandler(hVehHandler);
+	}
+
+	return EXCEPTION_CONTINUE_SEARCH;
+}
+
+// DLL entry point
+BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
+{
+	if (fdwReason == DLL_PROCESS_ATTACH)
+	{
+		if (hVehHandler == NULL)
+			hVehHandler = AddVectoredExceptionHandler(1, VectoredExceptionsHandler);
+		PatchEngine();
+		::HookSvcMessages();
+	}
+	else if (fdwReason == DLL_PROCESS_DETACH)
+	{
+		g_bDllDetaching = true;
+
+		UnHookSvcMessages();
+		UnPatchEngine();
+		StopServerBrowserThreads();
+
+		if (hVehHandler != NULL)
+		{
+			RemoveVectoredExceptionHandler(hVehHandler);
+			hVehHandler = NULL;
+		}
+	}
+	return TRUE;
+}
+
+//---------------------------------------------------------------
+// memory.h
+//---------------------------------------------------------------
 // Output patch status and sets refresh rate
 void Memory::OnFrame(void)
 {
@@ -1609,18 +1778,6 @@ void Memory::OnFrame(void)
 	g_bPatchStatusPrinted = true;
 
 	SetRefreshRate();
-}
-
-// Patch and hook the engine
-void Memory::OnLibraryInit()
-{
-	PatchEngine();
-}
-
-void Memory::OnLibraryDeinit()
-{
-	UnPatchEngine();
-	StopServerBrowserThreads();
 }
 
 // Called in HUD_Init

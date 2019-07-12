@@ -116,8 +116,6 @@ namespace Memory
 	size_t MemoryFindBackward(size_t start, size_t end, const char *pattern, const char *mask);
 
 	// Platform
-	void OnLibraryInit();
-	void OnLibraryDeinit();
 	void OnHudInit();
 	void OnFrame();
 	void HookSvcMessages(cl_enginemessages_t *pEngineMessages);

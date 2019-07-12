@@ -457,14 +457,6 @@ void Memory::PatchGameUI()
 //-----------------------------------------------------------------------------------------------------------
 // Memory init
 //-----------------------------------------------------------------------------------------------------------
-void Memory::OnLibraryInit()
-{
-}
-
-void Memory::OnLibraryDeinit()
-{
-}
-
 void Memory::OnHudInit()
 {
 	if (gEngfuncs.CheckParm("-nomempatch", nullptr) != 0)
