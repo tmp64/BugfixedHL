@@ -111,6 +111,37 @@ int		_DLLEXPORT HUD_GetStudioModelInterface(int version, struct r_studio_interfa
 void	_DLLEXPORT ChatInputPosition(int *x, int *y);
 }
 
+//--------------------------------------------------------
+// Console hook
+// Hooks Con_Printf and pfnConsolePrint and redirects them
+// to Con_DPrintf during game inititalization.
+//--------------------------------------------------------
+typedef void (*Con_PrintfFn) (char *fmt, ...);
+typedef void (*ConsolePrintFn) (const char *string);
+
+static Con_PrintfFn g_fnEngineConPrintf = nullptr;
+static ConsolePrintFn g_fnEngineConsolePrint = nullptr;
+
+static void HookConsoleFunctions()
+{
+	assert(!g_fnEngineConPrintf && !g_fnEngineConsolePrint);
+	g_fnEngineConPrintf = gEngfuncs.Con_Printf;
+	g_fnEngineConsolePrint = gEngfuncs.pfnConsolePrint;
+
+	gEngfuncs.Con_Printf = gEngfuncs.Con_DPrintf;	// Declarations are identical
+	gEngfuncs.pfnConsolePrint = [](const char *string)
+	{
+		gEngfuncs.Con_DPrintf("%s", string);
+	};
+}
+
+static void UnhookConsoleFunctions()
+{
+	assert(g_fnEngineConPrintf && g_fnEngineConsolePrint);
+	gEngfuncs.Con_Printf = g_fnEngineConPrintf;
+	gEngfuncs.pfnConsolePrint = g_fnEngineConsolePrint;
+}
+
 /*
 ================================
 HUD_GetHullBounds
@@ -192,6 +223,8 @@ int _DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 
 	g_iIsAg = HUD_IsGame("ag");
 
+	HookConsoleFunctions();
+
 	return 1;
 }
 
@@ -253,6 +286,8 @@ void _DLLEXPORT HUD_Init( void )
 		ConPrintf(RGBA(249, 54, 54), "HUD_Init: C++ exception thrown.\n");
 		ConPrintf(RGBA(249, 54, 54), "HUD_Init: %s.\n", e.what());
 	}
+
+	UnhookConsoleFunctions();
 }
 
 
