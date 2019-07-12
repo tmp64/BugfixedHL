@@ -23,6 +23,10 @@
 
 #include "CClientVGUI.h"
 #include "IEngineVgui.h"
+#include "CHudBase.h"
+#include "cl_util.h"
+
+static SpewOutputFunc_t g_fnDefaultSpewFunc = nullptr;
 
 namespace
 {
@@ -82,6 +86,17 @@ void CClientVGUI::Initialize( CreateInterfaceFn* pFactories, int iNumFactories )
 	{
 		m_FactoryList[ uiIndex + 1 ] = pFactories[ uiIndex ];
 	}
+
+	// Redirect spew to game console
+	g_fnDefaultSpewFunc = GetSpewOutputFunc();
+	SpewOutputFunc([](SpewType_t spewType, tchar const *pMsg) -> SpewRetval_t
+	{
+		if (spewType == SPEW_ERROR)
+			ConPrintf(RGBA(247, 83, 74), "%s", pMsg);	// Print in red
+		else
+			ConPrintf("%s", pMsg);
+		return SPEW_CONTINUE;
+	});
 
 	if( !vgui2::VGui_InitInterfacesList( "CLIENT", m_FactoryList, NUM_FACTORIES ) )
 	{
@@ -179,4 +194,5 @@ void CClientVGUI::Shutdown()
 #if USE_VGUI2
 	g_pViewport->Shutdown();
 #endif
+	SpewOutputFunc(g_fnDefaultSpewFunc);
 }
