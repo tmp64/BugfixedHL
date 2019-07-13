@@ -7,6 +7,7 @@
 Param (
     [string]$Target = "Help",
     [string]$Out = "__UNSPECIFIED",
+    [string]$CMakeArgs = "",
     [switch]$MakeZip = $false,
     [switch]$Updater = $false,
     [switch]$CleanUp = $false
@@ -28,6 +29,7 @@ if ($Target -eq "Help")
     Write-Host "BuildRelease.ps1 -Target [target] -Out [path] -MakeZip -CleanUp";
     Write-Host "`t-Target`t`ttarget that needs to be built:`n`t`t`t`t`tHelp, Client, ClientVGUI2, Client4554, Server, Amxx";
     Write-Host "`t-Out`t`tdirectory in which build and game files will be located.`n`t`t`t`t`tDefault: <repo>/autobuild/<version>-<target>";
+    Write-Host "`t-CMakeArgs`targuments to be passed to CMake";
     Write-Host "`t-MakeZip`twill make a ZIP file with binaries and game files (ready to be unpacked to 'Half-Life/valve')";
     Write-Host "`t-Updater`tenable update checker";
     Write-Host "`t-CleanUp`twill remove build files when build is finished successfully";
@@ -153,7 +155,7 @@ if ($Updater)
 Push-Location;
 Set-Location $CMAKE_BUILD_DIR;
 
-$CMAKE_ARGS = "-DAUTO_DEPLOY=0 ${CMAKE_UPDATER_FLAG} ${PLATFORM_ARGS} ${TARGET_FLAGS} `"${ROOT_DIR}`"";
+$CMAKE_ARGS = "-DAUTO_DEPLOY=0 ${CMAKE_UPDATER_FLAG} ${PLATFORM_ARGS} ${TARGET_FLAGS} ${CMakeArgs} `"${ROOT_DIR}`"";
 Write-Host "Running cmake ${CMAKE_ARGS}";
 $CMAKE_CMD = "& `"$CMAKE`" $CMAKE_ARGS";
 Invoke-Expression $CMAKE_CMD;
