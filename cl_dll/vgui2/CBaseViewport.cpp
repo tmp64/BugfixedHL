@@ -22,6 +22,7 @@
 #include "CBaseViewport.h"
 
 CBaseViewport* g_pViewport = nullptr;
+bool g_bIsCreatingGameUIPanel = false;	// Used in vgui2::Panel::Panel()
 
 CBaseViewport::CBaseViewport()
 	: BaseClass( nullptr, "CBaseViewport" )
@@ -488,4 +489,9 @@ IGameUIPanel *CBaseViewport::FindGameUIPanelByName(const char *pszName)
 	}
 
 	return nullptr;
+}
+
+void CBaseViewport::SetIsCreatingGameUIPanel(bool state)
+{
+	g_bIsCreatingGameUIPanel = state;
 }

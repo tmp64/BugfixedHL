@@ -720,6 +720,8 @@ private:
 	static int m_siCorner1, m_siCorner2, m_siCorner3, m_siCorner4;
 	static bool m_sbAreCornersLoaded;
 	void LoadCorners();
+
+	bool m_bIsGameUIPanel = false;
 };
 #pragma pack()
 

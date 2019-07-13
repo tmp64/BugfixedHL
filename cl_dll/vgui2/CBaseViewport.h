@@ -114,6 +114,7 @@ public:
 	virtual IGameUIPanel* CreateGameUIPanelByName(const char* pszName);
 	bool AddNewGameUIPanel(IGameUIPanel* pPanel);
 	IGameUIPanel* FindGameUIPanelByName(const char* pszName);
+	void SetIsCreatingGameUIPanel(bool state);
 
 private:
 	int m_OldSize[ 2 ] = { -1, -1 };

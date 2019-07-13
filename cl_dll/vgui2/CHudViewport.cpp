@@ -49,11 +49,15 @@ void CHudViewport::CreateDefaultPanels()
 	AddNewPanel( CreatePanelByName( VIEWPORT_PANEL_MOTD ) );
 	AddNewPanel( CreatePanelByName( VIEWPORT_PANEL_SCORE ) );
 
+	SetIsCreatingGameUIPanel(true);
+
 	AddNewGameUIPanel(CreateGameUIPanelByName(GAMEUI_PANEL_TEST));
 #ifdef USE_UPDATER
 	AddNewGameUIPanel(CreateGameUIPanelByName(GAMEUI_UPDATER_DEBUG));
 	AddNewGameUIPanel(CreateGameUIPanelByName(GAMEUI_UPDATE_NOTIF));
 #endif
+
+	SetIsCreatingGameUIPanel(false);
 }
 
 IViewportPanel* CHudViewport::CreatePanelByName( const char* pszName )
