@@ -680,12 +680,11 @@ void Panel::Init( int x, int y, int wide, int tall )
 	_tabPosition = 0;
 	m_iScheme = 0;
 
-	// Set default scheme
-	if (g_bIsCreatingGameUIPanel)
-		m_iScheme = vgui2::scheme()->LoadSchemeFromFile(UI_GAMEUISCHEME_FILENAME, "SourceScheme");
-	else
-		m_iScheme = vgui2::scheme()->LoadSchemeFromFile(UI_CLIENTSCHEME_FILENAME, "GameScheme");
 	m_bIsGameUIPanel = g_bIsCreatingGameUIPanel;
+
+	// Set default scheme for GameUI panels
+	if (m_bIsGameUIPanel)
+		m_iScheme = vgui2::scheme()->LoadSchemeFromFile(UI_GAMEUISCHEME_FILENAME, "SourceScheme");
 
 	_buildModeFlags = 0; // not editable or deletable in buildmode dialog by default
 
