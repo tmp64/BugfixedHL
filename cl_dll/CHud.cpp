@@ -474,8 +474,8 @@ void __CmdFunc_Updater_PrintChangelog()
 	// Con_Printf has an internal limit of 4095 characters.
 	// Changelog may be longer than that so we split it up in chunks of 512 chars.
 	gEngfuncs.Con_Printf("Update changelog:\n");
-	int constexpr LOG_CHUNK_SIZE = 512;
-	for (int i = 0; LOG_CHUNK_SIZE * i <= changelog.length(); i++)
+	size_t constexpr LOG_CHUNK_SIZE = 512;
+	for (size_t i = 0; LOG_CHUNK_SIZE * i <= changelog.length(); i++)
 	{
 		std::string substr = changelog.substr(LOG_CHUNK_SIZE * i, LOG_CHUNK_SIZE);
 		gEngfuncs.Con_Printf("%s", substr.c_str());
