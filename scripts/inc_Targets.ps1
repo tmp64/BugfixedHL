@@ -27,7 +27,7 @@ if ($target -eq 'Client')
 }
 elseif ($target -eq 'ClientVGUI2')
 {
-    $TARGET_CMAKE_FLAGS = '-DUSE_VGUI2=1 -DVGUI2_BUILD_4554=1';
+    $TARGET_CMAKE_FLAGS = '-DUSE_VGUI2=1';
     $TARGET_BUILD = 'client';
     $TARGET_BINARY_DIR = 'cl_dlls';
 
@@ -38,7 +38,7 @@ elseif ($target -eq 'ClientVGUI2')
 }
 elseif ($target -eq 'Client4554')
 {
-    $TARGET_CMAKE_FLAGS = '-DUSE_VGUI2=1';
+    $TARGET_CMAKE_FLAGS = '-DUSE_VGUI2=1 -DVGUI2_BUILD_4554=1';
     $TARGET_BUILD = 'client';
     $TARGET_BINARY_DIR = 'cl_dlls';
 
