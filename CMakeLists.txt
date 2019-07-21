@@ -63,12 +63,6 @@ option( AUTO_DEPLOY "Whether to automatically deploy to deploy paths" 1 )
 
 # Updater option
 option( USE_UPDATER "Enable autoupdater module" 0 )
-ternary( USE_UPDATER_DEFINE USE_UPDATER 1 0 )
-if( USE_UPDATER )
-	set( USE_UPDATER_DEFINE "USE_UPDATER=${USE_UPDATER_DEFINE}" )
-else()
-	set( USE_UPDATER_DEFINE "" )
-endif()
 
 #Shared preprocessor definitions
 set( SHARED_DEFS 
@@ -243,7 +237,10 @@ clear_sources()
 # Find CURL for updater
 set( UPDATER_LIBS )
 set( UPDATER_INCLUDE_PATHS )
+set( UPDATER_DEFINES )
 if( USE_UPDATER )
+	option( CURL_STATICLIB "Enable if cURL was built as a static library" 0 )
+
 	find_package( CURL MODULE REQUIRED )
 	set( UPDATER_LIBS
 		${CURL_LIBRARIES}
@@ -252,6 +249,24 @@ if( USE_UPDATER )
 		${CURL_INCLUDE_DIRS}
 		game_shared/updater
 	)
+	
+	set( UPDATER_DEFINES
+		USE_UPDATER=1
+	)
+	
+	if( CURL_STATICLIB )
+		set( UPDATER_DEFINES
+			${UPDATER_DEFINES}
+			CURL_STATICLIB=1
+		)
+		if( WIN32 )
+			set( UPDATER_LIBS
+				${UPDATER_LIBS}
+				wldap32.lib
+			)
+		endif()
+	endif()
+	
 endif()
 
 #--------------------------------------------------------------------------------------------------------
@@ -341,7 +356,7 @@ target_compile_definitions( client PRIVATE
 	HAVE_CONFIG_H
 	${SOURCE_SDK_DEFINES}
 	LODEPNG_NO_COMPILE_CPP
-	${USE_UPDATER_DEFINE}
+	${UPDATER_DEFINES}
 )
 
 #Find client dependencies
