@@ -14,6 +14,7 @@
 #include <vgui/ILocalize.h>
 #include <vgui/ISurface.h>
 #include <vgui/IInputInternal.h>
+#include <vgui/ISystem.h>
 #include <KeyValues.h>
 #include "IEngineVgui.h"
 #include "vgui/IInput.h"
@@ -261,7 +262,7 @@ void CBaseHudChatLine::ApplySchemeSettings(vgui2::IScheme *pScheme)
 void CBaseHudChatLine::PerformFadeout( void )
 {
 	// Flash + Extra bright when new
-	float curtime = gHUD.m_flTime;
+	float curtime = vgui2::system()->GetCurrentTime();
 
 	int lr = m_clrText[0];
 	int lg = m_clrText[1];
@@ -334,7 +335,7 @@ void CBaseHudChatLine::PerformFadeout( void )
 //-----------------------------------------------------------------------------
 void CBaseHudChatLine::SetExpireTime( void )
 {
-	m_flStartTime = gHUD.m_flTime;
+	m_flStartTime = vgui2::system()->GetCurrentTime();
 	m_flExpireTime = m_flStartTime + hud_saytext_time->value;
 	m_nCount = CBaseHudChat::m_nLineCounter++;
 }
@@ -353,7 +354,7 @@ int CBaseHudChatLine::GetCount( void )
 //-----------------------------------------------------------------------------
 bool CBaseHudChatLine::IsReadyToExpire( void )
 {
-	if ( gHUD.m_flTime >= m_flExpireTime )
+	if ( vgui2::system()->GetCurrentTime() >= m_flExpireTime )
 		return true;
 	return false;
 }
@@ -1122,7 +1123,7 @@ void CBaseHudChat::StartMessageMode( int iMessageModeType )
 	GetChatHistory()->GetBounds( x, y, w, h );
 	vgui2::input()->SetCursorPos( x + ( w/2), y + (h/2) );
 
-	m_flHistoryFadeTime = gHUD.m_flTime + CHAT_HISTORY_FADE_TIME;
+	m_flHistoryFadeTime = vgui2::system()->GetCurrentTime() + CHAT_HISTORY_FADE_TIME;
 
 	m_pFilterPanel->SetVisible( false );
 		
@@ -1157,7 +1158,7 @@ void CBaseHudChat::StopMessageMode( void )
 	//hide filter panel
 	m_pFilterPanel->SetVisible( false );
 
-	m_flHistoryFadeTime = gHUD.m_flTime + CHAT_HISTORY_FADE_TIME;
+	m_flHistoryFadeTime = vgui2::system()->GetCurrentTime() + CHAT_HISTORY_FADE_TIME;
 
 	m_nMessageMode = MM_NONE;
 #endif
@@ -1181,7 +1182,7 @@ void CBaseHudChat::OnChatEntryStopMessageMode( void )
 
 void CBaseHudChat::FadeChatHistory( void )
 {
-	float frac = ( m_flHistoryFadeTime -  gHUD.m_flTime ) / CHAT_HISTORY_FADE_TIME;
+	float frac = ( m_flHistoryFadeTime - vgui2::system()->GetCurrentTime() ) / CHAT_HISTORY_FADE_TIME;
 
 	int alpha = frac * CHAT_HISTORY_ALPHA;
 	alpha = clamp( alpha, 0, CHAT_HISTORY_ALPHA );
