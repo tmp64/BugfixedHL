@@ -521,6 +521,7 @@ target_link_libraries( hl
 	${SERVER_PLAT_LIBS}
 	${SHARED_DEPENDENCIES}
 	${UNIX_FS_LIB}
+	Threads::Threads
 )
 
 set( SERVER_LINK_FLAGS )
