@@ -52,7 +52,6 @@ elseif ($target -eq 'Server')
     $TARGET_CMAKE_FLAGS = '';
     $TARGET_BUILD = 'hl';
     $TARGET_BINARY_DIR = 'dlls';
-    $TARGET_NEED_LIB_SUFFIX = $true;
 
     $TARGET_GAME_FILES += $TARGET_COMMON_FILES;
 }
