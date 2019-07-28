@@ -566,8 +566,8 @@ CGameUpdater::CGameUpdater()
 		version = APP_VERSION;
 	if (!m_GameVersion.TryParse(version))
 	{
-		logf("Version is invalid: '%s'. Using '0.0.0+eeeeeee'.", version);
-		m_GameVersion.TryParse("0.0.0+eeeeeee");
+		logf("Version is invalid: '%s'. Using '0.0.0-invalid+eeeeeee'.", version);
+		m_GameVersion.TryParse("0.0.0-invalid+eeeeeee");
 	}
 }
 

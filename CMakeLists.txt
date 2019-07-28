@@ -1,13 +1,14 @@
-###################################################
-#                                                 #
-#	Bugfixed and Improved HL CMake build file     #
-#                                                 #
-#   Based on Half-Life Enhanced CMake build file  #
-#                                                 #
-###################################################
+#
+# Bugfixed and Improved Half-Life Release
+#
+
 cmake_minimum_required( VERSION 3.5.2 )
 
 # Source additional modules from the "cmake" directory
+
+#-----------------------------------------------------------------
+# CMake modules
+#-----------------------------------------------------------------
 list( APPEND CMAKE_MODULE_PATH
 	"${CMAKE_CURRENT_LIST_DIR}/cmake"
 )
@@ -17,67 +18,136 @@ include( MSVCRuntime )
 include( WinXPSupport )
 include( Ternary )
 
-project( BugfixedHL )
+#-----------------------------------------------------------------
+# Version
+#-----------------------------------------------------------------
+set( BHL_REPO_VERSION_MAJOR 1 )
+set( BHL_REPO_VERSION_MINOR 4 )
+set( BHL_REPO_VERSION_PATCH 0 )
+set( BHL_REPO_VERSION_TAG "dev" )
 
-#C++14 support
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+if( NOT BHL_VERSION_MAJOR )
+	set( BHL_VERSION_MAJOR ${BHL_REPO_VERSION_MAJOR} )
+endif()
+if( NOT BHL_VERSION_MINOR )
+	set( BHL_VERSION_MINOR ${BHL_REPO_VERSION_MINOR} )
+endif()
+if( NOT BHL_VERSION_PATCH )
+	set( BHL_VERSION_PATCH ${BHL_REPO_VERSION_PATCH} )
+endif()
+if( NOT BHL_VERSION_TAG )
+	set( BHL_VERSION_TAG ${BHL_REPO_VERSION_TAG} )
+endif()
 
-set( SHARED_GAME_LINKER_FLAGS
-)
+unset( BHL_REPO_VERSION_MAJOR )
+unset( BHL_REPO_VERSION_MINOR )
+unset( BHL_REPO_VERSION_PATCH )
+unset( BHL_REPO_VERSION_TAG )
+# Use BHL_VERSION_XXX from now on
+# BHL_VERSION_METADATA as well (if set externally)
+
+project( BugfixedHL VERSION "${BHL_VERSION_MAJOR}.${BHL_VERSION_MINOR}.${BHL_VERSION_PATCH}" )
+
+#-----------------------------------------------------------------
+# Compiler checks
+#-----------------------------------------------------------------
+if( CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU" )
+	if( WIN32 )
+		message( WARNING "You are building with GCC or CLang on Windows. This is not supported." )
+	endif()
+elseif( CMAKE_CXX_COMPILER_ID MATCHES "MSVC" )
+
+else()
+	message( WARNING "Unknown compiler deteceted: ${CMAKE_CXX_COMPILER_ID}. This is not supported." )
+endif()
+
+if( NOT CMAKE_SIZEOF_VOID_P EQUAL 4 )
+	if( NO_SIZEOF_VOID_P_CHECK )
+		message( WARNING "You are not building for 32 bit systems. This is not supported." )
+	else()
+		set( PLAT_ERROR "" )
+		if( CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU" )
+			set( PLAT_ERROR "Did you forget CMAKE_TOOLCHAIN_FILE?" )
+		elseif( CMAKE_CXX_COMPILER_ID MATCHES "MSVC" )
+			set( PLAT_ERROR "Are you generating for Win64?" )
+		else()
+			set( PLAT_ERROR "Check your compiler options." )
+		endif()
+		message( FATAL_ERROR "You are not building for 32 bit systems. ${PLAT_ERROR} Use NO_SIZEOF_VOID_P_CHECK to disable this error." )
+	endif()
+endif()
+
+#-----------------------------------------------------------------
+# Compiler settings
+#-----------------------------------------------------------------
+# C++14 support
+set( CMAKE_CXX_STANDARD 14 )
+set( CMAKE_CXX_STANDARD_REQUIRED ON )
+set( CMAKE_CXX_EXTENSIONS OFF )
+
+set( C_CXX_COMPILER_FLAGS "" )			# Flags for C and C++ compilers
+set( SHARED_GAME_LINKER_FLAGS "" )		# Flags for Game DLL linker
 
 if( CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU" )
-	# Always build as 32 bit
-	# Additional debug info for GDB.
-	set( SHARED_COMPILER_FLAGS "${SHARED_COMPILER_FLAGS} -m32 -g" )
 	
-	option( GCC_NO_OPTIMIZE "GCC: Disable optimizations (-O0)" )
-	if( GCC_NO_OPTIMIZE )
-		set( SHARED_COMPILER_FLAGS "${SHARED_COMPILER_FLAGS} -O0" )
+	#-----------------------------------------------------------------
+	# Linker options
+	#-----------------------------------------------------------------
+	# From the Github 2013 Makefile, match the settings for Unix environments.
+	# - Force 387 for FP math so the precision between win32 and linux and osx match
+	# - Trigger an error if any code tries to use an implicit return type
+	# - Default visibility is hidden unless explicitly altered with __attribute__( visibility() )
+	set( SHARED_GAME_LINKER_FLAGS "${SHARED_GAME_LINKER_FLAGS} -mfpmath=387 -Werror=return-type -fvisibility=hidden" )
+
+	if( APPLE )
+		set( SHARED_GAME_LINKER_FLAGS "${SHARED_GAME_LINKER_FLAGS} -momit-leaf-frame-pointer -mtune=core2" )
+	else()
+		#Linux, Cygwin, etc.
 	endif()
 	
+	#-----------------------------------------------------------------
+	# Additional compiler options
+	#-----------------------------------------------------------------
+	# Undefined behavior sanitizer
 	option( GCC_CHECK_FOR_UB "GCC: Enable run-time checks for undefined behavior" )
 	if( GCC_CHECK_FOR_UB )
-		set( SHARED_COMPILER_FLAGS       "${SHARED_COMPILER_FLAGS} -fsanitize=address,undefined -fstack-protector" )
+		set( C_CXX_COMPILER_FLAGS       "${C_CXX_COMPILER_FLAGS} -fsanitize=address,undefined -fstack-protector" )
 		set( SHARED_GAME_LINKER_FLAGS "${SHARED_GAME_LINKER_FLAGS} -fsanitize=address,undefined -fstack-protector" )
 	endif()
+	
+	# Link-Time Optimizations
+	option( GCC_USE_LTO "GCC: Enable Link-Time Optimizations (LTO)" )
+	if( GCC_USE_LTO )
+		set( C_CXX_COMPILER_FLAGS       "${C_CXX_COMPILER_FLAGS} -flto" )
+		set( SHARED_GAME_LINKER_FLAGS "${SHARED_GAME_LINKER_FLAGS} -flto" )
+	endif()
+	
+	# Static link with libstdc++
+	option( GCC_STATIC_LIBCPP "GCC: Link statically with libstdc++" )
+	if( GCC_STATIC_LIBCPP )
+		set( SHARED_GAME_LINKER_FLAGS "${SHARED_GAME_LINKER_FLAGS} -static-libstdc++" )
+	endif()
+	
+elseif( CMAKE_CXX_COMPILER_ID MATCHES "MSVC" )
+
+	# Set Windows subsystem
+	set( SHARED_GAME_LINKER_FLAGS "${SHARED_GAME_LINKER_FLAGS} /SUBSYSTEM:WINDOWS " )
+	
 endif()
 
-if( MSVC )
-	# Enable exception support
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")
-endif()
+set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${C_CXX_COMPILER_FLAGS}" )
+set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${C_CXX_COMPILER_FLAGS}" )
 
-set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SHARED_COMPILER_FLAGS}" )
-set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${SHARED_COMPILER_FLAGS}" )
+unset( C_CXX_COMPILER_FLAGS )
 
-unset( SHARED_COMPILER_FLAGS )
+#-----------------------------------------------------------------
+# Compiler-specific definitions
+#-----------------------------------------------------------------
+set( SHARED_DEFS "" )		# Defines used to build all targets
 
-# VGUI2 option
-option( USE_VGUI2 "Whether to include VGUI2 features" )
-ternary( USE_VGUI2_DEFINE USE_VGUI2 1 0 )
-
-# Autodeploy option
-option( AUTO_DEPLOY "Whether to automatically deploy to deploy paths" 1 )
-
-# Updater option
-option( USE_UPDATER "Enable autoupdater module" 0 )
-
-#Shared preprocessor definitions
-set( SHARED_DEFS 
-)
-
-if( MSVC )
-	set( SHARED_DEFS
-		${SHARED_DEFS}
-		_CRT_SECURE_NO_WARNINGS
-		_SCL_SECURE_NO_WARNINGS
-	)
-else()
-	#All non-MSVC targets need this. That includes Cygwin and Mingw.
-	#Match Source 2013 in defining GNUC for UNIX platforms.
-	#Match Source 2013 in defining POSIX for UNIX platforms.
+if( CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU" )
+	# All non-MSVC targets need this. That includes Cygwin and Mingw.
+	# Match Source 2013 in defining GNUC and POSIX for UNIX platforms.
 	set( SHARED_DEFS
 		${SHARED_DEFS}
 		GNUC
@@ -104,49 +174,96 @@ else()
 			_LINUX
 		)
 	endif()
+elseif( CMAKE_CXX_COMPILER_ID MATCHES "MSVC" )
+	set( SHARED_DEFS
+		${SHARED_DEFS}
+		_CRT_SECURE_NO_WARNINGS
+		_SCL_SECURE_NO_WARNINGS
+	)
 endif()
 
-#Shared definitions for the client & server libaries.
-set( SHARED_GAME_DEFS
-	CLIENT_WEAPONS
-	NO_MALLOC_OVERRIDE
-)
-
-#Shared linker flags
-if( MSVC )
-	#Set Windows subsystem
-	set( SHARED_GAME_LINKER_FLAGS "${SHARED_GAME_LINKER_FLAGS} /SUBSYSTEM:WINDOWS "
-)
-elseif( UNIX )
-	#From the Github 2013 Makefile, match the settings for Unix environments.
-	# force 387 for FP math so the precision between win32 and linux and osx match
-	# Trigger an error if any code tries to use an implicit return type
-	# Default visibility is hidden unless explicitly altered with __attribute__( visibility() )
-	set( SHARED_GAME_LINKER_FLAGS "${SHARED_GAME_LINKER_FLAGS} -mfpmath=387 -Werror=return-type -fvisibility=hidden" )
-
-	if( APPLE )
-		set( SHARED_GAME_LINKER_FLAGS "${SHARED_GAME_LINKER_FLAGS} -momit-leaf-frame-pointer -mtune=core2" )
-	else()
-		#Linux, Cygwin, etc.
-	endif()
-endif()
-
+#-----------------------------------------------------------------
 # Warning level
-if( MSVC )
-	set( WARNING_LEVEL " " )
-else()
-	set( WARNING_LEVEL "-Wno-write-strings -Wno-unknown-pragmas -Wno-endif-labels -Wno-switch -Wno-unused-variable" )
-	set( WARNING_LEVEL "${WARNING_LEVEL} -Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-value" )
-	set( WARNING_LEVEL "${WARNING_LEVEL} -Wno-pointer-arith" )
-    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-delete-non-virtual-dtor -Wno-invalid-offsetof -Wno-conversion-null" )
+#-----------------------------------------------------------------
+set( WARNING_LEVEL_C "" )
+set( WARNING_LEVEL_CXX "" )
+set( WARNING_LEVEL_C_CXX "" )
+
+if( CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU" )
+	set( WARNING_LEVEL_C_CXX "${WARNING_LEVEL_C_CXX} -Wno-write-strings -Wno-unknown-pragmas -Wno-endif-labels -Wno-switch -Wno-unused-variable" )
+	set( WARNING_LEVEL_C_CXX "${WARNING_LEVEL_C_CXX} -Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-value" )
+	set( WARNING_LEVEL_C_CXX "${WARNING_LEVEL_C_CXX} -Wno-pointer-arith" )
+    set( WARNING_LEVEL_CXX "${WARNING_LEVEL_CXX} -Wno-delete-non-virtual-dtor -Wno-invalid-offsetof -Wno-conversion-null" )
+elseif( CMAKE_CXX_COMPILER_ID MATCHES "MSVC" )
+	
 endif()
 
-#Shared directories
-#Include paths for external dependencies. Should always come after all project paths.
-set( SHARED_EXTERNAL_INCLUDE_PATHS
+set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${C_CXX_COMPILER_FLAGS} ${WARNING_LEVEL_C}" )
+set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${C_CXX_COMPILER_FLAGS} ${WARNING_LEVEL_CXX}" )
+
+#-----------------------------------------------------------------
+# Build options
+#-----------------------------------------------------------------
+option( AUTO_DEPLOY		"Whether to automatically deploy to deploy paths" )
+option( USE_VGUI2		"Whether to include VGUI2 features" )
+option( USE_UPDATER		"Enable update notifier module" )
+
+#-----------------------------------------------------------------
+# appversion.h generator
+#-----------------------------------------------------------------
+if( WIN32 )
+	set( GENERATE_APPVERSION_SCRIPT "${CMAKE_SOURCE_DIR}/scripts/GenerateAppVersion.bat" )
+else()
+	set( GENERATE_APPVERSION_SCRIPT "${CMAKE_SOURCE_DIR}/scripts/GenerateAppVersion.sh" )
+endif()
+
+file( TO_NATIVE_PATH "${CMAKE_BINARY_DIR}/generated/appversion.h" APPVERSION_NATIVE_PATH )
+
+add_custom_target(
+	generate_appversion
+	"${GENERATE_APPVERSION_SCRIPT}" "${CMAKE_SOURCE_DIR}" "${APPVERSION_NATIVE_PATH}"
+	"${BHL_VERSION_MAJOR}" "${BHL_VERSION_MINOR}" "${BHL_VERSION_PATCH}" "${BHL_VERSION_TAG}" "${BHL_VERSION_METADATA}"
 )
 
+# Run it
+file( MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/generated" )
+execute_process(
+	COMMAND
+	"${GENERATE_APPVERSION_SCRIPT}" "${CMAKE_SOURCE_DIR}" "${APPVERSION_NATIVE_PATH}"
+	"${BHL_VERSION_MAJOR}" "${BHL_VERSION_MINOR}" "${BHL_VERSION_PATCH}" "${BHL_VERSION_TAG}" "${BHL_VERSION_METADATA}"
+	BYPRODUCTS ${APPVERSION_NATIVE_PATH}
+)
+
+unset( GENERATE_APPVERSION_SCRIPT )
+unset( APPVERSION_NATIVE_PATH )
+
+#-----------------------------------------------------------------
+# Autodeploy macro
+#-----------------------------------------------------------------
+if( AUTO_DEPLOY )
+	macro( add_auto_deploy TARGET_NAME PUBLISH_PATHS_FILE )
+		if ( WIN32 )
+			add_custom_command( TARGET ${TARGET_NAME}
+				POST_BUILD
+				COMMAND ${CMAKE_SOURCE_DIR}/scripts/DeployLibs.bat "${CMAKE_SOURCE_DIR}\\scripts\\${PUBLISH_PATHS_FILE}" "$<TARGET_FILE:${TARGET_NAME}>" "$<TARGET_PDB_FILE:${TARGET_NAME}>"
+			)
+		else()
+			add_custom_command( TARGET ${TARGET_NAME}
+				POST_BUILD
+				COMMAND ${CMAKE_SOURCE_DIR}/scripts/DeployLibs.sh "${CMAKE_SOURCE_DIR}/scripts/${PUBLISH_PATHS_FILE}" "$<TARGET_FILE:${TARGET_NAME}>"
+			)
+		endif()
+	endmacro()
+else()
+	macro( add_auto_deploy )
+	endmacro()
+endif()
+
+#-----------------------------------------------------------------
+# Common sources
+#-----------------------------------------------------------------
 set( SHARED_INCLUDE_PATHS
+	${CMAKE_BINARY_DIR}/generated
 	common
 	engine
 	pm_shared
@@ -159,35 +276,43 @@ add_subdirectory( engine )
 add_subdirectory( pm_shared )
 add_subdirectory( game_shared )
 
-#Save the shares sources into SHARED_SRCS
 get_sources( SHARED_SRCS )
-
 clear_sources()
 
+set ( BUGFIXEDAPI_SRCS )
+add_subdirectory( bugfixedapi )
+get_sources( BUGFIXEDAPI_SRCS )
+clear_sources()
+
+set( SHARED_GAME_DEFS
+	CLIENT_WEAPONS
+)
+
+#-----------------------------------------------------------------
+# Libraries
+#-----------------------------------------------------------------
 set( THREADS_PREFER_PTHREAD_FLAG ON )
 find_package( Threads REQUIRED )
 
-if( UNIX AND NOT APPLE )
-	set( UNIX_FS_LIB stdc++fs )
-endif()
+#-----------------------------------------------------------------
+# VGUI2
+#-----------------------------------------------------------------
+set( VGUI2_LIBS "" )
+set( VGUI2_INCLUDE_PATHS "" )
+set( VGUI2_DEFINES "" )
 
-# Source SDK code
-set( SOURCE_SDK_SRC )
-set( SOURCE_SDK_DEPENDENCIES )
-set( SOURCE_SDK_INCLUDE_PATHS )
-set( SOURCE_SDK_DEFINES )
-
-if ( USE_VGUI2 )
+if( USE_VGUI2 )
 	option( VGUI2_BUILD_4554 "Support game build 4554" )
-
+	
 	find_package( tier0 MODULE REQUIRED )
 	find_package( vstdlib MODULE REQUIRED )
 	
 	add_subdirectory( public )
 	add_subdirectory( source_sdk )
 	
-	# Order matters!
-	set( SOURCE_SDK_DEPENDENCIES
+	# Order matters (or it won't work on Linux
+	set( VGUI2_LIBS
+		${VGUI2_LIBS}
 		vgui2_controls
 		tier1
 		tier0
@@ -197,13 +322,14 @@ if ( USE_VGUI2 )
 	# steam_api.dll in 4554 is too old to use headers from Source SDK 2013
 	if( NOT VGUI2_BUILD_4554 )
 		find_package( SteamAPI MODULE REQUIRED )
-		set( SOURCE_SDK_DEPENDENCIES
-			${SOURCE_SDK_DEPENDENCIES}
+		set( VGUI2_LIBS
+			${VGUI2_LIBS}
 			SteamAPI
 		)
 	endif()
 	
-	set( SOURCE_SDK_INCLUDE_PATHS
+	set( VGUI2_INCLUDE_PATHS
+		${VGUI2_INCLUDE_PATHS}
 		public
 		public/math
 		source_sdk/public/tier1
@@ -211,33 +337,34 @@ if ( USE_VGUI2 )
 		source_sdk/common
 	)
 	
-	set( SOURCE_SDK_DEFINES
+	set( VGUI2_DEFINES
+		${VGUI2_DEFINES} 
+		NO_MALLOC_OVERRIDE
 		VERSION_SAFE_STEAM_API_INTERFACES
-		USE_VGUI2=${USE_VGUI2_DEFINE}
+		USE_VGUI2=1
 	)
 	
 	if( VGUI2_BUILD_4554 )
-		set( SOURCE_SDK_DEFINES 
-		${SOURCE_SDK_DEFINES} 
-		VGUI2_BUILD_4554
-		NO_STEAM
-	)
+		set( VGUI2_DEFINES 
+			${VGUI2_DEFINES} 
+			VGUI2_BUILD_4554
+			NO_STEAM
+		)
 	endif()
 else()
-	set( SOURCE_SDK_DEFINES
+	set( VGUI2_DEFINES
+		${VGUI2_DEFINES} 
 		NO_STEAM
 	)
 endif()
 
-set ( BUGFIXEDAPI_SRCS )
-add_subdirectory( bugfixedapi )
-get_sources( BUGFIXEDAPI_SRCS )
-clear_sources()
+#-----------------------------------------------------------------
+# Updater
+#-----------------------------------------------------------------
+set( UPDATER_LIBS "" )
+set( UPDATER_INCLUDE_PATHS "" )
+set( UPDATER_DEFINES "" )
 
-# Find CURL for updater
-set( UPDATER_LIBS )
-set( UPDATER_INCLUDE_PATHS )
-set( UPDATER_DEFINES )
 if( USE_UPDATER )
 	option( CURL_STATICLIB "Enable if cURL was built as a static library" 0 )
 
@@ -269,21 +396,13 @@ if( USE_UPDATER )
 	
 endif()
 
-#--------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------
 # Client library
-#--------------------------------------------------------------------------------------------------------
-
-# Generate appversion.h during configuration before adding any sources
-if ( WIN32 )
-	execute_process( COMMAND ${CMAKE_SOURCE_DIR}/scripts/GenerateAppVersion.bat "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}\\cl_dll\\appversion.h" )
-else()
-	execute_process( COMMAND ${CMAKE_SOURCE_DIR}/scripts/GenerateAppVersion.sh "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}/cl_dll/appversion.h" )
-endif()
-
-#Add in the shared sources
+#-----------------------------------------------------------------
+# Add in the shared sources
 add_sources( "${SHARED_SRCS}" )
 
-#Add in the client directories
+# Add in the client directories
 add_subdirectory( game_shared/client )
 add_subdirectory( cl_dll )
 
@@ -292,84 +411,48 @@ if( USE_UPDATER )
 endif()
 
 preprocess_sources()
-
-add_library( client SHARED ${PREP_SRCS} ${CMAKE_SOURCE_DIR}/cl_dll/appversion.h )
-
-# appversion.h generator target
-# A hack to make PRE_BUILD be actually PRE_BUILD on non-MSVC (non-Windows, generally speaking)
-if ( NOT MSVC )
-	add_custom_target( client_appversion ${CMAKE_SOURCE_DIR}/scripts/GenerateAppVersion.sh "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}/cl_dll/appversion.h" )
-	add_dependencies( client client_appversion )
-endif()
-
-if ( WIN32 )
-	# Generate appversion.h before building the library on Windows
-	add_custom_command( TARGET client
-		PRE_BUILD
-		COMMAND ${CMAKE_SOURCE_DIR}/scripts/GenerateAppVersion.bat "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}\\cl_dll\\appversion.h"
-	)
-	
-    if ( AUTO_DEPLOY )
-	    add_custom_command( TARGET client
-		    POST_BUILD
-		    COMMAND ${CMAKE_SOURCE_DIR}/scripts/DeployLibs.bat "${CMAKE_SOURCE_DIR}\\scripts\\PublishPathClient.txt" "$<TARGET_FILE:client>" "$<TARGET_PDB_FILE:client>"
-	    )
-    endif()
-else()
-	if( UNIX AND NOT APPLE )
-		# Fix vgui.so path in client.so
-		# " The best kostil' is not kostil' " (c) EzicMan
-		add_custom_command( TARGET client
-			POST_BUILD
-			COMMAND ${CMAKE_SOURCE_DIR}/scripts/FixClientLibPath.sh "$<TARGET_FILE:client>"
-		)
-	endif()
-    
-    if ( AUTO_DEPLOY )
-	    add_custom_command( TARGET client
-		    POST_BUILD
-		    COMMAND ${CMAKE_SOURCE_DIR}/scripts/DeployLibs.sh "${CMAKE_SOURCE_DIR}/scripts/PublishPathClient.txt" "$<TARGET_FILE:client>"
-	    )
-    endif()
-endif()
-
-#Needs static CRT to avoid alloc issues.
+add_library( client SHARED ${PREP_SRCS} )
+add_dependencies( client generate_appversion )
 configure_msvc_runtime( client STATIC )
-
 check_winxp_support( client )
+add_auto_deploy( client PublishPathClient.txt )
 
 target_include_directories( client PRIVATE
 	game_shared/client
     cl_dll
 	utils/vgui/include_DLLEXPORT
 	${SHARED_INCLUDE_PATHS}
-	${SHARED_EXTERNAL_INCLUDE_PATHS}
-	${SOURCE_SDK_INCLUDE_PATHS}
+	${VGUI2_INCLUDE_PATHS}
 	${UPDATER_INCLUDE_PATHS}
+	${SHARED_EXTERNAL_INCLUDE_PATHS}
 )
 
 target_compile_definitions( client PRIVATE
 	${SHARED_DEFS}
 	${SHARED_GAME_DEFS}
 	CLIENT_DLL
+	${VGUI2_DEFINES}
+	${UPDATER_DEFINES}
+	
+	# pcre
 	PCRE_STATIC
 	HAVE_CONFIG_H
-	${SOURCE_SDK_DEFINES}
+	
+	# lodepng
 	LODEPNG_NO_COMPILE_CPP
-	${UPDATER_DEFINES}
 )
 
-#Find client dependencies
+# Dependencies
 find_package( vgui MODULE REQUIRED )
 find_package( SDL2 MODULE REQUIRED )
 
-if ( MSVC )
+if( WIN32 )
 	# DInput for direct mouse input
 	find_package( DInput REQUIRED )
 	find_package( DXGUID REQUIRED )
 endif()
 
-#Set the list of platform specific libraries
+# Set the list of platform specific libraries
 if( WIN32 )
 	set( CLIENT_PLAT_LIBS 
         dbghelp
@@ -386,7 +469,7 @@ else()
 	)
 endif()
 
-#Link with client dependencies
+# Link with dependencies
 target_link_libraries( client 
 	vgui
 	${VGUI2_LIBS}
@@ -394,58 +477,35 @@ target_link_libraries( client
 	${SHARED_DEPENDENCIES}
 	${SOURCE_SDK_DEPENDENCIES}
 	Threads::Threads
-	${UNIX_FS_LIB}
 	${UPDATER_LIBS}
 )
 
-set( CLIENT_LINK_FLAGS )
-set ( CLIENT_COMPILE_FLAGS )
-
-if( MSVC )
-	set( CLIENT_LINK_FLAGS "${CLIENT_LINK_FLAGS} " )
-elseif( NOT APPLE )
-	set( CLIENT_COMPILE_FLAGS
-		${CLIENT_COMPILE_FLAGS} ""
-	)
-
-	#Generate a map file that provides information about the linking stage.
-	set( CLIENT_LINK_FLAGS
-		${CLIENT_LINK_FLAGS} "-Wl,-Map,client_map.txt"
-	)
-endif()
+set( CLIENT_LINK_FLAGS "")
+set( CLIENT_COMPILE_FLAGS "")
 
 set_target_properties( client PROPERTIES
-	COMPILE_FLAGS "${WARNING_LEVEL} ${CLIENT_COMPILE_FLAGS}"
+	COMPILE_FLAGS "${CLIENT_COMPILE_FLAGS}"
 	LINK_FLAGS "${SHARED_GAME_LINKER_FLAGS} ${CLIENT_LINK_FLAGS}"
 )
 
-#No lib prefix
+# Remove "lib" prefix
 set_target_properties( client PROPERTIES PREFIX "" )
 
-#Create filters
-create_source_groups( "${CMAKE_SOURCE_DIR}" )
-
-#Set the startup project to the client
-#TODO: does this even work?
-set_property( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT client )
-
-clear_sources()
-
-#
-#End client library
-#
-
-#--------------------------------------------------------------------------------------------------------
-# Server library
-#--------------------------------------------------------------------------------------------------------
-
-# Generate appversion.h during configuration before adding any sources
-if ( WIN32 )
-	execute_process( COMMAND ${CMAKE_SOURCE_DIR}/scripts/GenerateAppVersion.bat "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}\\dlls\\appversion.h" )
-else()
-	execute_process( COMMAND ${CMAKE_SOURCE_DIR}/scripts/GenerateAppVersion.sh "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}/dlls/appversion.h" )
+# Fix vgui.so (and others) path in client.so
+# See scripts/FixClientLibPath.sh for more details
+if( UNIX AND NOT APPLE )
+	add_custom_command( TARGET client
+		POST_BUILD
+		COMMAND ${CMAKE_SOURCE_DIR}/scripts/FixClientLibPath.sh "$<TARGET_FILE:client>"
+	)
 endif()
 
+create_source_groups( "${CMAKE_SOURCE_DIR}" )
+clear_sources()
+
+#-----------------------------------------------------------------
+# Server library
+#-----------------------------------------------------------------
 #Add in the shared sources
 add_sources( "${SHARED_SRCS}" )
 
@@ -457,48 +517,16 @@ add_subdirectory( game_shared/server )
 add_subdirectory( dlls )
 
 preprocess_sources()
-
-add_library( hl SHARED ${PREP_SRCS} ${CMAKE_SOURCE_DIR}/dlls/appversion.h )
-
-# appversion.h generator target
-# A hack to make PRE_BUILD be actually PRE_BUILD on non-MSVC (non-Windows, generally speaking)
-if ( NOT MSVC )
-	add_custom_target( hl_appversion ${CMAKE_SOURCE_DIR}/scripts/GenerateAppVersion.sh "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}/dlls/appversion.h" )
-	add_dependencies( hl hl_appversion )
-endif()
-
-if ( WIN32 )
-	# Generate appversion.h before building the library on Windows
-	add_custom_command( TARGET hl
-		PRE_BUILD
-		COMMAND ${CMAKE_SOURCE_DIR}/scripts/GenerateAppVersion.bat "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}\\dlls\\appversion.h"
-	)
-	
-    if ( AUTO_DEPLOY )
-	    add_custom_command( TARGET hl
-		    POST_BUILD
-		    COMMAND ${CMAKE_SOURCE_DIR}/scripts/DeployLibs.bat "${CMAKE_SOURCE_DIR}\\scripts\\PublishPathServer.txt" "$<TARGET_FILE:hl>" "$<TARGET_PDB_FILE:hl>"
-	    )
-    endif()
-else()
-    if ( AUTO_DEPLOY )
-	    add_custom_command( TARGET hl
-		    POST_BUILD
-		    COMMAND ${CMAKE_SOURCE_DIR}/scripts/DeployLibs.sh "${CMAKE_SOURCE_DIR}/scripts/PublishPathServer.txt" "$<TARGET_FILE:hl>"
-	    )
-    endif()
-endif()
-
-#Needs static CRT to avoid alloc issues.
+add_library( hl SHARED ${PREP_SRCS} )
 configure_msvc_runtime( hl STATIC )
-
 check_winxp_support( hl )
+add_auto_deploy( hl PublishPathServer.txt )
 
 target_include_directories( hl PRIVATE
 	${SHARED_INCLUDE_PATHS}
-	${SHARED_EXTERNAL_INCLUDE_PATHS}
 	game_shared/server
 	bugfixedapi
+	${SHARED_EXTERNAL_INCLUDE_PATHS}
 )
 
 target_compile_definitions( hl PRIVATE
@@ -506,65 +534,40 @@ target_compile_definitions( hl PRIVATE
 	${SHARED_GAME_DEFS}
 	SERVER_DLL
 	VALVE_DLL
-    CLIENT_WEAPONS
 )
 
-#Set the list of platform specific libraries
+# Set the list of platform specific libraries
 if( WIN32 )
 	set( SERVER_PLAT_LIBS )
 else()
-	set( SERVER_PLAT_LIBS dl )
+	set( SERVER_PLAT_LIBS
+		dl
+	)
 endif()
 
-#Link with server dependencies
+# Link with dependencies
 target_link_libraries( hl 
 	${SERVER_PLAT_LIBS}
 	${SHARED_DEPENDENCIES}
-	${UNIX_FS_LIB}
 	Threads::Threads
 )
 
-set( SERVER_LINK_FLAGS )
-
-if( MSVC )
-	
-else()
-	if( NOT APPLE )
-		#Generate a map file that provides information about the linking stage.
-		set( SERVER_LINK_FLAGS
-			${SERVER_LINK_FLAGS} "-Wl,-Map,hl_map.txt "
-		)
-	endif()
-endif()
+set( SERVER_LINK_FLAGS "")
+set( SERVER_COMPILE_FLAGS "")
 
 set_target_properties( hl PROPERTIES
-	COMPILE_FLAGS "${WARNING_LEVEL}" 
+	COMPILE_FLAGS "${SERVER_COMPILE_FLAGS}" 
 	LINK_FLAGS "${SHARED_GAME_LINKER_FLAGS} ${SERVER_LINK_FLAGS}"
 )
 
-#No lib prefix
+# Remove "lib" prefix
 set_target_properties( hl PROPERTIES PREFIX "" )
-
-#Create filters
 create_source_groups( "${CMAKE_SOURCE_DIR}" )
-
 clear_sources()
 
-#
-#End server library
-#
-
-#--------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------
 # BugfixedAPI AMXX module
-#--------------------------------------------------------------------------------------------------------
-
-# Generate appversion.h during configuration before adding any sources
-if ( WIN32 )
-	execute_process( COMMAND ${CMAKE_SOURCE_DIR}/scripts/GenerateAppVersion.bat "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}\\bugfixedapi_amxx\\appversion.h" )
-else()
-	execute_process( COMMAND ${CMAKE_SOURCE_DIR}/scripts/GenerateAppVersion.sh "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}/bugfixedapi_amxx/appversion.h" )
-endif()
-
+#-----------------------------------------------------------------
 #Add in the shared sources
 add_sources( "${SHARED_SRCS}" )
 
@@ -574,42 +577,10 @@ add_sources( "${BUGFIXEDAPI_SRCS}" )
 add_subdirectory( bugfixedapi_amxx )
 
 preprocess_sources()
-
 add_library( bugfixedapi_amxx SHARED ${PREP_SRCS} )
-
-# appversion.h generator target
-# A hack to make PRE_BUILD be actually PRE_BUILD on non-MSVC (non-Windows, generally speaking)
-if ( NOT MSVC )
-	add_custom_target( bugfixedapi_amxx_appversion ${CMAKE_SOURCE_DIR}/scripts/GenerateAppVersion.sh "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}/bugfixedapi_amxx/appversion.h" )
-	add_dependencies( bugfixedapi_amxx bugfixedapi_amxx_appversion )
-endif()
-
-if ( WIN32 )
-	# Generate appversion.h before building the library on Windows
-	add_custom_command( TARGET bugfixedapi_amxx
-		PRE_BUILD
-		COMMAND ${CMAKE_SOURCE_DIR}/scripts/GenerateAppVersion.bat "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}\\bugfixedapi_amxx\\appversion.h"
-	)
-	
-    if ( AUTO_DEPLOY )
-	    add_custom_command( TARGET bugfixedapi_amxx
-		    POST_BUILD
-		    COMMAND ${CMAKE_SOURCE_DIR}/scripts/DeployLibs.bat "${CMAKE_SOURCE_DIR}\\scripts\\PublishPathAMXXModules.txt" "$<TARGET_FILE:bugfixedapi_amxx>" "$<TARGET_PDB_FILE:bugfixedapi_amxx>"
-	    )
-    endif()
-else()
-    if ( AUTO_DEPLOY )
-	    add_custom_command( TARGET bugfixedapi_amxx
-		    POST_BUILD
-		    COMMAND ${CMAKE_SOURCE_DIR}/scripts/DeployLibs.sh "${CMAKE_SOURCE_DIR}/scripts/PublishPathAMXXModules.txt" "$<TARGET_FILE:bugfixedapi_amxx>"
-	    )
-    endif()
-endif()
-
-#Needs static CRT to avoid alloc issues.
 configure_msvc_runtime( bugfixedapi_amxx STATIC )
-
 check_winxp_support( bugfixedapi_amxx )
+add_auto_deploy( bugfixedapi_amxx PublishPathAMXXModules.txt )
 
 target_include_directories( bugfixedapi_amxx PRIVATE
 	${SHARED_INCLUDE_PATHS}
@@ -628,43 +599,33 @@ target_compile_definitions( bugfixedapi_amxx PRIVATE
 
 #Set the list of platform specific libraries
 if( WIN32 )
-	set( SERVER_PLAT_LIBS )
+	set( BUGFIXEDAPI_AMXX_PLAT_LIBS )
 else()
-	set( SERVER_PLAT_LIBS dl )
+	set( BUGFIXEDAPI_AMXX_PLAT_LIBS
+		dl
+	)
 endif()
 
-#Link with server dependencies
+# Link with dependencies
 target_link_libraries( bugfixedapi_amxx 
-	${SERVER_PLAT_LIBS}
+	${BUGFIXEDAPI_AMXX_PLAT_LIBS}
 	${SHARED_DEPENDENCIES}
-	${UNIX_FS_LIB}
 )
 
-set( SERVER_LINK_FLAGS )
-
-if( MSVC )
-	
-else()
-	if( NOT APPLE )
-		#Generate a map file that provides information about the linking stage.
-		set( SERVER_LINK_FLAGS
-			${SERVER_LINK_FLAGS} "-Wl,-Map,hl_map.txt "
-		)
-	endif()
-endif()
+set( BUGFIXEDAPI_AMXX_LINK_FLAGS )
+set( BUGFIXEDAPI_AMXX_COMPILE_FLAGS )
 
 set_target_properties( bugfixedapi_amxx PROPERTIES
-	COMPILE_FLAGS "${WARNING_LEVEL}" 
-	LINK_FLAGS "${SHARED_GAME_LINKER_FLAGS} ${SERVER_LINK_FLAGS}"
+	COMPILE_FLAGS "${BUGFIXEDAPI_AMXX_COMPILE_FLAGS}" 
+	LINK_FLAGS "${SHARED_GAME_LINKER_FLAGS} ${BUGFIXEDAPI_AMXX_LINK_FLAGS}"
 )
 
-#No lib prefix
+# Remove "lib" prefix
 set_target_properties( bugfixedapi_amxx PROPERTIES PREFIX "" )
 if ( NOT MSVC )
+	# Add i386 to the file name
 	set_target_properties( bugfixedapi_amxx PROPERTIES OUTPUT_NAME "bugfixedapi_amxx_i386" )
 endif()
 
-#Create filters
 create_source_groups( "${CMAKE_SOURCE_DIR}" )
-
 clear_sources()

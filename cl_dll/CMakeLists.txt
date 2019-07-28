@@ -26,7 +26,6 @@ add_sources(
     ammo.h
     ammohistory.cpp
     ammohistory.h
-	appversion.h
     camera.h
     cdll_int.cpp
     CHudAmmo.cpp

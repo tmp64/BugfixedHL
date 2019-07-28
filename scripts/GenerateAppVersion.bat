@@ -2,12 +2,16 @@
 ::
 :: Pre-build auto-versioning script
 ::
-:: Usage: GenerateAppVersion.bat [git repo dir] [file to generate] [version suffix]
+:: Usage: GenerateAppVersion.bat [git repo dir] [file to generate] [major] [minor] [patch] [tag] [metadata]
 ::
 
 SET repodir=%~1
 SET srcfile=%~2
-SET suffix=%~3
+SET arg_major=%~3
+SET arg_minor=%~4
+SET arg_patch=%~5
+SET arg_tag=%~6
+SET arg_metadata=%~7
 
 SET old_version=""
 SET new_version="0.0.0"
@@ -39,7 +43,7 @@ SET old_version=%old_version:~1,-1%
 IF NOT "%errlvl%" == "1" (
 	ECHO Can not locate git.exe. Auto-versioning step will not be performed.
 
-	:: If we doesn't have appversion.h, we need to create it
+	:: If we don't have appversion.h, we need to create it
 	IF "%old_version%" == "" GOTO COMPARE
 	EXIT /B 0
 )
@@ -63,10 +67,19 @@ IF EXIST "%TMPFILE%" GOTO :GETTEMPNAME
 :: Get information from GIT repository
 ::
 SET errlvl=0
+
+:: e.g. v1.3-0-gcc5b7c1-dirty
 git.exe -C "%repodir%." describe --long --tags --dirty --always > "%TMPFILE%.tmp1"
 IF NOT "%ERRORLEVEL%" == "0" THEN SET errlvl=1
+
+:: e.g. 2019-07-23 15:28:44 +0700
 git.exe -C "%repodir%." log -1 --format^=%%ci >> "%TMPFILE%.tmp2"
 IF NOT "%ERRORLEVEL%" == "0" THEN SET errlvl=1
+
+:: e.g. cc5b7c1
+git.exe -C "%repodir%." rev-parse --short HEAD > "%TMPFILE%.tmp3"
+IF NOT "%ERRORLEVEL%" == "0" THEN SET errlvl=1
+
 IF NOT "%errlvl%" == "0" (
 	ECHO git.exe done with errors [%ERRORLEVEL%].
 	ECHO Check if you have correct GIT repository at '%repodir%'.
@@ -75,7 +88,7 @@ IF NOT "%errlvl%" == "0" (
 	DEL /F /Q "%TMPFILE%.tmp1" 2>NUL
 	DEL /F /Q "%TMPFILE%.tmp2" 2>NUL
 
-	:: If we doesn't have appversion.h, we need to create it
+	:: If we don't have appversion.h, we need to create it
 	IF "%old_version%" == "" GOTO COMPARE
 	EXIT /B 0
 )
@@ -85,32 +98,27 @@ IF NOT "%errlvl%" == "0" (
 ::
 SET /P git_version=<"%TMPFILE%.tmp1"
 SET /P git_date=<"%TMPFILE%.tmp2"
+SET /P git_commit_hash=<"%TMPFILE%.tmp3"
 
 DEL /F /Q "%TMPFILE%.tmp1" 2>NUL
 DEL /F /Q "%TMPFILE%.tmp2" 2>NUL
+DEL /F /Q "%TMPFILE%.tmp3" 2>NUL
 
-::
-:: Detect local modifications
-::
-SET new_version=%git_version:-dirty=+m%
-IF NOT x%new_version%==x%git_version% (
-	SET new_specialbuild=modified
-) ELSE (
-	SET new_specialbuild=
+:: Check if tree is dirty
+SET git_dirty_tag=
+ECHO %git_version%|find "-dirty" >nul
+IF NOT ERRORLEVEL 1 (SET git_dirty_tag=+m)
+
+:: Prepend variables
+IF NOT [%arg_tag%] == [] (
+	SET arg_tag=-%arg_tag%
 )
 
-::
-:: Process version string
-::
-:: Remove "v" at start, change "-g" hash prefix into "+", "-" before patch into "."
-SET new_version=%new_version:~1%
-SET new_version=%new_version:-g=+%
-SET new_version=%new_version:-=.%
-
-:: Add suffix if set
-IF NOT [%suffix%] == [] (
-	SET new_version=%new_version%+%suffix%
+IF NOT [%arg_metadata%] == [] (
+	SET arg_metadata=+%arg_metadata%
 )
+
+SET new_version=%arg_major%.%arg_minor%.%arg_patch%%arg_tag%+%git_commit_hash%%arg_metadata%%git_dirty_tag%
 
 ::
 :: Check if version has changed
@@ -123,8 +131,6 @@ EXIT /B 0
 :: Update appversion.h
 ::
 :UPDATE
-FOR /F "tokens=1,2,3 delims=.+" %%a IN ("%new_version%") DO SET major=%%a&SET minor=%%b&SET patch=%%c
-
 ECHO Updating %srcfile%, old version "%old_version%", new version "%new_version%".
 
 ECHO #ifndef __APPVERSION_H__>"%srcfile%"
@@ -138,7 +144,7 @@ ECHO.>>"%srcfile%"
 ECHO // Version defines>>"%srcfile%"
 
 ECHO #define APP_VERSION "%new_version%">>"%srcfile%"
-ECHO #define APP_VERSION_C %major%,%minor%,%patch%,^0>>"%srcfile%"
+ECHO #define APP_VERSION_C %arg_major%,%arg_minor%,%arg_patch%,^0>>"%srcfile%"
 
 ECHO.>>"%srcfile%"
 ECHO #define APP_VERSION_DATE "%git_date%">>"%srcfile%"

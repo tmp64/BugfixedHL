@@ -8,7 +8,6 @@ add_sources(
     animation.cpp
     animation.h
     apache.cpp
-    appversion.h
     barnacle.cpp
     barney.cpp
     basemonster.h

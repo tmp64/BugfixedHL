@@ -20,12 +20,11 @@ public:
 	inline CGameVersion() {}
 	inline CGameVersion(const char *str) { TryParse(str); }
 
-	bool TryParse(const char *str);		// Tries to parse game version (e.g. 1.1.35+c4ddd6b+m)
+	bool TryParse(const char *cstr);		// Tries to parse game version (e.g. 1.3.1-dev+abababa+ci.master.228+m)
 	bool TryParseTag(const char *str);	// Tries to parse Git tag (e.g. v1.2)
 	inline bool IsValid() const;
 	inline bool IsModified() const;
 	inline const char *GetFullString() const;
-	inline const char *GetVersionString() const;
 	inline const char *GetCommitString() const;
 	inline void GetVersion(int &major, int &minor, int &patch) const;
 	inline void RemovePatch();
@@ -37,14 +36,15 @@ public:
 	bool operator<= (const CGameVersion &rhs) const;
 
 private:
-	//-----------------[API-BREAKING V1.0 BEGIN]-----------------
+	//-----------------[API-BREAKING V2.0 BEGIN]-----------------
 	bool m_bIsValid = false;
 	bool m_bIsModified = false;
-	char m_szString[64] = "";
-	char m_szVersion[16] = "";
-	char m_szCommit[16] = "";
+	char m_szString[256] = "";		// e.g. 1.3.1-dev+abababa+ci.master.228
+	char m_szTag[32] = "";			// e.g. dev
+	char m_szCommit[16] = "";		// e.g. abababa
+	char m_szMetadata[128] = "";	// e.g. ci.master.228
 	int m_iMajor = 0, m_iMinor = 0, m_iPatch = 0;
-	//-----------------[API-BREAKING V1.0 END]-----------------
+	//-----------------[API-BREAKING V2.0 END]-----------------
 };
 
 inline bool CGameVersion::IsValid() const
@@ -60,11 +60,6 @@ inline bool CGameVersion::IsModified() const
 inline const char *CGameVersion::GetFullString() const
 {
 	return m_szString;
-}
-
-inline const char *CGameVersion::GetVersionString() const
-{
-	return m_szVersion;
 }
 
 inline const char *CGameVersion::GetCommitString() const
