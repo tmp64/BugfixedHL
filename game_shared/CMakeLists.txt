@@ -1,4 +1,5 @@
 add_sources(
+	CMakeLists.txt
     voice_common.h
     bitvec.h
 	CGameVersion.h

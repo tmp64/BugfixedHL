@@ -1,4 +1,5 @@
 add_sources(
+	CMakeLists.txt
 	AttributeFlags.h
 	DmAttributeVar.h
 	DmElementRef.h

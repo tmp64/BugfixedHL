@@ -11,6 +11,7 @@ include( MSVCRuntime )
 include( WinXPSupport )
 
 add_sources(
+	CMakeLists.txt
 	bitbuf.cpp
 	byteswap.cpp
 	CharacterSet.cpp

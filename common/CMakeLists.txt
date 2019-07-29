@@ -1,4 +1,5 @@
 add_sources(
+	CMakeLists.txt
 	beamdef.h
     cl_entity.h
     com_model.h

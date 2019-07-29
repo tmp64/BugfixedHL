@@ -1,4 +1,5 @@
 add_sources(
+	CMakeLists.txt
 	#afxmem_override.cpp
 	basetypes.h
 	commonmacros.h

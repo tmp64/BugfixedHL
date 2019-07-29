@@ -1,4 +1,5 @@
 add_sources(
+	CMakeLists.txt
 	CBackGroundPanel.h
 	CBackGroundPanel.cpp
 	CBaseViewport.h

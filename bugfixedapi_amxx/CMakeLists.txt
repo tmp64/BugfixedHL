@@ -1,4 +1,5 @@
 add_sources(
+	CMakeLists.txt
 	../dlls/globals.cpp
 	amxxmodule.cpp
 	amxxmodule.h

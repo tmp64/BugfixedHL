@@ -1,4 +1,5 @@
 add_sources(
+	CMakeLists.txt
     activity.h
     activitymap.h
     aflock.cpp

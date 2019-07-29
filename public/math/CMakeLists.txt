@@ -1,4 +1,5 @@
 add_sources(
+	CMakeLists.txt
 	interpolation.h
 	interpolation.cpp
 	mathlib.h

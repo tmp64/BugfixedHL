@@ -1,4 +1,5 @@
 add_sources(
+	CMakeLists.txt
     anorms.h
     archtypes.h
     cdll_int.h

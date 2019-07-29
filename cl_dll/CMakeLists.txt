@@ -1,4 +1,5 @@
 add_sources(
+	CMakeLists.txt
 	aghudcountdown.cpp
     aghudcountdown.h
     aghudctf.cpp
@@ -72,7 +73,6 @@ add_sources(
     cl_dll.dsp
     cl_dll.h
     cl_util.h
-    CMakeLists.txt
     com_weapons.cpp
     com_weapons.h
     demo.cpp
