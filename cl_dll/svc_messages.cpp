@@ -31,7 +31,7 @@ cvar_t *m_pCvarClProtectBlock = 0;
 cvar_t *m_pCvarClProtectAllow = 0;
 cvar_t *m_pCvarClProtectBlockCvar = 0;
 char com_token[1024];
-const char *blockList = "^(exit|quit|bind|unbind|unbindall|kill|exec|alias|clear|motdfile|motd_write|writecfg|cd|developer|fps.+|rcon.*)$";
+const char *blockList = "^(exit|quit|bind|unbind|unbindall|kill|exec|alias|clear|motdfile|motd_write|writecfg|developer|fps.+|rcon.*)$";
 const char *blockListCvar = "^(rcon.*)$";
 
 bool RegexMatch(const char *str, const char *regex)
