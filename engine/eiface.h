@@ -36,13 +36,20 @@
 // This is conveniently done for them in extdll.h
 //
 
-/*
+#ifndef CLIENT_DLL
+
 #ifdef _WIN32
-#define DLLEXPORT __stdcall
+#define DLLEXPORT __declspec(dllexport)
 #else
-#define DLLEXPORT  __attribute__ ((visibility("default")))
+#define DLLEXPORT __attribute__ ((visibility("default")))
+#define WINAPI /**/
 #endif
-*/
+
+#else
+
+#include "dllexport.h"
+
+#endif
 
 typedef enum
 	{
