@@ -21,6 +21,7 @@ include( Ternary )
 #-----------------------------------------------------------------
 # Version
 #-----------------------------------------------------------------
+# Also needs to be changed in scripts/BuildRelease.ps1
 set( BHL_REPO_VERSION_MAJOR 1 )
 set( BHL_REPO_VERSION_MINOR 4 )
 set( BHL_REPO_VERSION_PATCH 0 )

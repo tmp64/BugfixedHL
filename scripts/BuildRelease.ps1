@@ -16,6 +16,13 @@ Param (
 $ErrorActionPreference = "Stop"
 $THIS_IS_BUILD_SCRIPT = $true;   # For checking in includes
 
+# Version info
+# Should be the same as in CMakeLists.txt
+$VERSION_MAJOR = 1
+$VERSION_MINOR = 4
+$VERSION_PATCH = 0
+$VERSION_TAG = 'dev'
+
 # Check params
 if (($Target -ne "Help") -and ($Target -ne "Client") -and ($Target -ne "ClientVGUI2") -and ($Target -ne "Client4554") -and ($Target -ne "Server") -and ($Target -ne "Amxx"))
 {
@@ -85,7 +92,33 @@ Write-Host "Repo root dir: $ROOT_DIR";
 
 
 # Get repo version
-$VERSION = (& $GIT describe --long --tags --dirty --always).Substring(1).Replace('-', '.').Replace(".g", "-").Replace(".dirty", "-m");
+$GIT_VERSION = (& $GIT describe --long --tags --dirty --always);
+$GIT_LATEST_TAG = (& $GIT describe --abbrev=0 --tags);
+$GIT_COMMIT_COUNT = (& $GIT rev-list --count "${GIT_LATEST_TAG}..HEAD" );
+$GIT_COMMIT_HASH = (& $GIT rev-parse --short HEAD);
+
+$GIT_MODIFIED_TAG = '';
+if ($GIT_VERSION.IndexOf('.dirty') -ne -1)
+{
+	$GIT_MODIFIED_TAG = '-m';
+}
+
+if ($VERSION_TAG.Length -ne 0)
+{
+	$VERSION_TAG = "-${VERSION_TAG}";
+}
+
+if ($GIT_COMMIT_COUNT -eq 0)
+{
+	$GIT_COMMIT_COUNT = '';
+}
+else
+{
+	$GIT_COMMIT_COUNT = "-${GIT_COMMIT_COUNT}";
+}
+
+$VERSION = "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}${GIT_COMMIT_COUNT}${VERSION_TAG}${GIT_MODIFIED_TAG}";
+
 Write-Host "Repo version: $VERSION";
 
 # Update $Out
