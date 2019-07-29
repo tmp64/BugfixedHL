@@ -10,10 +10,6 @@
 #define BUGFIXEDAPI_REQUEST_BASE 1
 #endif
 
-#ifdef SERVER_DLL
-extern "C" DLLEXPORT void *AGHL_GetServerInterface(int version, int *srvVersion = nullptr);
-#endif
-
 /**
  * Implementation of IBugfixedServer
  * @see IBugfixedServer

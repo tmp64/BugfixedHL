@@ -1,16 +1,17 @@
 add_sources(
 	CMakeLists.txt
-    anorms.h
-    archtypes.h
-    cdll_int.h
-    customentity.h
-    custom.h
-    edict.h
-    eiface.h
-    keydefs.h
-    progdefs.h
-    progs.h
-    Sequence.h
-    shake.h
-    studio.h
+	anorms.h
+	APIProxy.h
+	cdll_int.h
+	custom.h
+	customentity.h
+	edict.h
+	eiface.h
+	IBaseUI.h
+	IClientVGUI.h
+	IGameUIFuncs.h
+	progdefs.h
+	progs.h
+	shake.h
+	studio.h
 )

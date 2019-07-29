@@ -1,16 +1,7 @@
-//========= Copyright © 1996-2002, Valve LLC, All rights reserved. ============
-//
-// Purpose: 
-//
-// $NoKeywords: $
-//=============================================================================
-
 #if !defined( R_STUDIOINT_H )
 #define R_STUDIOINT_H
 #if defined( _WIN32 )
-#ifndef __MINGW32__
 #pragma once
-#endif /* not __MINGW32__ */
 #endif
 
 #define STUDIO_INTERFACE_VERSION 1
@@ -103,6 +94,10 @@ typedef struct engine_studio_api_s
 	// Only called by hardware interface
 	void			( *GL_StudioDrawShadow )		( void );
 	void			( *GL_SetRenderMode )			( int mode );
+
+	void			( *StudioSetRenderamt )			(int iRenderamt); 	//!!!CZERO added for rendering glass on viewmodels
+	void			( *StudioSetCullState )			( int iCull	   );
+	void			( *StudioRenderShadow )			( int iSprite, float *p1, float *p2, float *p3, float *p4 );
 } engine_studio_api_t;
 
 typedef struct server_studio_api_s
@@ -133,17 +128,17 @@ extern r_studio_interface_t *pStudioAPI;
 
 typedef struct sv_blending_interface_s
 {
-	int	version;
+	int				version;
 
-	void	( *SV_StudioSetupBones )( struct model_s *pModel, 
-					float frame,
-					int sequence,
-					const vec3_t angles,
-					const vec3_t origin,
-					const byte *pcontroller,
-					const byte *pblending,
-					int iBone,
-					const edict_t *pEdict );
+	void			( *SV_StudioSetupBones )		( struct model_s	*pModel, 
+													  float				frame, 
+													  int				sequence, 
+													  const vec3_t		angles, 
+													  const	vec3_t		origin, 
+													  const	byte		*pcontroller,
+													  const	byte		*pblending, 
+													  int				iBone,
+													  const edict_t		*pEdict );
 } sv_blending_interface_t;
 
 #endif // R_STUDIOINT_H

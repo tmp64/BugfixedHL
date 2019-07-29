@@ -10,7 +10,6 @@
 #include "CHudTextMessage.h"
 #include "CHudSayText.h"
 #include "vgui/ILocalize.h"
-#include "memory.h"	// For struct CommandLink
 
 //=====================
 //CHudChatLine
@@ -92,16 +91,16 @@ void CHudChat::Init( void )
 	// Hook messagemode and messagemode2
 	if (!gfnEngineMsgMode && !gfnEngineMsgMode2)
 	{
-		CommandLink *item = gEngfuncs.pfnGetCommandsList();
-		CommandLink *msgMode = nullptr, *msgMode2 = nullptr;
+		cmd_function_t *item = gEngfuncs.GetFirstCmdFunctionHandle();
+		cmd_function_t *msgMode = nullptr, *msgMode2 = nullptr;
 
 		while (item)
 		{
-			if (!strcmp(item->commandName, "messagemode"))
+			if (!strcmp(item->name, "messagemode"))
 				msgMode = item;
-			else if (!strcmp(item->commandName, "messagemode2"))
+			else if (!strcmp(item->name, "messagemode2"))
 				msgMode2 = item;
-			item = item->nextCommand;
+			item = item->next;
 		}
 
 		if (!msgMode || !msgMode2)

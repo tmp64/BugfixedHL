@@ -88,14 +88,6 @@ struct UserMessage
 	UserMessage *nextMessage;
 };
 
-struct CommandLink
-{
-	CommandLink *nextCommand;
-	char *commandName;
-	void (*handler)(void);
-	int addedByMod;
-};
-
 struct CGameConsole003
 {
 	int v_table;

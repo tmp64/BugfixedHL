@@ -198,4 +198,4 @@ void Sequence_ParseFile( const char* fileName, qboolean isGlobal );
 void Sequence_OnLevelLoad( const char* mapName );
 sentenceEntry_s* SequencePickSentence( const char *groupName, int pickMethod, int *picked );
 
-#endif /* _INCLUDE_SEQUENCE_H_ */
+#endif // _INCLUDE_SEQUENCE_H_

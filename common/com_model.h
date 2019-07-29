@@ -9,9 +9,7 @@
 #if !defined( COM_MODEL_H )
 #define COM_MODEL_H
 #if defined( _WIN32 )
-#ifndef __MINGW32__
 #pragma once
-#endif /* not __MINGW32__ */
 #endif
 
 #define STUDIO_RENDER 1

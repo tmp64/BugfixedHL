@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2002, Valve LLC, All rights reserved. ============
+//========= Copyright © 1996-2001, Valve LLC, All rights reserved. ============
 //
 // Purpose: 
 //
@@ -10,6 +10,7 @@
 #ifndef _WIN32
 
 #include <unistd.h>
+#include <sys/types.h>
 
 #endif //!_WIN32
 #endif //INC_NOWIN_H

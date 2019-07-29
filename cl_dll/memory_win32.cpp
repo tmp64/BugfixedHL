@@ -745,41 +745,41 @@ void PatchFpsBugPlace(void)
 }
 void PatchCommandsList(void)
 {
-	if (gEngfuncs.pfnGetCommandsList)
+	if (gEngfuncs.GetFirstCmdFunctionHandle)
 	{
-		CommandLink *cl;
+		cmd_function_t *cl;
 
 		// Unhook commands
-		cl = gEngfuncs.pfnGetCommandsList();
+		cl = gEngfuncs.GetFirstCmdFunctionHandle();
 		while (cl != NULL)
 		{
 			// Search by address cos some commands has invalidated name references due to unloading process
-			if (g_pOldMotdWriteHandler && cl->handler == MotdWriteHandler && !_stricmp(cl->commandName, "motd_write"))
+			if (g_pOldMotdWriteHandler && cl->handler == MotdWriteHandler && !_stricmp(cl->name, "motd_write"))
 			{
 				HookDWord((size_t)&cl->handler, (uint32_t)g_pOldMotdWriteHandler);
 				g_pOldMotdWriteHandler = 0;
 			}
-			else if (g_pEngineSnapshotCommandHandler && cl->handler == SnapshotCmdHandler && !_stricmp(cl->commandName, "snapshot"))
+			else if (g_pEngineSnapshotCommandHandler && cl->handler == SnapshotCmdHandler && !_stricmp(cl->name, "snapshot"))
 			{
 				HookDWord((size_t)&cl->handler, (uint32_t)g_pEngineSnapshotCommandHandler);
 				g_pEngineSnapshotCommandHandler = 0;
 			}
-			cl = cl->nextCommand;
+			cl = cl->next;
 		}
 
 		// Hook commands
-		cl = gEngfuncs.pfnGetCommandsList();
+		cl = gEngfuncs.GetFirstCmdFunctionHandle();
 		while (cl != NULL)
 		{
-			if (!_stricmp(cl->commandName, "motd_write"))
+			if (!_stricmp(cl->name, "motd_write"))
 			{
 				g_pOldMotdWriteHandler = (void (*)())HookDWord((size_t)&cl->handler, (uint32_t)MotdWriteHandler);
 			}
-			else if (!_stricmp(cl->commandName, "snapshot"))
+			else if (!_stricmp(cl->name, "snapshot"))
 			{
 				g_pEngineSnapshotCommandHandler = (void (*)())HookDWord((size_t)&cl->handler, (uint32_t)SnapshotCmdHandler);
 			}
-			cl = cl->nextCommand;
+			cl = cl->next;
 		}
 	}
 	else

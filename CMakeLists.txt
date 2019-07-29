@@ -267,6 +267,7 @@ set( SHARED_INCLUDE_PATHS
 	${CMAKE_BINARY_DIR}/generated
 	common
 	engine
+	public
 	pm_shared
 	game_shared
 	dlls
