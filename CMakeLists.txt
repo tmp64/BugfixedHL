@@ -417,6 +417,17 @@ add_library( client SHARED ${PREP_SRCS} )
 add_dependencies( client generate_appversion )
 configure_msvc_runtime( client STATIC )
 check_winxp_support( client )
+
+# Fix vgui.so (and others) path in client.so
+# See scripts/FixClientLibPath.sh for more details
+# Needs to be run before auto deploy
+if( UNIX AND NOT APPLE )
+	add_custom_command( TARGET client
+		POST_BUILD
+		COMMAND ${CMAKE_SOURCE_DIR}/scripts/FixClientLibPath.sh "$<TARGET_FILE:client>"
+	)
+endif()
+
 add_auto_deploy( client PublishPathClient.txt )
 
 target_include_directories( client PRIVATE
@@ -492,15 +503,6 @@ set_target_properties( client PROPERTIES
 
 # Remove "lib" prefix
 set_target_properties( client PROPERTIES PREFIX "" )
-
-# Fix vgui.so (and others) path in client.so
-# See scripts/FixClientLibPath.sh for more details
-if( UNIX AND NOT APPLE )
-	add_custom_command( TARGET client
-		POST_BUILD
-		COMMAND ${CMAKE_SOURCE_DIR}/scripts/FixClientLibPath.sh "$<TARGET_FILE:client>"
-	)
-endif()
 
 create_source_groups( "${CMAKE_SOURCE_DIR}" )
 clear_sources()
