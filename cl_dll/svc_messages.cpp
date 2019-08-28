@@ -11,6 +11,8 @@
 
 #include <string.h>
 #include <time.h>
+//#include <string>
+#include <algorithm>
 
 #include "hud.h"
 #include "memory.h"
@@ -250,8 +252,8 @@ void SvcPrint(void)
 				if (str[0] == '#' && str[1] != 0 && str[2] != 0 && str[3] == ' ')
 				{
 					// start of new player info row
-					int slot = atoi(str + 1);
-					if (slot > 0)
+					int idx = atoi(str + 1);	// Index in 'status' doesn't always match with player slot
+					if (idx > 0)
 					{
 						char *name = strchr(strchr(str + 2, ' '), '"');
 						if (name != NULL)
@@ -264,16 +266,44 @@ void SvcPrint(void)
 								char *steamid = strchr(userid, ' ');
 								if (steamid != NULL)
 								{
-									steamid++; // space
-									char *steamidend = strchr(steamid, ' ');
-									if (steamidend != NULL)
-										*steamidend = 0;
-									if (!strncmp(steamid, "STEAM_", 6) ||
-										!strncmp(steamid, "VALVE_", 6))
-										strncpy(g_PlayerSteamId[slot], steamid + 6, MAX_STEAMID); // cutout "STEAM_" or "VALVE_" start of the string
+									// Find actual slot
+									int slot = 0;
+
+									// Replace '\"' in the string with a null-terminator
+									//   to later be used in strcmp
+									char stringTerm = '\0';
+									std::swap<char>(name[userid - name - 2], stringTerm);
+
+									for (int i = 1; i <= MAX_PLAYERS; i++)
+									{
+										if (g_PlayerInfoList[i].name && g_PlayerInfoList[i].name[0] && !strcmp(g_PlayerInfoList[i].name, name))
+										{
+											slot = i;
+											break;
+										}
+									}
+
+									std::swap<char>(name[userid - name - 2], stringTerm);
+
+									if (slot > 0)
+									{
+										steamid++; // space
+										char *steamidend = strchr(steamid, ' ');
+										if (steamidend != NULL)
+											*steamidend = 0;
+										if (!strncmp(steamid, "STEAM_", 6) ||
+											!strncmp(steamid, "VALVE_", 6))
+											strncpy(g_PlayerSteamId[slot], steamid + 6, MAX_STEAMID); // cutout "STEAM_" or "VALVE_" start of the string
+										else
+											strncpy(g_PlayerSteamId[slot], steamid, MAX_STEAMID);
+										g_PlayerSteamId[slot][MAX_STEAMID] = 0;
+									}
 									else
-										strncpy(g_PlayerSteamId[slot], steamid, MAX_STEAMID);
-									g_PlayerSteamId[slot][MAX_STEAMID] = 0;
+									{
+										ConPrintf(RGBA(255, 0, 0), "[BUG] SvcPrint: Unable to find player's slot\n");
+										ConPrintf(RGBA(255, 0, 0), "[BUG] Status string:\n");
+										ConPrintf(RGBA(255, 0, 0), "[BUG] %s\n", str);
+									}
 								}
 							}
 						}
