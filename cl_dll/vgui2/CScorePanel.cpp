@@ -28,6 +28,7 @@
 #include "CPngImage.h"
 #include "CHudScoreBoard.h"
 #include "../vgui_TeamFortressViewport.h"
+#include "../vgui_ScorePanel.h"
 
 #ifdef CSCOREBOARD_DEBUG
 #define DebugPrintf ConPrintf
@@ -207,6 +208,17 @@ void CScorePanel::FullUpdate()
 	{
 		SetSortByFrags();
 		m_pEffSortSwitch->ToggleButton::SetSelected(false);
+	}
+
+	for (int i = 1; i <= MAX_PLAYERS; i++)
+	{
+		if (g_PlayerInfoList[i].name &&
+			g_PlayerInfoList[i].name[0] &&
+			g_PlayerSteamId[i][0] == 0)
+		{
+			gViewPort->GetScoreBoard()->SendStatusRequest();	// call to VGUI1 Scoreboard
+			break;
+		}
 	}
 
 	UpdateServerName();
