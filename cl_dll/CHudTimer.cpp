@@ -57,9 +57,9 @@ void CHudTimer::Init()
 
 	m_iFlags |= HUD_ACTIVE;
 
-	m_pCvarHudTimer = gEngfuncs.pfnRegisterVariable("hud_timer", "1", FCVAR_ARCHIVE);
-	m_pCvarHudTimerSync = gEngfuncs.pfnRegisterVariable("hud_timer_sync", "1", FCVAR_ARCHIVE);
-	m_pCvarHudNextmap = gEngfuncs.pfnRegisterVariable("hud_nextmap", "1", FCVAR_ARCHIVE);
+	m_pCvarHudTimer = gEngfuncs.pfnRegisterVariable("hud_timer", "1", FCVAR_BHL_ARCHIVE);
+	m_pCvarHudTimerSync = gEngfuncs.pfnRegisterVariable("hud_timer_sync", "1", FCVAR_BHL_ARCHIVE);
+	m_pCvarHudNextmap = gEngfuncs.pfnRegisterVariable("hud_nextmap", "1", FCVAR_BHL_ARCHIVE);
 };
 
 void CHudTimer::VidInit()

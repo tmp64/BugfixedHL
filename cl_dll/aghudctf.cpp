@@ -47,7 +47,7 @@ void AgHudCTF::Init()
 	g_iPlayerFlag1 = 0;
 	g_iPlayerFlag2 = 0;
 
-	m_pCvarClCtfVolume = gEngfuncs.pfnRegisterVariable("cl_ctf_volume", "1", FCVAR_ARCHIVE);
+	m_pCvarClCtfVolume = gEngfuncs.pfnRegisterVariable("cl_ctf_volume", "1", FCVAR_BHL_ARCHIVE);
 }
 
 void AgHudCTF::VidInit()

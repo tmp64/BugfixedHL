@@ -497,12 +497,12 @@ void ResultsThink(void)
 // Registers cvars and commands.
 void ResultsInit(void)
 {
-	m_pCvarResultsFileFormat = gEngfuncs.pfnRegisterVariable("results_file_format", g_szDefaultFilenameFormat, FCVAR_ARCHIVE);
-	m_pCvarResultsCounterFormat = gEngfuncs.pfnRegisterVariable("results_counter_format", g_szDefaultCounterFormat, FCVAR_ARCHIVE);
-	m_pCvarResultsDemoAutorecord = gEngfuncs.pfnRegisterVariable("results_demo_autorecord", "0", FCVAR_ARCHIVE);
-	m_pCvarResultsDemoKeepDays = gEngfuncs.pfnRegisterVariable("results_demo_keepdays", "14", FCVAR_ARCHIVE);
-	m_pCvarResultsLogChat = gEngfuncs.pfnRegisterVariable("results_log_chat", "0", FCVAR_ARCHIVE);
-	m_pCvarResultsLogOther = gEngfuncs.pfnRegisterVariable("results_log_other", "0", FCVAR_ARCHIVE);
+	m_pCvarResultsFileFormat = gEngfuncs.pfnRegisterVariable("results_file_format", g_szDefaultFilenameFormat, FCVAR_BHL_ARCHIVE);
+	m_pCvarResultsCounterFormat = gEngfuncs.pfnRegisterVariable("results_counter_format", g_szDefaultCounterFormat, FCVAR_BHL_ARCHIVE);
+	m_pCvarResultsDemoAutorecord = gEngfuncs.pfnRegisterVariable("results_demo_autorecord", "0", FCVAR_BHL_ARCHIVE);
+	m_pCvarResultsDemoKeepDays = gEngfuncs.pfnRegisterVariable("results_demo_keepdays", "14", FCVAR_BHL_ARCHIVE);
+	m_pCvarResultsLogChat = gEngfuncs.pfnRegisterVariable("results_log_chat", "0", FCVAR_BHL_ARCHIVE);
+	m_pCvarResultsLogOther = gEngfuncs.pfnRegisterVariable("results_log_other", "0", FCVAR_BHL_ARCHIVE);
 
 	gEngfuncs.pfnAddCommand("agrecord", ResultsStartDemoRecord);
 

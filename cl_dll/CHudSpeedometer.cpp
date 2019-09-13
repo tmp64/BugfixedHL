@@ -8,7 +8,7 @@ void CHudSpeedometer::Init()
 {
 	m_iFlags = HUD_ACTIVE;
 	
-	m_pCvarSpeedometer = CVAR_CREATE("hud_speedometer", "0", FCVAR_ARCHIVE);
+	m_pCvarSpeedometer = CVAR_CREATE("hud_speedometer", "0", FCVAR_BHL_ARCHIVE);
 }
 
 void CHudSpeedometer::VidInit()

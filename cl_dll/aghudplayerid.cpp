@@ -19,7 +19,7 @@ void AgHudPlayerId::Init()
 	m_iHealth = 0;
 	m_iArmour = 0;
 
-	m_pCvarHudPlayerId = gEngfuncs.pfnRegisterVariable("hud_playerid", "1", FCVAR_ARCHIVE);
+	m_pCvarHudPlayerId = gEngfuncs.pfnRegisterVariable("hud_playerid", "1", FCVAR_BHL_ARCHIVE);
 }
 
 void AgHudPlayerId::VidInit()

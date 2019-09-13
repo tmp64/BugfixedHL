@@ -1501,11 +1501,11 @@ void PatchGameUi(void)
 // Registers cvars and hooks commands
 void MemoryPatcherInit(void)
 {
-	m_pCvarEngineFixFpsBug = gEngfuncs.pfnRegisterVariable("engine_fix_fpsbug", "1", FCVAR_ARCHIVE);
-	m_pCvarEngineSnapshotHook = gEngfuncs.pfnRegisterVariable("engine_snapshot_hook", "1", FCVAR_ARCHIVE);
-	m_pCvarSnapshotJpeg = gEngfuncs.pfnRegisterVariable("snapshot_jpeg", "1", FCVAR_ARCHIVE);
-	m_pCvarSnapshotJpegQuality = gEngfuncs.pfnRegisterVariable("snapshot_jpeg_quality", "95", FCVAR_ARCHIVE);
-	m_pCvarSnapshotJpegPoolSize = gEngfuncs.pfnRegisterVariable("snapshot_jpeg_poolsize", "10", FCVAR_ARCHIVE);
+	m_pCvarEngineFixFpsBug = gEngfuncs.pfnRegisterVariable("engine_fix_fpsbug", "1", FCVAR_BHL_ARCHIVE);
+	m_pCvarEngineSnapshotHook = gEngfuncs.pfnRegisterVariable("engine_snapshot_hook", "1", FCVAR_BHL_ARCHIVE);
+	m_pCvarSnapshotJpeg = gEngfuncs.pfnRegisterVariable("snapshot_jpeg", "1", FCVAR_BHL_ARCHIVE);
+	m_pCvarSnapshotJpegQuality = gEngfuncs.pfnRegisterVariable("snapshot_jpeg_quality", "95", FCVAR_BHL_ARCHIVE);
+	m_pCvarSnapshotJpegPoolSize = gEngfuncs.pfnRegisterVariable("snapshot_jpeg_poolsize", "10", FCVAR_BHL_ARCHIVE);
 
 	HOOK_COMMAND("togglefullscreen", ToggleFullScreen);
 	HOOK_COMMAND("fs", ToggleFullScreen);	// shortcut

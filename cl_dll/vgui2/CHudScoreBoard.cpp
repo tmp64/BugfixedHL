@@ -13,17 +13,17 @@
 
 void CHudScoreBoard::Init()
 {
-	m_CvarMouseBtn = CVAR_CREATE("hud_scoreboard_mousebtn", "1", FCVAR_ARCHIVE);
-	m_CvarAvatars = CVAR_CREATE("hud_scoreboard_showavatars", "1", FCVAR_ARCHIVE);
-	m_CvarLoss = CVAR_CREATE("hud_scoreboard_showloss", "1", FCVAR_ARCHIVE);
-	m_CvarEffSort = CVAR_CREATE("hud_scoreboard_effsort", "0", FCVAR_ARCHIVE);
-	m_CvarEffType = CVAR_CREATE("hud_scoreboard_efftype", "1", FCVAR_ARCHIVE);
-	m_CvarEffPercent = CVAR_CREATE("hud_scoreboard_effpercent", "0", FCVAR_ARCHIVE);
-	m_CvarShowSteamId = CVAR_CREATE("hud_scoreboard_showsteamid", "1", FCVAR_ARCHIVE);
-	m_CvarShowEff = CVAR_CREATE("hud_scoreboard_showeff", "1", FCVAR_ARCHIVE);
-	m_CvarSize = CVAR_CREATE("hud_scoreboard_size", "0", FCVAR_ARCHIVE);
-	m_CvarSpacingNormal = CVAR_CREATE("hud_scoreboard_spacing_normal", "0", FCVAR_ARCHIVE);
-	m_CvarSpacingCompact = CVAR_CREATE("hud_scoreboard_spacing_compact", "0", FCVAR_ARCHIVE);
+	m_CvarMouseBtn = CVAR_CREATE("hud_scoreboard_mousebtn", "1", FCVAR_BHL_ARCHIVE);
+	m_CvarAvatars = CVAR_CREATE("hud_scoreboard_showavatars", "1", FCVAR_BHL_ARCHIVE);
+	m_CvarLoss = CVAR_CREATE("hud_scoreboard_showloss", "1", FCVAR_BHL_ARCHIVE);
+	m_CvarEffSort = CVAR_CREATE("hud_scoreboard_effsort", "0", FCVAR_BHL_ARCHIVE);
+	m_CvarEffType = CVAR_CREATE("hud_scoreboard_efftype", "1", FCVAR_BHL_ARCHIVE);
+	m_CvarEffPercent = CVAR_CREATE("hud_scoreboard_effpercent", "0", FCVAR_BHL_ARCHIVE);
+	m_CvarShowSteamId = CVAR_CREATE("hud_scoreboard_showsteamid", "1", FCVAR_BHL_ARCHIVE);
+	m_CvarShowEff = CVAR_CREATE("hud_scoreboard_showeff", "1", FCVAR_BHL_ARCHIVE);
+	m_CvarSize = CVAR_CREATE("hud_scoreboard_size", "0", FCVAR_BHL_ARCHIVE);
+	m_CvarSpacingNormal = CVAR_CREATE("hud_scoreboard_spacing_normal", "0", FCVAR_BHL_ARCHIVE);
+	m_CvarSpacingCompact = CVAR_CREATE("hud_scoreboard_spacing_compact", "0", FCVAR_BHL_ARCHIVE);
 	m_iFlags |= HUD_ACTIVE;
 	m_pScorePanel = dynamic_cast<CScorePanel *>(g_pViewport->FindPanelByName(VIEWPORT_PANEL_SCORE));
 	Assert(m_pScorePanel);

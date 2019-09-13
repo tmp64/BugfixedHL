@@ -157,6 +157,8 @@ add_sources(
     ../dlls/tripmine.cpp
     memory.h
     memory_common.cpp
+	bhlcfg.h
+	bhlcfg.cpp
 )
 
 if( MSVC )

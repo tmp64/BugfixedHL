@@ -81,10 +81,10 @@ void CHudSayText :: Init( void )
 
 	m_HUD_saytext = CVAR_CREATE( "hud_saytext", "1", 0 );
 	m_HUD_saytext_time = CVAR_CREATE( "hud_saytext_time", "5", 0 );
-	m_pCvarConSayColor = CVAR_CREATE( "con_say_color", "30 230 50", FCVAR_ARCHIVE );
-	m_pCvarOldInputPos = CVAR_CREATE("hud_saytext_oldpos", "0", FCVAR_ARCHIVE);
+	m_pCvarConSayColor = CVAR_CREATE( "con_say_color", "30 230 50", FCVAR_BHL_ARCHIVE );
+	m_pCvarOldInputPos = CVAR_CREATE("hud_saytext_oldpos", "0", FCVAR_BHL_ARCHIVE);
 #ifdef USE_VGUI2
-	m_pCvarOldChat = CVAR_CREATE("hud_saytext_oldchat", "0", FCVAR_ARCHIVE);
+	m_pCvarOldChat = CVAR_CREATE("hud_saytext_oldchat", "0", FCVAR_BHL_ARCHIVE);
 #endif
 
 	m_iFlags |= HUD_INTERMISSION; // is always drawn during an intermission

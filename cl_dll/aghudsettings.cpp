@@ -29,7 +29,7 @@ void AgHudSettings::Init()
 	m_szBlastRadius[0] = '\0';
 	m_flTurnoff = 0.0;
 
-	m_pCvarHudSettings = gEngfuncs.pfnRegisterVariable("hud_settings", "1", FCVAR_ARCHIVE);
+	m_pCvarHudSettings = gEngfuncs.pfnRegisterVariable("hud_settings", "1", FCVAR_BHL_ARCHIVE);
 }
 
 void AgHudSettings::VidInit()

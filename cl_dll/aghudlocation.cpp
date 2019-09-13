@@ -36,7 +36,7 @@ void AgHudLocation::Init()
 	HOOK_COMMAND("agdelloc", DeleteLocation);
 	HOOK_COMMAND("aglistloc", ShowLocations);
 
-	m_pCvarLocationKeywords = gEngfuncs.pfnRegisterVariable("cl_location_keywords", "0", FCVAR_ARCHIVE);
+	m_pCvarLocationKeywords = gEngfuncs.pfnRegisterVariable("cl_location_keywords", "0", FCVAR_BHL_ARCHIVE);
 }
 
 void AgHudLocation::VidInit()

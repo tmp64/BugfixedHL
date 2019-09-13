@@ -27,8 +27,8 @@
 
 void CHudScores::Init()
 {
-	m_pCvarHudScores = CVAR_CREATE("hud_scores", "0", FCVAR_ARCHIVE);
-	m_pCvarHudScoresPos = CVAR_CREATE("hud_scores_pos", "30 50", FCVAR_ARCHIVE);
+	m_pCvarHudScores = CVAR_CREATE("hud_scores", "0", FCVAR_BHL_ARCHIVE);
+	m_pCvarHudScoresPos = CVAR_CREATE("hud_scores_pos", "30 50", FCVAR_BHL_ARCHIVE);
 
 	m_iFlags |= HUD_ACTIVE;
 }

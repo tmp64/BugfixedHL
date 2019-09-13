@@ -297,7 +297,7 @@ void CHudAmmo::Init()
 
 	CVAR_CREATE( "hud_drawhistory_time", HISTORY_DRAW_TIME, 0 );
 	CVAR_CREATE( "hud_fastswitch", "0", FCVAR_ARCHIVE );		// controls whether or not weapons can be selected in one keypress
-	m_pCvarHudWeapon = CVAR_CREATE( "hud_weapon", "0", FCVAR_ARCHIVE );			// controls displaying sprite of currently selected weapon
+	m_pCvarHudWeapon = CVAR_CREATE( "hud_weapon", "0", FCVAR_BHL_ARCHIVE );			// controls displaying sprite of currently selected weapon
 
 	m_iFlags |= HUD_ACTIVE; //!!!
 

@@ -14,18 +14,18 @@ CHudCrosshair::CHudCrosshair()
 
 void CHudCrosshair::Init()
 {
-	m_CustomCrosshair.enable = CVAR_CREATE("cl_crosshair_custom", "0", FCVAR_ARCHIVE);
-	m_CustomCrosshair.red = CVAR_CREATE("cl_crosshair_red", "0", FCVAR_ARCHIVE);
-	m_CustomCrosshair.green = CVAR_CREATE("cl_crosshair_green", "255", FCVAR_ARCHIVE);
-	m_CustomCrosshair.blue = CVAR_CREATE("cl_crosshair_blue", "255", FCVAR_ARCHIVE);
-	m_CustomCrosshair.gap = CVAR_CREATE("cl_crosshair_gap", "8", FCVAR_ARCHIVE);
-	m_CustomCrosshair.size = CVAR_CREATE("cl_crosshair_size", "6", FCVAR_ARCHIVE);
-	m_CustomCrosshair.thickness = CVAR_CREATE("cl_crosshair_thickness", "2", FCVAR_ARCHIVE);
+	m_CustomCrosshair.enable = CVAR_CREATE("cl_crosshair_custom", "0", FCVAR_BHL_ARCHIVE);
+	m_CustomCrosshair.red = CVAR_CREATE("cl_crosshair_red", "0", FCVAR_BHL_ARCHIVE);
+	m_CustomCrosshair.green = CVAR_CREATE("cl_crosshair_green", "255", FCVAR_BHL_ARCHIVE);
+	m_CustomCrosshair.blue = CVAR_CREATE("cl_crosshair_blue", "255", FCVAR_BHL_ARCHIVE);
+	m_CustomCrosshair.gap = CVAR_CREATE("cl_crosshair_gap", "8", FCVAR_BHL_ARCHIVE);
+	m_CustomCrosshair.size = CVAR_CREATE("cl_crosshair_size", "6", FCVAR_BHL_ARCHIVE);
+	m_CustomCrosshair.thickness = CVAR_CREATE("cl_crosshair_thickness", "2", FCVAR_BHL_ARCHIVE);
 #ifdef USE_VGUI2
-	m_CustomCrosshair.outline_thickness = CVAR_CREATE("cl_crosshair_outline_thickness", "0", FCVAR_ARCHIVE);
+	m_CustomCrosshair.outline_thickness = CVAR_CREATE("cl_crosshair_outline_thickness", "0", FCVAR_BHL_ARCHIVE);
 #endif
-	m_CustomCrosshair.dot = CVAR_CREATE("cl_crosshair_dot", "0", FCVAR_ARCHIVE);
-	m_CustomCrosshair.t = CVAR_CREATE("cl_crosshair_t", "0", FCVAR_ARCHIVE);
+	m_CustomCrosshair.dot = CVAR_CREATE("cl_crosshair_dot", "0", FCVAR_BHL_ARCHIVE);
+	m_CustomCrosshair.t = CVAR_CREATE("cl_crosshair_t", "0", FCVAR_BHL_ARCHIVE);
 
 	m_iFlags |= HUD_ACTIVE; //!!!
 }

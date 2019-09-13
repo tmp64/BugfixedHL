@@ -529,12 +529,12 @@ void ProtectHelp(void)
 // Registers cvars and commands
 void SvcMessagesInit(void)
 {
-	m_pCvarClLogMessages = gEngfuncs.pfnRegisterVariable("cl_messages_log", "0", FCVAR_ARCHIVE);
+	m_pCvarClLogMessages = gEngfuncs.pfnRegisterVariable("cl_messages_log", "0", FCVAR_BHL_ARCHIVE);
 	gEngfuncs.pfnAddCommand("cl_messages_dump", DumpUserMessages);
 
-	m_pCvarClProtectLog = gEngfuncs.pfnRegisterVariable("cl_protect_log", "1", FCVAR_ARCHIVE);
-	m_pCvarClProtectBlock = gEngfuncs.pfnRegisterVariable("cl_protect_block", "", FCVAR_ARCHIVE);
-	m_pCvarClProtectAllow = gEngfuncs.pfnRegisterVariable("cl_protect_allow", "", FCVAR_ARCHIVE);
-	m_pCvarClProtectBlockCvar = gEngfuncs.pfnRegisterVariable("cl_protect_block_cvar", "", FCVAR_ARCHIVE);
+	m_pCvarClProtectLog = gEngfuncs.pfnRegisterVariable("cl_protect_log", "1", FCVAR_BHL_ARCHIVE);
+	m_pCvarClProtectBlock = gEngfuncs.pfnRegisterVariable("cl_protect_block", "", FCVAR_BHL_ARCHIVE);
+	m_pCvarClProtectAllow = gEngfuncs.pfnRegisterVariable("cl_protect_allow", "", FCVAR_BHL_ARCHIVE);
+	m_pCvarClProtectBlockCvar = gEngfuncs.pfnRegisterVariable("cl_protect_block_cvar", "", FCVAR_BHL_ARCHIVE);
 	gEngfuncs.pfnAddCommand("cl_protect", ProtectHelp);
 }

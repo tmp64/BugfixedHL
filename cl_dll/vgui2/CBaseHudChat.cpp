@@ -615,11 +615,11 @@ CBaseHudChat::CBaseHudChat() : CHudBase(), BaseClass( NULL, "HudChat" )
 	// "Enable/disable text messages printing on the screen."
 	cl_showtextmsg = CVAR_CREATE("cl_showtextmsg", "1", 0);
 	// Stores the chat filter settings
-	cl_chatfilters = CVAR_CREATE("cl_chatfilters", "63", FCVAR_CLIENTDLL | FCVAR_ARCHIVE);
+	cl_chatfilters = CVAR_CREATE("cl_chatfilters", "63", FCVAR_CLIENTDLL | FCVAR_BHL_ARCHIVE);
 	// Stores the chat filter version
-	cl_chatfilter_version = CVAR_CREATE("cl_chatfilter_version", "0", FCVAR_CLIENTDLL | FCVAR_ARCHIVE);
+	cl_chatfilter_version = CVAR_CREATE("cl_chatfilter_version", "0", FCVAR_CLIENTDLL | FCVAR_BHL_ARCHIVE);
 	// If 1, then all communications from a player will be blocked when that player is muted, including chat messages.
-	cl_mute_all_comms = CVAR_CREATE("cl_mute_all_comms", "1", FCVAR_ARCHIVE);
+	cl_mute_all_comms = CVAR_CREATE("cl_mute_all_comms", "1", FCVAR_BHL_ARCHIVE);
 
 	SetParent( g_pViewport );
 	SetProportional(true);
