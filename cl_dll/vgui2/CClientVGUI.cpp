@@ -26,6 +26,9 @@
 #include "CHudBase.h"
 #include "cl_util.h"
 
+// Hack to allow creating ImagePanel from .res files
+#include <vgui_controls/ImagePanel.h>
+
 static SpewOutputFunc_t g_fnDefaultSpewFunc = nullptr;
 
 namespace
@@ -118,6 +121,13 @@ void CClientVGUI::Initialize( CreateInterfaceFn* pFactories, int iNumFactories )
 	new CHudViewport();
 
 	g_pViewport->Initialize( pFactories, iNumFactories );
+
+	// Hack
+	volatile bool kostyl = false;
+	if (kostyl)
+	{
+		new vgui2::ImagePanel(nullptr, nullptr);
+	}
 }
 
 void CClientVGUI::Start()
