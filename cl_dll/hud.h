@@ -84,6 +84,27 @@ class AgHudVote;
 extern int g_iColorsCodes[10][3];
 
 //-----------------------------------------------------
+// Possible values for gHUD.m_pCvarColorText
+//-----------------------------------------------------
+enum E_ColorCodeMode
+{
+	COLOR_CODES_OFF = 0,	// Color codes will be ignored like in vanilla game
+	COLOR_CODES_ON,			// Color codes will color the text
+	COLOR_CODES_REMOVE		// Color codes will be removed without coloring
+};
+
+// Checks whether c is a digit from 0 to 9
+inline bool IsColorCodeCharValid(char c)
+{
+	return (c >= '0' && c <= '9');
+}
+
+inline bool IsColorCodeCharValid(wchar_t c)
+{
+	return (c >= L'0' && c <= L'9');
+}
+
+//-----------------------------------------------------
 // Game info structures declaration
 //-----------------------------------------------------
 struct extra_player_info_t 
@@ -285,6 +306,7 @@ public:
 	void GetHudAmmoColor(int value, int maxvalue, int &r, int &g, int &b);
 	float GetHudTransparency();
 	void UpdateSupportsCvar();
+	E_ColorCodeMode GetColorCodeMode();
 
 	inline const char *GetServerName()
 	{

@@ -1107,6 +1107,19 @@ void CHud::UpdateSupportsCvar()
 	ClientCmd(buf);
 }
 
+E_ColorCodeMode CHud::GetColorCodeMode()
+{
+	if (gHUD.m_pCvarColorText->value)
+	{
+		if (gHUD.m_pCvarColorText->value == 2)
+			return COLOR_CODES_REMOVE;
+		else
+			return COLOR_CODES_ON;
+	}
+	else
+		return COLOR_CODES_OFF;
+}
+
 void GetConsoleStringSize(const char *string, int *width, int *height)
 {
 	if (gHUD.m_pCvarColorText->value == 0)

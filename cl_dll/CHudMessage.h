@@ -39,7 +39,7 @@ public:
 	void MessageAdd(client_textmessage_t * newMessage);
 	void MessageDrawScan(client_textmessage_t *pMessage, float time, const std::wstring &wstr);
 	void MessageScanStart(void);
-	void MessageScanNextChar(void);
+	void MessageScanNextChar(RGBA srcColor);
 	void Reset(void);
 
 	void CStrToWide(const char *pString, std::wstring &wstr);
@@ -54,8 +54,6 @@ private:
 
 	int m_HUD_title_life;
 	int m_HUD_title_half;
-	RGBA m_cColorNow;
-	bool m_bIsColorCoded = false;
 };
 
 #endif
