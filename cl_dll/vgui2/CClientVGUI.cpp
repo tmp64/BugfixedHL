@@ -94,7 +94,12 @@ void CClientVGUI::Initialize( CreateInterfaceFn* pFactories, int iNumFactories )
 	g_fnDefaultSpewFunc = GetSpewOutputFunc();
 	SpewOutputFunc([](SpewType_t spewType, tchar const *pMsg) -> SpewRetval_t
 	{
-		if (spewType == SPEW_ERROR)
+		if (spewType == SPEW_ASSERT)
+		{
+			ConPrintf(RGBA(247, 83, 74), "%s", pMsg);	// Print in red
+			return SPEW_DEBUGGER;
+		}
+		else if (spewType == SPEW_ERROR)
 			ConPrintf(RGBA(247, 83, 74), "%s", pMsg);	// Print in red
 		else
 			ConPrintf("%s", pMsg);
