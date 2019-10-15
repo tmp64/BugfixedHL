@@ -53,3 +53,5 @@ if( USE_UPDATER )
 		CUpdateNotificationDialog.cpp
 	)
 endif()
+
+add_subdirectory( options )

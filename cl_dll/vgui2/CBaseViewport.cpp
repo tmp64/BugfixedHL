@@ -495,3 +495,19 @@ void CBaseViewport::SetIsCreatingGameUIPanel(bool state)
 {
 	g_bIsCreatingGameUIPanel = state;
 }
+
+bool CBaseViewport::DeleteGameUIPanel(IGameUIPanel *pPanel)
+{
+	auto count = m_GameUIPanels.Count();
+
+	for (decltype(count) iIndex = 0; iIndex < count; ++iIndex)
+	{
+		if (m_GameUIPanels[iIndex] == pPanel)
+		{
+			delete m_GameUIPanels[iIndex];
+			m_GameUIPanels.Remove(iIndex);
+			return true;
+		}
+	}
+	return false;
+}

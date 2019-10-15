@@ -16,4 +16,9 @@
 */
 #define GAMEUI_UPDATE_NOTIF "UpdateNotificationialog"
 
+/**
+*	GameUI Test panel.
+*/
+#define GAMEUI_ADV_OPTIONS "AdvOptionsDialog"
+
 #endif //GAMEUIPANELNAMES_H

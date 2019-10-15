@@ -12,6 +12,7 @@
 #include <vgui_controls/Frame.h>
 
 #include <vgui/ISurface.h>
+#include <vgui/ILocalize.h>
 
 #include "IGameUIFuncs.h"
 #include "IBaseUI.h"
@@ -21,6 +22,7 @@
 
 #include "KeyValuesCompat.h"
 
+#include "VGUI2Paths.h"
 #include "CClientVGUI.h"
 #include "IEngineVgui.h"
 #include "CHudBase.h"
@@ -121,6 +123,9 @@ void CClientVGUI::Initialize( CreateInterfaceFn* pFactories, int iNumFactories )
 	g_GameUIFuncs = ( IGameUIFuncs* ) pFactories[ 0 ]( IGAMEUIFUNCS_NAME, nullptr );
 	g_pBaseUI = ( IBaseUI* ) pFactories[ 0 ]( IBASEUI_NAME, nullptr );
 	g_EngineVgui = (IEngineVGui* ) pFactories[ 0 ](VENGINE_VGUI_VERSION, nullptr );
+
+	// Add language files
+	vgui2::localize()->AddFile(vgui2::filesystem(), UI_LANGUAGE_DIR "/bugfixedhl_%language%.txt");
 
 	//Constructor sets itself as the viewport.
 	new CHudViewport();

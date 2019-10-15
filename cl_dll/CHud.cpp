@@ -69,6 +69,7 @@
 #include <vgui/ISurface.h>
 #include <vgui_controls/Controls.h>
 #include <vgui_controls/TextImage.h>
+#include "vgui2/options/colorpicker/CTextureManager.h"
 #endif
 
 //-----------------------------------------------------
@@ -632,6 +633,7 @@ void CHud :: Init( void )
 
 #ifdef USE_VGUI2
 	vgui2::TextImage::SetColorsArrayPointer(&g_iColorsCodes);
+	colorpicker::gTexMgr.Init();
 	g_pViewport->ReloadScheme();
 #endif
 
@@ -663,11 +665,22 @@ void CHud :: Shutdown()
 	}
 #endif
 
+#ifdef USE_VGUI2
+	colorpicker::gTexMgr.Shutdown();
+#endif
+
 	bhlcfg::Shutdown();
 }
 
 void CHud::Frame(double time)
 {
+	while (m_NextFrameQueue.size())
+	{
+		auto &i = m_NextFrameQueue.front();
+		i();
+		m_NextFrameQueue.pop();
+	}
+
 #ifdef USE_UPDATER
 	if (!m_bUpdatesChecked && time >= 0.05 )		// Wait for config.cfg to be executed
 	{
@@ -675,6 +688,10 @@ void CHud::Frame(double time)
 		if (m_pCvarCheckUpdates->value)
 			gGameUpdater->CheckForUpdates();
 	}
+#endif
+
+#ifdef USE_VGUI2
+	colorpicker::gTexMgr.RunFrame();
 #endif
 }
 
@@ -1118,6 +1135,12 @@ E_ColorCodeMode CHud::GetColorCodeMode()
 	}
 	else
 		return COLOR_CODES_OFF;
+}
+
+void CHud::CallOnNextFrame(std::function<void()> f)
+{
+	assert(f);
+	m_NextFrameQueue.push(f);
 }
 
 void GetConsoleStringSize(const char *string, int *width, int *height)

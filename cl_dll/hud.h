@@ -25,6 +25,8 @@
 
 #include <list>
 #include <memory>
+#include <queue>
+#include <functional>
 #include "wrect.h"
 #include "cl_dll.h"
 #include "ammo.h"
@@ -325,6 +327,8 @@ public:
 	}
 #endif
 
+	void CallOnNextFrame(std::function<void()> f);
+
 private:
 	std::list<CHudBase *>	m_HudList;
 	HLHSPRITE				m_hsprLogo;
@@ -369,6 +373,8 @@ private:
 #ifdef USE_UPDATER
 	bool m_bUpdatesChecked = false;
 #endif
+
+	std::queue<std::function<void()>> m_NextFrameQueue;
 
 	friend class CHudBase;
 };
