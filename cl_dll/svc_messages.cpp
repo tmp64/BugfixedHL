@@ -11,7 +11,6 @@
 
 #include <string.h>
 #include <time.h>
-//#include <string>
 #include <algorithm>
 
 #include "hud.h"
@@ -272,7 +271,7 @@ void SvcPrint(void)
 									// Replace '\"' in the string with a null-terminator
 									//   to later be used in strcmp
 									char stringTerm = '\0';
-									std::swap<char>(name[userid - name - 2], stringTerm);
+									std::swap(name[userid - name - 2], stringTerm);
 
 									for (int i = 1; i <= MAX_PLAYERS; i++)
 									{
@@ -283,7 +282,7 @@ void SvcPrint(void)
 										}
 									}
 
-									std::swap<char>(name[userid - name - 2], stringTerm);
+									std::swap(name[userid - name - 2], stringTerm);
 
 									if (slot > 0)
 									{
