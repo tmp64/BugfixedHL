@@ -143,8 +143,8 @@ std::vector<std::vector<unsigned char>> &colorpicker::CTextureManager::CWorker::
 
 void colorpicker::CTextureManager::CWorker::ClearRgba()
 {
-	m_BarRgba.clear();
-	m_PickerRgba.clear();
+	std::vector<unsigned char>().swap(m_BarRgba);
+	std::vector<std::vector<unsigned char>>().swap(m_PickerRgba);
 }
 
 void colorpicker::CTextureManager::CWorker::operator()()
