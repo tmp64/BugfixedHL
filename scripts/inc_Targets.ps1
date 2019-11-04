@@ -34,6 +34,7 @@ elseif ($target -eq 'ClientVGUI2')
     $TARGET_GAME_FILES += $TARGET_COMMON_FILES;
     $TARGET_GAME_FILES += @(
         ,@('gamedir/ui', 'ui')
+        ,@('gamedir/resource', 'resource')
     );
 }
 elseif ($target -eq 'Client4554')
@@ -45,6 +46,7 @@ elseif ($target -eq 'Client4554')
     $TARGET_GAME_FILES += $TARGET_COMMON_FILES;
     $TARGET_GAME_FILES += @(
         ,@('gamedir/ui', 'ui')
+        ,@('gamedir/resource', 'resource')
     );
 }
 elseif ($target -eq 'Server')
