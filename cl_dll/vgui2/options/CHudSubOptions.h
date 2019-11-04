@@ -6,7 +6,6 @@ namespace vgui2
 {
 	class Label;
 	class Slider;
-	class ComboBox;
 }
 
 class CCvarTextEntry;

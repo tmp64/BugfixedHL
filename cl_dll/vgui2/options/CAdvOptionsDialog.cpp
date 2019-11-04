@@ -10,6 +10,7 @@
 #include "vgui_controls/PropertySheet.h"
 
 #include "CHudSubOptions.h"
+#include "CChatSubOptions.h"
 
 static void OpenAdvOptionsCommand()
 {
@@ -68,6 +69,7 @@ CAdvOptionsDialog::CAdvOptionsDialog(vgui2::VPANEL parent) : BaseClass(nullptr, 
 	SetTitle("#BHL_AdvOptions", true);
 
 	AddPage(new CHudSubOptions(this), "#BHL_AdvOptions_HUD");
+	AddPage(new CChatSubOptions(this), "#BHL_AdvOptions_Chat");
 
 	SetApplyButtonVisible(true);
 	EnableApplyButton(true);

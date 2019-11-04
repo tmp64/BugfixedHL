@@ -5,6 +5,8 @@ add_sources(
 	
 	CHudSubOptions.h
 	CHudSubOptions.cpp
+	CChatSubOptions.h
+	CChatSubOptions.cpp
 	
 	CCvarTextEntry.h
 	CCvarTextEntry.cpp
