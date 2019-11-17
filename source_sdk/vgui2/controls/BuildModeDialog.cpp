@@ -452,6 +452,8 @@ void BuildModeDialog::ApplySchemeSettings( IScheme *pScheme )
 	m_pShiftValue->SetFont( font );
 	m_pShiftXButton->SetFont( font );
 	m_pShiftYButton->SetFont( font );
+
+	SetPaintBackgroundType(2);
 }
 
 //-----------------------------------------------------------------------------
