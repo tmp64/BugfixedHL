@@ -12,12 +12,15 @@ CCvarColor::CCvarColor(vgui2::Panel *parent, const char *panelName, const char *
 	m_pColorPicker = new CColorPicker(this, "ColorPicker", cvarTitle);
 	m_pColorPicker->AddActionSignalTarget(this);
 
-	m_pCvar = gEngfuncs.pfnGetCvarPointer(cvarName);
-	if (!m_pCvar)
+	if (cvarName)
 	{
-		Msg("%s [CCvarSlider]: cvar '%s' not found.\n", panelName, cvarName);
+		m_pCvar = gEngfuncs.pfnGetCvarPointer(cvarName);
+		if (!m_pCvar)
+		{
+			Msg("%s [CCvarColor]: cvar '%s' not found.\n", panelName, cvarName);
+		}
+		ResetData();
 	}
-	ResetData();
 }
 
 void CCvarColor::ApplySchemeSettings(vgui2::IScheme *pScheme)
@@ -27,7 +30,7 @@ void CCvarColor::ApplySchemeSettings(vgui2::IScheme *pScheme)
 	SetSize(128, TALL);
 	m_pPreview->SetBounds(0, 0, 48, TALL);
 	m_pPreview->SetPaintBackgroundEnabled(true);
-	m_pPreview->SetBgColor(SDK_Color(0, 0, 0, 255));
+	m_pPreview->SetBgColor(m_NewColor);
 	m_pPreview->SetBorder(pScheme->GetBorder("DepressedBorder"));
 	m_pBtn->SetPos(52, 0);
 }
@@ -48,9 +51,7 @@ void CCvarColor::ResetData()
 		RGBA rgba;
 		if (ParseColor(m_pCvar->string, rgba))
 		{
-			m_NewColor = SDK_Color(rgba.r, rgba.g, rgba.b, rgba.a);
-			m_pPreview->SetBgColor(m_NewColor);
-			m_pColorPicker->SetInitialColor(m_NewColor);
+			SetInitialColor(SDK_Color(rgba.r, rgba.g, rgba.b, rgba.a));
 		}
 	}
 }
@@ -62,7 +63,20 @@ void CCvarColor::ApplyChanges()
 		char buf[128];
 		snprintf(buf, sizeof(buf), "%s \"%d %d %d\"", m_pCvar->name, m_NewColor.r(), m_NewColor.g(), m_NewColor.b());
 		gEngfuncs.pfnClientCmd(buf);
+		SetInitialColor(m_NewColor);
 	}
+}
+
+void CCvarColor::SetInitialColor(SDK_Color c)
+{
+	m_NewColor = c;
+	m_pPreview->SetBgColor(m_NewColor);
+	m_pColorPicker->SetInitialColor(m_NewColor);
+}
+
+SDK_Color CCvarColor::GetSelectedColor()
+{
+	return m_NewColor;
 }
 
 void CCvarColor::OnColorPicked(KeyValues *kv)
