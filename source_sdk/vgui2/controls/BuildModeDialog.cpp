@@ -378,6 +378,20 @@ void BuildModeDialog::CreateControls()
 	m_pVarsButton = new MenuButton(this, "VarsButton", "Variables");
 	m_pVarsButton->SetSize(72, buttonH);
 	m_pVarsButton->SetOpenDirection(Menu::UP);
+
+	m_pShiftLabel = new Label(this, "ShiftLabel", "Sft");
+	m_pShiftLabel->SetSize(36, buttonH);
+
+	m_pShiftXButton = new Button(this, "ShiftXButton", "X");
+	m_pShiftXButton->SetSize(20, buttonH);
+	m_pShiftXButton->SetCommand("ShiftStuffX");
+
+	m_pShiftYButton = new Button(this, "ShiftYButton", "Y");
+	m_pShiftYButton->SetSize(20, buttonH);
+	m_pShiftYButton->SetCommand("ShiftStuffY");
+
+	m_pShiftValue = new TextEntry(this, "ShiftValue");
+	m_pShiftValue->SetSize(36, buttonH);
 	
 	// iterate the vars
 	KeyValues *vars = m_pBuildGroup->GetDialogVariables();
@@ -414,6 +428,9 @@ void BuildModeDialog::CreateControls()
 	m_pEditableParents->SetTabPosition( 8 );
 	m_pEditableChildren->SetTabPosition( 9 );
 	m_pReloadLocalization->SetTabPosition( 10 );
+	m_pShiftValue->SetTabPosition(11);
+	m_pShiftXButton->SetTabPosition(12);
+	m_pShiftYButton->SetTabPosition(13);
 }
 
 void BuildModeDialog::ApplySchemeSettings( IScheme *pScheme )
@@ -431,6 +448,10 @@ void BuildModeDialog::ApplySchemeSettings( IScheme *pScheme )
 	m_pEditableChildren->SetFont( font );
 	m_pDeleteButton->SetFont( font );
 	m_pVarsButton->SetFont( font );
+	m_pShiftLabel->SetFont( font );
+	m_pShiftValue->SetFont( font );
+	m_pShiftXButton->SetFont( font );
+	m_pShiftYButton->SetFont( font );
 }
 
 //-----------------------------------------------------------------------------
@@ -493,6 +514,10 @@ void BuildModeDialog::PerformLayout()
 	ypos -= (YGAP_LARGE + 18 );
 	xpos = BORDER_GAP;
 	m_pReloadLocalization->SetPos( xpos, ypos );
+	m_pShiftLabel->SetPos( xpos + 150, ypos );
+	m_pShiftValue->SetPos( xpos + 180, ypos );
+	m_pShiftXButton->SetPos( xpos + 220, ypos );
+	m_pShiftYButton->SetPos( xpos + 244, ypos );
 
 	ypos -= (YGAP_LARGE  + m_pVarsButton->GetTall());
 	xpos = BORDER_GAP;
@@ -850,6 +875,26 @@ void BuildModeDialog::OnCommand(const char *command)
 	else if (!stricmp(command, "ShowHelp"))
 	{
 		ShowHelp();
+	}
+	else if (!stricmp(command, "ShiftStuffX"))
+	{
+		ApplyDataToControls();
+
+		char buf[128];
+		m_pShiftValue->GetText(buf, sizeof(buf));
+		int d = atoi(buf);
+
+		ShiftStuff(d, 0);
+	}
+	else if (!stricmp(command, "ShiftStuffY"))
+	{
+		ApplyDataToControls();
+
+		char buf[128];
+		m_pShiftValue->GetText(buf, sizeof(buf));
+		int d = atoi(buf);
+
+		ShiftStuff(0, d);
 	}
 	else
 	{
@@ -1236,6 +1281,23 @@ void BuildModeDialog::ShowHelp()
 	MessageBox *helpDlg = new MessageBox ("Build Mode Help", helpText, this);
 	helpDlg->AddActionSignalTarget(this);
 	helpDlg->DoModal();
+}
+
+void BuildModeDialog::ShiftStuff(int dx, int dy)
+{
+	Assert(m_pCurrentPanel);
+
+	int count = m_pCurrentPanel->GetChildCount();
+
+	for (int i = 0; i < count; i++)
+	{
+		Panel *p = m_pCurrentPanel->GetChild(i);
+		if (dynamic_cast<BuildModeDialog *>(p))
+			continue;	// Skip BuildModeDialog
+		int x, y;
+		p->GetPos(x, y);
+		p->SetPos(x + dx, y + dy);
+	}
 }
 
 	
