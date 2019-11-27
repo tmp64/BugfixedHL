@@ -875,6 +875,7 @@ void CScorePanel::OpenPlayerMenu(int itemID)
 	}
 
 	m_pMenu->RequestFocus();
+	m_pMenu->MoveToFront();
 }
 
 void CScorePanel::OnItemContextMenu(int itemID)
