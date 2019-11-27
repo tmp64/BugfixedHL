@@ -68,6 +68,7 @@
 #include "clientsteamcontext.h"
 #include <vgui/ISurface.h>
 #include <vgui_controls/Controls.h>
+#include <vgui_controls/AnimationController.h>
 #include <vgui_controls/TextImage.h>
 #include "vgui2/options/colorpicker/CTextureManager.h"
 #endif
@@ -691,6 +692,11 @@ void CHud::Frame(double time)
 #endif
 
 #ifdef USE_VGUI2
+	// Run VGUI2 animations
+	static double flTimeSum = 0;
+	vgui2::GetAnimationController()->UpdateAnimations(flTimeSum);
+	flTimeSum += time;
+
 	colorpicker::gTexMgr.RunFrame();
 #endif
 }
