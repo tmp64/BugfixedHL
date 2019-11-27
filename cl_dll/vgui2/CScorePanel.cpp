@@ -845,18 +845,20 @@ void CScorePanel::OpenPlayerMenu(int itemID)
 	int wide, tall;
 	vgui2::surface()->GetScreenSize(wide, tall);
 
+	int constexpr POS_OFFSET = 2;
+
 	if (wide - menuWide > cursorX)
 	{
 		// menu hanging right
 		if (tall - menuTall > cursorY)
 		{
 			// menu hanging down
-			m_pMenu->SetPos(cursorX, cursorY);
+			m_pMenu->SetPos(cursorX + POS_OFFSET, cursorY + POS_OFFSET);
 		}
 		else
 		{
 			// menu hanging up
-			m_pMenu->SetPos(cursorX, cursorY - menuTall);
+			m_pMenu->SetPos(cursorX + POS_OFFSET, cursorY - menuTall - POS_OFFSET);
 		}
 	}
 	else
@@ -865,12 +867,12 @@ void CScorePanel::OpenPlayerMenu(int itemID)
 		if (tall - menuTall > cursorY)
 		{
 			// menu hanging down
-			m_pMenu->SetPos(cursorX - menuWide, cursorY);
+			m_pMenu->SetPos(cursorX - menuWide - POS_OFFSET, cursorY + POS_OFFSET);
 		}
 		else
 		{
 			// menu hanging up
-			m_pMenu->SetPos(cursorX - menuWide, cursorY - menuTall);
+			m_pMenu->SetPos(cursorX - menuWide - POS_OFFSET, cursorY - menuTall - POS_OFFSET);
 		}
 	}
 
