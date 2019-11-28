@@ -4,7 +4,7 @@
 #include "../CColorPicker.h"
 #include "lodepng/lodepng.h"
 #include "hud.h"
-#include "../../VGUI2Paths.h"
+#include "vgui2/VGUI2Paths.h"
 
 namespace colorpicker
 {

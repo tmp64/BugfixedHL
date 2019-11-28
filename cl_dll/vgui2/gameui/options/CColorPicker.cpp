@@ -11,7 +11,7 @@
 #include <vgui_controls/Image.h>
 #include <vgui_controls/ImagePanel.h>
 #include <vgui_controls/TextEntry.h>
-#include "../VGUI2Paths.h"
+#include "vgui2/VGUI2Paths.h"
 #include "CColorPicker.h"
 #include "colorpicker/CPickerPanel.h"
 #include "colorpicker/CBarPanel.h"
