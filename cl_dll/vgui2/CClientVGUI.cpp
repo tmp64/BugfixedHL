@@ -3,7 +3,6 @@
 
 #include "tier0/dbg.h"
 
-#if USE_VGUI2
 #include <vgui/VGUI2.h>
 #include <vgui/IVGui.h>
 #include <vgui/IScheme.h>
@@ -18,7 +17,7 @@
 #include "IBaseUI.h"
 
 #include "CHudViewport.h"
-#endif
+#include "gameui/CGameUIViewport.h"
 
 #include "KeyValuesCompat.h"
 
@@ -79,7 +78,7 @@ void CClientVGUI::Initialize( CreateInterfaceFn* pFactories, int iNumFactories )
 	*	client (this library)
 	*/
 
-	//4 factories to use.
+	// 4 factories to use.
 	assert( static_cast<size_t>( iNumFactories ) >= NUM_FACTORIES - 1 );
 
 	m_FactoryList[ 0 ] = Sys_GetFactoryThis();
@@ -124,8 +123,9 @@ void CClientVGUI::Initialize( CreateInterfaceFn* pFactories, int iNumFactories )
 	// Add language files
 	vgui2::localize()->AddFile(vgui2::filesystem(), UI_LANGUAGE_DIR "/bugfixedhl_%language%.txt");
 
-	//Constructor sets itself as the viewport.
+	// Constructor sets itself as the viewport.
 	new CHudViewport();
+	new CGameUIViewport();
 
 	g_pViewport->Initialize( pFactories, iNumFactories );
 }
@@ -134,6 +134,7 @@ void CClientVGUI::Start()
 {
 #if USE_VGUI2
 	g_pViewport->Start();
+	g_pGameUIViewport->Start();
 
 #if 0
 	vgui2::Frame* pFrame = new vgui2::Frame(g_pViewport, "TestFrame");
@@ -189,6 +190,7 @@ void CClientVGUI::ActivateClientUI()
 {
 #if USE_VGUI2
 	g_pViewport->ActivateClientUI();
+	g_pGameUIViewport->ActivateClientUI();
 #endif
 }
 
@@ -196,6 +198,7 @@ void CClientVGUI::HideClientUI()
 {
 #if USE_VGUI2
 	g_pViewport->HideClientUI();
+	g_pGameUIViewport->HideClientUI();
 #endif
 }
 
@@ -203,6 +206,7 @@ void CClientVGUI::Shutdown()
 {
 #if USE_VGUI2
 	g_pViewport->Shutdown();
+	g_pGameUIViewport->Shutdown();
 #endif
 	SpewOutputFunc(g_fnDefaultSpewFunc);
 }

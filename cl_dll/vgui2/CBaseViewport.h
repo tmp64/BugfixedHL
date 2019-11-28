@@ -10,7 +10,6 @@
 
 class CBackGroundPanel;
 class IViewportPanel;
-class IGameUIPanel;
 
 namespace vgui2
 {
@@ -110,13 +109,6 @@ public:
 
 	virtual void ReloadScheme( const char* pszFromFile );
 
-	// GameUI
-	virtual IGameUIPanel* CreateGameUIPanelByName(const char* pszName);
-	bool AddNewGameUIPanel(IGameUIPanel* pPanel);
-	IGameUIPanel* FindGameUIPanelByName(const char* pszName);
-	void SetIsCreatingGameUIPanel(bool state);
-	bool DeleteGameUIPanel(IGameUIPanel *pPanel);
-
 private:
 	int m_OldSize[ 2 ] = { -1, -1 };
 	int m_nRootSize[ 2 ] = { -1, -1 };
@@ -124,7 +116,6 @@ private:
 	CBackGroundPanel* m_pBackGround = nullptr;
 
 	CUtlVector<IViewportPanel*> m_Panels;
-	CUtlVector<IGameUIPanel*> m_GameUIPanels;
 
 	IViewportPanel* m_pActivePanel = nullptr;
 	IViewportPanel* m_pLastActivePanel = nullptr;

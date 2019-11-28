@@ -18,24 +18,19 @@ public:
 public:
 	CGameUITestPanel(vgui2::VPANEL parent);
 	virtual ~CGameUITestPanel();
-	void OnCommand(const char* command) override;
 	void Activate() override;
 	void ApplySchemeSettings(vgui2::IScheme *pScheme) override;
+	void Reset();
 
 	// IGameUIPanel overrides
 	const char *GetName() override;
-	void Reset() override;
-	void ShowPanel(bool state) override;
 	virtual void OnGameUIActivated() override;
-	virtual void OnGameUIDeactivated() override;
+	virtual void OnGameUIHidden() override;
 
 	// VGUI functions:
 	vgui2::VPANEL GetVPanel() override final;
-	bool IsVisible() override final;
 
 private:
-	bool m_bIsOpen = false;
-
 	vgui2::RichText *m_pRichText = nullptr;
 };
 

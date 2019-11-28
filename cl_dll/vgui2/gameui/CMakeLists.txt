@@ -2,6 +2,8 @@ add_sources(
 	CMakeLists.txt
 	GameUIPanelNames.h
 	IGameUIPanel.h
+	CGameUIViewport.h
+	CGameUIViewport.cpp
 	
 	CGameUITestPanel.h
 	CGameUITestPanel.cpp

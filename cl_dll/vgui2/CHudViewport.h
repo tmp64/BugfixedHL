@@ -29,7 +29,6 @@ public:
 	void CreateDefaultPanels() override;
 
 	IViewportPanel* CreatePanelByName( const char* pszName ) override;
-	IGameUIPanel* CreateGameUIPanelByName(const char* pszName) override;
 
 private:
 };

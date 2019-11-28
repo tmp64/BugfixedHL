@@ -2,8 +2,8 @@
 #include "vgui2/gameui/GameUIPanelNames.h"
 #include "vgui2/VGUI2Paths.h"
 #include "vgui2/IEngineVgui.h"
-#include "vgui2/CBaseViewport.h"
 #include "vgui2/CClientVGUI.h"
+#include "vgui2/gameui/CGameUIViewport.h"
 #include "IBaseUI.h"
 #include "hud.h"
 
@@ -15,11 +15,11 @@
 
 static void OpenAdvOptionsCommand()
 {
-	CAdvOptionsDialog *panel = dynamic_cast<CAdvOptionsDialog *>(g_pViewport->FindGameUIPanelByName(GAMEUI_ADV_OPTIONS));
-	
+	CAdvOptionsDialog *panel = g_pGameUIViewport->FindPanel<CAdvOptionsDialog>(GAMEUI_ADV_OPTIONS);
+
 	auto fnActivateNextFrame = []()
 	{
-		CAdvOptionsDialog *panel = dynamic_cast<CAdvOptionsDialog *>(g_pViewport->FindGameUIPanelByName(GAMEUI_ADV_OPTIONS));
+		CAdvOptionsDialog *panel = g_pGameUIViewport->FindPanel<CAdvOptionsDialog>(GAMEUI_ADV_OPTIONS); 
 		if (panel)
 			panel->Activate();
 		else
@@ -28,7 +28,7 @@ static void OpenAdvOptionsCommand()
 
 	if (panel)
 	{
-		if (panel->IsOpen())
+		if (panel->IsVisible())
 		{
 			// See below for more details about that hack
 			gHUD.CallOnNextFrame(fnActivateNextFrame);
@@ -38,14 +38,13 @@ static void OpenAdvOptionsCommand()
 		else
 		{
 			// Panel will be recreated
-			g_pViewport->DeleteGameUIPanel(panel);
+			g_pGameUIViewport->DeletePanel(panel);
 		}
 	}
 
 	// Create new panel
-	panel = dynamic_cast<CAdvOptionsDialog *>(g_pViewport->CreateGameUIPanelByName(GAMEUI_ADV_OPTIONS));
-	Assert(panel);
-	g_pViewport->AddNewGameUIPanel(panel);
+	panel = g_pGameUIViewport->CreatePanel<CAdvOptionsDialog>(GAMEUI_ADV_OPTIONS);
+	g_pGameUIViewport->AddPanel(panel);
 
 	// Since this command is called from game menu using "engine gameui_open_adv_options"
 	// GameUI will hide itself and show the game.
@@ -85,23 +84,11 @@ CAdvOptionsDialog::~CAdvOptionsDialog()
 
 void CAdvOptionsDialog::Activate()
 {
-	if (!m_bIsOpen)
+	if (!IsVisible())
 	{
-		m_bIsOpen = true;
-		Reset();
+		MoveToCenterOfScreen();
 	}
 	BaseClass::Activate();
-}
-
-void CAdvOptionsDialog::OnClose()
-{
-	BaseClass::OnClose();
-	m_bIsOpen = false;	// Panel will be recreated next time it is openned
-}
-
-bool CAdvOptionsDialog::IsOpen()
-{
-	return m_bIsOpen;
 }
 
 void CAdvOptionsDialog::OnCommand(const char *command)
@@ -120,44 +107,15 @@ const char *CAdvOptionsDialog::GetName()
 	return GAMEUI_ADV_OPTIONS;
 }
 
-void CAdvOptionsDialog::Reset()
-{
-	MoveToCenterOfScreen();
-}
-
-void CAdvOptionsDialog::ShowPanel(bool state)
-{
-	if (BaseClass::IsVisible() == state)
-		return;
-
-	if (state)
-	{
-		BaseClass::Activate();
-	}
-	else
-	{
-		BaseClass::SetVisible(false);
-	}
-}
-
 void CAdvOptionsDialog::OnGameUIActivated()
 {
-	if (m_bIsOpen)
-		ShowPanel(true);
 }
 
-void CAdvOptionsDialog::OnGameUIDeactivated()
+void CAdvOptionsDialog::OnGameUIHidden()
 {
-	if (m_bIsOpen)
-		ShowPanel(false);
 }
 
 vgui2::VPANEL CAdvOptionsDialog::GetVPanel()
 {
 	return BaseClass::GetVPanel();
-}
-
-bool CAdvOptionsDialog::IsVisible()
-{
-	return BaseClass::IsVisible();
 }

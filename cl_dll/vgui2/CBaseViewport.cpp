@@ -22,7 +22,6 @@
 #include "CBaseViewport.h"
 
 CBaseViewport* g_pViewport = nullptr;
-bool g_bIsCreatingGameUIPanel = false;	// Used in vgui2::Panel::Panel()
 
 CBaseViewport::CBaseViewport()
 	: BaseClass( nullptr, "CBaseViewport" )
@@ -116,18 +115,10 @@ void CBaseViewport::HideAllVGUIMenu()
 
 void CBaseViewport::ActivateClientUI()
 {
-	for (int i = 0; i < m_GameUIPanels.Count(); i++)
-	{
-		m_GameUIPanels[i]->OnGameUIDeactivated();
-	}
 }
 
 void CBaseViewport::HideClientUI()
 {
-	for (int i = 0; i < m_GameUIPanels.Count(); i++)
-	{
-		m_GameUIPanels[i]->OnGameUIActivated();
-	}
 }
 
 void CBaseViewport::Shutdown()
@@ -452,62 +443,4 @@ void CBaseViewport::ReloadScheme( const char* pszFromFile )
 
 	// reset the hud
 	gHUD.MsgFunc_ResetHUD(nullptr, 0, nullptr);
-}
-
-IGameUIPanel *CBaseViewport::CreateGameUIPanelByName(const char *pszName)
-{
-	return nullptr;
-}
-
-bool CBaseViewport::AddNewGameUIPanel(IGameUIPanel *pPanel)
-{
-	if (!pPanel)
-	{
-		gEngfuncs.Con_Printf("CBaseViewport::AddNewGameUIPanel: Null panel!\n");
-		return false;
-	}
-
-	if (FindGameUIPanelByName(pPanel->GetName()))
-	{
-		gEngfuncs.Con_Printf("CBaseViewport::AddNewGameUIPanel: A panel with name '%s' already exists.\n", pPanel->GetName());
-		return false;
-	}
-
-	m_GameUIPanels.AddToTail(pPanel);
-
-	return true;
-}
-
-IGameUIPanel *CBaseViewport::FindGameUIPanelByName(const char *pszName)
-{
-	auto count = m_GameUIPanels.Count();
-
-	for (decltype(count) iIndex = 0; iIndex < count; ++iIndex)
-	{
-		if (Q_strcmp(m_GameUIPanels[iIndex]->GetName(), pszName) == 0)
-			return m_GameUIPanels[iIndex];
-	}
-
-	return nullptr;
-}
-
-void CBaseViewport::SetIsCreatingGameUIPanel(bool state)
-{
-	g_bIsCreatingGameUIPanel = state;
-}
-
-bool CBaseViewport::DeleteGameUIPanel(IGameUIPanel *pPanel)
-{
-	auto count = m_GameUIPanels.Count();
-
-	for (decltype(count) iIndex = 0; iIndex < count; ++iIndex)
-	{
-		if (m_GameUIPanels[iIndex] == pPanel)
-		{
-			delete m_GameUIPanels[iIndex];
-			m_GameUIPanels.Remove(iIndex);
-			return true;
-		}
-	}
-	return false;
 }

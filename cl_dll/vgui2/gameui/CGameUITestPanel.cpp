@@ -1,15 +1,15 @@
 #include <vgui_controls/RichText.h>
 #include "CGameUITestPanel.h"
 #include "GameUIPanelNames.h"
-#include "VGUI2Paths.h"
-#include "IEngineVgui.h"
-#include "CBaseViewport.h"
+#include "vgui2/VGUI2Paths.h"
+#include "vgui2/IEngineVgui.h"
+#include "vgui2/gameui/CGameUIViewport.h"
 #include "cl_dll.h"
 #include "cl_util.h"
 
 static void __CmdFunc_OpenGameUITestPanel()
 {
-	CGameUITestPanel *panel = dynamic_cast<CGameUITestPanel *>(g_pViewport->FindGameUIPanelByName(GAMEUI_PANEL_TEST));
+	CGameUITestPanel *panel = g_pGameUIViewport->FindPanel<CGameUITestPanel>(GAMEUI_PANEL_TEST);
 	if (!panel)
 	{
 		ConPrintf("__CmdFunc_OpenGameUITestPanel: panel is NULL\n");
@@ -64,21 +64,10 @@ void CGameUITestPanel::Reset()
 	m_pRichText->SetText(quotes[idx]);
 }
 
-void CGameUITestPanel::OnCommand(const char* command)
-{
-	if (!strcmp(command, "Close"))
-	{
-		m_bIsOpen = false;
-		BaseClass::OnCommand(command);
-	}
-	else BaseClass::OnCommand(command);
-}
-
 void CGameUITestPanel::Activate()
 {
-	if (!m_bIsOpen)
+	if (!IsVisible())
 	{
-		m_bIsOpen = true;
 		Reset();
 	}
 	BaseClass::Activate();
@@ -95,39 +84,15 @@ const char *CGameUITestPanel::GetName()
 	return GAMEUI_PANEL_TEST;
 }
 
-void CGameUITestPanel::ShowPanel(bool state)
-{
-	if (BaseClass::IsVisible() == state)
-		return;
-
-	if (state)
-	{
-		BaseClass::Activate();
-	}
-	else
-	{
-		BaseClass::SetVisible(false);
-	}
-}
-
 void CGameUITestPanel::OnGameUIActivated()
 {
-	if (m_bIsOpen)
-		ShowPanel(true);
 }
 
-void CGameUITestPanel::OnGameUIDeactivated()
+void CGameUITestPanel::OnGameUIHidden()
 {
-	if (m_bIsOpen)
-		ShowPanel(false);
 }
 
 vgui2::VPANEL CGameUITestPanel::GetVPanel()
 {
 	return BaseClass::GetVPanel();
-}
-
-bool CGameUITestPanel::IsVisible()
-{
-	return BaseClass::IsVisible();
 }

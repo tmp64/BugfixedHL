@@ -15,25 +15,20 @@ public:
 	virtual ~CAdvOptionsDialog();
 
 	void Activate() override;
-	void OnClose() override;
-	bool IsOpen();
 	virtual void OnCommand(const char *command);
 
 	// IGameUIPanel overrides
 	const char *GetName() override;
-	void Reset() override;
-	void ShowPanel(bool state) override;
 	virtual void OnGameUIActivated() override;
-	virtual void OnGameUIDeactivated() override;
+	virtual void OnGameUIHidden() override;
 
 	// VGUI functions:
 	vgui2::VPANEL GetVPanel() override final;
-	bool IsVisible() override final;
 
 	static void RegisterConsoleCommands();
 
 private:
-	bool m_bIsOpen = false;
+	
 };
 
 #endif
