@@ -1,7 +1,7 @@
 #include <vgui_controls/Label.h>
 #include <vgui_controls/ComboBox.h>
 #include <KeyValues.h>
-#include "../VGUI2Paths.h"
+#include "vgui2/VGUI2Paths.h"
 #include "CChatSubOptions.h"
 #include "hud.h"
 #include "CCvarCheckButton.h"

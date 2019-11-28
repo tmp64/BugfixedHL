@@ -2,7 +2,7 @@
 #include <vgui_controls/Slider.h>
 #include <vgui_controls/ComboBox.h>
 #include <KeyValues.h>
-#include "../VGUI2Paths.h"
+#include "vgui2/VGUI2Paths.h"
 #include "CHudSubOptions.h"
 #include "CCvarTextEntry.h"
 #include "CCvarColor.h"

@@ -70,7 +70,7 @@
 #include <vgui_controls/Controls.h>
 #include <vgui_controls/AnimationController.h>
 #include <vgui_controls/TextImage.h>
-#include "vgui2/options/colorpicker/CTextureManager.h"
+#include "vgui2/gameui/options/colorpicker/CTextureManager.h"
 #endif
 
 //-----------------------------------------------------

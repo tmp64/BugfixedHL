@@ -1,5 +1,5 @@
 #include "CCrosshairSubOptions.h"
-#include "../VGUI2Paths.h"
+#include "vgui2/VGUI2Paths.h"
 #include "CCvarCheckButton.h"
 #include "CCvarTextEntry.h"
 #include "CCvarColor.h"

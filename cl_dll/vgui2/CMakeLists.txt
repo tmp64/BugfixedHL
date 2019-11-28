@@ -26,11 +26,8 @@ add_sources(
 	KeyValuesCompat.cpp
 	CPngImage.h
 	CPngImage.cpp
-	IGameUIPanel.h
-	GameUIPanelNames.h
 	IEngineVgui.h
 	
-	# HUD panels
 	CScorePanel.h
 	CScorePanel.cpp
 	CClientMOTD.h
@@ -39,10 +36,6 @@ add_sources(
 	CBaseHudChat.cpp
 	CHudChat.h
 	CHudChat.cpp
-	
-	# GameUI panels
-	CGameUITestPanel.h
-	CGameUITestPanel.cpp
 )
 
 if( USE_UPDATER )
@@ -54,4 +47,4 @@ if( USE_UPDATER )
 	)
 endif()
 
-add_subdirectory( options )
+add_subdirectory( gameui )

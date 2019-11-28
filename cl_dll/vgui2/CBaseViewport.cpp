@@ -13,7 +13,7 @@
 
 #include "CBackGroundPanel.h"
 #include "IViewportPanel.h"
-#include "IGameUIPanel.h"
+#include "gameui/IGameUIPanel.h"
 #include "VGUI2Paths.h"
 #include "ViewportPanelNames.h"
 

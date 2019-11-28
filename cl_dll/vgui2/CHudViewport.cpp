@@ -5,12 +5,12 @@
 #include <vgui/ISurface.h>
 #include "hud.h"
 #include "CHudScoreBoard.h"
-#include "GameUIPanelNames.h"
+#include "gameui/GameUIPanelNames.h"
 #include "IEngineVgui.h"
-#include "CGameUITestPanel.h"
-#include "CUpdaterDebugDialog.h"
-#include "CUpdateNotificationDialog.h"
-#include "options/CAdvOptionsDialog.h"
+#include "gameui/CGameUITestPanel.h"
+#include "gameui/CUpdaterDebugDialog.h"
+#include "gameui/CUpdateNotificationDialog.h"
+#include "gameui/options/CAdvOptionsDialog.h"
 
 void CHudViewport::ApplySchemeSettings(vgui2::IScheme *pScheme)
 {
