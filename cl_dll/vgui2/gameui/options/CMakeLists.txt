@@ -9,6 +9,8 @@ add_sources(
 	CChatSubOptions.cpp
 	CCrosshairSubOptions.h
 	CCrosshairSubOptions.cpp
+	CScoreboardSubOptions.h
+	CScoreboardSubOptions.cpp
 	
 	CCvarTextEntry.h
 	CCvarTextEntry.cpp

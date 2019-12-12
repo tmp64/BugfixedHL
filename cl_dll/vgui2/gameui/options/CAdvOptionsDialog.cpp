@@ -12,6 +12,7 @@
 #include "CHudSubOptions.h"
 #include "CChatSubOptions.h"
 #include "CCrosshairSubOptions.h"
+#include "CScoreboardSubOptions.h"
 
 static void OpenAdvOptionsCommand()
 {
@@ -70,6 +71,7 @@ CAdvOptionsDialog::CAdvOptionsDialog(vgui2::VPANEL parent) : BaseClass(nullptr, 
 
 	AddPage(new CHudSubOptions(this), "#BHL_AdvOptions_HUD");
 	AddPage(new CChatSubOptions(this), "#BHL_AdvOptions_Chat");
+	AddPage(new CScoreboardSubOptions(this), "#BHL_AdvOptions_Scores");
 	AddPage(new CCrosshairSubOptions(this), "#BHL_AdvOptions_Cross");
 
 	SetApplyButtonVisible(true);
