@@ -321,6 +321,7 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time, c
 	{
 		m_parms.lineLength = 0;
 		m_parms.width = 0;
+		memset(lineColor, 0, sizeof(lineColor));	// FIXME: Not very efficient
 		lineColor[0] = RGBA(pMessage->r1, pMessage->g1, pMessage->b1);
 		while (*pwText && *pwText != '\n')
 		{
