@@ -14,6 +14,7 @@ public:
 
 private:
 	int m_HUD_d_skull;  // sprite index of skull icon
+	cvar_t *m_pCvarKillSnd;
 };
 
 #endif

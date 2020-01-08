@@ -51,6 +51,7 @@ void CHudDeathNotice :: Init()
 HOOK_MESSAGE( DeathMsg );
 
 	CVAR_CREATE( "hud_deathnotice_time", "6", 0 );
+	m_pCvarKillSnd = CVAR_CREATE("cl_killsound", "0", FCVAR_BHL_ARCHIVE);
 }
 
 
@@ -216,6 +217,16 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 	DEATHNOTICE_DISPLAY_TIME = CVAR_GET_FLOAT( "hud_deathnotice_time" );
 	rgDeathNoticeList[i].flDisplayTime = gHUD.m_flTime + DEATHNOTICE_DISPLAY_TIME;
 
+	// Play kill sound
+	if (g_PlayerInfoList[killer].thisplayer &&
+		!rgDeathNoticeList[i].iNonPlayerKill &&
+		!rgDeathNoticeList[i].iSuicide &&
+		m_pCvarKillSnd->value)
+	{
+		PlaySound("buttons/bell1.wav", 1.0f);
+	}
+
+	// Print to console
 	if (rgDeathNoticeList[i].iNonPlayerKill)
 	{
 		ConsolePrint( rgDeathNoticeList[i].szKiller );
