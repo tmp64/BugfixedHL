@@ -1858,13 +1858,17 @@ void CBaseHudChatEntry::OnKeyCodeTyped(vgui2::KeyCode code)
 		{
 			PostMessage(m_pHudChat, new KeyValues("ChatEntryStopMessageMode"));
 		}
-
-		//baseUI()->HideGameUI();
 	}
 	else if (code == vgui2::KEY_TAB)
 	{
 		// Ignore tab, otherwise vgui will screw up the focus.
 		return;
+	}
+	else if (code == vgui2::KEY_BACKQUOTE)
+	{
+		// Pressing tilde key (~ or `) opens the console.
+		// This method hides it.
+		baseUI()->HideGameUI();
 	}
 	else
 	{
