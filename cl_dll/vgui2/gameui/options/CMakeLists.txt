@@ -11,6 +11,8 @@ add_sources(
 	CCrosshairSubOptions.cpp
 	CScoreboardSubOptions.h
 	CScoreboardSubOptions.cpp
+	CGeneralSubOptions.h
+	CGeneralSubOptions.cpp
 	
 	CCvarTextEntry.h
 	CCvarTextEntry.cpp
