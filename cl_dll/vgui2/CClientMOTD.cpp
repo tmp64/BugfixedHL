@@ -110,7 +110,7 @@ void CClientMOTD::OnCommand( const char* command )
 	{
 		RemoveTempFile();
 
-		Close();
+		SetVisible(false);
 	}
 
 	BaseClass::OnCommand( command );
