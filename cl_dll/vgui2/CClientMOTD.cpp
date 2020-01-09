@@ -81,7 +81,7 @@ void CClientMOTD::PerformLayout()
 
 void CClientMOTD::OnKeyCodeTyped( vgui2::KeyCode key )
 {
-	if( key == KEY_PAD_ENTER || key == KEY_ENTER )
+	if( key == KEY_PAD_ENTER || key == KEY_ENTER || key == KEY_SPACE )
 	{
 		OnCommand( "okay" );
 	}
