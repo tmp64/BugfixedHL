@@ -682,6 +682,17 @@ void CHud::Frame(double time)
 		m_NextFrameQueue.pop();
 	}
 
+	// Check m_rawinput cvar
+#ifdef _WIN32
+	static cvar_t *rawInput = gEngfuncs.pfnGetCvarPointer("m_rawinput");
+	if (rawInput && rawInput->value)
+	{
+		ConPrintf(RGBA(111, 234, 247), "m_rawinput 1 is not supported. Setting m_input 2 (DirectInput) instead.\n");
+		gEngfuncs.pfnClientCmd("m_rawinput 0");
+		gEngfuncs.pfnClientCmd("m_input 2");
+	}
+#endif
+
 #ifdef USE_UPDATER
 	if (!m_bUpdatesChecked && time >= 0.05 )		// Wait for config.cfg to be executed
 	{
