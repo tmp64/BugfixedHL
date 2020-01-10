@@ -35,6 +35,13 @@ private:
 	CCvarCheckButton *m_pViewmodelCheckbox = nullptr;
 	CCvarCheckButton *m_pSpeedCheckbox = nullptr;
 
+	vgui2::Label *m_pTimerLabel = nullptr;
+	vgui2::ComboBox *m_pTimerBox = nullptr;
+	int m_TimerItems[4];
+
+	void TimerResetData();
+	void TimerApplyChanges();
+
 	MESSAGE_FUNC_PARAMS(OnSliderMoved, "SliderMoved", kv);
 	MESSAGE_FUNC_PARAMS(OnCvarTextChanged, "CvarTextChanged", kv);
 };

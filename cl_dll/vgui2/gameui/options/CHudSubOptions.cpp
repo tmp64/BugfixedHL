@@ -2,6 +2,7 @@
 #include <vgui_controls/Slider.h>
 #include <vgui_controls/ComboBox.h>
 #include <KeyValues.h>
+#include <MinMax.h>
 #include "vgui2/VGUI2Paths.h"
 #include "CHudSubOptions.h"
 #include "CCvarTextEntry.h"
@@ -35,6 +36,13 @@ CHudSubOptions::CHudSubOptions(vgui2::Panel *parent) : BaseClass(parent, nullptr
 	m_pWeaponSpriteCheckbox = new CCvarCheckButton(this, "WeaponSpriteCheckbox", "#BHL_AdvOptions_HUD_WeapSprite", "hud_weapon");
 	m_pSpeedCheckbox = new CCvarCheckButton(this, "SpeedCheckbox", "#BHL_AdvOptions_HUD_Speed", "hud_speedometer");
 
+	m_pTimerLabel = new vgui2::Label(this, "TimerLabel", "#BHL_AdvOptions_Hud_Timer");
+	m_pTimerBox = new vgui2::ComboBox(this, "TimerBox", 4, false);
+	m_TimerItems[0] = m_pTimerBox->AddItem("#BHL_AdvOptions_Hud_Timer0", new KeyValues("Off", "value", 0));
+	m_TimerItems[1] = m_pTimerBox->AddItem("#BHL_AdvOptions_Hud_Timer1", new KeyValues("TimeLeft", "value", 1));
+	m_TimerItems[2] = m_pTimerBox->AddItem("#BHL_AdvOptions_Hud_Timer2", new KeyValues("TimePassed", "value", 2));
+	m_TimerItems[3] = m_pTimerBox->AddItem("#BHL_AdvOptions_Hud_Timer3", new KeyValues("LocalTime", "value", 3));
+
 	LoadControlSettings(UI_RESOURCE_DIR "/options/HudSubOptions.res");
 }
 
@@ -49,6 +57,7 @@ void CHudSubOptions::OnResetData()
 	m_pViewmodelCheckbox->ResetData();
 	m_pWeaponSpriteCheckbox->ResetData();
 	m_pSpeedCheckbox->ResetData();
+	TimerResetData();
 }
 
 void CHudSubOptions::OnApplyChanges()
@@ -62,6 +71,26 @@ void CHudSubOptions::OnApplyChanges()
 	m_pViewmodelCheckbox->ApplyChanges();
 	m_pWeaponSpriteCheckbox->ApplyChanges();
 	m_pSpeedCheckbox->ApplyChanges();
+	TimerApplyChanges();
+}
+
+void CHudSubOptions::TimerResetData()
+{
+	int timer = gEngfuncs.pfnGetCvarFloat("hud_timer");
+	timer = clamp(timer, 0, 3);
+	m_pTimerBox->ActivateItem(m_TimerItems[timer]);
+}
+
+void CHudSubOptions::TimerApplyChanges()
+{
+	KeyValues *userdata = m_pTimerBox->GetActiveItemUserData();
+	Assert(userdata);
+	int sel = userdata->GetInt("value", 0);
+	Assert(sel >= 0 && sel <= 3);
+
+	char buf[128];
+	snprintf(buf, sizeof(buf), "hud_timer %d", sel);
+	gEngfuncs.pfnClientCmd(buf);
 }
 
 void CHudSubOptions::OnSliderMoved(KeyValues *kv)
