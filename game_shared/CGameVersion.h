@@ -53,6 +53,8 @@ private:
     std::string m_Branch;
     std::string m_CommitHash;
     bool m_bIsDirty = false;
+
+    void CopyFrom(const IGameVersion *copy);
 };
 
 
