@@ -13,9 +13,9 @@ class CGameVersion : public IGameVersion
 {
 public:
     CGameVersion();
-    CGameVersion(IGameVersion *copy);
-    CGameVersion(const CGameVersion &) = delete;
-    CGameVersion &operator =(const CGameVersion &&) = delete;
+    CGameVersion(const IGameVersion *copy);
+    CGameVersion(const CGameVersion &);
+    CGameVersion &operator =(const CGameVersion &);
     CGameVersion(const char *pszVersion);
     virtual ~CGameVersion();
 

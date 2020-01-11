@@ -8,7 +8,7 @@ CGameVersion::CGameVersion()
 	memset(&m_SemVer, 0, sizeof(m_SemVer));
 }
 
-CGameVersion::CGameVersion(IGameVersion *copy) : CGameVersion()
+CGameVersion::CGameVersion(const IGameVersion *copy) : CGameVersion()
 {
 	assert(copy->IsValid());
 
@@ -39,6 +39,15 @@ CGameVersion::CGameVersion(IGameVersion *copy) : CGameVersion()
 	copy->GetCommitHash(buf, sizeof(buf));
 	m_CommitHash = buf;
 	m_bIsDirty = copy->IsDirtyBuild();
+}
+
+CGameVersion::CGameVersion(const CGameVersion &copy) : CGameVersion(&copy)
+{
+}
+
+CGameVersion &CGameVersion::operator=(const CGameVersion &)
+{
+	return CGameVersion(this);
 }
 
 CGameVersion::CGameVersion(const char *pszVersion) : CGameVersion()
