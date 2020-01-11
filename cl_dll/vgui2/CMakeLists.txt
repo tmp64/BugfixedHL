@@ -38,13 +38,4 @@ add_sources(
 	CHudChat.cpp
 )
 
-if( USE_UPDATER )
-	add_sources(
-		CUpdaterDebugDialog.h
-		CUpdaterDebugDialog.cpp
-		CUpdateNotificationDialog.h
-		CUpdateNotificationDialog.cpp
-	)
-endif()
-
 add_subdirectory( gameui )

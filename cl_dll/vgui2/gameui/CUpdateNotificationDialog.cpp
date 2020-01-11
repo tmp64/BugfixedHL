@@ -5,9 +5,9 @@
 #include <vgui/ILocalize.h>
 #include "CUpdateNotificationDialog.h"
 #include "GameUIPanelNames.h"
-#include "VGUI2Paths.h"
-#include "IEngineVgui.h"
-#include "CBaseViewport.h"
+#include "vgui2/VGUI2Paths.h"
+#include "vgui2/IEngineVgui.h"
+#include "vgui2/gameui/CGameUIViewport.h"
 #include "cl_dll.h"
 #include "cl_util.h"
 #include "hud.h"
@@ -84,28 +84,13 @@ CUpdateNotificationDialog::CUpdateNotificationDialog(vgui2::VPANEL parent) : Bas
 
 	SetScheme(vgui2::scheme()->LoadSchemeFromFile(UI_GAMEUISCHEME_FILENAME, "SourceScheme"));
 	LoadControlSettings(UI_RESOURCE_DIR "/UpdateNotificationDialog.res");
-	Reset();
 }
 
 CUpdateNotificationDialog::~CUpdateNotificationDialog() {}
 
-void CUpdateNotificationDialog::Reset()
-{
-	constexpr int WIDE = 400, TALL = 200, GAP = 6;
-	SetSize(WIDE, TALL);
-	MoveToCenterOfScreen();
-	if (gHUD.m_pCvarCheckUpdates)
-		m_pAutoUpdateBox->SetSelected(!!gHUD.m_pCvarCheckUpdates->value);
-}
-
 void CUpdateNotificationDialog::OnCommand(const char* command)
 {
-	if (!strcmp(command, "Close"))
-	{
-		m_bIsOpen = false;
-		BaseClass::OnCommand(command);
-	}
-	else if (!strcmp(command, "okay"))
+	if (!strcmp(command, "okay"))
 	{
 		if (m_pAutoUpdateBox->IsSelected())
 			ClientCmd("cl_check_for_updates 1");
@@ -122,10 +107,13 @@ void CUpdateNotificationDialog::OnCommand(const char* command)
 
 void CUpdateNotificationDialog::Activate()
 {
-	if (!m_bIsOpen)
+	if (!IsVisible())
 	{
-		m_bIsOpen = true;
-		Reset();
+		constexpr int WIDE = 400, TALL = 200, GAP = 6;
+		SetSize(WIDE, TALL);
+		MoveToCenterOfScreen();
+		if (gHUD.m_pCvarCheckUpdates)
+			m_pAutoUpdateBox->SetSelected(!!gHUD.m_pCvarCheckUpdates->value);
 
 		int major, minor, patch;
 		char buf[32];
@@ -149,31 +137,12 @@ const char *CUpdateNotificationDialog::GetName()
 	return GAMEUI_UPDATE_NOTIF;
 }
 
-void CUpdateNotificationDialog::ShowPanel(bool state)
-{
-	if (BaseClass::IsVisible() == state)
-		return;
-
-	if (state)
-	{
-		BaseClass::Activate();
-	}
-	else
-	{
-		BaseClass::SetVisible(false);
-	}
-}
-
 void CUpdateNotificationDialog::OnGameUIActivated()
 {
-	if (m_bIsOpen)
-		ShowPanel(true);
 }
 
-void CUpdateNotificationDialog::OnGameUIDeactivated()
+void CUpdateNotificationDialog::OnGameUIHidden()
 {
-	if (m_bIsOpen)
-		ShowPanel(false);
 }
 
 vgui2::VPANEL CUpdateNotificationDialog::GetVPanel()

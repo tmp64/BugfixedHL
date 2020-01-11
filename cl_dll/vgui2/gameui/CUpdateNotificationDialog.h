@@ -28,18 +28,14 @@ public:
 
 	// IGameUIPanel overrides
 	const char *GetName() override;
-	void Reset() override;
-	void ShowPanel(bool state) override;
 	virtual void OnGameUIActivated() override;
-	virtual void OnGameUIDeactivated() override;
+	virtual void OnGameUIHidden() override;
 
 	// VGUI functions:
 	vgui2::VPANEL GetVPanel() override final;
 	bool IsVisible() override final;
 
 private:
-	bool m_bIsOpen = false;
-
 	CChangelogDialog *m_pChangelogDialog;
 	vgui2::Label *m_pMainTextLabel;
 	vgui2::Label *m_pGameVersionLabel, *m_pNewVersionLabel;

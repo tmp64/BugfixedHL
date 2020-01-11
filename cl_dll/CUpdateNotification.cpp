@@ -5,9 +5,9 @@
 #include "CHudBase.h"
 
 #ifdef USE_VGUI2
-#include "vgui2/GameUIPanelNames.h"
-#include "vgui2/CBaseViewport.h"
-#include "vgui2/CUpdateNotificationDialog.h"
+#include "vgui2/gameui/GameUIPanelNames.h"
+#include "vgui2/gameui/CGameUIViewport.h"
+#include "vgui2/gameui/CUpdateNotificationDialog.h"
 #endif
 
 CUpdateNotification *gUpdateNotif = nullptr;
@@ -58,7 +58,7 @@ void CUpdateNotification::CheckFinishedCallback(bool isUpdateFound)
 	SetConsoleColor(oldColor);
 
 #ifdef USE_VGUI2
-	auto upd = dynamic_cast<CUpdateNotificationDialog *>(g_pViewport->FindGameUIPanelByName(GAMEUI_UPDATE_NOTIF));
+	auto upd = g_pGameUIViewport->FindPanel<CUpdateNotificationDialog>(GAMEUI_UPDATE_NOTIF);
 	upd->Activate();
 #endif
 }

@@ -18,7 +18,7 @@
 #include <vector>
 #include <curl/curl.h>
 #include <curl/easy.h>
-#include "json.hpp"
+#include <json.hpp>
 #include <appversion.h>
 #include "CGameUpdater.h"
 #include "CGameVersion.h"

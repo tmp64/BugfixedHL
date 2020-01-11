@@ -4,15 +4,15 @@
 #include <CGameUpdater.h>
 #include "CUpdaterDebugDialog.h"
 #include "GameUIPanelNames.h"
-#include "VGUI2Paths.h"
-#include "IEngineVgui.h"
-#include "CBaseViewport.h"
+#include "vgui2/VGUI2Paths.h"
+#include "vgui2/IEngineVgui.h"
+#include "vgui2/gameui/CGameUIViewport.h"
 #include "cl_dll.h"
 #include "cl_util.h"
 
 static void __CmdFunc_OpenUpdaterDebugDialog()
 {
-	CUpdaterDebugDialog *panel = dynamic_cast<CUpdaterDebugDialog *>(g_pViewport->FindGameUIPanelByName(GAMEUI_UPDATER_DEBUG));
+	CUpdaterDebugDialog *panel = g_pGameUIViewport->FindPanel<CUpdaterDebugDialog>(GAMEUI_UPDATER_DEBUG);
 	if (!panel)
 	{
 		ConPrintf("__CmdFunc_OpenGameUITestPanel: panel is NULL\n");
@@ -57,28 +57,14 @@ CUpdaterDebugDialog::CUpdaterDebugDialog(vgui2::VPANEL parent) : BaseClass(nullp
 	SetScheme(vgui2::scheme()->LoadSchemeFromFile(UI_GAMEUISCHEME_FILENAME, "SourceScheme"));
 	LoadControlSettings(UI_RESOURCE_DIR "/UpdaterDebugDialog.res");
 
-	Reset();
 	HOOK_COMMAND("gameui_open_updater_debug", OpenUpdaterDebugDialog);
 }
 
 CUpdaterDebugDialog::~CUpdaterDebugDialog() {}
 
-void CUpdaterDebugDialog::Reset()
-{
-	constexpr int WIDE = 640, TALL = 480;
-	SetSize(WIDE, TALL);
-	MoveToCenterOfScreen();
-	
-}
-
 void CUpdaterDebugDialog::OnCommand(const char* command)
 {
-	if (!strcmp(command, "Close"))
-	{
-		m_bIsOpen = false;
-		BaseClass::OnCommand(command);
-	}
-	else if (!strcmp(command, "check"))
+	if (!strcmp(command, "check"))
 	{
 		m_pCheckBtn->SetEnabled(false);
 		m_pDownloadBtn->SetEnabled(false);
@@ -113,12 +99,10 @@ void CUpdaterDebugDialog::OnCommand(const char* command)
 
 void CUpdaterDebugDialog::Activate()
 {
-	if (!m_bIsOpen)
-	{
-		m_bIsOpen = true;
-		Reset();
-		AddCallbacks();
-	}
+	constexpr int WIDE = 640, TALL = 480;
+	SetSize(WIDE, TALL);
+	MoveToCenterOfScreen();
+	AddCallbacks();
 	BaseClass::Activate();
 }
 
@@ -127,31 +111,12 @@ const char *CUpdaterDebugDialog::GetName()
 	return GAMEUI_UPDATER_DEBUG;
 }
 
-void CUpdaterDebugDialog::ShowPanel(bool state)
-{
-	if (BaseClass::IsVisible() == state)
-		return;
-
-	if (state)
-	{
-		BaseClass::Activate();
-	}
-	else
-	{
-		BaseClass::SetVisible(false);
-	}
-}
-
 void CUpdaterDebugDialog::OnGameUIActivated()
 {
-	if (m_bIsOpen)
-		ShowPanel(true);
 }
 
-void CUpdaterDebugDialog::OnGameUIDeactivated()
+void CUpdaterDebugDialog::OnGameUIHidden()
 {
-	if (m_bIsOpen)
-		ShowPanel(false);
 }
 
 vgui2::VPANEL CUpdaterDebugDialog::GetVPanel()
