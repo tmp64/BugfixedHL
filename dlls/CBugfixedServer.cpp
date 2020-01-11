@@ -123,9 +123,9 @@ CGameRules **CBugfixedServer::GetGameRulesPtr()
 	return &g_pGameRules;
 }
 
-const CGameVersion &CBugfixedServer::GetServerVersion()
+const IGameVersion *CBugfixedServer::GetServerVersion()
 {
-	return m_ServerVersion;
+	return &m_ServerVersion;
 }
 
 bhl::E_ClientSupports CBugfixedServer::GetClientSupports(int idx)
@@ -158,7 +158,7 @@ bool CBugfixedServer::IsClientVersionValid(int idx)
 	return m_pClientInfo[idx].version.IsValid();
 }
 
-bool CBugfixedServer::GetClientVersion(int idx, CGameVersion &ver)
+const IGameVersion *CBugfixedServer::GetClientVersion(int idx)
 {
 	if (idx < 1 || idx > gpGlobals->maxClients)
 	{
@@ -166,9 +166,8 @@ bool CBugfixedServer::GetClientVersion(int idx, CGameVersion &ver)
 		return false;
 	}
 	if (!m_pClientInfo[idx].version.IsValid())
-		return false;
-	ver = m_pClientInfo[idx].version;
-	return true;
+		return nullptr;
+	return &m_pClientInfo[idx].version;
 }
 
 bool CBugfixedServer::GetAutomaticMotd(bhl::E_MotdType type)

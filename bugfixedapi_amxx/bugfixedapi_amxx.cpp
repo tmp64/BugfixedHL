@@ -62,11 +62,10 @@ static cell AMX_NATIVE_CALL bhl_get_client_version(AMX *amx, cell *params)
 	cell *minor = MF_GetAmxAddr(amx, params[3]);
 	cell *patch = MF_GetAmxAddr(amx, params[4]);
 
-	CGameVersion ver;
-	bool result = serverapi()->GetClientVersion(idx, ver);
-	if (!result)
+	const IGameVersion *ver = serverapi()->GetClientVersion(idx);
+	if (!ver)
 		return 0;
-	ver.GetVersion(*major, *minor, *patch);
+	ver->GetVersion(*major, *minor, *patch);
 	return 1;
 }
 
@@ -78,11 +77,10 @@ static cell AMX_NATIVE_CALL bhl_is_client_dirty(AMX *amx, cell *params)
 	int idx = params[1];
 	if (idx < 0 || idx > gpGlobals->maxClients)
 		return 0;
-	CGameVersion ver;
-	bool result = serverapi()->GetClientVersion(idx, ver);
-	if (!result)
+	const IGameVersion *ver = serverapi()->GetClientVersion(idx);
+	if (!ver)
 		return 0;
-	return ver.IsModified();
+	return ver->IsDirtyBuild();
 }
 
 // native bhl_get_client_version_commit(idx, buf[], size)
@@ -94,11 +92,12 @@ static cell AMX_NATIVE_CALL bhl_get_client_version_commit(AMX *amx, cell *params
 	int size = params[3];
 	if (idx < 0 || idx > gpGlobals->maxClients)
 		return 0;
-	CGameVersion ver;
-	bool result = serverapi()->GetClientVersion(idx, ver);
-	if (!result)
+	const IGameVersion *ver = serverapi()->GetClientVersion(idx);
+	if (!ver)
 		return 0;
-	MF_SetAmxString(amx, params[2], ver.GetCommitString(), size);
+	char buf[128];
+	ver->GetCommitHash(buf, sizeof(buf));
+	MF_SetAmxString(amx, params[2], buf, size);
 	return 1;
 }
 

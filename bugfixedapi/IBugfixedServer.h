@@ -9,7 +9,7 @@
 #define IBUGFIXEDSERVER_MINOR 0
 
 class CGameRules;
-class CGameVersion;
+class IGameVersion;
 
 namespace bhl
 {
@@ -47,8 +47,11 @@ public:
 
 	/**
 	 * Returns server DLL version.
+	 *
+	 * This pointer is only valid immediately after the call.
+	 * Make a copy if you need to use it later.
 	 */
-	virtual const CGameVersion &GetServerVersion() = 0;
+	virtual const IGameVersion *GetServerVersion() = 0;
 
 	/**
 	 * Returns bitfield with BugfixedHL features the client's game supports.
@@ -68,10 +71,13 @@ public:
 	virtual bool IsClientVersionValid(int idx) = 0;
 
 	/**
-	 * If IsClientVersionValid(idx) == true then sets ver to a valid version and returns true.
-	 * Otherwise returns false.
+	 * If IsClientVersionValid(idx) == true then returns pointer to the version.
+	 * Otherwise returns nullptr.
+	 *
+	 * This pointer is only valid immediately after the call.
+	 * Make a copy if you need to use it later.
 	 */
-	virtual bool GetClientVersion(int idx, CGameVersion &ver) = 0;
+	virtual const IGameVersion *GetClientVersion(int idx) = 0;
 
 	/**
 	 * @see SetAutomaticMotd

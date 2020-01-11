@@ -59,11 +59,11 @@ public:
 	//----------------------------------------------------------------------------------------------------
 	virtual void GetInterfaceVersion(int &major, int &minor);
 	virtual CGameRules **GetGameRulesPtr();
-	virtual const CGameVersion &GetServerVersion();
+	virtual const IGameVersion *GetServerVersion();
 	virtual bhl::E_ClientSupports GetClientSupports(int idx);
 	virtual bool GetColorSupport(int idx);
 	virtual bool IsClientVersionValid(int idx);
-	virtual bool GetClientVersion(int idx, CGameVersion &ver);
+	virtual const IGameVersion *GetClientVersion(int idx);
 	virtual bool GetAutomaticMotd(bhl::E_MotdType type);
 	virtual void SetAutomaticMotd(bhl::E_MotdType type, bool state);
 	virtual void ShowMotdFromString(bhl::E_MotdType type, int idx, const char *str);
