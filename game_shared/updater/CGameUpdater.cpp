@@ -326,11 +326,10 @@ private:
 
 		m_jReleases = nlohmann::json::parse(buffer.data());
 
-		std::string latestTag = m_jReleases.at(0).at("tag_name").get<std::string>();
+		std::string latestTag = m_jReleases.at(0).at("tag_name").get<std::string>();	// v1.3.0
 		CGameVersion latestVer;
-		if (!latestVer.TryParseTag(latestTag.c_str()))
+		if (latestTag.empty() || !latestVer.TryParse(latestTag.c_str() + 1))	// +1 to skip 'v'
 			throw std::runtime_error(std::string("Tag name is not valid: ") + latestTag);
-		latestVer.RemovePatch();
 
 		logf("Current version: %s", VerToStr(m_pUpdater->m_GameVersion).c_str());
 		logf("Latest version:  %s", VerToStr(latestVer).c_str());
@@ -357,13 +356,12 @@ private:
 		{
 			CGameVersion ver;
 			std::string tag = item.at("tag_name").get<std::string>();
-			if (!ver.TryParseTag(tag.c_str()))
+			if (tag.empty() || !ver.TryParse(tag.c_str() + 1))
 			{
 				throw std::runtime_error(std::string("Invalid tag: ") + tag);
 			}
 			else
 			{
-				ver.RemovePatch();
 				if (ver <= m_pUpdater->m_GameVersion)	// Don't show current version
 					break;
 			}
