@@ -163,7 +163,7 @@ const IGameVersion *CBugfixedServer::GetClientVersion(int idx)
 	if (idx < 1 || idx > gpGlobals->maxClients)
 	{
 		UTIL_LogPrintf("CBugfixedServer::IsClientVersionValid(): invalid player id (%d)\n", idx);
-		return false;
+		return nullptr;
 	}
 	if (!m_pClientInfo[idx].version.IsValid())
 		return nullptr;
