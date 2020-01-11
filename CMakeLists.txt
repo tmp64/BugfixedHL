@@ -296,6 +296,11 @@ set( SHARED_GAME_DEFS
 set( THREADS_PREFER_PTHREAD_FLAG ON )
 find_package( Threads REQUIRED )
 add_subdirectory( external/nlohmann_json )
+add_subdirectory( external/semver.c )
+
+set( SHARED_DEPENDENCIES
+	semver
+)
 
 #-----------------------------------------------------------------
 # VGUI2

@@ -1,256 +1,274 @@
-#include <regex>
-#include <string>
+#include <cassert>
+#include <cstring>
 #include "CGameVersion.h"
 
-//----------------------------------------------------------------------------------------------------
-// CGameVersion
-//----------------------------------------------------------------------------------------------------
-bool CGameVersion::TryParse(const char *cstr)
+
+CGameVersion::CGameVersion()
 {
-	// TODO: Use regex to search the whole string?
-
-	try
-	{
-		m_bIsValid = false;
-		strncpy(m_szString, cstr, sizeof(m_szString));
-		m_szString[sizeof(m_szString) - 1] = '\0';
-
-		std::string str = cstr;
-		std::vector<std::string> parts;
-
-		// Split string by '+'
-		{
-			size_t from = 0;
-			for (size_t i = 0; i <= str.size(); i++)
-			{
-				if (str[i] == '+' || str[i] == '\0')
-				{
-					parts.push_back(str.substr(from, i - from));
-					from = i + 1;
-				}
-			}
-		}
-
-		if (parts.size() < 2 || parts.size() > 4)
-			return false;
-
-		// Parse version
-		{
-			size_t dash = parts[0].find('-');
-			std::string version;
-			if (dash == std::string::npos)
-			{
-				version = parts[0];
-			}
-			else
-			{
-				version = parts[0].substr(0, dash);
-				std::string tag = parts[0].substr(dash + 1);
-				strncpy(m_szTag, tag.c_str(), sizeof(m_szTag));
-				m_szTag[sizeof(m_szTag) - 1] = '\0';
-			}
-
-			// Look for x.y.z
-			std::regex r1("^([0-9]+)\\.([0-9]+)\\.([0-9]+)");
-			std::smatch m1;
-			std::regex_search(version, m1, r1);
-			if (m1.size() == 4)
-			{
-				m_iMajor = std::stoi(m1[1].str());
-				m_iMinor = std::stoi(m1[2].str());
-				m_iPatch = std::stoi(m1[3].str());
-			}
-			else
-			{
-				// Look for x.y
-				std::regex r2("^([0-9]+)\\.([0-9]+)");
-				std::smatch m2;
-				std::regex_search(version, m2, r2);
-				if (m2.size() != 3)
-					return false;	// Invalid string or something else
-				m_iMajor = std::stoi(m2[1].str());
-				m_iMinor = std::stoi(m2[2].str());
-				m_iPatch = 0;
-			}
-		}
-
-		// Commit hash
-		if (parts[1].size() != 7)
-			return false;
-		for (int i = 0; i < 7; i++)
-		{
-			if (!((parts[1][i] >= 'a' && parts[1][i] <= 'f') || (parts[1][i] >= '0' && parts[1][i] <= '9')))
-				return false;	// Only lower-case HEX digits are allowed in commit hash
-		}
-		strncpy(m_szCommit, parts[1].c_str(), sizeof(m_szCommit));
-		m_szCommit[sizeof(m_szCommit) - 1] = '\0';
-
-		// Build metadata
-		if (parts.size() >= 3 && parts[2] != "m")
-		{
-			strncpy(m_szMetadata, parts[2].c_str(), sizeof(m_szMetadata));
-			m_szMetadata[sizeof(m_szMetadata) - 1] = '\0';
-		}
-		else
-		{
-			m_szMetadata[0] = '\0';
-		}
-
-		// Dirty tag
-		if (parts.size() >= 3 && parts[parts.size() - 1] == "m")
-			m_bIsModified = true;
-		else
-			m_bIsModified = false;
-
-		m_bIsValid = true;
-		return true;
-	}
-	catch (const std::exception &)
-	{
-		m_bIsValid = false;
-		return false;
-	}
-
-	return false;
+	memset(&m_SemVer, 0, sizeof(m_SemVer));
 }
 
-bool CGameVersion::TryParseTag(const char * str)
+CGameVersion::CGameVersion(IGameVersion *copy) : CGameVersion()
+{
+	assert(copy->IsValid());
+
+	// Copy m_SemVer
+	auto fnCopyCStr = [](const char *from, char *&to)
+	{
+		if (!from)
+			return;
+		size_t len = strlen(from);
+		to = (char *)malloc(len + 1);
+		memcpy(to, from, len + 1);
+	};
+
+	m_SemVer.major = copy->GetMajor();
+	m_SemVer.minor = copy->GetMinor();
+	m_SemVer.patch = copy->GetPatch();
+
+	char buf[128];
+	copy->GetBuildMetadata(buf, sizeof(buf));
+	fnCopyCStr(buf, m_SemVer.metadata);
+	copy->GetTag(buf, sizeof(buf));
+	fnCopyCStr(buf, m_SemVer.prerelease);
+
+	// Copy other
+	m_bIsValid = copy->IsValid();
+	copy->GetBranch(buf, sizeof(buf));
+	m_Branch = buf;
+	copy->GetCommitHash(buf, sizeof(buf));
+	m_CommitHash = buf;
+	m_bIsDirty = copy->IsDirtyBuild();
+}
+
+CGameVersion::CGameVersion(const char *pszVersion) : CGameVersion()
+{
+	TryParse(pszVersion);
+}
+
+CGameVersion::~CGameVersion()
+{
+	semver_free(&m_SemVer);
+}
+
+bool CGameVersion::TryParse(const char *pszVersion)
 {
 	m_bIsValid = false;
 
-	// First symbol must always be 'v'
-	if (str[0] != 'v')
-	{
+	// Parse with semver.c
+	semver_free(&m_SemVer);
+	if (semver_parse(pszVersion, &m_SemVer))
 		return false;
-	}
+	m_bIsValid = true;
 
-	try
+	// Clear metadata
+	m_Branch.clear();
+	m_CommitHash.clear();
+	m_bIsDirty = false;
+
+	// Prase metadata
+	std::string metadata(m_SemVer.metadata);
+	size_t branchDot = metadata.find('.');
+	if (branchDot != std::string::npos)
 	{
-		std::string stdstr(str);
-		stdstr = stdstr.substr(1);	// Cut off 'v'
+		// Get branch
+		m_Branch = metadata.substr(0, branchDot);
 
-		// Look for x.y.z
-		std::regex r1("^([0-9]+)\\.([0-9]+)\\.([0-9]+)");
-		std::smatch m1;
-		std::regex_search(stdstr, m1, r1);
-		if (m1.size() == 4)
+		// Get commit hash
+		size_t hashDot = metadata.find('.');
+		size_t hashLen = hashDot;
+		if (hashLen != std::string::npos)
 		{
-			m_iMajor = std::stoi(m1[1].str());
-			m_iMinor = std::stoi(m1[2].str());
-			m_iPatch = std::stoi(m1[3].str());
+			hashLen = hashLen - branchDot - 1;
+		}
+
+		m_CommitHash = metadata.substr(branchDot + 1, hashLen);
+
+		// Check branch for valid chars
+		bool hashValid = !m_CommitHash.empty();
+		for (char c : m_CommitHash)
+		{
+			if (!(
+				(c >= '0' && c <= '9') ||
+				(c >= 'a' && c <= 'f')
+				))
+			{
+				hashValid = false;
+				break;
+			}
+		}
+
+		if (!hashValid)
+		{
+			m_CommitHash.clear();
 		}
 		else
 		{
-			// Look for x.y
-			std::regex r2("^([0-9]+)\\.([0-9]+)");
-			std::smatch m2;
-			std::regex_search(stdstr, m2, r2);
-			if (m2.size() != 3)
-				return false;	// Invalid string or something else
-			m_iMajor = std::stoi(m2[1].str());
-			m_iMinor = std::stoi(m2[2].str());
-			m_iPatch = 0;
+			m_bIsDirty =
+				hashDot != std::string::npos &&
+				hashDot == metadata.size() - 2 &&
+				metadata[metadata.size() + 1] == 'm';
 		}
-
 	}
-	catch (...)
-	{
-		return false;	// Exception thrown
-	}
-
-	m_bIsValid = true;
+	
 	return true;
+}
+
+//-------------------------------------------------------------------
+// IGameVersion overrides
+//-------------------------------------------------------------------
+void CGameVersion::DeleteThis()
+{
+	delete this;
+}
+
+bool CGameVersion::IsValid() const
+{
+	return m_bIsValid;
+}
+
+int CGameVersion::ToInt() const
+{
+	assert(IsValid());
+	return semver_numeric(const_cast<semver_t *>(&m_SemVer));
+}
+
+/*IGameVersion *CGameVersion::MakeCopy() const
+{
+	assert(IsValid());
+	CGameVersion *p = new CGameVersion();
+
+	// Copy m_SemVer
+	auto fnCopyCStr = [](const char *from, char *&to)
+	{
+		if (!from)
+			return;
+		size_t len = strlen(from);
+		to = (char *)malloc(len + 1);
+		memcpy(to, from, len + 1);
+	};
+
+	p->m_SemVer.major = m_SemVer.minor;
+	p->m_SemVer.minor = m_SemVer.minor;
+	p->m_SemVer.patch = m_SemVer.patch;
+	fnCopyCStr(m_SemVer.metadata, p->m_SemVer.metadata);
+	fnCopyCStr(m_SemVer.prerelease, p->m_SemVer.prerelease);
+
+	// Copy other
+	p->m_bIsValid = m_bIsValid;
+	p->m_Branch = m_Branch;
+	p->m_CommitHash = m_CommitHash;
+	p->m_bIsDirty = m_bIsDirty;
+
+	return p;
+}*/
+
+void CGameVersion::GetVersion(int &major, int &minor, int &patch) const
+{
+	assert(IsValid());
+	major = GetMajor();
+	minor = GetMinor();
+	patch = GetPatch();
+}
+
+int CGameVersion::GetMajor() const
+{
+	assert(IsValid());
+	return m_SemVer.major;
+}
+
+int CGameVersion::GetMinor() const
+{
+	assert(IsValid());
+	return m_SemVer.minor;
+}
+
+int CGameVersion::GetPatch() const
+{
+	assert(IsValid());
+	return m_SemVer.patch;
+}
+
+bool CGameVersion::GetTag(char *buf, int size) const
+{
+	assert(IsValid());
+
+	if (!m_SemVer.prerelease)
+		return false;
+
+	strncpy(buf, m_SemVer.prerelease, size);
+	buf[size - 1] = '\0';
+	return true;
+}
+
+bool CGameVersion::GetBuildMetadata(char *buf, int size) const
+{
+	assert(IsValid());
+
+	if (!m_SemVer.metadata)
+		return false;
+
+	strncpy(buf, m_SemVer.metadata, size);
+	buf[size - 1] = '\0';
+	return true;
+}
+
+bool CGameVersion::GetBranch(char *buf, int size) const
+{
+	assert(IsValid());
+
+	if (m_Branch.empty())
+		return false;
+
+	strncpy(buf, m_Branch.c_str(), size);
+	buf[size - 1] = '\0';
+	return true;
+}
+
+bool CGameVersion::GetCommitHash(char *buf, int size) const
+{
+	assert(IsValid());
+
+	if (m_CommitHash.empty())
+		return false;
+
+	strncpy(buf, m_CommitHash.c_str(), size);
+	buf[size - 1] = '\0';
+	return true;
+}
+
+bool CGameVersion::IsDirtyBuild() const
+{
+	assert(IsValid());
+	return m_bIsDirty;
 }
 
 bool CGameVersion::operator==(const CGameVersion &rhs) const
 {
-	return (m_iMajor == rhs.m_iMajor) && (m_iMinor == rhs.m_iMinor) && (m_iPatch == rhs.m_iPatch);
+	return semver_eq(m_SemVer, rhs.m_SemVer);
+}
+
+bool CGameVersion::operator!=(const CGameVersion &rhs) const
+{
+	return semver_neq(m_SemVer, rhs.m_SemVer);
 }
 
 bool CGameVersion::operator>(const CGameVersion &rhs) const
 {
-	if (m_iMajor > rhs.m_iMajor)
-		return true;
-	if (m_iMajor < rhs.m_iMajor)
-		return false;
-
-	if (m_iMinor > rhs.m_iMinor)
-		return true;
-	if (m_iMinor < rhs.m_iMinor)
-		return false;
-
-	if (m_iPatch > rhs.m_iPatch)
-		return true;
-	if (m_iPatch < rhs.m_iPatch)
-		return false;
-
-	if (!m_szTag[0] && rhs.m_szTag[0])
-		return true;
-	else
-		return false;
-}
-
-bool CGameVersion::operator>=(const CGameVersion &rhs) const
-{
-	if (m_iMajor > rhs.m_iMajor)
-		return true;
-	if (m_iMajor < rhs.m_iMajor)
-		return false;
-
-	if (m_iMinor > rhs.m_iMinor)
-		return true;
-	if (m_iMinor < rhs.m_iMinor)
-		return false;
-
-	if (m_iPatch > rhs.m_iPatch)
-		return true;
-	if (m_iPatch < rhs.m_iPatch)
-		return false;
-
-	if ((!m_szTag[0] && rhs.m_szTag[0]) || !strcmp(m_szTag, rhs.m_szTag))
-		return true;
-	else
-		return false;
+	return semver_gt(m_SemVer, rhs.m_SemVer);
 }
 
 bool CGameVersion::operator<(const CGameVersion &rhs) const
 {
-	if (m_iMajor < rhs.m_iMajor)
-		return true;
-	if (m_iMajor > rhs.m_iMajor)
-		return false;
-
-	if (m_iMinor < rhs.m_iMinor)
-		return true;
-	if (m_iMinor > rhs.m_iMinor)
-		return false;
-
-	if (m_iPatch < rhs.m_iPatch)
-		return true;
-	if (m_iPatch > rhs.m_iPatch)
-		return false;
-
-	if (m_szTag[0] && !rhs.m_szTag[0])
-		return true;
-	else
-		return false;
+	return semver_lt(m_SemVer, rhs.m_SemVer);
 }
 
-bool CGameVersion::operator<=(const CGameVersion & rhs) const
+bool CGameVersion::operator>=(const CGameVersion &rhs) const
 {
-	if (m_iMajor < rhs.m_iMajor)
-		return true;
-	if (m_iMajor > rhs.m_iMajor)
-		return false;
-
-	if (m_iMinor < rhs.m_iMinor)
-		return true;
-	if (m_iMinor > rhs.m_iMinor)
-		return false;
-
-	if ((m_szTag[0] && !rhs.m_szTag[0]) || !strcmp(m_szTag, rhs.m_szTag))
-		return true;
-	else
-		return false;
+	return semver_gte(m_SemVer, rhs.m_SemVer);
 }
 
+bool CGameVersion::operator<=(const CGameVersion &rhs) const
+{
+	return semver_lte(m_SemVer, rhs.m_SemVer);
+}

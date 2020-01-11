@@ -5,4 +5,5 @@ add_sources(
 	CGameVersion.h
 	CGameVersion.cpp
 	ClientSupportsFlags.h
+	IGameVersion.h
 )
