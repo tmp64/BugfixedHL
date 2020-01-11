@@ -295,6 +295,7 @@ set( SHARED_GAME_DEFS
 #-----------------------------------------------------------------
 set( THREADS_PREFER_PTHREAD_FLAG ON )
 find_package( Threads REQUIRED )
+add_subdirectory( external/nlohmann_json )
 
 #-----------------------------------------------------------------
 # VGUI2
@@ -373,6 +374,7 @@ if( USE_UPDATER )
 	find_package( CURL MODULE REQUIRED )
 	set( UPDATER_LIBS
 		${CURL_LIBRARIES}
+		nlohmann_json
 	)
 	set( UPDATER_INCLUDE_PATHS
 		${CURL_INCLUDE_DIRS}
