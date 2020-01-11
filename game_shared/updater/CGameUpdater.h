@@ -47,6 +47,7 @@ public:
 	typedef std::function<void()> DownloadFinishedCallback_t;
 
 	CGameUpdater();
+	~CGameUpdater();
 	void Frame();
 	void CheckForUpdates();
 	std::string GetChangeLog();

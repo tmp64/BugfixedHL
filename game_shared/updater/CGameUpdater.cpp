@@ -130,16 +130,9 @@ public:
 
 	~CUpdateWorker()
 	{
-		if (m_bIsThreadRunning)
-		{
-			m_bStopThread = true;
-			while (m_bIsThreadRunning)
-			{
-				// Wait for worker thread to finish
-				std::this_thread::sleep_for(std::chrono::milliseconds(100));
-			}
-			GameFrame();	// Flush logs and etc before we get deleted (destructor can only be called from main thread)
-		}
+		m_bStopThread = true;
+		m_pUpdater->m_WorkerThread.join();
+		GameFrame();	// Flush logs and etc before we get deleted (destructor can only be called from main thread)
 	}
 
 	void operator() ()
@@ -569,6 +562,11 @@ CGameUpdater::CGameUpdater()
 	}
 }
 
+CGameUpdater::~CGameUpdater()
+{
+	delete m_pWorker;
+}
+
 void CGameUpdater::Frame()
 {
 	if (m_pWorker)
@@ -580,8 +578,7 @@ void CGameUpdater::Frame()
 /////////////////////////////////////////////////////////////////
 void CGameUpdater::CheckForUpdates()
 {
-	if (m_pWorker)
-		delete m_pWorker;
+	delete m_pWorker;
 
 #if defined(CLIENT_DLL)
 	m_iUpdateModule = UPD_CLIENT;
@@ -595,7 +592,6 @@ void CGameUpdater::CheckForUpdates()
 	m_LatestVersion = CGameVersion();
 	m_pWorker = new CUpdateWorker(this);
 	m_WorkerThread = std::thread(std::ref(*m_pWorker));
-	m_WorkerThread.detach();
 }
 
 std::string CGameUpdater::GetChangeLog()
