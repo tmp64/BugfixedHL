@@ -97,7 +97,7 @@ function Invoke-PlatformBuild
 
     $target = Get-BuildTarget;
     $MSBUILD = Get-MSBuildPath;
-    & $MSBUILD BugfixedHL.sln -nologo /t:${target} /p:PlatformTarget=x86 /p:Configuration=RelWithDebInfo
+    & $MSBUILD BugfixedHL.sln -nologo /t:${target} /p:PlatformTarget=x86 /p:Configuration=RelWithDebInfo /m
 
     if ($LastExitCode -ne 0)
     {
