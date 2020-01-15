@@ -13,8 +13,19 @@ Param (
     [switch]$CleanUp = $false
 )
 
-$ErrorActionPreference = "Stop"
 $THIS_IS_BUILD_SCRIPT = $true;   # For checking in includes
+
+
+# Error handling
+$OriginalLocation = Get-Location;
+trap {
+    $DirNow = Get-Location;
+    Write-Host "Error occured:"
+    Write-Host "$_"
+    Write-Host "Error directory: $DirNow";
+    Set-Location = $OriginalLocation;
+    break;
+}
 
 # Version info
 # Should be the same as in CMakeLists.txt
