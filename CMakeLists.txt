@@ -17,6 +17,7 @@ include( InputFilesList )
 include( MSVCRuntime )
 include( WinXPSupport )
 include( Ternary )
+include( GetGitRevisionDescription )
 
 #-----------------------------------------------------------------
 # Version
@@ -212,31 +213,50 @@ option( USE_UPDATER		"Enable update notifier module" )
 #-----------------------------------------------------------------
 # appversion.h generator
 #-----------------------------------------------------------------
-if( WIN32 )
-	set( GENERATE_APPVERSION_SCRIPT "${CMAKE_SOURCE_DIR}/scripts/GenerateAppVersion.bat" )
+find_package( Git )
+if( GIT_FOUND )
+	# Get branch name
+	execute_process(
+		COMMAND "${GIT_EXECUTABLE}" rev-parse --abbrev-ref HEAD
+		WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+		OUTPUT_VARIABLE GIT_BRANCH
+		OUTPUT_STRIP_TRAILING_WHITESPACE
+	)
+	
+	# Get last commit hash (short)
+	execute_process(
+		COMMAND "${GIT_EXECUTABLE}" rev-parse --short HEAD
+		WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+		OUTPUT_VARIABLE GIT_COMMIT_HASH
+		OUTPUT_STRIP_TRAILING_WHITESPACE
+	)
+	
+	# Get whether worktree is dirty
+	git_local_changes( GIT_DIRTY )
+	if( ${GIT_DIRTY} EQUAL CLEAN )
+		set( GIT_DIRTY FALSE )
+	else()
+		set( GIT_DIRTY TRUE )
+	endif()
 else()
-	set( GENERATE_APPVERSION_SCRIPT "${CMAKE_SOURCE_DIR}/scripts/GenerateAppVersion.sh" )
+	set( GIT_BRANCH "unknown" )
+	set( GIT_COMMIT_HASH "0000000" )
+	set( GIT_DIRTY FALSE )
 endif()
 
-file( TO_NATIVE_PATH "${CMAKE_BINARY_DIR}/generated/appversion.h" APPVERSION_NATIVE_PATH )
+# Assemble version string
+set( BHL_VERSION_STRING "${BHL_VERSION_MAJOR}.${BHL_VERSION_MINOR}.${BHL_VERSION_PATCH}" )
+if( BHL_VERSION_TAG )
+	set( BHL_VERSION_STRING "${BHL_VERSION_STRING}-${BHL_VERSION_TAG}" )
+endif()
+set( BHL_VERSION_STRING "${BHL_VERSION_STRING}+${GIT_BRANCH}.${GIT_COMMIT_HASH}" )
+if( GIT_DIRTY )
+	set( BHL_VERSION_STRING "${BHL_VERSION_STRING}.m" )
+endif()
 
-add_custom_target(
-	generate_appversion
-	"${GENERATE_APPVERSION_SCRIPT}" "${CMAKE_SOURCE_DIR}" "${APPVERSION_NATIVE_PATH}"
-	"${BHL_VERSION_MAJOR}" "${BHL_VERSION_MINOR}" "${BHL_VERSION_PATCH}" "${BHL_VERSION_TAG}" "${BHL_VERSION_METADATA}"
-)
-
-# Run it
+# Generate version file
 file( MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/generated" )
-execute_process(
-	COMMAND
-	"${GENERATE_APPVERSION_SCRIPT}" "${CMAKE_SOURCE_DIR}" "${APPVERSION_NATIVE_PATH}"
-	"${BHL_VERSION_MAJOR}" "${BHL_VERSION_MINOR}" "${BHL_VERSION_PATCH}" "${BHL_VERSION_TAG}" "${BHL_VERSION_METADATA}"
-	BYPRODUCTS ${APPVERSION_NATIVE_PATH}
-)
-
-unset( GENERATE_APPVERSION_SCRIPT )
-unset( APPVERSION_NATIVE_PATH )
+configure_file( "common/appversion.h.in" "${CMAKE_BINARY_DIR}/generated/appversion.h" )
 
 #-----------------------------------------------------------------
 # Autodeploy macro
@@ -421,7 +441,6 @@ endif()
 
 preprocess_sources()
 add_library( client SHARED ${PREP_SRCS} )
-add_dependencies( client generate_appversion )
 configure_msvc_runtime( client STATIC )
 check_winxp_support( client )
 
