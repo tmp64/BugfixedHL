@@ -233,7 +233,7 @@ if( GIT_FOUND )
 	
 	# Get whether worktree is dirty
 	git_local_changes( GIT_DIRTY )
-	if( ${GIT_DIRTY} EQUAL CLEAN )
+	if( GIT_DIRTY STREQUAL "CLEAN" )
 		set( GIT_DIRTY FALSE )
 	else()
 		set( GIT_DIRTY TRUE )
