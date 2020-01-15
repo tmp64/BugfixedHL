@@ -62,7 +62,7 @@ bool CGameVersion::TryParse(const char *pszVersion)
 			m_Branch = metadata.substr(0, branchDot);
 
 			// Get commit hash
-			size_t hashDot = metadata.find('.');
+			size_t hashDot = metadata.find('.', branchDot + 1);
 			size_t hashLen = hashDot;
 			if (hashLen != std::string::npos)
 			{
@@ -94,7 +94,7 @@ bool CGameVersion::TryParse(const char *pszVersion)
 				m_bIsDirty =
 					hashDot != std::string::npos &&
 					hashDot == metadata.size() - 2 &&
-					metadata[metadata.size() + 1] == 'm';
+					metadata[metadata.size() - 1] == 'm';
 			}
 		}
 	}
