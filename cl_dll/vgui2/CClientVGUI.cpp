@@ -137,22 +137,6 @@ void CClientVGUI::Start()
 #if USE_VGUI2
 	g_pViewport->Start();
 	g_pGameUIViewport->Start();
-
-#if 0
-	vgui2::Frame* pFrame = new vgui2::Frame(g_pViewport, "TestFrame");
-	pFrame->SetProportional(false);
-	pFrame->SetTitleBarVisible(true);
-	pFrame->SetMinimizeButtonVisible(false);
-	pFrame->SetMaximizeButtonVisible(false);
-	pFrame->SetCloseButtonVisible(true);
-	pFrame->SetSizeable(true);
-	pFrame->SetMoveable(true);
-	pFrame->SetVisible(true);
-	//pFrame->SetScheme(vgui2::scheme()->LoadSchemeFromFile("ui/resource/SourceScheme.res", "SourceScheme"));
-	pFrame->SetSize(500, 500);
-	pFrame->SetTitle("Test Frame", true);
-	pFrame->Activate();
-#endif
 #endif
 }
 
