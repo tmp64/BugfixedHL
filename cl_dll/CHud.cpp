@@ -687,7 +687,7 @@ void CHud::Frame(double time)
 	static cvar_t *rawInput = gEngfuncs.pfnGetCvarPointer("m_rawinput");
 	if (rawInput && rawInput->value)
 	{
-		ConPrintf(RGBA(111, 234, 247), "m_rawinput 1 is not supported. Setting m_input 2 (DirectInput) instead.\n");
+		ConPrintf(RGBA::ConColor::Cyan, "m_rawinput 1 is not supported. Setting m_input 2 (DirectInput) instead.\n");
 		gEngfuncs.pfnClientCmd("m_rawinput 0");
 		gEngfuncs.pfnClientCmd("m_input 2");
 	}
@@ -1465,3 +1465,11 @@ bool VGUI2_IsCursorVisible()
 	return vgui2::surface()->IsCursorVisible();
 }
 #endif
+
+//-----------------------------------------------------
+// Colors for ConPrintf
+//-----------------------------------------------------
+RGBA RGBA::ConColor::Red = RGBA(249, 54, 54);
+RGBA RGBA::ConColor::Green = RGBA(77, 219, 83);
+RGBA RGBA::ConColor::Yellow = RGBA(240, 205, 65);
+RGBA RGBA::ConColor::Cyan = RGBA(111, 234, 247);

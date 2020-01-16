@@ -94,11 +94,13 @@ void CClientVGUI::Initialize( CreateInterfaceFn* pFactories, int iNumFactories )
 	{
 		if (spewType == SPEW_ASSERT)
 		{
-			ConPrintf(RGBA(247, 83, 74), "%s", pMsg);	// Print in red
+			ConPrintf(RGBA::ConColor::Red, "%s", pMsg);
 			return SPEW_DEBUGGER;
 		}
 		else if (spewType == SPEW_ERROR)
-			ConPrintf(RGBA(247, 83, 74), "%s", pMsg);	// Print in red
+			ConPrintf(RGBA::ConColor::Red, "%s", pMsg);
+		else if (spewType == SPEW_WARNING)
+			ConPrintf(RGBA::ConColor::Yellow, "%s", pMsg);
 		else
 			ConPrintf("%s", pMsg);
 		return SPEW_CONTINUE;

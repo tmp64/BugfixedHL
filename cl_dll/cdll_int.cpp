@@ -250,8 +250,8 @@ int _DLLEXPORT HUD_VidInit( void )
 	}
 	catch (const std::exception &e)
 	{
-		ConPrintf(RGBA(249, 54, 54), "HUD_VidInit: C++ exception thrown.\n");
-		ConPrintf(RGBA(249, 54, 54), "HUD_VidInit: %s.\n", e.what());
+		ConPrintf(RGBA::ConColor::Red, "HUD_VidInit: C++ exception thrown.\n");
+		ConPrintf(RGBA::ConColor::Red, "HUD_VidInit: %s.\n", e.what());
 	}
 	return 1;
 }
@@ -283,8 +283,8 @@ void _DLLEXPORT HUD_Init( void )
 	}
 	catch (const std::exception &e)
 	{
-		ConPrintf(RGBA(249, 54, 54), "HUD_Init: C++ exception thrown.\n");
-		ConPrintf(RGBA(249, 54, 54), "HUD_Init: %s.\n", e.what());
+		ConPrintf(RGBA::ConColor::Red, "HUD_Init: C++ exception thrown.\n");
+		ConPrintf(RGBA::ConColor::Red, "HUD_Init: %s.\n", e.what());
 	}
 
 	UnhookConsoleFunctions();
@@ -308,8 +308,8 @@ int _DLLEXPORT HUD_Redraw( float time, int intermission )
 	}
 	catch (const std::exception &e)
 	{
-		ConPrintf(RGBA(249, 54, 54), "HUD_Redraw: C++ exception thrown.\n");
-		ConPrintf(RGBA(249, 54, 54), "HUD_Redraw: %s.\n", e.what());
+		ConPrintf(RGBA::ConColor::Red, "HUD_Redraw: C++ exception thrown.\n");
+		ConPrintf(RGBA::ConColor::Red, "HUD_Redraw: %s.\n", e.what());
 	}
 
 	return 1;
@@ -339,8 +339,8 @@ int _DLLEXPORT HUD_UpdateClientData(client_data_t *pcldata, float flTime )
 	}
 	catch (const std::exception &e)
 	{
-		ConPrintf(RGBA(249, 54, 54), "HUD_UpdateClientData: C++ exception thrown.\n");
-		ConPrintf(RGBA(249, 54, 54), "HUD_UpdateClientData: %s.\n", e.what());
+		ConPrintf(RGBA::ConColor::Red, "HUD_UpdateClientData: C++ exception thrown.\n");
+		ConPrintf(RGBA::ConColor::Red, "HUD_UpdateClientData: %s.\n", e.what());
 		return 0;
 	}
 }
@@ -379,8 +379,8 @@ void _DLLEXPORT HUD_Shutdown( void )
 	}
 	catch (const std::exception &e)
 	{
-		ConPrintf(RGBA(249, 54, 54), "HUD_Shutdown: C++ exception thrown.\n");
-		ConPrintf(RGBA(249, 54, 54), "HUD_Shutdown: %s.\n", e.what());
+		ConPrintf(RGBA::ConColor::Red, "HUD_Shutdown: C++ exception thrown.\n");
+		ConPrintf(RGBA::ConColor::Red, "HUD_Shutdown: %s.\n", e.what());
 	}
 }
 
@@ -411,8 +411,8 @@ void _DLLEXPORT HUD_Frame( double time )
 	}
 	catch (const std::exception &e)
 	{
-		ConPrintf(RGBA(249, 54, 54), "HUD_Frame: C++ exception thrown.\n");
-		ConPrintf(RGBA(249, 54, 54), "HUD_Frame: %s.\n", e.what());
+		ConPrintf(RGBA::ConColor::Red, "HUD_Frame: C++ exception thrown.\n");
+		ConPrintf(RGBA::ConColor::Red, "HUD_Frame: %s.\n", e.what());
 	}
 }
 

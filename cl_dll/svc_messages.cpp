@@ -299,9 +299,10 @@ void SvcPrint(void)
 									}
 									else
 									{
-										ConPrintf(RGBA(255, 0, 0), "[BUG] SvcPrint: Unable to find player's slot\n");
-										ConPrintf(RGBA(255, 0, 0), "[BUG] Status string:\n");
-										ConPrintf(RGBA(255, 0, 0), "[BUG] %s\n", str);
+										ConPrintf(RGBA::ConColor::Red, "[BUG] SvcPrint: Unable to find player's slot\n");
+										ConPrintf(RGBA::ConColor::Red, "[BUG] Status string:\n");
+										ConPrintf(RGBA::ConColor::Red, "[BUG] %s\n", str);
+										assert(false);
 									}
 								}
 							}
