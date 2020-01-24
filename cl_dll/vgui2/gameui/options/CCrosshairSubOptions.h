@@ -6,11 +6,13 @@ namespace vgui2
 {
 class Label;
 class ComboBox;
+class ImagePanel;
 }
 
 class CCvarCheckButton;
 class CCvarTextEntry;
 class CCvarColor;
+class CCrosshairImage;
 
 typedef struct cvar_s cvar_t;
 
@@ -19,6 +21,8 @@ class CCrosshairSubOptions : public vgui2::PropertyPage
 	DECLARE_CLASS_SIMPLE(CCrosshairSubOptions, vgui2::PropertyPage);
 public:
 	CCrosshairSubOptions(vgui2::Panel *parent);
+	~CCrosshairSubOptions();
+	virtual void ApplySchemeSettings(vgui2::IScheme *pScheme);
 
 	virtual void OnResetData();
 	virtual void OnApplyChanges();
@@ -38,7 +42,14 @@ private:
 	CCvarCheckButton *m_pDotCvar = nullptr;
 	CCvarCheckButton *m_pTCvar = nullptr;
 
+	vgui2::ImagePanel *m_pPreviewPanel = nullptr;
+	CCrosshairImage *m_pPreviewImage = nullptr;
+
 	cvar_t *m_pColors[3];
+
+	MESSAGE_FUNC_PARAMS(OnColorPicked, "ColorPicked", kv);
+	MESSAGE_FUNC_PARAMS(OnCvarTextChanged, "CvarTextChanged", kv);
+	MESSAGE_FUNC_PARAMS(OnCheckButtonChecked, "CheckButtonChecked", kv);
 };
 
 #endif

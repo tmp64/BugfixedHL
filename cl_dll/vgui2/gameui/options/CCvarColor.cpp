@@ -83,4 +83,7 @@ void CCvarColor::OnColorPicked(KeyValues *kv)
 {
 	m_NewColor.SetRawColor(kv->GetInt("color"));
 	m_pPreview->SetBgColor(m_NewColor);
+
+	// Relay down the line
+	PostActionSignal(kv->MakeCopy());
 }
