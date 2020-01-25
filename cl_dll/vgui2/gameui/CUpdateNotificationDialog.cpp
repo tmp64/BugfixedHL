@@ -10,7 +10,7 @@
 #include "cl_util.h"
 #include "hud.h"
 #include <CGameUpdater.h>
-#include "CChangelogDialog.h"
+#include "CChangeLogDialog.h"
 
 CUpdateNotificationDialog::CUpdateNotificationDialog(vgui2::VPANEL parent) : BaseClass(nullptr, GAMEUI_UPDATE_NOTIF)
 {

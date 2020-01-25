@@ -15,8 +15,8 @@ if( USE_UPDATER )
 		CUpdaterDebugDialog.cpp
 		CUpdateNotificationDialog.h
 		CUpdateNotificationDialog.cpp
-		CChangelogDialog.h
-		CChangelogDialog.cpp
+		CChangeLogDialog.h
+		CChangeLogDialog.cpp
 	)
 endif()
 
