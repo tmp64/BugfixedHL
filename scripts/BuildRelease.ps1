@@ -10,7 +10,11 @@ Param (
     [string]$CMakeArgs = "",
     [switch]$MakeZip = $false,
     [switch]$Updater = $false,
-    [switch]$CleanUp = $false
+    [switch]$CleanUp = $false,
+    [string]$VMajor = "0",
+    [string]$VMinor = "0",
+    [string]$VPatch = "0",
+    [string]$VTag = "__UNSPECIFIED"
 )
 
 $THIS_IS_BUILD_SCRIPT = $true;   # For checking in includes
@@ -34,6 +38,12 @@ $VERSION_MINOR = 4
 $VERSION_PATCH = 0
 $VERSION_TAG = 'dev'
 
+# Check overrides
+if ($VMajor -ne "0") { $VERSION_MAJOR = $VMajor; }
+if ($VMinor -ne "0") { $VERSION_MINOR = $VMinor; }
+if ($VPatch -ne "0") { $VERSION_PATCH = $VPatch; }
+if ($VTag -ne "__UNSPECIFIED") { $VERSION_TAG = $VTag; }
+
 # Check params
 if (($Target -ne "Help") -and ($Target -ne "Client") -and ($Target -ne "ClientVGUI2") -and ($Target -ne "Client4554") -and ($Target -ne "Server") -and ($Target -ne "Amxx"))
 {
@@ -51,6 +61,11 @@ if ($Target -eq "Help")
     Write-Host "`t-MakeZip`twill make a ZIP file with binaries and game files (ready to be unpacked to 'Half-Life/valve')";
     Write-Host "`t-Updater`tenable update checker";
     Write-Host "`t-CleanUp`twill remove build files when build is finished successfully";
+    Write-Host "`tVersion overrides:"
+    Write-Host "`t`t-VMajor";
+    Write-Host "`t`t-VMinor";
+    Write-Host "`t`t-VPatch";
+    Write-Host "`t`t-VTag";
     exit 0;
 }
 
@@ -114,9 +129,10 @@ if ($GIT_VERSION.IndexOf('.dirty') -ne -1)
 	$GIT_MODIFIED_TAG = '-m';
 }
 
-if ($VERSION_TAG.Length -ne 0)
+$VERSION_TAG_PREFIXED = $VERSION_TAG;
+if ($VERSION_TAG_PREFIXED.Length -ne 0)
 {
-	$VERSION_TAG = "-${VERSION_TAG}";
+	$VERSION_TAG_PREFIXED = "-${VERSION_TAG}";
 }
 
 if ($GIT_COMMIT_COUNT -eq 0)
@@ -128,7 +144,7 @@ else
 	$GIT_COMMIT_COUNT = "-${GIT_COMMIT_COUNT}";
 }
 
-$VERSION = "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}${GIT_COMMIT_COUNT}${VERSION_TAG}${GIT_MODIFIED_TAG}";
+$VERSION = "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}${GIT_COMMIT_COUNT}${VERSION_TAG_PREFIXED}${GIT_MODIFIED_TAG}";
 
 Write-Host "Repo version: $VERSION";
 
@@ -199,7 +215,7 @@ if ($Updater)
 Push-Location;
 Set-Location $CMAKE_BUILD_DIR;
 
-$CMAKE_ARGS = "-DAUTO_DEPLOY=0 ${CMAKE_UPDATER_FLAG} ${PLATFORM_ARGS} ${TARGET_FLAGS} ${CMakeArgs} `"${ROOT_DIR}`"";
+$CMAKE_ARGS = "-DAUTO_DEPLOY=0 -DBHL_VERSION_MAJOR=${VERSION_MAJOR} -DBHL_VERSION_MINOR=${VERSION_MINOR} -DBHL_VERSION_PATCH=${VERSION_PATCH} -DBHL_VERSION_TAG=${VERSION_TAG} ${CMAKE_UPDATER_FLAG} ${PLATFORM_ARGS} ${TARGET_FLAGS} ${CMakeArgs} `"${ROOT_DIR}`"";
 Write-Host "Running cmake ${CMAKE_ARGS}";
 $CMAKE_CMD = "& `"$CMAKE`" $CMAKE_ARGS";
 Invoke-Expression $CMAKE_CMD;
