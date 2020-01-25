@@ -1,5 +1,5 @@
-#ifndef CCROSSHAIRSUBOPTIONS
-#define CCROSSHAIRSUBOPTIONS
+#ifndef CCROSSHAIRSUBOPTIONS_H
+#define CCROSSHAIRSUBOPTIONS_H
 #include <vgui_controls/PropertyPage.h>
 
 namespace vgui2
