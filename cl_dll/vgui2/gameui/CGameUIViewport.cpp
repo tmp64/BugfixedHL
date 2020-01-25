@@ -140,7 +140,7 @@ void CGameUIViewport::AddPanel(IGameUIPanel *pPanel)
 
 bool CGameUIViewport::DeletePanel(const char *pszName)
 {
-	for (int i = 0; i < m_Panels.size(); i++)
+	for (size_t i = 0; i < m_Panels.size(); i++)
 	{
 		if (!strcmp(m_Panels[i]->GetName(), pszName))
 		{
@@ -155,7 +155,7 @@ bool CGameUIViewport::DeletePanel(const char *pszName)
 
 bool CGameUIViewport::DeletePanel(IGameUIPanel *pPanel)
 {
-	for (int i = 0; i < m_Panels.size(); i++)
+	for (size_t i = 0; i < m_Panels.size(); i++)
 	{
 		if (m_Panels[i] == pPanel)
 		{
