@@ -13,6 +13,8 @@ add_sources(
 	CScoreboardSubOptions.cpp
 	CGeneralSubOptions.h
 	CGeneralSubOptions.cpp
+	CAboutSubOptions.h
+	CAboutSubOptions.cpp
 	
 	CCvarTextEntry.h
 	CCvarTextEntry.cpp

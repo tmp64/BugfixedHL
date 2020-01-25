@@ -1,8 +1,6 @@
-#include <vgui_controls/RichText.h>
 #include <vgui_controls/Label.h>
 #include <vgui_controls/Button.h>
 #include <vgui_controls/CheckButton.h>
-#include <vgui/ILocalize.h>
 #include "CUpdateNotificationDialog.h"
 #include "GameUIPanelNames.h"
 #include "vgui2/VGUI2Paths.h"
@@ -12,48 +10,7 @@
 #include "cl_util.h"
 #include "hud.h"
 #include <CGameUpdater.h>
-
-class CChangelogDialog : vgui2::Frame
-{
-public:
-	DECLARE_CLASS_SIMPLE(CChangelogDialog, Frame);
-
-public:
-	CChangelogDialog(vgui2::Panel *parent) : BaseClass(parent, "ChangelogDialog")
-	{
-		SetKeyBoardInputEnabled(true);
-		SetMouseInputEnabled(true);
-		MakePopup();
-		SetProportional(false);
-		SetTitleBarVisible(true);
-		SetMinimizeButtonVisible(false);
-		SetMaximizeButtonVisible(false);
-		SetCloseButtonVisible(true);
-		SetSizeable(false);
-		SetMoveable(true);
-		SetVisible(false);
-		SetTitle("Changelog", false);
-		SetSize(480, 320);
-
-		m_pChangelogText = new vgui2::RichText(this, "ChangelogText");
-		LoadControlSettings(UI_RESOURCE_DIR "/ChangelogDialog.res");
-
-		SetScheme(vgui2::scheme()->LoadSchemeFromFile(UI_GAMEUISCHEME_FILENAME, "SourceScheme"));
-	}
-
-	virtual void Activate()
-	{
-		// SetText(const char *) uses a tiny buffer (1 KB) to convert UTF-8 to UTF-16
-		wchar_t *buf = new wchar_t[16 * 1024];	// 16 KB should probably be enough
-		vgui2::localize()->ConvertANSIToUnicode(gGameUpdater->GetChangeLog().c_str(), buf, 16 * 1024);
-		m_pChangelogText->SetText(buf);
-		delete[] buf;
-		BaseClass::Activate();
-	}
-
-private:
-	vgui2::RichText *m_pChangelogText = nullptr;
-};
+#include "CChangelogDialog.h"
 
 CUpdateNotificationDialog::CUpdateNotificationDialog(vgui2::VPANEL parent) : BaseClass(nullptr, GAMEUI_UPDATE_NOTIF)
 {
@@ -72,7 +29,7 @@ CUpdateNotificationDialog::CUpdateNotificationDialog(vgui2::VPANEL parent) : Bas
 	SetVisible(false);
 	SetTitle("New update available", false);
 
-	m_pChangelogDialog = new CChangelogDialog(this);
+	m_pChangelogDialog = new CChangeLogDialog(this);
 
 	m_pMainTextLabel = new vgui2::Label(this, "MainTextLabel", "A new update was released.");
 	m_pGameVersionLabel = new vgui2::Label(this, "GameVersionLabel", "");
@@ -119,14 +76,11 @@ void CUpdateNotificationDialog::Activate()
 		char buf[32];
 
 		gGameUpdater->GetGameVersion().GetVersion(major, minor, patch);
-		if (patch != 0)
-			snprintf(buf, sizeof(buf), "Your version: %d.%d.%d", major, minor, patch);
-		else
-			snprintf(buf, sizeof(buf), "Your version: %d.%d", major, minor);
+		snprintf(buf, sizeof(buf), "Your version: %d.%d.%d", major, minor, patch);
 		m_pGameVersionLabel->SetText(buf);
 
 		gGameUpdater->GetLatestVersion().GetVersion(major, minor, patch);
-		snprintf(buf, sizeof(buf), "New version: %d.%d", major, minor);
+		snprintf(buf, sizeof(buf), "New version: %d.%d.%d", major, minor, patch);
 		m_pNewVersionLabel->SetText(buf);
 	}
 	BaseClass::Activate();

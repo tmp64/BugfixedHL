@@ -698,7 +698,12 @@ void CHud::Frame(double time)
 	{
 		m_bUpdatesChecked = true;
 		if (m_pCvarCheckUpdates->value)
+		{
+			gUpdateNotif->SetActive(true);
 			gGameUpdater->CheckForUpdates();
+		}
+		else
+			gUpdateNotif->SetActive(false);
 	}
 #endif
 

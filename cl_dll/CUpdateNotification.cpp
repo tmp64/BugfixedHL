@@ -14,7 +14,7 @@ CUpdateNotification *gUpdateNotif = nullptr;
 
 CUpdateNotification::CUpdateNotification()
 {
-	gGameUpdater->AddCheckFinishedCallback([&](bool b)
+	m_iCallbackId = gGameUpdater->AddCheckFinishedCallback([&](bool b)
 	{
 		CheckFinishedCallback(b);
 	});
@@ -28,9 +28,14 @@ CUpdateNotification::~CUpdateNotification()
 	}
 }
 
+void CUpdateNotification::SetActive(bool state)
+{
+	m_bIsActive = state;
+}
+
 void CUpdateNotification::CheckFinishedCallback(bool isUpdateFound)
 {
-	if (m_bIsNotified)
+	if (!m_bIsActive || m_bIsNotified)
 		return;
 	m_bIsNotified = true;
 	if (!isUpdateFound)

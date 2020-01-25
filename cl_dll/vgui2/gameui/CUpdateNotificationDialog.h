@@ -13,7 +13,7 @@ namespace vgui2
 	class Button;
 }
 
-class CChangelogDialog;
+class CChangeLogDialog;
 
 class CUpdateNotificationDialog : public vgui2::Frame, public IGameUIPanel
 {
@@ -36,7 +36,7 @@ public:
 	bool IsVisible() override final;
 
 private:
-	CChangelogDialog *m_pChangelogDialog;
+	CChangeLogDialog *m_pChangelogDialog;
 	vgui2::Label *m_pMainTextLabel;
 	vgui2::Label *m_pGameVersionLabel, *m_pNewVersionLabel;
 	vgui2::CheckButton *m_pAutoUpdateBox;
