@@ -1,7 +1,7 @@
 #include <vgui/ILocalize.h>
 #include <vgui_controls/RichText.h>
 #include <CGameUpdater.h>
-#include "CChangelogDialog.h"
+#include "CChangeLogDialog.h"
 #include "vgui2/VGUI2Paths.h"
 
 CChangeLogDialog::CChangeLogDialog(vgui2::Panel *parent) : BaseClass(parent, "ChangelogDialog")
