@@ -148,6 +148,8 @@ add_sources(
     zombie.cpp
 	CBugfixedServer.h
 	CBugfixedServer.cpp
+	convar.h
+	convar.cpp
 )
 
 if(WIN32)
