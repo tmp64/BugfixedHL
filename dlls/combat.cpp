@@ -1592,7 +1592,7 @@ Vector CBaseEntity::FireBulletsPlayer ( ULONG cShots, Vector vecSrc, Vector vecD
 		switch (iBulletType)
 		{
 		case BULLET_PLAYER_9MM:
-			k = 50;
+			k = 150;
 			break;
 		case BULLET_PLAYER_MP5:
 			k = 150;
