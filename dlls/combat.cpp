@@ -1607,6 +1607,11 @@ Vector CBaseEntity::FireBulletsPlayer ( ULONG cShots, Vector vecSrc, Vector vecD
 
 		vel = k * cShots * vel;
 		pevAttacker->velocity = pevAttacker->velocity + vel;
+		
+		// Limit velocity
+		// Hack: should use sv_maxvelocity value
+		if (pevAttacker->velocity.Length() >= 2000)
+			pevAttacker->velocity = pevAttacker->velocity.Normalize() * 1999;
 	}
 
 	return Vector( x * vecSpread.x, y * vecSpread.y, 0.0 );
