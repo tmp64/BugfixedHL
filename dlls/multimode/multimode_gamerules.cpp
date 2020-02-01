@@ -186,7 +186,43 @@ void CHalfLifeMultimode::BeginCurMode(bool bEnableFreezeTime)
 			if (pAmmo)
 			{
 				if (m_pCurMode->ShouldRespawnAmmo())
-					pAmmo->Materialize();
+				{
+					// Call m_pCurMode->ShouldRespawnWeapon to check
+					// if we should respawn ammo
+					bool should = false;
+
+					if (!_stricmp(classname, "ammo_9mmclip") ||
+						!_stricmp(classname, "ammo_glockclip") ||
+						!_stricmp(classname, "ammo_mp5clip") ||
+						!_stricmp(classname, "ammo_9mmAR") ||
+						!_stricmp(classname, "ammo_9mmbox"))
+						should = m_pCurMode->ShouldRespawnWeapon("weapon_mp5") || m_pCurMode->ShouldRespawnWeapon("weapon_glock");
+					else if (!_stricmp(classname, "ammo_mp5grenades") ||
+						!_stricmp(classname, "ammo_ARgrenades"))
+						should = m_pCurMode->ShouldRespawnWeapon("weapon_mp5");
+					else if (!_stricmp(classname, "ammo_357"))
+						should = m_pCurMode->ShouldRespawnWeapon("weapon_357");
+					else if (!_stricmp(classname, "ammo_buckshot"))
+						should = m_pCurMode->ShouldRespawnWeapon("weapon_shotgun");
+					else if (!_stricmp(classname, "ammo_crossbow"))
+						should = m_pCurMode->ShouldRespawnWeapon("weapon_crossbow");
+					else if (!_stricmp(classname, "ammo_rpgclip"))
+						should = m_pCurMode->ShouldRespawnWeapon("weapon_rpg");
+					else if (!_stricmp(classname, "ammo_gaussclip"))
+						should = m_pCurMode->ShouldRespawnWeapon("weapon_gauss") || m_pCurMode->ShouldRespawnWeapon("weapon_egon");
+
+					if (should)
+						pAmmo->Materialize();
+					else
+					{
+						// Hide
+						pAmmo->pev->effects |= EF_NODRAW;
+						pAmmo->SetTouch(NULL);
+						UTIL_SetOrigin(pAmmo->pev, g_pGameRules->VecAmmoRespawnSpot(pAmmo));// move to wherever I'm supposed to repawn.
+						pAmmo->SetThink(&CBasePlayerAmmo::Materialize);
+						pAmmo->pev->nextthink = gpGlobals->time + 99999999;
+					}
+				}
 				else
 					pAmmo->Respawn();	// Would call FlAmmoRespawnTime() and never respawn
 			}

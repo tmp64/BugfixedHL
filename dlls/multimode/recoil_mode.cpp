@@ -84,5 +84,11 @@ bool CRecoilMode::ShouldRespawnWeapon(const char *classname)
 			return true;
 	}
 
+	// I guess Valve couldn't agree how to call the guns so some have multiple names
+	if (!_stricmp(classname, "weapon_9mmAR") ||
+		!_stricmp(classname, "weapon_9mmhandgun") ||
+		!_stricmp(classname, "weapon_python"))
+		return true;
+
 	return false;
 }
