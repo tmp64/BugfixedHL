@@ -25,7 +25,7 @@ CHalfLifeMultimode::CHalfLifeMultimode() : CHalfLifeMultiplay()
 {
 	// Init HUD texts
 	m_WarmupTextParams.x = -1.0f;
-	m_WarmupTextParams.y = 0.3f;
+	m_WarmupTextParams.y = 0.25f;
 	m_WarmupTextParams.effect = 0;
 	m_WarmupTextParams.r1 = 255;
 	m_WarmupTextParams.g1 = 255;
