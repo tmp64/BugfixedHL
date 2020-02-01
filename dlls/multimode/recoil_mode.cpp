@@ -18,7 +18,7 @@ struct wpn_t
 // If probability is zero, this weapon is never given when spawning
 // the player but will be allowed to be spawned in the world
 static wpn_t s_Wpns[] = {
-	{ "weapon_pistol", 0.05 },
+	{ "weapon_glock", 0.05 },
 	{ "weapon_357", 0.15 },
 	{ "weapon_shotgun", 0.4 },
 	{ "weapon_mp5", 0.4 },
