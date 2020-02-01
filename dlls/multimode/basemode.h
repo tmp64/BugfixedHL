@@ -149,6 +149,12 @@ public:
 	virtual bool ShouldRespawnItemsAfterPickUp();
 
 	/**
+	 * Called when respawning weapons. Returns true if weapon should be respawned
+	 * @arg classname Classname of the weapon (e.g. weapon_crowbar)
+	 */
+	virtual bool ShouldRespawnWeapon(const char *classname);
+
+	/**
 	 * Returns number of seconds weapons should be respawned after pick up
 	 */
 	virtual float GetWeaponRespawnTime();

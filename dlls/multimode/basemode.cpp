@@ -107,6 +107,11 @@ bool CBaseMode::ShouldRespawnItemsAfterPickUp()
 	return true;
 }
 
+bool CBaseMode::ShouldRespawnWeapon(const char *classname)
+{
+	return true;
+}
+
 float CBaseMode::GetWeaponRespawnTime()
 {
 	return WEAPON_RESPAWN_TIME;

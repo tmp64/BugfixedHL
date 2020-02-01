@@ -12,12 +12,29 @@
 #include "oneshot_mode.h"
 #include "recoil_mode.h"
 #include "wpn_drop_mode.h"
+#include "warmup_mode.h"
 
 extern ConVar mp_multimode;
+
+ConVar mp_mm_min_players("mp_mm_min_players", "1");
+ConVar mp_mm_warmup_time("mp_mm_warmup_time", "10");
+ConVar mp_mm_freeze_time("mp_mm_freeze_time", "5");
+ConVar mp_mm_game_time("mp_mm_game_time", "30");
 
 CHalfLifeMultimode::CHalfLifeMultimode() : CHalfLifeMultiplay()
 {
 	// Init HUD texts
+	m_WarmupTextParams.x = -1.0f;
+	m_WarmupTextParams.y = 0.3f;
+	m_WarmupTextParams.effect = 0;
+	m_WarmupTextParams.r1 = 255;
+	m_WarmupTextParams.g1 = 255;
+	m_WarmupTextParams.b1 = 255;
+	m_WarmupTextParams.fadeinTime = 0.1f;
+	m_WarmupTextParams.fadeoutTime = 0.1f;
+	m_WarmupTextParams.holdTime = 0.9f;
+	m_WarmupTextParams.fxTime = 0.9f;
+
 	m_TimerTextParams.x = -1.0f;
 	m_TimerTextParams.y = 0.05f;
 	m_TimerTextParams.effect = 0;
@@ -33,8 +50,8 @@ CHalfLifeMultimode::CHalfLifeMultimode() : CHalfLifeMultiplay()
 	m_ModeTitleTextParams.effect = 0;
 	m_ModeTitleTextParams.fadeinTime = 0.3f;
 	m_ModeTitleTextParams.fadeoutTime = 0.6f;
-	m_ModeTitleTextParams.holdTime = FREEZE_DURATION - 0.6f;
-	m_ModeTitleTextParams.fxTime = FREEZE_DURATION - 0.6f;
+	m_ModeTitleTextParams.holdTime = mp_mm_freeze_time.Get() - 0.6f;
+	m_ModeTitleTextParams.fxTime = mp_mm_freeze_time.Get() - 0.6f;
 
 	m_ModeTitleTextParams.y = 0.3f;
 
@@ -50,21 +67,55 @@ CHalfLifeMultimode::CHalfLifeMultimode() : CHalfLifeMultiplay()
 	// Back up skill data
 	m_DefSkillData = gSkillData;
 
+	// Warmup
+	m_pWarmupMode = new CWarmupMode();
+
 	// Create mode instances
 	//m_pModes[(int)ModeID::DM] = new CDmMode();
 	m_pModes[(int)ModeID::OneShot] = new COneshotMode();
 	m_pModes[(int)ModeID::Recoil] = new CRecoilMode();
 	m_pModes[(int)ModeID::WpnDrop] = new CWpnDropMode();
-
-	StartNextMode();
 }
 
-void CHalfLifeMultimode::StartNextMode()
+void CHalfLifeMultimode::SwitchToWaiting()
 {
-	if (m_pCurMode)
+	if (m_State == State::Waiting)
+		return;
+
+	if (m_State == State::Warmup)
 	{
-		m_pCurMode->OnEnd();
+		m_State = State::Waiting;
+		return;
 	}
+
+	FinishCurMode();
+	m_State = State::Waiting;
+	m_pCurMode = m_pWarmupMode;
+	BeginCurMode(false);
+}
+
+void CHalfLifeMultimode::SwitchToWarmup()
+{
+	if (m_State == State::Warmup)
+		return;
+
+	m_flWarmupEndTime = gpGlobals->time + mp_mm_warmup_time.Get();
+
+	if (m_State == State::Waiting)
+	{
+		m_State = State::Warmup;
+		return;
+	}
+
+	FinishCurMode();
+	m_State = State::Warmup;
+	m_pCurMode = m_pWarmupMode;
+	BeginCurMode(false);
+}
+
+void CHalfLifeMultimode::SwitchToNextMode()
+{
+	FinishCurMode();
 
 	m_CurModeId = (ModeID)((int)m_CurModeId + 1);
 	if (m_CurModeId == ModeID::ModeCount)
@@ -75,10 +126,14 @@ void CHalfLifeMultimode::StartNextMode()
 		m_CurModeId = (ModeID)((int)m_CurModeId + 1);
 
 	m_pCurMode = m_pModes[(int)m_CurModeId];
-	m_bIsFreezeTime = true;
-	m_flFreezeEndTime = gpGlobals->time + FREEZE_DURATION;
-	m_flFreezeNextSecTime = gpGlobals->time + 0;
-	m_iFreezeNextSec = FREEZE_DURATION;
+
+	m_State = State::Game;
+	BeginCurMode(true);
+}
+
+void CHalfLifeMultimode::BeginCurMode(bool bEnableFreezeTime)
+{
+	ALERT(at_console, "Preparing to run [%d] %s\n", (int)m_CurModeId, m_pCurMode->GetModeName());
 
 	// Respawn stuff
 	// TODO: Remove corpses?
@@ -96,7 +151,7 @@ void CHalfLifeMultimode::StartNextMode()
 			CBasePlayerItem *pWeapon = dynamic_cast<CBasePlayerItem *>(pBase);
 			if (pWeapon)
 			{
-				if (m_pCurMode->ShouldRespawnWeapons())
+				if (m_pCurMode->ShouldRespawnWeapons() && m_pCurMode->ShouldRespawnWeapon(classname))
 				{
 					if (pWeapon->pev->effects & EF_NODRAW)
 					{
@@ -105,8 +160,6 @@ void CHalfLifeMultimode::StartNextMode()
 				}
 				else
 				{
-					//pWeapon->Respawn();
-
 					pWeapon->pev->effects |= EF_NODRAW;// invisible for now
 					pWeapon->SetTouch(NULL);// no touch
 					pWeapon->SetThink(&CBasePlayerItem::AttemptToMaterialize);
@@ -146,6 +199,8 @@ void CHalfLifeMultimode::StartNextMode()
 	}
 
 	// Respawn all players
+	m_bFreezeOnSpawn = true;
+
 	for (int i = 1; i <= gpGlobals->maxClients; i++)
 	{
 		edict_t *pEdict = INDEXENT(i);
@@ -163,29 +218,53 @@ void CHalfLifeMultimode::StartNextMode()
 		}
 	}
 
+	m_bFreezeOnSpawn = false;
+
 	// Restore skill data
 	gSkillData = m_DefSkillData;
 
-	// Show mode info message
-	m_pCurMode->GetShortTitleColor(m_ModeTitleTextParams.r1, m_ModeTitleTextParams.g1, m_ModeTitleTextParams.b1);
-	UTIL_DirectorHudMessageAll(m_ModeTitleTextParams, m_pCurMode->GetShortTitle(), true);
-	UTIL_DirectorHudMessageAll(m_ModeInfoTextParams, m_pCurMode->GetDescription(), true);
+	// Reset timer updates
+	m_flNextTimerUpdate = gpGlobals->time + 0;
 
-	m_pCurMode->OnFreezeStart();
-	ALERT(at_console, "Preparing to run [%d] %s\n", (int)m_CurModeId, m_pCurMode->GetModeName());
+	if (m_State != State::Waiting && m_State != State::Warmup)
+	{
+		// Show mode info message
+		m_pCurMode->GetShortTitleColor(m_ModeTitleTextParams.r1, m_ModeTitleTextParams.g1, m_ModeTitleTextParams.b1);
+		UTIL_DirectorHudMessageAll(m_ModeTitleTextParams, m_pCurMode->GetShortTitle(), true);
+		UTIL_DirectorHudMessageAll(m_ModeInfoTextParams, m_pCurMode->GetDescription(), true);
+
+		m_pCurMode->OnFreezeStart();
+
+		if (bEnableFreezeTime)
+		{
+			m_State = State::FreezeTime;
+			m_flFreezeEndTime = gpGlobals->time + mp_mm_freeze_time.Get();
+			m_iFreezeNextSec = mp_mm_freeze_time.Get();
+		}
+		else
+		{
+			StartCurMode();
+		}
+	}
+	else
+	{
+		// Start immediately
+		m_pCurMode->OnFreezeStart();
+		StartCurMode();
+	}
 }
 
-float CHalfLifeMultimode::GetModeDuration()
+void CHalfLifeMultimode::StartCurMode()
 {
-	return 30;
-}
-
-void CHalfLifeMultimode::EndFreezeTime()
-{
-	m_bIsFreezeTime = false;
-	m_pCurMode->OnStart();
-	m_flEndTime = gpGlobals->time + GetModeDuration();
 	ALERT(at_console, "Running mode [%d] %s\n", (int)m_CurModeId, m_pCurMode->GetModeName());
+
+	if (m_State == State::FreezeTime)
+	{
+		m_State = State::Game;
+		m_flEndTime = gpGlobals->time + mp_mm_game_time.Get();
+	}
+
+	m_pCurMode->OnStart();
 
 	// Unfreeze players and play sound on all clients
 	for (int i = 1; i <= gpGlobals->maxClients; i++)
@@ -210,9 +289,24 @@ void CHalfLifeMultimode::EndFreezeTime()
 	}
 }
 
+void CHalfLifeMultimode::FinishCurMode()
+{
+	if (m_pCurMode)
+	{
+		m_pCurMode->OnEnd();
+	}
+
+	m_pCurMode = nullptr;
+}
+
 bool CHalfLifeMultimode::IsSpectator(CBasePlayer *pPlayer)
 {
 	return (pPlayer->pev->iuser1 || pPlayer->pev->iuser2 || pPlayer->m_bInWelcomeCam);
+}
+
+const char *CHalfLifeMultimode::GetGameDescription()
+{
+	return "HL Multimode";
 }
 
 void CHalfLifeMultimode::Think()
@@ -224,13 +318,78 @@ void CHalfLifeMultimode::Think()
 		m_pCurMode->Think();
 	}
 
-	if (m_bIsFreezeTime)
+	switch (m_State)
+	{
+	case State::Invalid:
+	{
+		SwitchToWaiting();
+		break;
+	}
+	case State::Waiting:
+	{
+		if (gpGlobals->time >= m_flNextTimerUpdate)
+		{
+			// TODO: Show "Waiting for players" message
+			// TODO: and check for player count
+
+
+			// Count connected players
+			int iPlayerCount = 0;
+			int iMinPlayerCount = mp_mm_min_players.Get();
+			for (int i = 1; i <= gpGlobals->maxClients; i++)
+			{
+				edict_t *pEdict = INDEXENT(i);
+				if (!pEdict || pEdict->free)
+					continue;
+
+				CBasePlayer *pPlayer = (CBasePlayer *)CBaseEntity::Instance(pEdict);
+				if (pPlayer && !pPlayer->m_bIsBot)
+					iPlayerCount++;
+			}
+
+			if (iPlayerCount >= iMinPlayerCount)
+			{
+				// Start warmup
+				SwitchToWarmup();
+			}
+			else
+			{
+				// Show hud message
+				char buf[128];
+				snprintf(buf, sizeof(buf), "Waiting for players [%d / %d]", iPlayerCount, iMinPlayerCount);
+				UTIL_DirectorHudMessageAll(m_WarmupTextParams, buf, false);
+			}
+
+			m_flNextTimerUpdate = gpGlobals->time + 1;
+		}
+
+		break;
+	}
+	case State::Warmup:
+	{
+		if (gpGlobals->time >= m_flNextTimerUpdate)
+		{
+			char buf[128];
+			int seconds = m_flWarmupEndTime - gpGlobals->time;
+			snprintf(buf, sizeof(buf), "Warm-up [%d:%02d]", seconds / 60, seconds % 60);
+			UTIL_DirectorHudMessageAll(m_WarmupTextParams, buf, false);
+			m_flNextTimerUpdate = gpGlobals->time + 1;
+		}
+
+		if (gpGlobals->time >= m_flWarmupEndTime)
+		{
+			SwitchToNextMode();
+		}
+
+		break;
+	}
+	case State::FreezeTime:
 	{
 		if (gpGlobals->time >= m_flFreezeEndTime)
 		{
-			EndFreezeTime();
+			StartCurMode();
 		}
-		else if (gpGlobals->time >= m_flFreezeNextSecTime)
+		else if (gpGlobals->time >= m_flNextTimerUpdate)
 		{
 			const char *szSuitVoice[10] = {
 				nullptr,
@@ -264,10 +423,12 @@ void CHalfLifeMultimode::Think()
 			}
 
 			m_iFreezeNextSec--;
-			m_flFreezeNextSecTime = gpGlobals->time + 1;
+			m_flNextTimerUpdate = gpGlobals->time + 1;
 		}
+
+		break;
 	}
-	else
+	case State::Game:
 	{
 		// Update timer
 		if (gpGlobals->time >= m_flNextTimerUpdate)
@@ -276,33 +437,16 @@ void CHalfLifeMultimode::Think()
 			int seconds = m_flEndTime - gpGlobals->time;
 			snprintf(buf, sizeof(buf), "%d:%02d", seconds / 60, seconds % 60);
 			UTIL_DirectorHudMessageAll(m_TimerTextParams, buf, false);
-			
-			/*MESSAGE_BEGIN(MSG_BROADCAST, SVC_DIRECTOR, NULL);
-			{
-				auto WRITE_FLOAT = [](float val)
-				{
-					WRITE_LONG(*reinterpret_cast<int *>(&val));
-				};
-
-				WRITE_BYTE(strlen(buf) + 31);
-				WRITE_BYTE(DRC_CMD_MESSAGE);
-				WRITE_BYTE(0);				// Effect - None
-				WRITE_LONG(0xF29D35);		// Color - Orange
-				WRITE_FLOAT(-1.0);			// X
-				WRITE_FLOAT(0.05);			// Y
-				WRITE_FLOAT(0.1);			// Fade-in time
-				WRITE_FLOAT(0.1);			// Fade-out time
-				WRITE_FLOAT(0.9);			// Hold time
-				WRITE_FLOAT(0.9);			// FX time
-				WRITE_STRING(buf);
-				MESSAGE_END();
-			}*/
-
 			m_flNextTimerUpdate = gpGlobals->time + 1;
 		}
 
 		if (gpGlobals->time >= m_flEndTime)
-			StartNextMode();
+		{
+			SwitchToNextMode();
+		}
+
+		break;
+	}
 	}
 }
 
@@ -345,7 +489,7 @@ void CHalfLifeMultimode::PlayerSpawn(CBasePlayer *pPlayer)
 	if (IsSpectator(pPlayer))
 		return;
 
-	if (m_bIsFreezeTime)
+	if (m_State == State::FreezeTime || m_bFreezeOnSpawn)
 	{
 		// Disable attack
 		pPlayer->m_flNextAttack = gpGlobals->time + 9999999;
@@ -356,12 +500,12 @@ void CHalfLifeMultimode::PlayerSpawn(CBasePlayer *pPlayer)
 		DROP_TO_FLOOR(pPlayer->edict());
 	}
 
-	// Regive weapons weapons
+	// Regive weapons
 	pPlayer->RemoveAllItems(false);
-	m_pCurMode->GivePlayerWeapons(pPlayer);
 
 	if (m_pCurMode)
 	{
+		m_pCurMode->GivePlayerWeapons(pPlayer);
 		m_pCurMode->PlayerSpawn(pPlayer);
 	}
 }

@@ -12,6 +12,7 @@ public:
 	virtual const char *GetDescription();
 
 	virtual void GivePlayerWeapons(CBasePlayer *pPlayer);
+	virtual bool ShouldRespawnWeapon(const char *classname);
 };
 
 #endif

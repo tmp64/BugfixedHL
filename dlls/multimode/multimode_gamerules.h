@@ -9,14 +9,31 @@ class CHalfLifeMultimode : public CHalfLifeMultiplay
 public:
 	using BaseClass = CHalfLifeMultiplay;
 
-	static constexpr int FREEZE_DURATION = 5;
+	enum class State
+	{
+		Invalid = 0,
+		Waiting,
+		Warmup,
+		FreezeTime,
+		Game
+	};
 
 	CHalfLifeMultimode();
-	void StartNextMode();
+	/*void StartNextMode();
 	float GetModeDuration();
-	void EndFreezeTime();
+	void EndFreezeTime();*/
+
+	void SwitchToWaiting();
+	void SwitchToWarmup();
+	void SwitchToNextMode();
+
+	void BeginCurMode(bool bEnableFreezeTime);
+	void StartCurMode();
+	void FinishCurMode();
 
 	bool IsSpectator(CBasePlayer *pPlayer);
+
+	virtual const char *GetGameDescription();
 
 	void Think();
 	virtual void ClientDisconnected(edict_t *pClient);
@@ -75,21 +92,27 @@ public:
 private:
 	CBaseMode *m_pModes[(int)ModeID::ModeCount] = {};
 	skilldata_t m_DefSkillData;
+	hudtextparms_t m_WarmupTextParams;
 	hudtextparms_t m_TimerTextParams;
 	hudtextparms_t m_ModeTitleTextParams;
 	hudtextparms_t m_ModeInfoTextParams;
 
+	State m_State = State::Invalid;
+	float m_flNextTimerUpdate = 0;
+
+	// Warmup
+	CBaseMode *m_pWarmupMode = nullptr;
+	float m_flWarmupEndTime = 0;
+
 	// Freeze time
-	bool m_bIsFreezeTime = false;
 	float m_flFreezeEndTime = 0;
-	float m_flFreezeNextSecTime = 0;
 	int m_iFreezeNextSec = 0;
+	bool m_bFreezeOnSpawn = false;
 
 	// Game time
 	CBaseMode *m_pCurMode = nullptr;
 	ModeID m_CurModeId = ModeID::None;
 	float m_flEndTime = 0;
-	float m_flNextTimerUpdate = 0;
 
 	friend bool IsRunningMultimode(ModeID mode);
 };

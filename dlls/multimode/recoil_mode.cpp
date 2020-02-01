@@ -8,8 +8,36 @@
 #include "game.h"
 #include "recoil_mode.h"
 
+struct wpn_t
+{
+	const char *ent;
+	float rnd;
+};
+
+// weapon : probability of spawn
+// If probability is zero, this weapon is never given when spawning
+// the player but will be allowed to be spawned in the world
+static wpn_t s_Wpns[] = {
+	{ "weapon_pistol", 0.05 },
+	{ "weapon_357", 0.15 },
+	{ "weapon_shotgun", 0.4 },
+	{ "weapon_mp5", 0.4 },
+
+	{ "weapon_crowbar", 0 },
+};
+
 CRecoilMode::CRecoilMode() : CBaseMode()
 {
+	// Prepare s_Wpns
+	float sum = 0;
+	for (int i = 0; i < HLARRAYSIZE(s_Wpns); i++)
+	{
+		if (s_Wpns[i].rnd != 0)
+		{
+			sum += s_Wpns[i].rnd;
+			s_Wpns[i].rnd = sum;
+		}
+	}
 }
 
 const char *CRecoilMode::GetModeName()
@@ -33,37 +61,28 @@ void CRecoilMode::GivePlayerWeapons(CBasePlayer *pPlayer)
 	pPlayer->GiveNamedItem("weapon_crowbar");
 
 	// Give random weapon
-	struct wpn_t
-	{
-		const char *ent;
-		float rnd;
-	};
-
-	wpn_t wpns[] = {
-		{ "weapon_pistol", 0.1 },
-		{ "weapon_357", 0.3 },
-		{ "weapon_shotgun", 0.3 },
-		{ "weapon_mp5", 0.3 },
-	};
-
-	float sum = 0;
-	for (int i = 0; i < HLARRAYSIZE(wpns); i++)
-	{
-		sum += wpns[i].rnd;
-		wpns[i].rnd = sum;
-	}
-
 	float rnd = RANDOM_FLOAT(0, 1);
 	int i;
-	for (i = 0; i < HLARRAYSIZE(wpns); i++)
+	for (i = 0; i < HLARRAYSIZE(s_Wpns); i++)
 	{
-		if (rnd <= wpns[i].rnd || fabs(rnd - wpns[i].rnd) <= 0.001)
+		if (rnd <= s_Wpns[i].rnd || fabs(rnd - s_Wpns[i].rnd) <= 0.001)
 			break;
 	}
-	pPlayer->GiveNamedItem(wpns[i].ent);
+	pPlayer->GiveNamedItem(s_Wpns[i].ent);
 
 	// Give a lot of ammo
 	pPlayer->m_rgAmmo[pPlayer->GetAmmoIndex("buckshot")] = 125;
 	pPlayer->m_rgAmmo[pPlayer->GetAmmoIndex("9mm")] = 250;
 	pPlayer->m_rgAmmo[pPlayer->GetAmmoIndex("357")] = 36;
+}
+
+bool CRecoilMode::ShouldRespawnWeapon(const char *classname)
+{
+	for (int i = 0; i < HLARRAYSIZE(s_Wpns); i++)
+	{
+		if (!_stricmp(classname, s_Wpns[i].ent))
+			return true;
+	}
+
+	return false;
 }

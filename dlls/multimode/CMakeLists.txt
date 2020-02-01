@@ -14,4 +14,6 @@ add_sources(
 	recoil_mode.cpp
 	wpn_drop_mode.h
 	wpn_drop_mode.cpp
+	warmup_mode.h
+	warmup_mode.cpp
 )
