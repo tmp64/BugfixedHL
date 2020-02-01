@@ -30,6 +30,7 @@
 #include "soundent.h"
 #include "decals.h"
 #include "gamerules.h"
+#include "multimode/multimode_gamerules.h"
 
 extern CGraph	WorldGraph;
 extern int gEvilImpulse101;
@@ -666,6 +667,11 @@ void CBasePlayerWeapon::ItemPostFrame( void )
 
 		pPlayer->TabulateAmmo();
 		PrimaryAttack();
+
+		if (IsRunningMultimode())
+		{
+			GetMultimodeGR()->OnPrimaryAttack(pPlayer, this);
+		}
 	}
 	else if ( pPlayer->pev->button & IN_RELOAD && iMaxClip() != WEAPON_NOCLIP && !m_fInReload ) 
 	{

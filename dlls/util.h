@@ -327,6 +327,10 @@ typedef struct hudtextparms_s
 extern void			UTIL_HudMessageAll( const hudtextparms_t &textparms, const char *pMessage );
 extern void			UTIL_HudMessage( CBaseEntity *pEntity, const hudtextparms_t &textparms, const char *pMessage );
 
+// HUD messages that don't use channel
+extern void			UTIL_DirectorHudMessageAll(const hudtextparms_t &textparms, const char *pMessage, bool reliable);
+extern void			UTIL_DirectorHudMessage(CBaseEntity *pEntity, const hudtextparms_t &textparms, const char *pMessage, bool reliable);
+
 // for handy use with ClientPrint params
 extern char *UTIL_dtos1( int d );
 extern char *UTIL_dtos2( int d );

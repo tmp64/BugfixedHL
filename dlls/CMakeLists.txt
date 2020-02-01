@@ -161,3 +161,4 @@ if(WIN32)
 endif()
 
 add_subdirectory( wpn_shared )
+add_subdirectory( multimode )
