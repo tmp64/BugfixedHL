@@ -22,6 +22,9 @@ ConVar mp_mm_warmup_time("mp_mm_warmup_time", "45");
 ConVar mp_mm_freeze_time("mp_mm_freeze_time", "5");
 ConVar mp_mm_game_time("mp_mm_game_time", "60");
 
+ConVar mp_mm_skip_warmup("mp_mm_skip_warmup", "0");
+ConVar mp_mm_skip_mode("mp_mm_skip_mode", "0");
+
 CHalfLifeMultimode::CHalfLifeMultimode() : CHalfLifeMultiplay()
 {
 	// Init HUD texts
@@ -360,6 +363,19 @@ void CHalfLifeMultimode::Think()
 	if (m_pCurMode)
 	{
 		m_pCurMode->Think();
+	}
+
+	// Handle skip cvars
+	if (mp_mm_skip_warmup)
+	{
+		mp_mm_skip_warmup.Set(0.0);
+		if (m_State == State::Warmup)
+			SwitchToNextMode();
+	}
+	else if (mp_mm_skip_mode)
+	{
+		mp_mm_skip_mode.Set(0.0);
+		SwitchToNextMode();
 	}
 
 	switch (m_State)
