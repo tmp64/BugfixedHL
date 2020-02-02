@@ -89,6 +89,8 @@ void CHalfLifeMultimode::SwitchToWaiting()
 	if (m_State == State::Waiting)
 		return;
 
+	ResetTimerUpdate();
+
 	if (m_State == State::Warmup)
 	{
 		m_State = State::Waiting;
@@ -106,6 +108,7 @@ void CHalfLifeMultimode::SwitchToWarmup()
 	if (m_State == State::Warmup)
 		return;
 
+	ResetTimerUpdate();
 	m_flWarmupEndTime = gpGlobals->time + mp_mm_warmup_time.Get();
 
 	if (m_State == State::Waiting)
@@ -273,7 +276,7 @@ void CHalfLifeMultimode::BeginCurMode(bool bEnableFreezeTime)
 	gSkillData = m_DefSkillData;
 
 	// Reset timer updates
-	m_flNextTimerUpdate = gpGlobals->time + 0;
+	ResetTimerUpdate();
 
 	if (m_State != State::Waiting && m_State != State::Warmup)
 	{
@@ -829,6 +832,11 @@ void CHalfLifeMultimode::OnPrimaryAttack(CBasePlayer *pPlayer, CBasePlayerItem *
 	{
 		return m_pCurMode->OnPrimaryAttack(pPlayer, pWeapon);
 	}
+}
+
+void CHalfLifeMultimode::ResetTimerUpdate()
+{
+	m_flNextTimerUpdate = gpGlobals->time + 0.0;
 }
 
 bool IsRunningMultimode()

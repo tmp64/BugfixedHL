@@ -111,6 +111,8 @@ private:
 	ModeID m_CurModeId = ModeID::None;
 	float m_flEndTime = 0;
 
+	void ResetTimerUpdate();
+
 	friend bool IsRunningMultimode(ModeID mode);
 };
 
