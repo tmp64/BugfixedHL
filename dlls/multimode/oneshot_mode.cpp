@@ -63,7 +63,7 @@ void COneshotMode::Think()
 void COneshotMode::PlayerThink(CBasePlayer *pPlayer)
 {
 	// Infinite shotgun ammo
-	pPlayer->m_rgAmmo[pPlayer->GetAmmoIndex("buckshot")] = 120;
+	pPlayer->m_rgAmmo[pPlayer->GetAmmoIndex("buckshot")] = 125;
 }
 
 int COneshotMode::DeadPlayerWeapons(CBasePlayer *pPlayer)
