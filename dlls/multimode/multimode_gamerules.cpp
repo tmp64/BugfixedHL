@@ -391,10 +391,6 @@ void CHalfLifeMultimode::Think()
 	{
 		if (gpGlobals->time >= m_flNextTimerUpdate)
 		{
-			// TODO: Show "Waiting for players" message
-			// TODO: and check for player count
-
-
 			// Count connected players
 			int iPlayerCount = 0;
 			int iMinPlayerCount = mp_mm_min_players.Get();
