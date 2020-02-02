@@ -20,7 +20,7 @@ const char *COneshotMode::GetModeName()
 
 const char *COneshotMode::GetShortTitle()
 {
-	return "One-Shot-Gun";
+	return "One-Shot Gun";
 }
 
 void COneshotMode::GetShortTitleColor(byte &r, byte &g, byte &b)
