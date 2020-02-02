@@ -30,9 +30,6 @@ const char *CWpnDropMode::GetDescription()
 void CWpnDropMode::GivePlayerWeapons(CBasePlayer *pPlayer)
 {
 	pPlayer->GiveNamedItem("weapon_357");
-	pPlayer->GiveNamedItem("ammo_357");
-	pPlayer->GiveNamedItem("ammo_357");
-	pPlayer->GiveNamedItem("ammo_357");
 }
 
 bool CWpnDropMode::ShouldRespawnWeapons()
@@ -49,4 +46,10 @@ void CWpnDropMode::OnPrimaryAttack(CBasePlayer *pPlayer, CBasePlayerItem *pWeapo
 {
 	// Drop active weapon
 	pPlayer->DropPlayerItem("");
+}
+
+void CWpnDropMode::PlayerThink(CBasePlayer *pPlayer)
+{
+	// Infinite ammo
+	pPlayer->m_rgAmmo[pPlayer->GetAmmoIndex("357")] = 36;
 }

@@ -15,6 +15,7 @@ public:
 	virtual bool ShouldRespawnWeapons();
 	virtual bool ShouldRespawnAmmo();
 	virtual void OnPrimaryAttack(CBasePlayer *pPlayer, CBasePlayerItem *pWeapon);
+	virtual void PlayerThink(CBasePlayer *pPlayer);
 };
 
 #endif
