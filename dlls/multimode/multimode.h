@@ -11,6 +11,7 @@ enum class ModeID : int
 	OneShot,
 	Recoil,
 	WpnDrop,
+	Biohazard,
 	ModeCount
 };
 

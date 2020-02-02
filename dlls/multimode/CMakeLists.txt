@@ -16,4 +16,6 @@ add_sources(
 	wpn_drop_mode.cpp
 	warmup_mode.h
 	warmup_mode.cpp
+	biohazard_mode.h
+	biohazard_mode.cpp
 )

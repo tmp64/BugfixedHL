@@ -13,6 +13,7 @@
 #include "recoil_mode.h"
 #include "wpn_drop_mode.h"
 #include "warmup_mode.h"
+#include "biohazard_mode.h"
 
 extern ConVar mp_multimode;
 
@@ -75,6 +76,7 @@ CHalfLifeMultimode::CHalfLifeMultimode() : CHalfLifeMultiplay()
 	m_pModes[(int)ModeID::OneShot] = new COneshotMode();
 	m_pModes[(int)ModeID::Recoil] = new CRecoilMode();
 	m_pModes[(int)ModeID::WpnDrop] = new CWpnDropMode();
+	m_pModes[(int)ModeID::Biohazard] = new CBiohazardMode();
 }
 
 void CHalfLifeMultimode::SwitchToWaiting()
@@ -231,6 +233,12 @@ void CHalfLifeMultimode::BeginCurMode(bool bEnableFreezeTime)
 		{
 			CWeaponBox *pEnt = (CWeaponBox *)CBaseEntity::Instance(pEdict);
 			pEnt->Kill();
+		}
+		else if (!strcmp("monster_snark", classname) ||
+			!strcmp("hornet", classname))
+		{
+			CBaseMonster *pEnt = (CBaseMonster *)CBaseEntity::Instance(pEdict);
+			pEnt->Killed(nullptr, GIB_NEVER);
 		}
 	}
 
