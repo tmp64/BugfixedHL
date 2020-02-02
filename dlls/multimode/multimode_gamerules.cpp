@@ -497,6 +497,30 @@ void CHalfLifeMultimode::Think()
 			int seconds = m_flEndTime - gpGlobals->time;
 			snprintf(buf, sizeof(buf), "%d:%02d", seconds / 60, seconds % 60);
 			UTIL_DirectorHudMessageAll(m_TimerTextParams, buf, false);
+
+			if (seconds <= 4)
+			{
+				// Play blip sound to signal the end
+				const char *snd;
+
+				if (seconds <= 1)
+					snd = "blip2";
+				else
+					snd = "blip1";
+
+				for (int i = 1; i <= gpGlobals->maxClients; i++)
+				{
+					edict_t *pEdict = INDEXENT(i);
+
+					if (!pEdict || pEdict->free)
+						continue;
+
+					CBasePlayer *pPlayer = (CBasePlayer *)CBaseEntity::Instance(pEdict);
+					if (pPlayer && !pPlayer->m_bIsBot)
+						CLIENT_COMMAND(pEdict, "spk buttons/%s.wav\n", snd);
+				}
+			}
+
 			m_flNextTimerUpdate = gpGlobals->time + 1;
 		}
 
