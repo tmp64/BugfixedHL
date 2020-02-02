@@ -14,6 +14,7 @@
 #include "wpn_drop_mode.h"
 #include "warmup_mode.h"
 #include "biohazard_mode.h"
+#include "slowrockets_mode.h"
 
 extern ConVar mp_multimode;
 
@@ -80,6 +81,7 @@ CHalfLifeMultimode::CHalfLifeMultimode() : CHalfLifeMultiplay()
 	m_pModes[(int)ModeID::Recoil] = new CRecoilMode();
 	m_pModes[(int)ModeID::WpnDrop] = new CWpnDropMode();
 	m_pModes[(int)ModeID::Biohazard] = new CBiohazardMode();
+	m_pModes[(int)ModeID::SlowRockets] = new CSlowRocketsMode();
 }
 
 void CHalfLifeMultimode::SwitchToWaiting()

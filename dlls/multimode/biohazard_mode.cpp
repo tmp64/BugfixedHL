@@ -8,7 +8,7 @@
 #include "game.h"
 #include "biohazard_mode.h"
 
-// Period in seconds in whick snarks are given to players
+// Period in seconds in which snarks are given to players
 ConVar mp_mm_biohaz_snark_respawn("mp_mm_biohaz_snark_respawn", "10");
 
 CBiohazardMode::CBiohazardMode() : CBaseMode()

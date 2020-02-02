@@ -19,9 +19,6 @@ public:
 	};
 
 	CHalfLifeMultimode();
-	/*void StartNextMode();
-	float GetModeDuration();
-	void EndFreezeTime();*/
 
 	void SwitchToWaiting();
 	void SwitchToWarmup();
