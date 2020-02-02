@@ -14,17 +14,17 @@ CWpnDropMode::CWpnDropMode() : CBaseMode()
 
 const char *CWpnDropMode::GetModeName()
 {
-	return "CWpnDropMode";
+	return "WpnDropMode";
 }
 
 const char *CWpnDropMode::GetShortTitle()
 {
-	return "TODO: Unnamed";
+	return "Heavy Weapons";
 }
 
 const char *CWpnDropMode::GetDescription()
 {
-	return "Weapon drops after each shot.";
+	return "Gun is so heavy you drop it after each shot.";
 }
 
 void CWpnDropMode::GivePlayerWeapons(CBasePlayer *pPlayer)
