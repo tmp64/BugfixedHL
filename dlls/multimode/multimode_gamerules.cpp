@@ -18,9 +18,9 @@
 extern ConVar mp_multimode;
 
 ConVar mp_mm_min_players("mp_mm_min_players", "1");
-ConVar mp_mm_warmup_time("mp_mm_warmup_time", "10");
+ConVar mp_mm_warmup_time("mp_mm_warmup_time", "45");
 ConVar mp_mm_freeze_time("mp_mm_freeze_time", "5");
-ConVar mp_mm_game_time("mp_mm_game_time", "30");
+ConVar mp_mm_game_time("mp_mm_game_time", "60");
 
 CHalfLifeMultimode::CHalfLifeMultimode() : CHalfLifeMultiplay()
 {
