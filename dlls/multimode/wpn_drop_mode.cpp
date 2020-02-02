@@ -8,6 +8,9 @@
 #include "game.h"
 #include "wpn_drop_mode.h"
 
+// Period in seconds in which weapons are regiven to players
+ConVar mp_mm_wpndrop_respawn("mp_mm_wpndrop_respawn", "7");
+
 CWpnDropMode::CWpnDropMode() : CBaseMode()
 {
 }
@@ -50,6 +53,32 @@ void CWpnDropMode::OnPrimaryAttack(CBasePlayer *pPlayer, CBasePlayerItem *pWeapo
 
 void CWpnDropMode::PlayerThink(CBasePlayer *pPlayer)
 {
+	if (!pPlayer->IsAlive())
+		return;
+
 	// Infinite ammo
 	pPlayer->m_rgAmmo[pPlayer->GetAmmoIndex("357")] = 36;
+
+	// Check weapon
+	int idx = pPlayer->entindex();
+	float &time = m_flGiveWeaponTime[idx];
+
+	if (time == 0)
+	{
+		if (!pPlayer->HasNamedPlayerItem("weapon_357"))
+		{
+			time = gpGlobals->time + mp_mm_wpndrop_respawn.Get();
+		}
+	}
+	else
+	{
+		if (pPlayer->HasNamedPlayerItem("weapon_357"))
+		{
+			time = 0;
+		}
+		else if (gpGlobals->time >= time)
+		{
+			pPlayer->GiveNamedItem("weapon_357");
+		}
+	}
 }

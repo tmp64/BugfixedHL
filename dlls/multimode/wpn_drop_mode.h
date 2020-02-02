@@ -16,6 +16,9 @@ public:
 	virtual bool ShouldRespawnAmmo();
 	virtual void OnPrimaryAttack(CBasePlayer *pPlayer, CBasePlayerItem *pWeapon);
 	virtual void PlayerThink(CBasePlayer *pPlayer);
+
+private:
+	float m_flGiveWeaponTime[MAX_PLAYERS];
 };
 
 #endif
