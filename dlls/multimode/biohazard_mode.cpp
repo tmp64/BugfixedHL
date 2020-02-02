@@ -67,6 +67,9 @@ bool CBiohazardMode::ShouldRespawnAmmo()
 
 void CBiohazardMode::PlayerThink(CBasePlayer *pPlayer)
 {
+	if (!pPlayer->IsAlive())
+		return;
+
 	if (m_Players[pPlayer->entindex()].wpnType == WeaponType::Snark &&
 		gpGlobals->time >= m_Players[pPlayer->entindex()].flNextTimerCheck)
 	{

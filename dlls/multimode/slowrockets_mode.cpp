@@ -64,6 +64,9 @@ bool CSlowRocketsMode::ShouldRespawnAmmo()
 
 void CSlowRocketsMode::PlayerThink(CBasePlayer *pPlayer)
 {
+	if (!pPlayer->IsAlive())
+		return;
+
 	if (gpGlobals->time >= m_flNextCheckTime[pPlayer->entindex()])
 	{
 		int ammo = pPlayer->m_rgAmmo[pPlayer->GetAmmoIndex("rockets")];
