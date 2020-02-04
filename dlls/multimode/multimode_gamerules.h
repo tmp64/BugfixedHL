@@ -15,7 +15,9 @@ public:
 		Waiting,
 		Warmup,
 		FreezeTime,
-		Game
+		Game,
+		Endgame,
+		Intermission
 	};
 
 	CHalfLifeMultimode();
@@ -23,8 +25,9 @@ public:
 	void SwitchToWaiting();
 	void SwitchToWarmup();
 	void SwitchToNextMode();
+	void SwitchToEndgame();
 
-	void BeginCurMode(bool bEnableFreezeTime);
+	void BeginCurMode(bool bEnableFreezeTime, bool bShowModeInfo);
 	void StartCurMode();
 	void FinishCurMode();
 

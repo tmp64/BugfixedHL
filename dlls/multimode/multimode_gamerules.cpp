@@ -26,6 +26,13 @@ ConVar mp_mm_game_time("mp_mm_game_time", "60");
 ConVar mp_mm_skip_warmup("mp_mm_skip_warmup", "0");
 ConVar mp_mm_skip_mode("mp_mm_skip_mode", "0");
 
+// Selects behavior when all modes have been played:
+//   0: the game will continue from the first mode;
+//   1: the game will go in intermission
+//   2: the game will go in "endgame" state to choose a
+//      new map using mapchooser_multimode AMXX plugin.
+ConVar mp_mm_on_end("mp_mm_on_end", "0");
+
 CHalfLifeMultimode::CHalfLifeMultimode() : CHalfLifeMultiplay()
 {
 	// Init HUD texts
@@ -82,6 +89,9 @@ CHalfLifeMultimode::CHalfLifeMultimode() : CHalfLifeMultiplay()
 	m_pModes[(int)ModeID::WpnDrop] = new CWpnDropMode();
 	m_pModes[(int)ModeID::Biohazard] = new CBiohazardMode();
 	m_pModes[(int)ModeID::SlowRockets] = new CSlowRocketsMode();
+
+	// Remove timelimit
+	g_engfuncs.pfnCvar_DirectSet(&timelimit, "0");
 }
 
 void CHalfLifeMultimode::SwitchToWaiting()
@@ -100,7 +110,7 @@ void CHalfLifeMultimode::SwitchToWaiting()
 	FinishCurMode();
 	m_State = State::Waiting;
 	m_pCurMode = m_pWarmupMode;
-	BeginCurMode(false);
+	BeginCurMode(false, false);
 }
 
 void CHalfLifeMultimode::SwitchToWarmup()
@@ -120,7 +130,7 @@ void CHalfLifeMultimode::SwitchToWarmup()
 	FinishCurMode();
 	m_State = State::Warmup;
 	m_pCurMode = m_pWarmupMode;
-	BeginCurMode(false);
+	BeginCurMode(false, false);
 }
 
 void CHalfLifeMultimode::SwitchToNextMode()
@@ -129,7 +139,36 @@ void CHalfLifeMultimode::SwitchToNextMode()
 
 	m_CurModeId = (ModeID)((int)m_CurModeId + 1);
 	if (m_CurModeId == ModeID::ModeCount)
-		m_CurModeId = (ModeID)1;
+	{
+		switch ((int)mp_mm_on_end.Get())
+		{
+		case 0:
+		{
+			m_CurModeId = (ModeID)1;
+			break;
+		}
+		case 1:
+		{
+			m_State = State::Intermission;
+			GoToIntermission();
+			return;
+		}
+		case 2:
+		{
+			int votetime = CVAR_GET_FLOAT("amx_multimode_votetime");
+
+			if (votetime <= 0)
+			{
+				GoToIntermission();
+				return;
+			}
+
+			g_engfuncs.pfnCvar_DirectSet(&timelimit, UTIL_VarArgs("%f", (gpGlobals->time + votetime) / 60.0));
+			SwitchToEndgame();
+			return;
+		}
+		}
+	}
 
 	// Skip commented modes
 	while (!m_pModes[(int)m_CurModeId])
@@ -138,10 +177,22 @@ void CHalfLifeMultimode::SwitchToNextMode()
 	m_pCurMode = m_pModes[(int)m_CurModeId];
 
 	m_State = State::Game;
-	BeginCurMode(true);
+	BeginCurMode(true, true);
 }
 
-void CHalfLifeMultimode::BeginCurMode(bool bEnableFreezeTime)
+void CHalfLifeMultimode::SwitchToEndgame()
+{
+	if (m_State == State::Endgame)
+		return;
+
+	FinishCurMode();
+	ResetTimerUpdate();
+	m_State = State::Endgame;
+	m_pCurMode = m_pWarmupMode;
+	BeginCurMode(false, false);
+}
+
+void CHalfLifeMultimode::BeginCurMode(bool bEnableFreezeTime, bool bShowModeInfo)
 {
 	ALERT(at_console, "Preparing to run [%d] %s\n", (int)m_CurModeId, m_pCurMode->GetModeName());
 
@@ -280,10 +331,13 @@ void CHalfLifeMultimode::BeginCurMode(bool bEnableFreezeTime)
 
 	if (m_State != State::Waiting && m_State != State::Warmup)
 	{
-		// Show mode info message
-		m_pCurMode->GetShortTitleColor(m_ModeTitleTextParams.r1, m_ModeTitleTextParams.g1, m_ModeTitleTextParams.b1);
-		UTIL_DirectorHudMessageAll(m_ModeTitleTextParams, m_pCurMode->GetShortTitle(), true);
-		UTIL_DirectorHudMessageAll(m_ModeInfoTextParams, m_pCurMode->GetDescription(), true);
+		if (bShowModeInfo)
+		{
+			// Show mode info message
+			m_pCurMode->GetShortTitleColor(m_ModeTitleTextParams.r1, m_ModeTitleTextParams.g1, m_ModeTitleTextParams.b1);
+			UTIL_DirectorHudMessageAll(m_ModeTitleTextParams, m_pCurMode->GetShortTitle(), true);
+			UTIL_DirectorHudMessageAll(m_ModeInfoTextParams, m_pCurMode->GetDescription(), true);
+		}
 
 		m_pCurMode->OnFreezeStart();
 
@@ -530,6 +584,11 @@ void CHalfLifeMultimode::Think()
 			SwitchToNextMode();
 		}
 
+		break;
+	}
+	case State::Endgame:
+	case State::Intermission:
+	{
 		break;
 	}
 	}
