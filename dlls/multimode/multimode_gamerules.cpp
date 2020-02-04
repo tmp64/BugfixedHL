@@ -94,6 +94,12 @@ CHalfLifeMultimode::CHalfLifeMultimode() : CHalfLifeMultiplay()
 	g_engfuncs.pfnCvar_DirectSet(&timelimit, "0");
 }
 
+CHalfLifeMultimode::~CHalfLifeMultimode()
+{
+	for (int i = (int)ModeID::ModeCount - 1; i >= 0; i--)
+		delete m_pModes[i];
+}
+
 void CHalfLifeMultimode::SwitchToWaiting()
 {
 	if (m_State == State::Waiting)

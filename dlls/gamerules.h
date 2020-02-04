@@ -161,6 +161,8 @@ public:
 
 	// Immediately end a multiplayer game
 	virtual void EndMultiplayerGame( void ) {}
+
+	virtual ~CGameRules() {}
 };
 
 extern CGameRules *InstallGameRules( void );

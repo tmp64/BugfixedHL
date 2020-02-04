@@ -21,6 +21,7 @@ public:
 	};
 
 	CHalfLifeMultimode();
+	virtual ~CHalfLifeMultimode();
 
 	void SwitchToWaiting();
 	void SwitchToWarmup();
@@ -113,6 +114,9 @@ private:
 	CBaseMode *m_pCurMode = nullptr;
 	ModeID m_CurModeId = ModeID::None;
 	float m_flEndTime = 0;
+
+	CHalfLifeMultimode(const CHalfLifeMultimode &&) = delete;
+	CHalfLifeMultimode &operator=(const CHalfLifeMultimode &&) = delete;
 
 	void ResetTimerUpdate();
 

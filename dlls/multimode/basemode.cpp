@@ -6,6 +6,10 @@
 #include "gamerules.h"
 #include "basemode.h"
 
+CBaseMode::~CBaseMode()
+{
+}
+
 void CBaseMode::GetShortTitleColor(byte &r, byte &g, byte &b)
 {
 	// Default orange
