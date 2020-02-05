@@ -43,10 +43,6 @@ extern int gmsgServerName;
 extern int g_teamplay;
 extern "C" int g_bBunnyHop;
 
-#define ITEM_RESPAWN_TIME	30
-#define WEAPON_RESPAWN_TIME	20
-#define AMMO_RESPAWN_TIME	20
-
 float g_flIntermissionStartTime = 0;
 
 CVoiceGameMgr	g_VoiceGameMgr;
@@ -703,17 +699,20 @@ void CHalfLifeMultiplay :: PlayerSpawn( CBasePlayer *pPlayer )
 
 	addDefault = TRUE;
 
-	while ( pWeaponEntity = UTIL_FindEntityByClassname( pWeaponEntity, "game_player_equip" ))
+	if (m_bGiveDefaultWeapons)
 	{
-		pWeaponEntity->Touch( pPlayer );
-		addDefault = FALSE;
-	}
+		while (pWeaponEntity = UTIL_FindEntityByClassname(pWeaponEntity, "game_player_equip"))
+		{
+			pWeaponEntity->Touch(pPlayer);
+			addDefault = FALSE;
+		}
 
-	if ( addDefault )
-	{
-		pPlayer->GiveNamedItem( "weapon_crowbar" );
-		pPlayer->GiveNamedItem( "weapon_9mmhandgun" );
-		pPlayer->GiveAmmo( 68, "9mm", _9MM_MAX_CARRY );// 4 full reloads
+		if (addDefault)
+		{
+			pPlayer->GiveNamedItem("weapon_crowbar");
+			pPlayer->GiveNamedItem("weapon_9mmhandgun");
+			pPlayer->GiveAmmo(68, "9mm", _9MM_MAX_CARRY);// 4 full reloads
+		}
 	}
 
 	FireTargets("game_playerspawn", pPlayer, pPlayer, USE_TOGGLE, 0);

@@ -16,6 +16,7 @@
 #include "eiface.h"
 #include "util.h"
 #include "game.h"
+#include "convar.h"
 
 #include "appversion.h"
 #include "CBugfixedServer.h"
@@ -956,6 +957,9 @@ void GameDLLInit( void )
 	CVAR_REGISTER ( &sk_player_leg2 );
 	CVAR_REGISTER ( &sk_player_leg3 );
 	// END REGISTER CVARS FOR SKILL LEVEL STUFF
+
+	// Register cvars from ConVar class
+	ConVar::RegisterAll();
 
 	SERVER_COMMAND( "exec skill.cfg\n" );
 

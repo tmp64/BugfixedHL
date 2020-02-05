@@ -148,6 +148,8 @@ add_sources(
     zombie.cpp
 	CBugfixedServer.h
 	CBugfixedServer.cpp
+	convar.h
+	convar.cpp
 )
 
 if(WIN32)
@@ -159,3 +161,4 @@ if(WIN32)
 endif()
 
 add_subdirectory( wpn_shared )
+add_subdirectory( multimode )

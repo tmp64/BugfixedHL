@@ -23,7 +23,12 @@
 #include "player.h"
 #include "gamerules.h"
 
+#ifdef SERVER_DLL
+#include "convar.h"
+#include "multimode/multimode.h"
 
+extern ConVar mp_mm_rocket_speed;
+#endif
 
 
 enum rpg_e {
@@ -197,7 +202,10 @@ void CRpgRocket :: IgniteThink( void  )
 
 	MESSAGE_END();  // move PHS/PVS data sending into here (SEND_ALL, SEND_PVS, SEND_PHS)
 
-	m_flIgniteTime = gpGlobals->time;
+	if (IsRunningMultimode(ModeID::SlowRockets))
+		m_flIgniteTime = gpGlobals->time + 14;	// 15 sec TTL
+	else
+		m_flIgniteTime = gpGlobals->time;
 
 	// set to follow laser spot
 	SetThink( &CRpgRocket::FollowThink );
@@ -259,6 +267,13 @@ void CRpgRocket :: FollowThink( void  )
 			{
 				pev->velocity = pev->velocity.Normalize() * 2000;
 			}
+		}
+
+		if (IsRunningMultimode(ModeID::SlowRockets))
+		{
+			float maxVel = mp_mm_rocket_speed.Get();
+			if (pev->velocity.Length() > maxVel)
+				pev->velocity = pev->velocity.Normalize() * maxVel;
 		}
 	}
 	else
@@ -330,7 +345,15 @@ void CRpg::Spawn( )
 	m_iId = WEAPON_RPG;
 
 	SET_MODEL(ENT(pev), "models/w_rpg.mdl");
+
+#ifdef CLIENT_DLL
 	m_fSpotActive = 1;
+#else
+	if (IsRunningMultimode(ModeID::SlowRockets))
+		m_fSpotActive = 0;
+	else
+		m_fSpotActive = 1;
+#endif
 
 #ifdef CLIENT_DLL
 	if ( bIsMultiplayer() )
@@ -489,6 +512,11 @@ void CRpg::PrimaryAttack()
 
 void CRpg::SecondaryAttack()
 {
+#ifndef CLIENT_DLL
+	if (IsRunningMultimode(ModeID::SlowRockets))
+		return;
+#endif
+
 	m_fSpotActive = ! m_fSpotActive;
 
 #ifndef CLIENT_DLL

@@ -23,10 +23,13 @@
 #include	"weapons.h"
 #include	"gamerules.h"
 #include	"teamplay_gamerules.h"
+#include	"multimode/multimode_gamerules.h"
 #include	"skill.h"
 #include	"game.h"
 
 extern edict_t *EntSelectSpawnPoint( CBaseEntity *pPlayer );
+
+ConVar mp_multimode("mp_multimode", "0");
 
 DLL_GLOBAL CGameRules*	g_pGameRules = NULL;
 extern DLL_GLOBAL BOOL	g_fGameOver;
@@ -322,13 +325,17 @@ CGameRules *InstallGameRules( void )
 	}
 	else
 	{
-		if ( teamplay.value > 0 )
+		if (mp_multimode)
+		{
+			return new CHalfLifeMultimode;
+		}
+		else if ( teamplay.value > 0 )
 		{
 			// teamplay
-
 			g_teamplay = 1;
 			return new CHalfLifeTeamplay;
 		}
+
 		if ((int)gpGlobals->deathmatch == 1)
 		{
 			// vanilla deathmatch

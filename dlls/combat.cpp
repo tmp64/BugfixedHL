@@ -29,6 +29,7 @@
 #include "animation.h"
 #include "weapons.h"
 #include "func_break.h"
+#include "multimode/multimode.h"
 
 extern DLL_GLOBAL Vector		g_vecAttackDir;
 extern DLL_GLOBAL int			g_iSkillLevel;
@@ -1558,7 +1559,10 @@ Vector CBaseEntity::FireBulletsPlayer ( ULONG cShots, Vector vecSrc, Vector vecD
 
 			case BULLET_PLAYER_BUCKSHOT:	
 				 // make distance based!
-				pEntity->TraceAttack(pevAttacker, gSkillData.plrDmgBuckshot, vecDir, &tr, DMG_BULLET); 
+				if (IsRunningMultimode(ModeID::OneShot))
+					pEntity->TraceAttack(pevAttacker, gSkillData.plrDmgBuckshot, vecDir, &tr, DMG_BULLET | DMG_ALWAYSGIB);
+				else
+					pEntity->TraceAttack(pevAttacker, gSkillData.plrDmgBuckshot, vecDir, &tr, DMG_BULLET);
 				break;
 			
 			case BULLET_PLAYER_357:		
@@ -1581,6 +1585,37 @@ Vector CBaseEntity::FireBulletsPlayer ( ULONG cShots, Vector vecSrc, Vector vecD
 		UTIL_BubbleTrail( vecSrc, tr.vecEndPos, (flDistance * tr.flFraction) / 64.0 );
 	}
 	ApplyMultiDamage(pev, pevAttacker);
+
+	if (IsRunningMultimode(ModeID::Recoil))
+	{
+		Vector vel = -vecDirShooting.Normalize();
+
+		float k = 0;
+
+		switch (iBulletType)
+		{
+		case BULLET_PLAYER_9MM:
+			k = 150;
+			break;
+		case BULLET_PLAYER_MP5:
+			k = 150;
+			break;
+		case BULLET_PLAYER_357:
+			k = 800;
+			break;
+		case BULLET_PLAYER_BUCKSHOT:
+			k = 200;
+			break;
+		}
+
+		vel = k * cShots * vel;
+		pevAttacker->velocity = pevAttacker->velocity + vel;
+		
+		// Limit velocity
+		// Hack: should use sv_maxvelocity value
+		if (pevAttacker->velocity.Length() >= 2000)
+			pevAttacker->velocity = pevAttacker->velocity.Normalize() * 1999;
+	}
 
 	return Vector( x * vecSpread.x, y * vecSpread.y, 0.0 );
 }

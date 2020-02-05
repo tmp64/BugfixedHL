@@ -23,6 +23,10 @@ class CBasePlayer;
 class CItem;
 class CBasePlayerAmmo;
 
+#define ITEM_RESPAWN_TIME	30
+#define WEAPON_RESPAWN_TIME	20
+#define AMMO_RESPAWN_TIME	20
+
 // weapon respawning return codes
 enum
 {	
@@ -157,6 +161,8 @@ public:
 
 	// Immediately end a multiplayer game
 	virtual void EndMultiplayerGame( void ) {}
+
+	virtual ~CGameRules() {}
 };
 
 extern CGameRules *InstallGameRules( void );
@@ -354,6 +360,7 @@ protected:
 	virtual void GoToIntermission( void );
 	float m_flIntermissionEndTime;
 	BOOL m_iEndIntermissionButtonHit;
+	bool m_bGiveDefaultWeapons = true;
 
 	void SendServerNameToClient( edict_t *client );
 
