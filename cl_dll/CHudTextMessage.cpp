@@ -31,15 +31,11 @@
 
 DECLARE_MESSAGE_PTR( m_TextMessage, TextMsg );
 
-int CHudTextMessage::Init(void)
+void CHudTextMessage::Init()
 {
 	HOOK_MESSAGE( TextMsg );
 
-	gHUD.AddHudElem( this );
-
 	Reset();
-
-	return 1;
 };
 
 // Searches through the string for any msg names (indicated by a '#')

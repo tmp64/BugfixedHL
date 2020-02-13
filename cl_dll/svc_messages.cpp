@@ -8,10 +8,10 @@
 //
 // Engine messages handlers
 //
-#ifdef _WIN32
 
 #include <string.h>
 #include <time.h>
+#include <algorithm>
 
 #include "hud.h"
 #include "memory.h"
@@ -32,7 +32,7 @@ cvar_t *m_pCvarClProtectBlock = 0;
 cvar_t *m_pCvarClProtectAllow = 0;
 cvar_t *m_pCvarClProtectBlockCvar = 0;
 char com_token[1024];
-const char *blockList = "^(exit|quit|bind|unbind|unbindall|kill|exec|alias|clear|motdfile|motd_write|writecfg|cd|developer|fps.+|rcon.*)$";
+const char *blockList = "^(exit|quit|bind|unbind|unbindall|kill|exec|alias|clear|motdfile|motd_write|writecfg|developer|fps.+|rcon.*)$";
 const char *blockListCvar = "^(rcon.*)$";
 
 bool RegexMatch(const char *str, const char *regex)
@@ -220,7 +220,7 @@ void SvcPrint(void)
 		if (!strncmp(str, "\"mp_timelimit\" changed to \"", 27) ||
 			!strncmp(str, "\"amx_nextmap\" changed to \"", 26))
 		{
-			gHUD.m_Timer->DoResync();
+			//gHUD.m_Timer->DoResync();
 		}
 		else if (gViewPort && gViewPort->m_pScoreBoard && gViewPort->m_pScoreBoard->m_iStatusRequestState != STATUS_REQUEST_IDLE)
 		{
@@ -251,8 +251,8 @@ void SvcPrint(void)
 				if (str[0] == '#' && str[1] != 0 && str[2] != 0 && str[3] == ' ')
 				{
 					// start of new player info row
-					int slot = atoi(str + 1);
-					if (slot > 0)
+					int idx = atoi(str + 1);	// Index in 'status' doesn't always match with player slot
+					if (idx > 0)
 					{
 						char *name = strchr(strchr(str + 2, ' '), '"');
 						if (name != NULL)
@@ -265,16 +265,45 @@ void SvcPrint(void)
 								char *steamid = strchr(userid, ' ');
 								if (steamid != NULL)
 								{
-									steamid++; // space
-									char *steamidend = strchr(steamid, ' ');
-									if (steamidend != NULL)
-										*steamidend = 0;
-									if (!strncmp(steamid, "STEAM_", 6) ||
-										!strncmp(steamid, "VALVE_", 6))
-										strncpy(g_PlayerSteamId[slot], steamid + 6, MAX_STEAMID); // cutout "STEAM_" or "VALVE_" start of the string
+									// Find actual slot
+									int slot = 0;
+
+									// Replace '\"' in the string with a null-terminator
+									//   to later be used in strcmp
+									char stringTerm = '\0';
+									std::swap(name[userid - name - 2], stringTerm);
+
+									for (int i = 1; i <= MAX_PLAYERS; i++)
+									{
+										if (g_PlayerInfoList[i].name && g_PlayerInfoList[i].name[0] && !strcmp(g_PlayerInfoList[i].name, name))
+										{
+											slot = i;
+											break;
+										}
+									}
+
+									std::swap(name[userid - name - 2], stringTerm);
+
+									if (slot > 0)
+									{
+										steamid++; // space
+										char *steamidend = strchr(steamid, ' ');
+										if (steamidend != NULL)
+											*steamidend = 0;
+										if (!strncmp(steamid, "STEAM_", 6) ||
+											!strncmp(steamid, "VALVE_", 6))
+											strncpy(g_PlayerSteamId[slot], steamid + 6, MAX_STEAMID); // cutout "STEAM_" or "VALVE_" start of the string
+										else
+											strncpy(g_PlayerSteamId[slot], steamid, MAX_STEAMID);
+										g_PlayerSteamId[slot][MAX_STEAMID] = 0;
+									}
 									else
-										strncpy(g_PlayerSteamId[slot], steamid, MAX_STEAMID);
-									g_PlayerSteamId[slot][MAX_STEAMID] = 0;
+									{
+										ConPrintf(RGBA::ConColor::Red, "[BUG] SvcPrint: Unable to find player's slot\n");
+										ConPrintf(RGBA::ConColor::Red, "[BUG] Status string:\n");
+										ConPrintf(RGBA::ConColor::Red, "[BUG] %s\n", str);
+										assert(false);
+									}
 								}
 							}
 						}
@@ -500,14 +529,12 @@ void ProtectHelp(void)
 // Registers cvars and commands
 void SvcMessagesInit(void)
 {
-	m_pCvarClLogMessages = gEngfuncs.pfnRegisterVariable("cl_messages_log", "0", FCVAR_ARCHIVE);
+	m_pCvarClLogMessages = gEngfuncs.pfnRegisterVariable("cl_messages_log", "0", FCVAR_BHL_ARCHIVE);
 	gEngfuncs.pfnAddCommand("cl_messages_dump", DumpUserMessages);
 
-	m_pCvarClProtectLog = gEngfuncs.pfnRegisterVariable("cl_protect_log", "1", FCVAR_ARCHIVE);
-	m_pCvarClProtectBlock = gEngfuncs.pfnRegisterVariable("cl_protect_block", "", FCVAR_ARCHIVE);
-	m_pCvarClProtectAllow = gEngfuncs.pfnRegisterVariable("cl_protect_allow", "", FCVAR_ARCHIVE);
-	m_pCvarClProtectBlockCvar = gEngfuncs.pfnRegisterVariable("cl_protect_block_cvar", "", FCVAR_ARCHIVE);
+	m_pCvarClProtectLog = gEngfuncs.pfnRegisterVariable("cl_protect_log", "1", FCVAR_BHL_ARCHIVE);
+	m_pCvarClProtectBlock = gEngfuncs.pfnRegisterVariable("cl_protect_block", "", FCVAR_BHL_ARCHIVE);
+	m_pCvarClProtectAllow = gEngfuncs.pfnRegisterVariable("cl_protect_allow", "", FCVAR_BHL_ARCHIVE);
+	m_pCvarClProtectBlockCvar = gEngfuncs.pfnRegisterVariable("cl_protect_block_cvar", "", FCVAR_BHL_ARCHIVE);
 	gEngfuncs.pfnAddCommand("cl_protect", ProtectHelp);
 }
-
-#endif

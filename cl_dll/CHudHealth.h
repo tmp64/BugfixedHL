@@ -104,10 +104,10 @@ typedef struct
 class CHudHealth: public CHudBase
 {
 public:
-	virtual int Init( void );
-	virtual int VidInit( void );
-	virtual int Draw(float fTime);
-	virtual void Reset( void );
+	virtual void Init();
+	virtual void VidInit();
+	virtual void Draw(float fTime);
+	virtual void Reset();
 	int MsgFunc_Health(const char *pszName,  int iSize, void *pbuf);
 	int MsgFunc_Damage(const char *pszName,  int iSize, void *pbuf);
 	int m_iHealth;
@@ -123,8 +123,8 @@ private:
 	wrect_t *m_prcCross;
 	DAMAGE_IMAGE m_dmg[NUM_DMG_TYPES];
 	int	m_bitsDamage;
-	int DrawPain(float fTime);
-	int DrawDamage(float fTime);
+	void DrawPain(float fTime);
+	void DrawDamage(float fTime);
 	void CalcDamageDirection(vec3_t vecFrom);
 	void UpdateTiles(float fTime, long bits);
 };	

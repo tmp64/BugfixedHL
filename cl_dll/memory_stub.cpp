@@ -16,14 +16,6 @@ UserMessage **g_pUserMessages = nullptr;
 // Any non-Windows build is new and uses SDL
 bool g_bNewerBuild = true;
 
-void Memory::OnLibraryInit()
-{
-}
-
-void Memory::OnLibraryDeinit()
-{
-}
-
 void Memory::OnHudInit()
 {
 	gEngfuncs.pfnConsolePrint("Memory patching failed: platform not supported\n");

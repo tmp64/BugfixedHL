@@ -15,10 +15,15 @@ public:
 	cvar_t* m_CvarEffSort = nullptr;
 	cvar_t* m_CvarEffType = nullptr;
 	cvar_t* m_CvarEffPercent = nullptr;
+	cvar_t* m_CvarShowSteamId = nullptr;
+	cvar_t* m_CvarShowEff = nullptr;
+	cvar_t *m_CvarSize = nullptr;
+	cvar_t *m_CvarSpacingNormal = nullptr;
+	cvar_t *m_CvarSpacingCompact = nullptr;
 
-	int Init(void);
-	int VidInit(void);
-	int Draw(float flTime);
+	void Init();
+	void VidInit();
+	void Draw(float flTime);
 	void Think();
 	virtual void Reset(void);
 	void ShowScoreBoard();
@@ -27,6 +32,10 @@ public:
 	void EnableMousePointer(bool enable);
 	bool IsVisible();
 	void UpdateServerName();
+
+	// Sends the key event to the scoreboard
+	// Returns true if event was handled and should not be passed to the engine (HUD_Key_Event returns 0)
+	bool HandleKeyEvent(int down, int keynum, const char *pszCurrentBinding);
 
 private:
 	float m_flScoreBoardLastUpdated = 0;

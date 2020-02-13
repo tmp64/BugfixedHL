@@ -21,6 +21,7 @@
 #include "vgui_TeamFortressViewport.h"
 #include "demo_api.h"
 #include "results.h"
+#include "CHudAmmo.h"
 #include "vgui2/CHudScoreBoard.h"
 
 // Fix conflicts with STL
@@ -62,6 +63,8 @@ void CHud::Think(void)
 		if (i->m_iFlags & HUD_ACTIVE) i->Think();
 	}
 
+	int oldfov = m_iFOV;
+
 	newfov = HUD_GetFOV();
 	if ( newfov == 0 )
 	{
@@ -71,6 +74,10 @@ void CHud::Think(void)
 	{
 		m_iFOV = newfov;
 	}
+
+	// Update crosshair after FOV change
+	if (oldfov != m_iFOV)
+		gHUD.m_Ammo->UpdateCrosshair();
 
 	// the clients fov is actually set in the client data update section of the hud
 

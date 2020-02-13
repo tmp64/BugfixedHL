@@ -12,9 +12,9 @@ struct HudScoresData
 class CHudScores : public CHudBase
 {
 public:
-	int Init(void);
-	int VidInit(void);
-	int Draw(float flTime);
+	void Init();
+	void VidInit();
+	void Draw(float flTime);
 
 private:
 	HudScoresData m_ScoresData[MAX_PLAYERS] = {};

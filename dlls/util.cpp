@@ -20,6 +20,7 @@
 
 */
 
+#include <hltv.h>
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
@@ -911,6 +912,34 @@ void UTIL_HudMessageAll( const hudtextparms_t &textparms, const char *pMessage )
 	}
 }
 
+static void UTIL_DirectorHudMessage(int dest, edict_t *ed, const hudtextparms_t &textparms, const char *pMessage)
+{
+	MESSAGE_BEGIN(dest, SVC_DIRECTOR, NULL, ed);
+	{
+		WRITE_BYTE(strlen(pMessage) + 31);
+		WRITE_BYTE(DRC_CMD_MESSAGE);
+		WRITE_BYTE(textparms.effect);
+		WRITE_LONG((textparms.r1 << 16) | (textparms.g1 << 8) | (textparms.b1 << 0));
+		WRITE_FLOAT(textparms.x);
+		WRITE_FLOAT(textparms.y);
+		WRITE_FLOAT(textparms.fadeinTime);
+		WRITE_FLOAT(textparms.fadeoutTime);
+		WRITE_FLOAT(textparms.holdTime);
+		WRITE_FLOAT(textparms.fxTime);
+		WRITE_STRING(pMessage);
+	}
+	MESSAGE_END();
+}
+
+void UTIL_DirectorHudMessageAll(const hudtextparms_t &textparms, const char *pMessage, bool reliable)
+{
+	UTIL_DirectorHudMessage(reliable ? MSG_ALL : MSG_BROADCAST, NULL, textparms, pMessage);
+}
+
+void UTIL_DirectorHudMessage(CBaseEntity *pEntity, const hudtextparms_t &textparms, const char *pMessage, bool reliable)
+{
+	UTIL_DirectorHudMessage(reliable ? MSG_ONE : MSG_ONE_UNRELIABLE, pEntity->edict(), textparms, pMessage);
+}
 					 
 extern int gmsgTextMsg, gmsgSayText;
 void UTIL_ClientPrintAll( int msg_dest, const char *msg_name, const char *param1, const char *param2, const char *param3, const char *param4 )

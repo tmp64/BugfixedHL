@@ -3,14 +3,14 @@
 #include "hud.h"
 #include "cl_util.h"
 #include "parsemsg.h"
+#include "aghudvote.h"
+#include "aghudglobal.h"
 
-DECLARE_MESSAGE(m_Vote, Vote)
+DECLARE_MESSAGE_PTR(m_Vote, Vote)
 
-int AgHudVote::Init(void)
+void AgHudVote::Init()
 {
 	HOOK_MESSAGE(Vote);
-
-	gHUD.AddHudElem(this);
 
 	m_iFlags = 0;
 	m_flTurnoff = 0.0;
@@ -21,13 +21,10 @@ int AgHudVote::Init(void)
 	m_szVote[0] = '\0';
 	m_szValue[0] = '\0';
 	m_szCalled[0] = '\0';
-
-	return 1;
 }
 
-int AgHudVote::VidInit(void)
+void AgHudVote::VidInit()
 {
-	return 1;
 }
 
 void AgHudVote::Reset(void)
@@ -35,12 +32,12 @@ void AgHudVote::Reset(void)
 	m_iFlags &= ~HUD_ACTIVE;
 }
 
-int AgHudVote::Draw(float fTime)
+void AgHudVote::Draw(float fTime)
 {
 	if (gHUD.m_flTime > m_flTurnoff || gHUD.m_iIntermission)
 	{
 		Reset();
-		return 1;
+		return;
 	}
 
 	char szText[128];
@@ -73,8 +70,6 @@ int AgHudVote::Draw(float fTime)
 		strcpy(szText, "Denied!");
 		gHUD.DrawHudString(ScreenWidth / 20, ScreenHeight / 8 + gHUD.m_scrinfo.iCharHeight * 2, szText, r, g, b);
 	}
-
-	return 0;
 }
 
 int AgHudVote::MsgFunc_Vote(const char *pszName, int iSize, void *pbuf)

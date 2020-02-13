@@ -1,4 +1,5 @@
 add_sources(
+	CMakeLists.txt
     config.h
     pcre.h
     pcre_internal.h

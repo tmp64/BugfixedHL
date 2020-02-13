@@ -35,6 +35,7 @@ CClientMOTD::CClientMOTD( IViewport* pParent )
 	SetScheme( "GameScheme" );
 	SetMoveable( false );
 	SetProportional( true );
+	SetSizeable( false );
 
 	m_pMessage = new vgui2::RichText( this, "TextMessage" );
 #ifndef VGUI2_BUILD_4554
@@ -80,7 +81,7 @@ void CClientMOTD::PerformLayout()
 
 void CClientMOTD::OnKeyCodeTyped( vgui2::KeyCode key )
 {
-	if( key == KEY_PAD_ENTER || key == KEY_ENTER )
+	if( key == KEY_PAD_ENTER || key == KEY_ENTER || key == KEY_SPACE )
 	{
 		OnCommand( "okay" );
 	}
@@ -109,7 +110,7 @@ void CClientMOTD::OnCommand( const char* command )
 	{
 		RemoveTempFile();
 
-		Close();
+		SetVisible(false);
 	}
 
 	BaseClass::OnCommand( command );

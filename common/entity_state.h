@@ -15,11 +15,8 @@
 #if !defined( ENTITY_STATEH )
 #define ENTITY_STATEH
 #ifdef _WIN32
-#ifndef __MINGW32__
 #pragma once
-#endif /* not __MINGW32__ */
 #endif
-
 #include <inttypes.h>
 
 // For entityType below

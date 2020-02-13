@@ -23,36 +23,30 @@
 #include "cl_util.h"
 #include "vgui_TeamFortressViewport.h"
 #include "vgui_ScorePanel.h"
+#include "aghudglobal.h"
 
-
-int CHudScores::Init(void)
+void CHudScores::Init()
 {
-	m_pCvarHudScores = CVAR_CREATE("hud_scores", "0", FCVAR_ARCHIVE);
-	m_pCvarHudScoresPos = CVAR_CREATE("hud_scores_pos", "30 50", FCVAR_ARCHIVE);
+	m_pCvarHudScores = CVAR_CREATE("hud_scores", "0", FCVAR_BHL_ARCHIVE);
+	m_pCvarHudScoresPos = CVAR_CREATE("hud_scores_pos", "30 50", FCVAR_BHL_ARCHIVE);
 
 	m_iFlags |= HUD_ACTIVE;
-
-	gHUD.AddHudElem(this);
-
-	return 1;
 }
 
-int CHudScores::VidInit(void)
+void CHudScores::VidInit()
 {
 	m_iOverLay = 0;
 	m_flScoreBoardLastUpdated = 0;
-
-	return 1;
 }
 
-int CHudScores::Draw(float flTime)
+void CHudScores::Draw(float flTime)
 {
 	if (m_pCvarHudScores->value < 1)
-		return 1;
+		return;
 
 	// No Scoreboard in single-player
 	if (gEngfuncs.GetMaxClients() <= 1)
-		return 1;
+		return;
 
 	if (gViewPort && gViewPort->m_pScoreBoard)
 	{
@@ -118,6 +112,4 @@ int CHudScores::Draw(float flTime)
 			ypos += gHUD.m_scrinfo.iCharHeight * 0.9;
 		}
 	}
-
-	return 1;
 }

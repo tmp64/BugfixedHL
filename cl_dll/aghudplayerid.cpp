@@ -3,14 +3,14 @@
 #include "hud.h"
 #include "cl_util.h"
 #include "parsemsg.h"
+#include "aghudplayerid.h"
+#include "aghudglobal.h"
 
-DECLARE_MESSAGE(m_PlayerId, PlayerId)
+DECLARE_MESSAGE_PTR(m_PlayerId, PlayerId)
 
-int AgHudPlayerId::Init(void)
+void AgHudPlayerId::Init()
 {
 	HOOK_MESSAGE(PlayerId);
-
-	gHUD.AddHudElem(this);
 
 	m_iFlags = 0;
 	m_flTurnoff = 0.0;
@@ -19,14 +19,11 @@ int AgHudPlayerId::Init(void)
 	m_iHealth = 0;
 	m_iArmour = 0;
 
-	m_pCvarHudPlayerId = gEngfuncs.pfnRegisterVariable("hud_playerid", "1", FCVAR_ARCHIVE);
-
-	return 1;
+	m_pCvarHudPlayerId = gEngfuncs.pfnRegisterVariable("hud_playerid", "1", FCVAR_BHL_ARCHIVE);
 }
 
-int AgHudPlayerId::VidInit(void)
+void AgHudPlayerId::VidInit()
 {
-	return 1;
 }
 
 void AgHudPlayerId::Reset(void)
@@ -35,15 +32,15 @@ void AgHudPlayerId::Reset(void)
 	m_iPlayer = 0;
 }
 
-int AgHudPlayerId::Draw(float fTime)
+void AgHudPlayerId::Draw(float fTime)
 {
 	if (m_iPlayer <= 0 || m_pCvarHudPlayerId->value == 0)
-		return 1;
+		return;
 
 	if (gHUD.m_flTime > m_flTurnoff)
 	{
 		Reset();
-		return 1;
+		return;
 	}
 
 	if (g_PlayerInfoList[m_iPlayer].name)
@@ -73,8 +70,6 @@ int AgHudPlayerId::Draw(float fTime)
 			gHUD.DrawHudString(10, ScreenHeight - ScreenHeight / 8, szText, r, g, b);
 		}
 	}
-
-	return 0;
 }
 
 int AgHudPlayerId::MsgFunc_PlayerId(const char *pszName, int iSize, void *pbuf)

@@ -71,6 +71,7 @@ private:
 	MESSAGE_FUNC( EnableSaveButton, "EnableSaveButton" );
 	void RevertToSaved();
 	void ShowHelp();
+	void ShiftStuff(int dx, int dy);
 	MESSAGE_FUNC( ShutdownBuildMode, "Close" );
 	MESSAGE_FUNC( OnPanelMoved, "PanelMoved" );
 	MESSAGE_FUNC( OnTextKillFocus, "TextKillFocus" );
@@ -94,6 +95,10 @@ private:
 	Button *m_pDeleteButton;
 	Button *m_pReloadLocalization;
 	MenuButton *m_pVarsButton;
+	Label *m_pShiftLabel;
+	TextEntry *m_pShiftValue;
+	Button *m_pShiftXButton;
+	Button *m_pShiftYButton;
 
 	bool _autoUpdate;
 

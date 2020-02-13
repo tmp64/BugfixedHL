@@ -8,10 +8,10 @@ class AgHudTimeout : public CHudBase
 public:
 	AgHudTimeout() : m_State(0), m_iTime(0) { }
 
-	int Init(void) override;
-	int VidInit(void) override;
-	int Draw(float flTime) override;
-	void Reset(void) override;
+	void Init() override;
+	void VidInit() override;
+	void Draw(float flTime) override;
+	void Reset() override;
 
 	int MsgFunc_Timeout(const char *pszName, int iSize, void *pbuf);
 

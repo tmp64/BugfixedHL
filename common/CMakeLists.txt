@@ -1,45 +1,44 @@
 add_sources(
+	CMakeLists.txt
 	beamdef.h
-    cl_entity.h
-    com_model.h
-    con_nprint.h
-    const.h
-    crc.h
-    cvardef.h
-    demo_api.h
-    director_cmds.h
-    dlight.h
-    dll_state.h
-    engine_launcher_api.h
-    entity_state.h
-    entity_types.h
-    event_api.h
-    event_args.h
-    event_flags.h
-    exefuncs.h
-    hltv.h
-    in_buttons.h
-    interface.h
-    ivoicetweak.h
-    mathlib.h
-    netadr.h
-    net_api.h
-    nowin.h
-    particledef.h
-    pmtrace.h
-    qfont.h
-    ref_params.h
-    r_efx.h
-    r_studioint.h
-    screenfade.h
-    studio_event.h
-    triangleapi.h
-    usercmd.h
-    weaponinfo.h
+	cl_entity.h
+	com_model.h
+	con_nprint.h
+	const.h
+	crc.h
+	cvardef.h
+	demo_api.h
+	director_cmds.h
+	dlight.h
+	dll_state.h
+	entity_state.h
+	entity_types.h
+	enums.h
+	event_api.h
+	event_args.h
+	event_flags.h
+	hltv.h
+	in_buttons.h
+	interface.cpp
+	interface.h
+	ivoicetweak.h
+	mathlib.h
+	net_api.h
+	netadr.h
+	nowin.h
+	particledef.h
+	pmtrace.h
+	port.h
+	qfont.h
+	r_efx.h
+	r_studioint.h
+	ref_params.h
+	screenfade.h
+	Sequence.h
+	studio_event.h
+	triangleapi.h
+	usercmd.h
+	weaponinfo.h
+	winsani_in.h
+	winsani_out.h
 )
-
-if ( NOT USE_VGUI2 )
-	add_sources(
-		interface.cpp	# tier1 uses interface.cpp from /public
-	)
-endif()

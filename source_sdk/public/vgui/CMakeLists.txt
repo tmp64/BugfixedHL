@@ -1,4 +1,5 @@
 add_sources(
+	CMakeLists.txt
 	Cursor.h
 	Dar.h
 	IBorder.h

@@ -50,7 +50,7 @@ struct cmd_function_t
 	*		@see cl_enginefunc_t::Cmd_Argc
 	*		@see cl_enginefunc_t::Cmd_Argv
 	*/
-	CmdFunction function;
+	CmdFunction handler;
 
 	/**
 	*	Command flags.

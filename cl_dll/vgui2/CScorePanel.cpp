@@ -28,6 +28,7 @@
 #include "CPngImage.h"
 #include "CHudScoreBoard.h"
 #include "../vgui_TeamFortressViewport.h"
+#include "../vgui_ScorePanel.h"
 
 #ifdef CSCOREBOARD_DEBUG
 #define DebugPrintf ConPrintf
@@ -38,9 +39,9 @@
 #define STEAM_PROFILE_URL "http://steamcommunity.com/profiles/"
 #define PING "#PlayerPing"
 #define PING_LOSS "Ping/Loss"
+#define SPECTATOR_TEAM (MAX_TEAMS + 1)
 
 void IN_ResetMouse(void);
-CScorePanel *CScorePanel::m_sSingleton = nullptr;
 
 //--------------------------------------------------------------
 // Constructor & destructor
@@ -48,7 +49,6 @@ CScorePanel *CScorePanel::m_sSingleton = nullptr;
 CScorePanel::CScorePanel(IViewport *pParent) : BaseClass(nullptr, VIEWPORT_PANEL_SCORE),
 												m_pViewport(pParent)
 {
-	m_sSingleton = this;
 	SetTitle("", true);
 	SetCloseButtonVisible(false);
 	SetScheme("GameScheme");
@@ -186,8 +186,16 @@ void CScorePanel::FullUpdate()
 {
 	DebugPrintf("CScoreBoard::FullUpdate: Full update called\n");
 
+	// Update line spacing
+	int iSizeMode = GetSizeMode();
+	if (iSizeMode == 0 || iSizeMode == 1)
+		m_pPlayerList->SetLineSpacingOverride(GetLineSpacingForNormal());
+	else
+		m_pPlayerList->SetLineSpacingOverride(GetLineSpacingForCompact());
+
+	// Update avatar size
 	if (gHUD.m_ScoreBoard->m_CvarAvatars->value)
-		m_iAvatarWidth = AVATAR_WIDTH;
+		m_iAvatarWidth = GetAvatarSize();
 	else
 		m_iAvatarWidth = AVATAR_OFF_WIDTH;
 
@@ -200,6 +208,17 @@ void CScorePanel::FullUpdate()
 	{
 		SetSortByFrags();
 		m_pEffSortSwitch->ToggleButton::SetSelected(false);
+	}
+
+	for (int i = 1; i <= MAX_PLAYERS; i++)
+	{
+		if (g_PlayerInfoList[i].name &&
+			g_PlayerInfoList[i].name[0] &&
+			g_PlayerSteamId[i][0] == 0)
+		{
+			gViewPort->GetScoreBoard()->SendStatusRequest();	// call to VGUI1 Scoreboard
+			break;
+		}
 	}
 
 	UpdateServerName();
@@ -226,10 +245,9 @@ void CScorePanel::FullUpdate()
 void CScorePanel::EnableMousePointer(bool enable)
 {
 	if (enable && !IsVisible()) return;
-	dynamic_cast<vgui2::EditablePanel *>(m_pViewport)->SetMouseInputEnabled(enable);
-	dynamic_cast<vgui2::EditablePanel *>(m_pViewport)->SetKeyBoardInputEnabled(enable);
+	dynamic_cast<vgui2::EditablePanel *>(m_pViewport)->SetMouseInputEnabled(enable);	// Removing that line breaks chatbox (lol)
 	SetMouseInputEnabled(enable);
-	SetKeyBoardInputEnabled(enable);
+	SetKeyBoardInputEnabled(false);
 	if (enable)
 	{
 		ShowExtraControls();
@@ -244,6 +262,7 @@ void CScorePanel::RecalcItems()
 	m_pPlayerList->DeleteAllItems();
 	m_pPlayerList->RemoveAllSections();
 	m_iPlayerCount = 0;
+	m_iSpectatorSection = -1;
 	memset(m_pTeamInfo, 0, sizeof(m_pTeamInfo));
 	memset(m_pClientItems, -1, sizeof(m_pClientItems));
 	memset(m_pClientTeams, 0, sizeof(m_pClientTeams));
@@ -254,6 +273,10 @@ void CScorePanel::RecalcItems()
 	int spectatorFrags = 0;
 	int spectatorDeaths = 0;
 	int totalPlayerCount = 0;
+
+	// If iEmptyTeamNum > 0 and iNonEmptyTeamNum > 0, then specatator team will be created.
+	// All players with empty g_PlayerExtraInfo[i].teamname will be put there
+	int iEmptyTeamNum = 0, iNonEmptyTeamNum = 0;
 
 	// Fill team info from player info
 	for (int i = 1; i <= MAX_PLAYERS; i++)
@@ -274,12 +297,16 @@ void CScorePanel::RecalcItems()
 		m_pTeamInfo[team].kills += g_PlayerExtraInfo[i].frags;
 		m_pTeamInfo[team].deaths += g_PlayerExtraInfo[i].deaths;
 		totalPlayerCount++;
+
+		if (g_PlayerExtraInfo[i].teamname[0] != '\0')
+			iNonEmptyTeamNum++;
+		else
+			iEmptyTeamNum++;
 	}
 
 	// Sort teams
 	auto cmp = [this](int lhs, int rhs)
 	{
-		Assert(m_pTeamSortFunction);
 		return m_pTeamSortFunction(lhs, rhs);
 	};
 	std::set<int, decltype(cmp)> set(cmp);
@@ -292,16 +319,28 @@ void CScorePanel::RecalcItems()
 		}
 	}
 	
+	// Calculate name width
+	int nameWidth = vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), NAME_WIDTH);
+	if (!gHUD.m_ScoreBoard->m_CvarShowSteamId->value)
+		nameWidth += vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), STEAMID_WIDTH);
+	if (!gHUD.m_ScoreBoard->m_CvarShowEff->value)
+		nameWidth += vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), EFF_WIDTH);
+
 	// Create sections in right order
 	for (int team : set)
 	{
 		char buf[64];
 		if (team == m_pHeader) continue;
+
 		m_pPlayerList->AddSection(team, "", m_pPlayerSortFunction);
 		m_pPlayerList->AddColumnToSection(team, "avatar", "", CPlayerListPanel::COLUMN_IMAGE, m_iAvatarWidth + m_iAvatarPaddingLeft + m_iAvatarPaddingRight);
 		snprintf(buf, sizeof(buf), "%s (%d/%d, %.0f%%)", m_pTeamInfo[team].name, m_pTeamInfo[team].players, totalPlayerCount, (double)m_pTeamInfo[team].players / totalPlayerCount * 100.0);
-		m_pPlayerList->AddColumnToSection(team, "name", buf, CPlayerListPanel::COLUMN_BRIGHT | CPlayerListPanel::COLUMN_COLORED, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), NAME_WIDTH));
-		m_pPlayerList->AddColumnToSection(team, "steamid", "", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), STEAMID_WIDTH));
+		m_pPlayerList->AddColumnToSection(team, "name", buf, CPlayerListPanel::COLUMN_BRIGHT | CPlayerListPanel::COLUMN_COLORED, nameWidth);
+		
+		if (gHUD.m_ScoreBoard->m_CvarShowSteamId->value)
+			m_pPlayerList->AddColumnToSection(team, "steamid", "", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), STEAMID_WIDTH));
+		
+		if (gHUD.m_ScoreBoard->m_CvarShowEff->value)
 		{
 			double eff;
 			if (gHUD.m_ScoreBoard->m_CvarEffType->value)
@@ -312,14 +351,34 @@ void CScorePanel::RecalcItems()
 				snprintf(buf, sizeof(buf), "%.0f%%", eff * 100);
 			else
 				snprintf(buf, sizeof(buf), "%.2f", eff);
+			m_pPlayerList->AddColumnToSection(team, "eff", buf, CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), DEATH_WIDTH));
 		}
-		m_pPlayerList->AddColumnToSection(team, "eff", buf, CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), DEATH_WIDTH));
+
 		m_pPlayerList->AddColumnToSection(team, "frags", "???", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), SCORE_WIDTH));
 		m_pPlayerList->AddColumnToSection(team, "deaths", "???", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), DEATH_WIDTH));
 		m_pPlayerList->AddColumnToSection(team, "ping", "", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), PING_WIDTH));
 		m_pPlayerList->SetSectionFgColor(team, gHUD.GetTeamColor(team));
 		UpdateTeamScore(team);
 		DebugPrintf("CScorePanel::RecalItems Team '%s' is %d\n", m_pTeamInfo[team].name, team);
+	}
+
+	if (iEmptyTeamNum > 0 && iNonEmptyTeamNum > 0)
+	{
+		m_iSpectatorSection = SPECTATOR_TEAM;
+		m_pPlayerList->AddSection(m_iSpectatorSection, "", m_pPlayerSortFunction);
+		m_pPlayerList->AddColumnToSection(m_iSpectatorSection, "avatar", "", CPlayerListPanel::COLUMN_IMAGE, m_iAvatarWidth + m_iAvatarPaddingLeft + m_iAvatarPaddingRight);
+		m_pPlayerList->AddColumnToSection(m_iSpectatorSection, "name", "#Spectators", CPlayerListPanel::COLUMN_BRIGHT | CPlayerListPanel::COLUMN_COLORED, nameWidth);
+
+		if (gHUD.m_ScoreBoard->m_CvarShowSteamId->value)
+			m_pPlayerList->AddColumnToSection(m_iSpectatorSection, "steamid", "", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), STEAMID_WIDTH));
+
+		if (gHUD.m_ScoreBoard->m_CvarShowEff->value)
+			m_pPlayerList->AddColumnToSection(m_iSpectatorSection, "eff", "", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), DEATH_WIDTH));
+
+		m_pPlayerList->AddColumnToSection(m_iSpectatorSection, "frags", "", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), SCORE_WIDTH));
+		m_pPlayerList->AddColumnToSection(m_iSpectatorSection, "deaths", "", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), DEATH_WIDTH));
+		m_pPlayerList->AddColumnToSection(m_iSpectatorSection, "ping", "", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), PING_WIDTH));
+		m_pPlayerList->SetSectionFgColor(m_iSpectatorSection, gHUD.GetTeamColor(0));
 	}
 
 	// Add players to sections
@@ -386,10 +445,14 @@ void CScorePanel::UpdateClientInfo(int client, bool autoUpdate)
 	else playerData->SetInt("ping", g_PlayerInfoList[client].ping);
 	if (g_PlayerInfoList[client].thisplayer) playerData->SetInt("thisPlayer", 1);
 
+	int iSectionId = team;
+	if (m_iSpectatorSection != -1 && g_PlayerExtraInfo[client].teamname[0] == '\0')
+		iSectionId = SPECTATOR_TEAM;
+
 	if (m_pClientItems[client] == -1)
 	{
 		// Create new item
-		m_pClientItems[client] = m_pPlayerList->AddItem(team, playerData);
+		m_pClientItems[client] = m_pPlayerList->AddItem(iSectionId, playerData);
 		m_pPlayerList->SetItemFgColor(m_pClientItems[client], gHUD.GetTeamColor(team));
 		m_iPlayerCount++;
 		DebugPrintf("CScorePanel::UpdateClientInfo: client %d added\n", client);
@@ -397,7 +460,7 @@ void CScorePanel::UpdateClientInfo(int client, bool autoUpdate)
 	else
 	{
 		// Modify existing item
-		m_pPlayerList->ModifyItem(m_pClientItems[client], team, playerData);
+		m_pPlayerList->ModifyItem(m_pClientItems[client], iSectionId, playerData);
 		DebugPrintf("CScorePanel::UpdateClientInfo: client %d modified\n", client);
 	}
 	
@@ -473,12 +536,21 @@ void CScorePanel::UpdatePlayerCount()
 //--------------------------------------------------------------
 void CScorePanel::AddHeader()
 {
+	// Calculate name width
+	int nameWidth = vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), NAME_WIDTH);
+	if (!gHUD.m_ScoreBoard->m_CvarShowSteamId->value)
+		nameWidth += vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), STEAMID_WIDTH);
+	if (!gHUD.m_ScoreBoard->m_CvarShowEff->value)
+		nameWidth += vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), EFF_WIDTH);
+
 	m_pPlayerList->AddSection(m_pHeader, "", m_pPlayerSortFunction);
 	m_pPlayerList->SetSectionAlwaysVisible(m_pHeader);
 	m_pPlayerList->AddColumnToSection(m_pHeader, "avatar", "", CPlayerListPanel::COLUMN_IMAGE, m_iAvatarWidth + m_iAvatarPaddingLeft + m_iAvatarPaddingRight);
-	m_pPlayerList->AddColumnToSection(m_pHeader, "name", "#PlayerName", CPlayerListPanel::COLUMN_BRIGHT | CPlayerListPanel::COLUMN_COLORED, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), NAME_WIDTH));
-	m_pPlayerList->AddColumnToSection(m_pHeader, "steamid", "Steam ID", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), STEAMID_WIDTH));
-	m_pPlayerList->AddColumnToSection(m_pHeader, "eff", "Eff", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), DEATH_WIDTH));
+	m_pPlayerList->AddColumnToSection(m_pHeader, "name", "#PlayerName", CPlayerListPanel::COLUMN_BRIGHT | CPlayerListPanel::COLUMN_COLORED, nameWidth);
+	if (gHUD.m_ScoreBoard->m_CvarShowSteamId->value)
+		m_pPlayerList->AddColumnToSection(m_pHeader, "steamid", "Steam ID", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), STEAMID_WIDTH));
+	if (gHUD.m_ScoreBoard->m_CvarShowEff->value)
+		m_pPlayerList->AddColumnToSection(m_pHeader, "eff", "Eff", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), DEATH_WIDTH));
 	m_pPlayerList->AddColumnToSection(m_pHeader, "frags", "#PlayerScore", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), SCORE_WIDTH));
 	m_pPlayerList->AddColumnToSection(m_pHeader, "deaths", "#PlayerDeath", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), DEATH_WIDTH));
 	m_pPlayerList->AddColumnToSection(m_pHeader, "ping", gHUD.m_ScoreBoard->m_CvarLoss->value ? PING_LOSS : PING, CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), PING_WIDTH));
@@ -489,28 +561,60 @@ void CScorePanel::AddHeader()
 //--------------------------------------------------------------
 void CScorePanel::Resize()
 {
-	int wide, tall, x, y;
-	int height = 0, listHeight = 0, addHeight = 0;
-	m_pPlayerList->GetPos(x, y);
-	addHeight = y + vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), 4);	// Header + bottom padding // TODO: Get padding in runtime
-	height += addHeight;
-	m_pPlayerList->GetContentSize(wide, tall);
-	listHeight = max(m_iMinHeight, tall);
-	height += listHeight;
+	int mode = GetSizeMode();
 
-	if (ScreenHeight - height < m_iMargin * 2)
+	// Returns true if scrollbas was enabled
+	auto fnUpdateSize = [&](int &height)
 	{
-		// It didn't fit
-		height = ScreenHeight - m_iMargin * 2;
-		listHeight = height - addHeight;
-		m_pPlayerList->SetVerticalScrollbar(true);
-	}
-	else
+		int wide, tall, x, y;
+		int listHeight = 0, addHeight = 0;
+		bool bIsOverflowed = false;
+		height = 0;
+
+		m_pPlayerList->GetPos(x, y);
+		addHeight = y + vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), 4);	// Header + bottom padding // TODO: Get padding in runtime
+		height += addHeight;
+		m_pPlayerList->GetContentSize(wide, tall);
+		listHeight = max(m_iMinHeight, tall);
+		height += listHeight;
+
+		if (ScreenHeight - height < m_iMargin * 2)
+		{
+			// It didn't fit
+			height = ScreenHeight - m_iMargin * 2;
+			listHeight = height - addHeight;
+			m_pPlayerList->SetVerticalScrollbar(true);
+			bIsOverflowed = true;
+		}
+		else
+		{
+			m_pPlayerList->SetVerticalScrollbar(false);
+		}
+
+		m_pPlayerList->GetSize(wide, tall);
+		m_pPlayerList->SetSize(wide, listHeight);
+
+		return bIsOverflowed;
+	};
+	
+	int wide, tall, x, y;
+	int height;
+	if (fnUpdateSize(height) && mode == 0)
 	{
-		m_pPlayerList->SetVerticalScrollbar(false);
+		// Content overflowed, scrollbar is now visible. Set comapct line spacing
+		m_pPlayerList->SetLineSpacingOverride(GetLineSpacingForCompact());
+
+		// Refresh player info to update avatar sizes
+		for (int i = 1; i <= MAX_PLAYERS; i++)
+		{
+			UpdateClientInfo(i, false);
+		}
+		UpdatePlayerCount();
+
+		// Resie again
+		fnUpdateSize(height);
 	}
-	m_pPlayerList->GetSize(wide, tall);
-	m_pPlayerList->SetSize(wide, listHeight);
+
 	GetSize(wide, tall);
 	SetSize(wide, height);
 
@@ -561,6 +665,8 @@ void CScorePanel::UpdatePlayerAvatar(int playerIndex, KeyValues *kv)
 
 		CAvatarImage *pAvIm = (CAvatarImage *)m_pImageList->GetImage(iImageIndex);
 		pAvIm->UpdateFriendStatus();
+		int avSize = GetAvatarSize();
+		pAvIm->SetSize(avSize, avSize);
 
 		if (vgui2::voicemgr()->IsPlayerBlocked(playerIndex))
 			pAvIm->SetSecondImage(m_pMutedIcon);
@@ -613,6 +719,51 @@ void CScorePanel::UpdateTeamScore(int i)
 		L"%d", score.deaths
 	);
 	m_pPlayerList->ModifyColumn(i, "deaths", buf);
+}
+
+//--------------------------------------------------------------
+// Returns line spacing for given screen height
+//--------------------------------------------------------------
+int CScorePanel::GetLineSpacingForHeight(int h)
+{
+	if (h < 600)
+		return 18; // (0; 600)
+	if (h < 720)
+		return 22; // [600; 720]
+	if (h < 800)
+		return 24; // [720; 800)
+	if (h < 1024)
+		return 26; // [800; 1024)
+	if (h < 1080)
+		return 28; // [1024; 1080)
+
+	return 28;	   // >= 1080
+}
+
+int CScorePanel::GetAvatarSize()
+{
+	int avSize = m_pPlayerList->GetLineSpacing() - 2;
+	avSize = clamp(avSize, 0, 32);
+	return avSize;
+}
+
+int CScorePanel::GetLineSpacingForNormal()
+{
+	if (gHUD.m_ScoreBoard->m_CvarSpacingNormal->value)
+		return gHUD.m_ScoreBoard->m_CvarSpacingNormal->value;
+	return 0;
+}
+
+int CScorePanel::GetLineSpacingForCompact()
+{
+	if (gHUD.m_ScoreBoard->m_CvarSpacingCompact->value)
+		return gHUD.m_ScoreBoard->m_CvarSpacingCompact->value;
+	return GetLineSpacingForHeight(ScreenHeight);
+}
+
+int CScorePanel::GetSizeMode()
+{
+	return clamp<int>(gHUD.m_ScoreBoard->m_CvarSize->value, 0, 2);
 }
 
 //--------------------------------------------------------------
@@ -694,18 +845,20 @@ void CScorePanel::OpenPlayerMenu(int itemID)
 	int wide, tall;
 	vgui2::surface()->GetScreenSize(wide, tall);
 
+	int constexpr POS_OFFSET = 2;
+
 	if (wide - menuWide > cursorX)
 	{
 		// menu hanging right
 		if (tall - menuTall > cursorY)
 		{
 			// menu hanging down
-			m_pMenu->SetPos(cursorX, cursorY);
+			m_pMenu->SetPos(cursorX + POS_OFFSET, cursorY + POS_OFFSET);
 		}
 		else
 		{
 			// menu hanging up
-			m_pMenu->SetPos(cursorX, cursorY - menuTall);
+			m_pMenu->SetPos(cursorX + POS_OFFSET, cursorY - menuTall - POS_OFFSET);
 		}
 	}
 	else
@@ -714,16 +867,17 @@ void CScorePanel::OpenPlayerMenu(int itemID)
 		if (tall - menuTall > cursorY)
 		{
 			// menu hanging down
-			m_pMenu->SetPos(cursorX - menuWide, cursorY);
+			m_pMenu->SetPos(cursorX - menuWide - POS_OFFSET, cursorY + POS_OFFSET);
 		}
 		else
 		{
 			// menu hanging up
-			m_pMenu->SetPos(cursorX - menuWide, cursorY - menuTall);
+			m_pMenu->SetPos(cursorX - menuWide - POS_OFFSET, cursorY - menuTall - POS_OFFSET);
 		}
 	}
 
 	m_pMenu->RequestFocus();
+	m_pMenu->MoveToFront();
 }
 
 void CScorePanel::OnItemContextMenu(int itemID)
@@ -760,7 +914,7 @@ void CScorePanel::HideExtraControls()
 //--------------------------------------------------------------
 // Commands
 //--------------------------------------------------------------
-void CScorePanel::OnCommandOverride(const char *command)
+void CScorePanel::OnCommand(const char *command)
 {
 	DebugPrintf("CScorePanel::OnCommand(command = '%s')\n", command);
 	//-----------------------------------------------------------------------
@@ -899,6 +1053,10 @@ void CScorePanel::SetSortByEff()
 		// Comapre deaths if efficiency is equal
 		if (m_pTeamInfo[lhs].deaths < m_pTeamInfo[rhs].deaths) return true;
 		else if (m_pTeamInfo[lhs].deaths > m_pTeamInfo[rhs].deaths) return false;
+
+		// Comapre kills if deaths are equal
+		if (m_pTeamInfo[lhs].kills > m_pTeamInfo[rhs].kills) return true;
+		else if (m_pTeamInfo[lhs].kills < m_pTeamInfo[rhs].kills) return false;
 
 		// Comapre idx if everything is equal
 		return lhs > rhs;

@@ -1,0 +1,23 @@
+add_sources(
+	CMakeLists.txt
+	multimode.h
+    multimode_gamerules.h
+    multimode_gamerules.cpp
+	basemode.h
+	basemode.cpp
+	
+	dm_mode.h
+	dm_mode.cpp
+	oneshot_mode.h
+	oneshot_mode.cpp
+	recoil_mode.h
+	recoil_mode.cpp
+	wpn_drop_mode.h
+	wpn_drop_mode.cpp
+	warmup_mode.h
+	warmup_mode.cpp
+	biohazard_mode.h
+	biohazard_mode.cpp
+	slowrockets_mode.h
+	slowrockets_mode.cpp
+)

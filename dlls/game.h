@@ -15,6 +15,7 @@
 
 #ifndef GAME_H
 #define GAME_H
+#include "convar.h"
 
 extern void GameDLLInit( void );
 

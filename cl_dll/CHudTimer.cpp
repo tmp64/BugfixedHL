@@ -50,23 +50,19 @@ SOCKET g_timerSocket = NULL;	// We will declare socket here to not include winso
 
 DECLARE_MESSAGE_PTR(m_Timer, Timer)
 
-int CHudTimer::Init(void)
+void CHudTimer::Init()
 {
-	if (g_iIsAg)
+	//if (g_iIsAg)
 		HOOK_MESSAGE(Timer);
-
-	gHUD.AddHudElem(this);
 
 	m_iFlags |= HUD_ACTIVE;
 
-	m_pCvarHudTimer = gEngfuncs.pfnRegisterVariable("hud_timer", "1", FCVAR_ARCHIVE);
-	m_pCvarHudTimerSync = gEngfuncs.pfnRegisterVariable("hud_timer_sync", "1", FCVAR_ARCHIVE);
-	m_pCvarHudNextmap = gEngfuncs.pfnRegisterVariable("hud_nextmap", "1", FCVAR_ARCHIVE);
-
-	return 1;
+	m_pCvarHudTimer = gEngfuncs.pfnRegisterVariable("hud_timer", "1", FCVAR_BHL_ARCHIVE);
+	m_pCvarHudTimerSync = gEngfuncs.pfnRegisterVariable("hud_timer_sync", "1", FCVAR_BHL_ARCHIVE);
+	m_pCvarHudNextmap = gEngfuncs.pfnRegisterVariable("hud_nextmap", "1", FCVAR_BHL_ARCHIVE);
 };
 
-int CHudTimer::VidInit(void)
+void CHudTimer::VidInit()
 {
 	m_pCvarMpTimelimit = CVAR_GET_POINTER("mp_timelimit");
 	m_pCvarMpTimeleft = CVAR_GET_POINTER("mp_timeleft");
@@ -96,8 +92,6 @@ int CHudTimer::VidInit(void)
 		g_timerSocket = NULL;
 		g_eRulesRequestStatus = SOCKET_NONE;
 	}
-
-	return 1;
 };
 
 int CHudTimer::MsgFunc_Timer(const char *pszName, int iSize, void *pbuf)
@@ -538,12 +532,12 @@ void CHudTimer::SetNextmap(const char *nextmap)
 	m_szNextmap[HLARRAYSIZE(m_szNextmap) - 1] = 0;
 }
 
-int CHudTimer::Draw(float fTime)
+void CHudTimer::Draw(float fTime)
 {
 	char text[64];
 
 	if (gHUD.m_iHideHUDDisplay & HIDEHUD_ALL)
-		return 1;
+		return;
 
 	// We will take time from demo stream if playingback
 	float currentTime;
@@ -636,8 +630,6 @@ int CHudTimer::Draw(float fTime)
 			m_bCustomTimerNeedSound[i] = false;
 		}
 	}
-
-	return 1;
 }
 
 void CHudTimer::DrawTimerInternal(int time, float ypos, int r, int g, int b, bool redOnLow)
@@ -692,9 +684,9 @@ void CHudTimer::DrawTimerInternal(int time, float ypos, int r, int g, int b, boo
 #else
 
 // Empty implementation
-int CHudTimer::Init(void) { return 1; }
-int CHudTimer::VidInit(void) { return 1; }
-void CHudTimer::Think(void) {}
-int CHudTimer::Draw(float) { return 0; }
+void CHudTimer::Init() {}
+void CHudTimer::VidInit() {}
+void CHudTimer::Think() {}
+void CHudTimer::Draw(float) {}
 
 #endif

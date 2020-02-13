@@ -7,7 +7,10 @@ public:
 	CUpdateNotification();
 	~CUpdateNotification();
 
+	void SetActive(bool state);
+
 private:
+	bool m_bIsActive = false;
 	bool m_bIsNotified = false;
 	int m_iCallbackId = -1;
 

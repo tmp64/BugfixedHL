@@ -4,10 +4,12 @@
 #include "cl_util.h"
 #include "parsemsg.h"
 #include "vgui_TeamFortressViewport.h"
+#include "aghudctf.h"
+#include "aghudglobal.h"
 
-DECLARE_MESSAGE(m_CTF, CTF)
-DECLARE_MESSAGE(m_CTF, CTFSound)
-DECLARE_MESSAGE(m_CTF, CTFFlag)
+DECLARE_MESSAGE_PTR(m_CTF, CTF)
+DECLARE_MESSAGE_PTR(m_CTF, CTFSound)
+DECLARE_MESSAGE_PTR(m_CTF, CTFFlag)
 
 int g_iPlayerFlag1 = 0;
 int g_iPlayerFlag2 = 0;
@@ -32,13 +34,11 @@ static char* s_szSounds[] =
 	"ctf/capture"
 };
 
-int AgHudCTF::Init(void)
+void AgHudCTF::Init()
 {
 	HOOK_MESSAGE(CTF);
 	HOOK_MESSAGE(CTFSound);
 	HOOK_MESSAGE(CTFFlag);
-
-	gHUD.AddHudElem(this);
 
 	m_iFlags = 0;
 	m_iFlagStatus1 = 0;
@@ -47,12 +47,10 @@ int AgHudCTF::Init(void)
 	g_iPlayerFlag1 = 0;
 	g_iPlayerFlag2 = 0;
 
-	m_pCvarClCtfVolume = gEngfuncs.pfnRegisterVariable("cl_ctf_volume", "1", FCVAR_ARCHIVE);
-
-	return 1;
+	m_pCvarClCtfVolume = gEngfuncs.pfnRegisterVariable("cl_ctf_volume", "1", FCVAR_BHL_ARCHIVE);
 }
 
-int AgHudCTF::VidInit(void)
+void AgHudCTF::VidInit()
 {
 	int iSprite;
 
@@ -77,8 +75,6 @@ int AgHudCTF::VidInit(void)
 
 	g_iPlayerFlag1 = 0;
 	g_iPlayerFlag2 = 0;
-
-	return 1;
 }
 
 void AgHudCTF::Reset(void)
@@ -87,12 +83,12 @@ void AgHudCTF::Reset(void)
 		m_iFlags &= ~HUD_ACTIVE;
 }
 
-int AgHudCTF::Draw(float fTime)
+void AgHudCTF::Draw(float fTime)
 {
 	if (m_iFlagStatus1 == Off || m_iFlagStatus2 == Off || gHUD.m_iIntermission)
 	{
 		Reset();
-		return 0;
+		return;
 	}
 
 	int x = 30;
@@ -112,8 +108,6 @@ int AgHudCTF::Draw(float fTime)
 		SPR_Set(m_IconFlagStatus[m_iFlagStatus2].spr, iTeamColors[2][0], iTeamColors[2][1], iTeamColors[2][2]);
 		SPR_DrawAdditive(0, x, y, &m_IconFlagStatus[m_iFlagStatus2].rc);
 	}
-
-	return 0;
 }
 
 int AgHudCTF::MsgFunc_CTF(const char *pszName, int iSize, void *pbuf)

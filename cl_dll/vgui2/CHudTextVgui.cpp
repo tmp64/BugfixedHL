@@ -38,14 +38,12 @@ static int DrawCharVGUI2(int x, int y, int number, int r, int g, int b)
 	return vgui2::surface()->GetCharacterWidth(g_HudTextVgui_TextFont, (wchar_t)number);
 }
 
-int CHudTextVgui::Init(void)
+void CHudTextVgui::Init()
 {
-	gHUD.AddHudElem(this);
 	m_pEngDrawString = gEngfuncs.pfnDrawString;
 	m_pEngDrawChar = gEngfuncs.pfnDrawCharacter;
 	m_pCvarVguiText = CVAR_CREATE("hud_textvgui", "0", FCVAR_ARCHIVE);
 	m_iFlags |= HUD_ACTIVE;
-	return 0;
 }
 
 void CHudTextVgui::Think(void)

@@ -1,6 +1,6 @@
 /***
 *
-*	Copyright (c) 1999, Valve LLC. All rights reserved.
+*	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
 *	
 *	This product contains software technology licensed from Id 
 *	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
@@ -36,7 +36,6 @@
 // This is conveniently done for them in extdll.h
 //
 
-// Client's DLLEXPORT is defined in cl_dll/dllexport.h
 #ifndef CLIENT_DLL
 
 #ifdef _WIN32
@@ -221,7 +220,7 @@ typedef struct enginefuncs_s
 	void		(*pfnRunPlayerMove)			(edict_t *fakeclient, const float *viewangles, float forwardmove, float sidemove, float upmove, unsigned short buttons, byte impulse, byte msec );
 	int			(*pfnNumberOfEntities)		(void);
 	char*		(*pfnGetInfoKeyBuffer)		(edict_t *e);	// passing in NULL gets the serverinfo
-	char*		(*pfnInfoKeyValue)			(char *infobuffer, const char *key);
+	char*		(*pfnInfoKeyValue)			(const char *infobuffer, const char *key);
 	void		(*pfnSetKeyValue)			(char *infobuffer, const char *key, const char *value);
 	void		(*pfnSetClientKeyValue)		(int clientIndex, char *infobuffer, const char *key, const char *value);
 	int			(*pfnIsMapValid)			(char *filename);
@@ -277,31 +276,33 @@ typedef struct enginefuncs_s
 	const char *(*pfnGetPlayerAuthId)		( edict_t *e );
 
 	// PSV: Added for CZ training map
-//	const char *(*pfnKeyNameForBinding)					( const char* pBinding );
+//	const char *(*pfnKeyNameForBinding)		( const char* pBinding );
 	
-	sequenceEntry_s*	(*pfnSequenceGet)				( const char* fileName, const char* entryName );
-	sentenceEntry_s*	(*pfnSequencePickSentence)		( const char* groupName, int pickMethod, int *picked );
+	sequenceEntry_s*	(*pfnSequenceGet)			( const char* fileName, const char* entryName );
+	sentenceEntry_s*	(*pfnSequencePickSentence)	( const char* groupName, int pickMethod, int *picked );
 
 	// LH: Give access to filesize via filesystem
-	int			(*pfnGetFileSize)						( char *filename );
+	int			(*pfnGetFileSize)			( char *filename );
 
-	unsigned int (*pfnGetApproxWavePlayLen)				(const char *filepath);
+	unsigned int (*pfnGetApproxWavePlayLen) (const char *filepath);
 	// MDC: Added for CZ career-mode
-	int			(*pfnIsCareerMatch)						( void );
+	int			(*pfnIsCareerMatch)			( void );
 
 	// BGC: return the number of characters of the localized string referenced by using "label"
-	int			(*pfnGetLocalizedStringLength)			(const char *label);
+	int			(*pfnGetLocalizedStringLength)(const char *label);
 
 	// BGC: added to facilitate persistent storage of tutor message decay values for
 	// different career game profiles.  Also needs to persist regardless of mp.dll being
 	// destroyed and recreated.
-	void		(*pfnRegisterTutorMessageShown)			(int mid);
-	int			(*pfnGetTimesTutorMessageShown)			(int mid);
-	void		(*pfnProcessTutorMessageDecayBuffer)	(int *buffer, int bufferLength);
-	void		(*pfnConstructTutorMessageDecayBuffer)	(int *buffer, int bufferLength);
-	void		(*pfnResetTutorMessageDecayData)		( void );
-	void		(*pfnQueryClientCvarValue)				( const edict_t *player, const char *cvarName );
-    void        (*pfnQueryClientCvarValue2)             ( const edict_t *player, const char *cvarName, int requestID );
+	void (*pfnRegisterTutorMessageShown)(int mid);
+	int (*pfnGetTimesTutorMessageShown)(int mid);
+	void (*ProcessTutorMessageDecayBuffer)(int *buffer, int bufferLength);
+	void (*ConstructTutorMessageDecayBuffer)(int *buffer, int bufferLength);
+	void (*ResetTutorMessageDecayData)( void );
+
+	void (*pfnQueryClientCvarValue)( const edict_t *player, const char *cvarName );
+	void (*pfnQueryClientCvarValue2)( const edict_t *player, const char *cvarName, int requestID );
+	int (*pfnCheckParm)( const char *pchCmdLineToken, char **ppnext );
 } enginefuncs_t;
 
 
@@ -400,7 +401,7 @@ typedef enum _fieldtypes
 	FIELD_TYPECOUNT,		// MUST BE LAST
 } FIELDTYPE;
 
-#ifndef offsetof
+#if !defined(offsetof)  && !defined(GNUC)
 #define offsetof(s,m)	(size_t)&(((s *)0)->m)
 #endif
 
@@ -525,7 +526,7 @@ typedef struct
 	void			(*pfnGameShutdown)(void);
 	int				(*pfnShouldCollide)( edict_t *pentTouched, edict_t *pentOther );
 	void			(*pfnCvarValue)( const edict_t *pEnt, const char *value );
-    void            (*pfnCvarValue2)( const edict_t *pEnt, int requestID, const char *cvarName, const char *value );
+	void			(*pfnCvarValue2)( const edict_t *pEnt, int requestID, const char *cvarName, const char *value );
 } NEW_DLL_FUNCTIONS;
 typedef int	(*NEW_DLL_FUNCTIONS_FN)( NEW_DLL_FUNCTIONS *pFunctionTable, int *interfaceVersion );
 
@@ -535,4 +536,4 @@ extern NEW_DLL_FUNCTIONS	gNewDLLFunctions;
 typedef int	(*APIFUNCTION)( DLL_FUNCTIONS *pFunctionTable, int interfaceVersion );
 typedef int	(*APIFUNCTION2)( DLL_FUNCTIONS *pFunctionTable, int *interfaceVersion );
 
-#endif /* EIFACE_H */
+#endif EIFACE_H

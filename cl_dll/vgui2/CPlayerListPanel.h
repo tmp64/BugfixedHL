@@ -150,6 +150,10 @@ public:
 
 	virtual void SetProportional(bool state);
 
+	int GetLineSpacing();
+	int GetLineSpacingOverride();
+	void SetLineSpacingOverride(int value);	// Set to 0 to restore default
+
 protected:
 	virtual void PerformLayout();
 	virtual void ApplySchemeSettings(vgui2::IScheme *pScheme);
@@ -200,6 +204,7 @@ private:
 	int m_iEditModeColumn;
 	int m_iContentHeight;
 	int m_iLineSpacing;
+	int m_iLineSpacingOverride = 0;
 
 	int FindSectionIndexByID(int sectionID);
 	void ReSortList();

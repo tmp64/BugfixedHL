@@ -432,7 +432,8 @@ void TextImage::Paint()
 			}
 		}
 
-		if (ch != ' ')
+		// Draw space for underlined fonts
+		//if (ch != ' ')
 		{
 			// Set the color
 			if (m_bUseColorCodes)

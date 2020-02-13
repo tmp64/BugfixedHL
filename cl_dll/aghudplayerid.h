@@ -8,10 +8,10 @@ class AgHudPlayerId : public CHudBase
 public:
 	AgHudPlayerId() : m_flTurnoff(0), m_iPlayer(0), m_bTeam(false), m_iHealth(0), m_iArmour(0), m_pCvarHudPlayerId(NULL) { }
 
-	int Init(void) override;
-	int VidInit(void) override;
-	int Draw(float flTime) override;
-	void Reset(void) override;
+	void Init() override;
+	void VidInit() override;
+	void Draw(float flTime) override;
+	void Reset() override;
 
 	int MsgFunc_PlayerId(const char *pszName, int iSize, void *pbuf);
 

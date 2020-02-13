@@ -7,10 +7,10 @@
 class CHudAmmoSecondary : public CHudBase
 {
 public:
-	int Init(void);
-	int VidInit(void);
-	void Reset(void);
-	int Draw(float flTime);
+	void Init();
+	void VidInit();
+	void Reset();
+	void Draw(float flTime);
 
 	int MsgFunc_SecAmmoVal(const char *pszName, int iSize, void *pbuf);
 	int MsgFunc_SecAmmoIcon(const char *pszName, int iSize, void *pbuf);

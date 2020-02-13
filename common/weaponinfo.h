@@ -15,9 +15,7 @@
 #if !defined ( WEAPONINFOH )
 #define WEAPONINFOH
 #ifdef _WIN32
-#ifndef __MINGW32__
 #pragma once
-#endif /* not __MINGW32__ */
 #endif
 
 // Info about weapons player might have in his/her possession

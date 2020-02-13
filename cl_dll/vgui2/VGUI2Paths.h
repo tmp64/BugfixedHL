@@ -18,6 +18,11 @@
 #define UI_RESOURCE_DIR UI_BASE_DIR "/resource"
 
 /**
+*	Language files.
+*/
+#define UI_LANGUAGE_DIR UI_RESOURCE_DIR "/language"
+
+/**
 *	Scripts.
 */
 #define UI_SCRIPTS_DIR UI_BASE_DIR "/scripts"

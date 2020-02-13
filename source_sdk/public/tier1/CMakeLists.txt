@@ -1,4 +1,5 @@
 add_sources(
+	CMakeLists.txt
 	bitbuf.h
 	byteswap.h
 	CharacterSet.h

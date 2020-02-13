@@ -23,7 +23,6 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
-#include "CBugfixedServer.h"
 
 // Holds engine functionality callbacks
 enginefuncs_t g_engfuncs;
@@ -56,7 +55,4 @@ extern "C" void WINAPI GiveFnptrsToDll(enginefuncs_t *pengfuncsFromEngine, globa
 	char gd[MAX_PATH];
 	GET_GAME_DIR(gd);
 	g_iIsAg = strcmp(gd, "ag") == 0 ? 1 : 0;
-
-	// Create CBugfixedServer instance for API
-	gBugfixedServer = new CBugfixedServer(&g_engfuncs, gpGlobals);
 }

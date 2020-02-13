@@ -27,23 +27,18 @@
 
 DECLARE_MESSAGE_PTR(m_Geiger, Geiger )
 
-int CHudGeiger::Init(void)
+void CHudGeiger::Init()
 {
 	HOOK_MESSAGE( Geiger );
 
 	m_iGeigerRange = 0;
 	m_iFlags = 0;
 
-	gHUD.AddHudElem(this);
-
 	srand( (unsigned)time( NULL ) );
-
-	return 1;
 };
 
-int CHudGeiger::VidInit(void)
+void CHudGeiger::VidInit()
 {
-	return 1;
 };
 
 int CHudGeiger::MsgFunc_Geiger(const char *pszName,  int iSize, void *pbuf)
@@ -60,7 +55,7 @@ int CHudGeiger::MsgFunc_Geiger(const char *pszName,  int iSize, void *pbuf)
 	return 1;
 }
 
-int CHudGeiger::Draw (float flTime)
+void CHudGeiger::Draw (float flTime)
 {
 	int pct;
 	float flvol;
@@ -173,6 +168,4 @@ int CHudGeiger::Draw (float flTime)
 			PlaySound(sz, flvol);
 		}
 	}
-
-	return 1;
 }

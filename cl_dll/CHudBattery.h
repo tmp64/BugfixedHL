@@ -6,9 +6,9 @@
 class CHudBattery : public CHudBase
 {
 public:
-	int Init(void);
-	int VidInit(void);
-	int Draw(float flTime);
+	void Init();
+	void VidInit();
+	void Draw(float flTime);
 	int MsgFunc_Battery(const char *pszName, int iSize, void *pbuf);
 
 private:

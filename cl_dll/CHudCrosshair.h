@@ -22,7 +22,7 @@ public:
 	custom_crosshair_cvars_t m_CustomCrosshair;
 
 	CHudCrosshair();
-	virtual int Init();
-	virtual int Draw(float flTime);
+	virtual void Init();
+	virtual void Draw(float flTime);
 };
 

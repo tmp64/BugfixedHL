@@ -752,6 +752,10 @@ void CPlayerListPanel::LayoutPanels(int &contentTall)
 		wide -= m_pScrollBar->GetWide();
 	}
 
+	int iLineSpacing = m_iLineSpacing;
+	if (m_iLineSpacingOverride != 0)
+		iLineSpacing = m_iLineSpacingOverride;
+
 	int iStart = -1;
 	int iEnd = -1;
 
@@ -793,7 +797,7 @@ void CPlayerListPanel::LayoutPanels(int &contentTall)
 			for (int i = iStart; i <= iEnd; i++)
 			{
 				CPlayerListItemButton *item = m_SortedItems[i]; //items[i];
-				item->SetBounds(x, y, wide, m_iLineSpacing);
+				item->SetBounds(x, y, wide, iLineSpacing);
 
 				// setup edit mode
 				if (m_hEditModePanel.Get() && m_iEditModeItemID == item->GetID())
@@ -803,7 +807,7 @@ void CPlayerListPanel::LayoutPanels(int &contentTall)
 					m_hEditModePanel->SetBounds(cx, y, cwide, tall);
 				}
 
-				y += m_iLineSpacing;
+				y += iLineSpacing;
 			}
 		}
 
@@ -1682,4 +1686,22 @@ int CPlayerListPanel::GetNewItemButton()
 		m_Items[itemID] = SETUP_PANEL(new CPlayerListItemButton(this, itemID));
 	}
 	return itemID;
+}
+
+int CPlayerListPanel::GetLineSpacing()
+{
+	if (m_iLineSpacingOverride)
+		return m_iLineSpacingOverride;
+	return m_iLineSpacing;
+}
+
+int CPlayerListPanel::GetLineSpacingOverride()
+{
+	return m_iLineSpacingOverride;
+}
+
+void CPlayerListPanel::SetLineSpacingOverride(int value)
+{
+	Assert(value >= 0);
+	m_iLineSpacingOverride = value;
 }

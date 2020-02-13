@@ -33,25 +33,19 @@ DECLARE_MESSAGE_PTR( m_StatusBar, StatusValue );
 #define STATUSBAR_ID_LINE		1
 
 
-int CHudStatusBar :: Init( void )
+void CHudStatusBar :: Init()
 {
-	gHUD.AddHudElem( this );
-
 	HOOK_MESSAGE( StatusText );
 	HOOK_MESSAGE( StatusValue );
 
 	Reset();
 
 	CVAR_CREATE( "hud_centerid", "0", FCVAR_ARCHIVE );
-
-	return 1;
 }
 
-int CHudStatusBar :: VidInit( void )
+void CHudStatusBar :: VidInit()
 {
 	// Load sprites here
-
-	return 1;
 }
 
 void CHudStatusBar :: Reset( void )
@@ -171,7 +165,7 @@ void CHudStatusBar :: ParseStatusString( int line_num )
 	}
 }
 
-int CHudStatusBar :: Draw( float fTime )
+void CHudStatusBar :: Draw( float fTime )
 {
 	if ( m_bReparseString )
 	{
@@ -203,8 +197,6 @@ int CHudStatusBar :: Draw( float fTime )
 
 		DrawConsoleString( x, y, m_szStatusBar[i], m_pflNameColors[i] );
 	}
-
-	return 1;
 }
 
 // Message handler for StatusText message

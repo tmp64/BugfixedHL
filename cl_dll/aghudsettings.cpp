@@ -3,16 +3,17 @@
 #include "hud.h"
 #include "cl_util.h"
 #include "parsemsg.h"
+#include "aghudsettings.h"
+#include "aghudglobal.h"
+#include "aghudlocation.h"
 
-DECLARE_MESSAGE(m_Settings, Settings)
+DECLARE_MESSAGE_PTR(m_Settings, Settings)
 
 int g_iMatch = 0;
 
-int AgHudSettings::Init(void)
+void AgHudSettings::Init()
 {
 	HOOK_MESSAGE(Settings);
-
-	gHUD.AddHudElem(this);
 
 	g_iMatch = 0;
 
@@ -28,28 +29,25 @@ int AgHudSettings::Init(void)
 	m_szBlastRadius[0] = '\0';
 	m_flTurnoff = 0.0;
 
-	m_pCvarHudSettings = gEngfuncs.pfnRegisterVariable("hud_settings", "1", FCVAR_ARCHIVE);
-
-	return 1;
+	m_pCvarHudSettings = gEngfuncs.pfnRegisterVariable("hud_settings", "1", FCVAR_BHL_ARCHIVE);
 }
 
-int AgHudSettings::VidInit(void)
+void AgHudSettings::VidInit()
 {
-	return 1;
 }
 
-void AgHudSettings::Reset(void)
+void AgHudSettings::Reset()
 {
 	m_iFlags &= ~HUD_ACTIVE;
 	m_flTurnoff = 0;
 }
 
-int AgHudSettings::Draw(float fTime)
+void AgHudSettings::Draw(float fTime)
 {
 	if (gHUD.m_flTime > m_flTurnoff || m_pCvarHudSettings->value == 0)
 	{
 		Reset();
-		return 1;
+		return;
 	}
 
 	char szText[128];
@@ -110,9 +108,7 @@ int AgHudSettings::Draw(float fTime)
 		AgDrawHudStringCentered(ScreenWidth / 2, gHUD.m_scrinfo.iCharHeight * 2, ScreenWidth, szText, r, g, b);
 	}
 
-	AgDrawHudStringCentered(ScreenWidth / 2, gHUD.m_scrinfo.iCharHeight * 3, ScreenWidth, gHUD.m_Location.m_szMap, r, g, b);
-
-	return 0;
+	AgDrawHudStringCentered(ScreenWidth / 2, gHUD.m_scrinfo.iCharHeight * 3, ScreenWidth, gHUD.m_Location->m_szMap, r, g, b);
 }
 
 int AgHudSettings::MsgFunc_Settings(const char *pszName, int iSize, void *pbuf)

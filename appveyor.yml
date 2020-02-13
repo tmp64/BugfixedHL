@@ -6,48 +6,32 @@ image:
 
 environment:
   matrix:
-    - CMAKE_BUILD_DIR: build_auto_client
-      CMAKE_OPTIONS:
-      VGUI2_BUILD: 0
-      SERVER_BUILD: 0
-      AMXX_BUILD: 0
-      
-    - CMAKE_BUILD_DIR: build_auto_client_vgui2
-      CMAKE_OPTIONS: -DUSE_VGUI2=1
-      VGUI2_BUILD: 1
-      SERVER_BUILD: 0
-      AMXX_BUILD: 0
-      
-    - CMAKE_BUILD_DIR: build_auto_server
-      CMAKE_OPTIONS:
-      VGUI2_BUILD: 0
-      SERVER_BUILD: 1
-      AMXX_BUILD: 0
-      
-    - CMAKE_BUILD_DIR: build_auto_amxx
-      CMAKE_OPTIONS:
-      VGUI2_BUILD: 0
-      SERVER_BUILD: 0
-      AMXX_BUILD: 1
+    - TARGET: Client
+    - TARGET: ClientVGUI2
+    - TARGET: Client4554
+    - TARGET: Server
+    - TARGET: Amxx
+
+matrix:
+  exclude:
+    - image: Ubuntu1804
+      TARGET: Client4554
 
 install:
   - sh: sudo dpkg --add-architecture i386
   - sh: sudo apt-get update > /dev/null
-  - sh: sudo apt-get install -y libc6:i386 cmake gcc g++ gcc-multilib g++-multilib patchelf > /dev/null
+  - sh: sudo apt-get install -y libc6:i386 cmake gcc g++ gcc-multilib g++-multilib patchelf ninja-build > /dev/null
+  - sh: git submodule update --init --recursive
+  
+  - ps: |
+      if ([System.Environment]::OSVersion.Platform -eq "Win32NT")
+      {
+        Install-Module VSSetup -Scope CurrentUser;
+      }
+  - cmd: git submodule update --init --recursive
 
 build_script:
-  - cmd: scripts/AppVeyor_WindowsBuild.bat
-  - sh: |
-      if [ "$SERVER_BUILD" -eq "0" ]; then
-        if [ "$VGUI2_BUILD" -eq "0" ]; then
-          ./scripts/MakeClientRelease.sh
-        else
-          ./scripts/MakeClientVGUI2Release.sh
-        fi
-      else
-        ./scripts/MakeServerRelease.sh
-      fi
+  - ps: ./scripts/BuildRelease.ps1 -Target $env:TARGET -MakeZip -CMakeArgs "-DBHL_VERSION_METADATA=`"appveyor.${env:APPVEYOR_REPO_BRANCH}.${env:APPVEYOR_BUILD_NUMBER}`""
 
 artifacts:
-  - path: BugfixedHL-*.zip
-  - path: BugfixedHL-*.tar.gz
+  - path: autobuild/BugfixedHL-*.zip

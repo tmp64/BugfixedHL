@@ -1,4 +1,5 @@
 add_sources(
+	CMakeLists.txt
     vgui_checkbutton2.cpp
     vgui_checkbutton2.h
     vgui_grid.cpp

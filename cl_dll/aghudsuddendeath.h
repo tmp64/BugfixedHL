@@ -8,10 +8,10 @@ class AgHudSuddenDeath : public CHudBase
 public:
 	AgHudSuddenDeath(): m_iSuddenDeath(0) { }
 
-	int Init(void) override;
-	int VidInit(void) override;
-	int Draw(float flTime) override;
-	void Reset(void) override;
+	void Init() override;
+	void VidInit() override;
+	void Draw(float flTime) override;
+	void Reset() override;
 
 	int MsgFunc_SuddenDeath(const char *pszName, int iSize, void *pbuf);
 

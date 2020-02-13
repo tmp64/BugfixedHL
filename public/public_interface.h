@@ -1,2 +1,2 @@
 
-#include "../public/interface.h"
+#include "../common/interface.h"

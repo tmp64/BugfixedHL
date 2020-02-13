@@ -138,10 +138,8 @@ void ToggleScores( void )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-int CHudSpectator::Init()
+void CHudSpectator::Init()
 {
-	gHUD.AddHudElem(this);
-
 	m_iFlags |= HUD_ACTIVE;
 	m_flNextObserverInput = 0.0f;
 	m_zoomDelta	= 0.0f;
@@ -168,10 +166,8 @@ int CHudSpectator::Init()
 	if ( !m_drawnames || !m_drawcone || !m_drawstatus || !m_autoDirector || !m_pip)
 	{
 		gEngfuncs.Con_Printf("ERROR! Couldn't register all spectator variables.\n");
-		return 0;
+		return;
 	}
-
-	return 1;
 }
 
 
@@ -366,7 +362,7 @@ void CHudSpectator::SetSpectatorStartPosition()
 //-----------------------------------------------------------------------------
 // Purpose: Loads new icons
 //-----------------------------------------------------------------------------
-int CHudSpectator::VidInit()
+void CHudSpectator::VidInit()
 {
 	m_hsprPlayer		= SPR_Load("sprites/iplayer.spr");
 	m_hsprPlayerBlue	= SPR_Load("sprites/iplayerblue.spr");
@@ -376,8 +372,6 @@ int CHudSpectator::VidInit()
 	m_hsprBeam			= SPR_Load("sprites/laserbeam.spr");
 	m_hsprCamera		= SPR_Load("sprites/camera.spr");
 	m_hCrosshair		= SPR_Load("sprites/crosshairs.spr");
-	
-	return 1;
 }
 
 //-----------------------------------------------------------------------------
@@ -385,7 +379,7 @@ int CHudSpectator::VidInit()
 // Input  : flTime - 
 //			intermission - 
 //-----------------------------------------------------------------------------
-int CHudSpectator::Draw(float flTime)
+void CHudSpectator::Draw(float flTime)
 {
 	int lx;
 
@@ -394,7 +388,7 @@ int CHudSpectator::Draw(float flTime)
 
 	// draw only in spectator mode
 	if ( !g_iUser1  )
-		return 0;
+		return;
 
 	// if user pressed zoom, aplly changes
 	if ( (m_zoomDelta != 0.0f) && (	g_iUser1 == OBS_MAP_FREE ) )
@@ -421,10 +415,10 @@ int CHudSpectator::Draw(float flTime)
 
 	// Only draw the icon names only if map mode is in Main Mode
 	if ( g_iUser1 < OBS_MAP_FREE  ) 
-		return 1;
+		return;
 
 	if ( !m_drawnames->value )
-		return 1;
+		return;
 
 	// make sure we have player info
 	gViewPort->GetAllPlayersInfo();
@@ -451,8 +445,6 @@ int CHudSpectator::Draw(float flTime)
 		color = GetClientTeamColor(i + 1);
 		DrawConsoleString( m_vPlayerPos[i][0] - lx, m_vPlayerPos[i][1], string, color );
 	}
-
-	return 1;
 }
 
 

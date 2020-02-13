@@ -1191,7 +1191,7 @@ IN_Init
 */
 void IN_Init (void)
 {
-	m_input					= gEngfuncs.pfnRegisterVariable ( "m_input","1", FCVAR_ARCHIVE );
+	m_input					= gEngfuncs.pfnRegisterVariable ( "m_input","1", FCVAR_BHL_ARCHIVE );
 	m_filter				= gEngfuncs.pfnRegisterVariable ( "m_filter","0", FCVAR_ARCHIVE );
 	sensitivity				= gEngfuncs.pfnRegisterVariable ( "sensitivity","3", FCVAR_ARCHIVE ); // user mouse sensitivity setting.
 

@@ -133,6 +133,7 @@ void ConsolePrint(const char *string);
 void ConsolePrintColor(const char *string, RGBA color);
 void CenterPrint(const char *string);
 void ConPrintf(const char *fmt, ...);
+void ConPrintf(RGBA color, const char *fmt, ...);	// Colored version
 
 float *GetClientTeamColor(int clientIndex);
 

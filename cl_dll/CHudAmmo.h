@@ -9,11 +9,11 @@ class CHudCrosshair;
 class CHudAmmo : public CHudBase
 {
 public:
-	int Init(void);
-	int VidInit(void);
-	int Draw(float flTime);
-	void Think(void);
-	void Reset(void);
+	void Init();
+	void VidInit();
+	void Draw(float flTime);
+	void Think();
+	void Reset();
 	int DrawWList(float flTime);
 	void UpdateCrosshair();
 	int MsgFunc_CurWeapon(const char *pszName, int iSize, void *pbuf);
@@ -24,21 +24,22 @@ public:
 	int MsgFunc_ItemPickup(const char *pszName, int iSize, void *pbuf);
 	int MsgFunc_HideWeapon(const char *pszName, int iSize, void *pbuf);
 
-	int GetMaxSlot(void) { return m_iMaxSlot; }
+	int GetMaxClip(char* weaponname);
+	int GetMaxSlot() { return m_iMaxSlot; }
 	void SlotInput(int iSlot);
-	void _cdecl UserCmd_Slot1(void);
-	void _cdecl UserCmd_Slot2(void);
-	void _cdecl UserCmd_Slot3(void);
-	void _cdecl UserCmd_Slot4(void);
-	void _cdecl UserCmd_Slot5(void);
-	void _cdecl UserCmd_Slot6(void);
-	void _cdecl UserCmd_Slot7(void);
-	void _cdecl UserCmd_Slot8(void);
-	void _cdecl UserCmd_Slot9(void);
-	void _cdecl UserCmd_Slot10(void);
-	void _cdecl UserCmd_Close(void);
-	void _cdecl UserCmd_NextWeapon(void);
-	void _cdecl UserCmd_PrevWeapon(void);
+	void _cdecl UserCmd_Slot1();
+	void _cdecl UserCmd_Slot2();
+	void _cdecl UserCmd_Slot3();
+	void _cdecl UserCmd_Slot4();
+	void _cdecl UserCmd_Slot5();
+	void _cdecl UserCmd_Slot6();
+	void _cdecl UserCmd_Slot7();
+	void _cdecl UserCmd_Slot8();
+	void _cdecl UserCmd_Slot9();
+	void _cdecl UserCmd_Slot10();
+	void _cdecl UserCmd_Close();
+	void _cdecl UserCmd_NextWeapon();
+	void _cdecl UserCmd_PrevWeapon();
 
 private:
 	float	m_fFade;

@@ -6,11 +6,11 @@
 class CHudMenu : public CHudBase
 {
 public:
-	int Init(void);
-	void InitHUDData(void);
-	int VidInit(void);
-	void Reset(void);
-	int Draw(float flTime);
+	void Init();
+	void InitHUDData();
+	void VidInit();
+	void Reset();
+	void Draw(float flTime);
 	int MsgFunc_ShowMenu(const char *pszName, int iSize, void *pbuf);
 
 	void SelectMenuItem(int menu_item);

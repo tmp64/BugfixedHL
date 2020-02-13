@@ -11,6 +11,7 @@ include( MSVCRuntime )
 include( WinXPSupport )
 
 add_sources(
+	CMakeLists.txt
 	AnimatingImagePanel.cpp
 	AnimationController.cpp
 	BitmapImagePanel.cpp

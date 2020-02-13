@@ -25,6 +25,8 @@
 
 #include <list>
 #include <memory>
+#include <queue>
+#include <functional>
 #include "wrect.h"
 #include "cl_dll.h"
 #include "ammo.h"
@@ -66,7 +68,43 @@ class CHudCrosshair;
 #ifdef USE_VGUI2
 class CHudScoreBoard;
 class CHudTextVgui;
+class CHudChat;
 #endif
+
+class AgHudGlobal;
+class AgHudCountdown;
+class AgHudCTF;
+class AgHudLocation;
+class AgHudLongjump;
+class AgHudNextmap;
+class AgHudPlayerId;
+class AgHudSettings;
+class AgHudSuddenDeath;
+class AgHudTimeout;
+class AgHudVote;
+
+extern int g_iColorsCodes[10][3];
+
+//-----------------------------------------------------
+// Possible values for gHUD.m_pCvarColorText
+//-----------------------------------------------------
+enum E_ColorCodeMode
+{
+	COLOR_CODES_OFF = 0,	// Color codes will be ignored like in vanilla game
+	COLOR_CODES_ON,			// Color codes will color the text
+	COLOR_CODES_REMOVE		// Color codes will be removed without coloring
+};
+
+// Checks whether c is a digit from 0 to 9
+inline bool IsColorCodeCharValid(char c)
+{
+	return (c >= '0' && c <= '9');
+}
+
+inline bool IsColorCodeCharValid(wchar_t c)
+{
+	return (c >= L'0' && c <= L'9');
+}
 
 //-----------------------------------------------------
 // Game info structures declaration
@@ -125,32 +163,20 @@ struct CharWidths
 };
 
 //-----------------------------------------------------
-// AG hud elements
+// CHud
 //-----------------------------------------------------
-#include "aghudglobal.h"
-#include "aghudcountdown.h"
-#include "aghudctf.h"
-#include "aghudlocation.h"
-#include "aghudlongjump.h"
-#include "aghudnextmap.h"
-#include "aghudplayerid.h"
-#include "aghudsettings.h"
-#include "aghudsuddendeath.h"
-#include "aghudtimeout.h"
-#include "aghudvote.h"
-
-#define HUD_ELEM_INIT_FULL(type, var) var = std::shared_ptr<type>(new type()); var->m_isDeletable = true; var->Init();
-#define HUD_ELEM_INIT(x) HUD_ELEM_INIT_FULL(CHud##x, m_##x)
-
 class CHud
 {
 public:
 	inline HLHSPRITE GetSprite(int index)
 	{
-		return (index < 0) ? 0 : m_rghSprites[index];
+		return (index < 0 || index >= m_iSpriteCountAlloc) ? 0 : m_rghSprites[index];
 	}
 	inline wrect_t& GetSpriteRect(int index)
 	{
+		static wrect_t empty = wrect_t();
+		if (index < 0 || index >= m_iSpriteCountAlloc)
+			return empty;
 		return m_rgrcRects[index];
 	}
 	int GetSpriteIndex(const char *SpriteName);	// gets a sprite index, for use in the m_rghSprites[] array
@@ -159,49 +185,50 @@ public:
 	//-----------------------------------------------------
 	// HUD elements
 	//-----------------------------------------------------
-	std::shared_ptr<CHudAmmo>			m_Ammo	= nullptr;
-	std::shared_ptr<CHudHealth>			m_Health = nullptr;
-	std::shared_ptr<CHudSpectator>		m_Spectator = nullptr;
-	std::shared_ptr<CHudGeiger>			m_Geiger = nullptr;
-	std::shared_ptr<CHudBattery>		m_Battery = nullptr;
-	std::shared_ptr<CHudTrain>			m_Train = nullptr;
-	std::shared_ptr<CHudFlashlight>		m_Flash = nullptr;
-	std::shared_ptr<CHudMessage>		m_Message = nullptr;
-	std::shared_ptr<CHudStatusBar>		m_StatusBar = nullptr;
-	std::shared_ptr<CHudSpeedometer>	m_Speedometer = nullptr;
-	std::shared_ptr<CHudDeathNotice>	m_DeathNotice = nullptr;
-	std::shared_ptr<CHudSayText>		m_SayText = nullptr;
-	std::shared_ptr<CHudMenu>			m_Menu = nullptr;
-	std::shared_ptr<CHudAmmoSecondary>	m_AmmoSecondary = nullptr;
-	std::shared_ptr<CHudTextMessage>	m_TextMessage = nullptr;
-	std::shared_ptr<CHudStatusIcons>	m_StatusIcons = nullptr;
-	std::shared_ptr<CHudTimer>			m_Timer = nullptr;
-	std::shared_ptr<CHudScores>			m_Scores = nullptr;
-	std::shared_ptr<CHudCrosshair>		m_Crosshair = nullptr;
+	CHudAmmo			*m_Ammo	= nullptr;
+	CHudHealth			*m_Health = nullptr;
+	CHudSpectator		*m_Spectator = nullptr;
+	CHudGeiger			*m_Geiger = nullptr;
+	CHudBattery			*m_Battery = nullptr;
+	CHudTrain			*m_Train = nullptr;
+	CHudFlashlight		*m_Flash = nullptr;
+	CHudMessage			*m_Message = nullptr;
+	CHudStatusBar		*m_StatusBar = nullptr;
+	CHudSpeedometer		*m_Speedometer = nullptr;
+	CHudDeathNotice		*m_DeathNotice = nullptr;
+	CHudSayText			*m_SayText = nullptr;
+	CHudMenu			*m_Menu = nullptr;
+	CHudAmmoSecondary	*m_AmmoSecondary = nullptr;
+	CHudTextMessage		*m_TextMessage = nullptr;
+	CHudStatusIcons		*m_StatusIcons = nullptr;
+	CHudTimer			*m_Timer = nullptr;
+	CHudScores			*m_Scores = nullptr;
+	CHudCrosshair		*m_Crosshair = nullptr;
 #ifdef USE_VGUI2
-	std::shared_ptr<CHudScoreBoard>		m_ScoreBoard = nullptr;		// VGUI2 scoreboard
-	std::shared_ptr<CHudTextVgui>		m_TextVgui = nullptr;
+	CHudScoreBoard		*m_ScoreBoard = nullptr;		// VGUI2 scoreboard
+	CHudTextVgui		*m_TextVgui = nullptr;
+	CHudChat			*m_Chat = nullptr;
 #endif
 
 	//-----------------------------------------------------
 	// AG HUD elements
 	//-----------------------------------------------------
-	AgHudGlobal			m_Global;
-	AgHudCountdown		m_Countdown;
-	AgHudCTF			m_CTF;
-	AgHudLocation		m_Location;
-	AgHudLongjump		m_Longjump;
-	AgHudNextmap		m_Nextmap;
-	AgHudPlayerId		m_PlayerId;
-	AgHudSettings		m_Settings;
-	AgHudSuddenDeath	m_SuddenDeath;
-	AgHudTimeout		m_Timeout;
-	AgHudVote			m_Vote;
+	AgHudGlobal			*m_Global = nullptr;
+	AgHudCountdown		*m_Countdown = nullptr;
+	AgHudCTF			*m_CTF = nullptr;
+	AgHudLocation		*m_Location = nullptr;
+	AgHudLongjump		*m_Longjump = nullptr;
+	AgHudNextmap		*m_Nextmap = nullptr;
+	AgHudPlayerId		*m_PlayerId = nullptr;
+	AgHudSettings		*m_Settings = nullptr;
+	AgHudSuddenDeath	*m_SuddenDeath = nullptr;
+	AgHudTimeout		*m_Timeout = nullptr;
+	AgHudVote			*m_Vote = nullptr;
 
-	void Init(void);
+	void Init();
 	void Shutdown();
-	void VidInit(void);
-	void Think(void);
+	void VidInit();
+	void Think();
 	int Redraw(float flTime, int intermission);
 	int UpdateClientData(client_data_t *cdata, float time);
 	void Frame(double time);
@@ -230,8 +257,6 @@ public:
 
 	// sprite indexes
 	int m_HUD_number_0;
-
-	void AddHudElem(CHudBase *elem);
 
 	float GetSensitivity();
 
@@ -280,8 +305,10 @@ public:
 	int GetHudCharWidth(int c);
 	int CalculateCharWidth(int c);
 	void GetHudColor(int hudPart, int value, int &r, int &g, int &b);
+	void GetHudAmmoColor(int value, int maxvalue, int &r, int &g, int &b);
 	float GetHudTransparency();
 	void UpdateSupportsCvar();
+	E_ColorCodeMode GetColorCodeMode();
 
 	inline const char *GetServerName()
 	{
@@ -299,6 +326,8 @@ public:
 		return m_pTeamColors[team % HLARRAYSIZE(m_pTeamColors)];
 	}
 #endif
+
+	void CallOnNextFrame(std::function<void()> f);
 
 private:
 	std::list<CHudBase *>	m_HudList;
@@ -344,6 +373,10 @@ private:
 #ifdef USE_UPDATER
 	bool m_bUpdatesChecked = false;
 #endif
+
+	std::queue<std::function<void()>> m_NextFrameQueue;
+
+	friend class CHudBase;
 };
 
 extern CHud gHUD;

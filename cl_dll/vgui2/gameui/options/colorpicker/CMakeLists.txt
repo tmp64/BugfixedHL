@@ -1,0 +1,11 @@
+add_sources(
+	CMakeLists.txt
+	CTextureManager.h
+	CTextureManager.cpp
+	CPickerPanel.h
+	CPickerPanel.cpp
+	CSelCirclePanel.h
+	CSelCirclePanel.cpp
+	CBarPanel.h
+	CBarPanel.cpp
+)

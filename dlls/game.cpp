@@ -16,8 +16,10 @@
 #include "eiface.h"
 #include "util.h"
 #include "game.h"
+#include "convar.h"
 
 #include "appversion.h"
+#include "CBugfixedServer.h"
 
 // Version cvar
 // You can remove it, but remember that this will lower amount of people getting knowing about that HLSDK release.
@@ -956,7 +958,12 @@ void GameDLLInit( void )
 	CVAR_REGISTER ( &sk_player_leg3 );
 	// END REGISTER CVARS FOR SKILL LEVEL STUFF
 
+	// Register cvars from ConVar class
+	ConVar::RegisterAll();
+
 	SERVER_COMMAND( "exec skill.cfg\n" );
+
+	serverapi()->Init();
 
 	int dedicated = IS_DEDICATED_SERVER();
 	cvar_t *deathmatch = CVAR_GET_POINTER("deathmatch");

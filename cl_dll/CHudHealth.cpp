@@ -53,7 +53,7 @@ int giDmgFlags[NUM_DMG_TYPES] =
 	DMG_HALLUC
 };
 
-int CHudHealth::Init(void)
+void CHudHealth::Init()
 {
 	HOOK_MESSAGE(Health);
 	HOOK_MESSAGE(Damage);
@@ -66,13 +66,9 @@ int CHudHealth::Init(void)
 	giDmgWidth = 0;
 
 	memset(m_dmg, 0, sizeof(DAMAGE_IMAGE) * NUM_DMG_TYPES);
-
-
-	gHUD.AddHudElem(this);
-	return 1;
 }
 
-void CHudHealth::Reset( void )
+void CHudHealth::Reset()
 {
 	// make sure the pain compass is cleared when the player respawns
 	m_fAttackFront = m_fAttackRear = m_fAttackRight = m_fAttackLeft = 0;
@@ -86,7 +82,7 @@ void CHudHealth::Reset( void )
 	}
 }
 
-int CHudHealth::VidInit(void)
+void CHudHealth::VidInit()
 {
 	m_hSprite = 0;
 
@@ -97,7 +93,6 @@ int CHudHealth::VidInit(void)
 
 	giDmgHeight = gHUD.GetSpriteRect(m_HUD_dmg_bio).right - gHUD.GetSpriteRect(m_HUD_dmg_bio).left;
 	giDmgWidth = gHUD.GetSpriteRect(m_HUD_dmg_bio).bottom - gHUD.GetSpriteRect(m_HUD_dmg_bio).top;
-	return 1;
 }
 
 int CHudHealth:: MsgFunc_Health(const char *pszName,  int iSize, void *pbuf )
@@ -170,7 +165,7 @@ void CHudHealth::GetPainColor( int &r, int &g, int &b )
 #endif 
 }
 
-int CHudHealth::Draw(float flTime)
+void CHudHealth::Draw(float flTime)
 {
 	int r, g, b;
 	int x, y;
@@ -178,7 +173,7 @@ int CHudHealth::Draw(float flTime)
 	int HealthWidth;
 
 	if ( (gHUD.m_iHideHUDDisplay & HIDEHUD_HEALTH) || gEngfuncs.IsSpectateOnly() )
-		return 1;
+		return;
 
 	if ( !m_hSprite )
 		m_hSprite = LoadSprite(PAIN_NAME);
@@ -247,7 +242,7 @@ int CHudHealth::Draw(float flTime)
 	}
 
 	DrawDamage(flTime);
-	return DrawPain(flTime);
+	DrawPain(flTime);
 }
 
 void CHudHealth::CalcDamageDirection(vec3_t vecFrom)
@@ -309,10 +304,10 @@ void CHudHealth::CalcDamageDirection(vec3_t vecFrom)
 	}
 }
 
-int CHudHealth::DrawPain(float flTime)
+void CHudHealth::DrawPain(float flTime)
 {
 	if (!(m_fAttackFront || m_fAttackRear || m_fAttackLeft || m_fAttackRight))
-		return 1;
+		return;
 
 	int r, g, b;
 	int x, y, a, shade;
@@ -378,19 +373,18 @@ int CHudHealth::DrawPain(float flTime)
 		SPR_DrawAdditive(3, x, y, NULL);
 
 		m_fAttackLeft = max( 0.f, m_fAttackLeft - fFade );
-	} else
+	}
+	else
 		m_fAttackLeft = 0;
-
-	return 1;
 }
 
-int CHudHealth::DrawDamage(float flTime)
+void CHudHealth::DrawDamage(float flTime)
 {
 	int r, g, b, a;
 	DAMAGE_IMAGE *pdmg;
 
 	if (!m_bitsDamage)
-		return 1;
+		return;
 
 	UnpackRGB(r,g,b, RGB_YELLOWISH);
 	
@@ -441,8 +435,6 @@ int CHudHealth::DrawDamage(float flTime)
 			}
 		}
 	}
-
-	return 1;
 }
 
 void CHudHealth::UpdateTiles(float flTime, long bitsDamage)

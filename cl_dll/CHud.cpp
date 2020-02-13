@@ -33,8 +33,9 @@
 #include "vgui_ScorePanel.h"
 #include "appversion.h"
 #include "memory.h"
+#include "bhlcfg.h"
 
-#include "../bugfixedapi/IBugfixedServer.h"
+#include <ClientSupportsFlags.h>
 
 //-----------------------------------------------------
 // HUD elements
@@ -60,11 +61,33 @@
 #include "CHudCrosshair.h"
 
 #ifdef USE_VGUI2
+#include "vgui2/CBaseViewport.h"
 #include "vgui2/CHudScoreBoard.h"
 #include "vgui2/CHudTextVgui.h"
+#include "vgui2/CHudChat.h"
 #include "clientsteamcontext.h"
+#include <vgui/ISurface.h>
+#include <vgui_controls/Controls.h>
+#include <vgui_controls/AnimationController.h>
 #include <vgui_controls/TextImage.h>
+#include "vgui2/gameui/options/colorpicker/CTextureManager.h"
 #endif
+
+//-----------------------------------------------------
+// AG hud elements
+//-----------------------------------------------------
+#include "aghudglobal.h"
+#include "aghudcountdown.h"
+#include "aghudctf.h"
+#include "aghudlocation.h"
+#include "aghudlongjump.h"
+#include "aghudnextmap.h"
+#include "aghudplayerid.h"
+#include "aghudsettings.h"
+#include "aghudsuddendeath.h"
+#include "aghudtimeout.h"
+#include "aghudvote.h"
+
 #ifdef USE_UPDATER
 #include <CGameUpdater.h>
 #include "CUpdateNotification.h"
@@ -197,12 +220,24 @@ int __MsgFunc_GameMode(const char *pszName, int iSize, void *pbuf )
 
 void __CmdFunc_About(void)
 {
-	char *ver = APP_VERSION;
-	ConsolePrint("Fixed and improved HLSDK client.dll.\n");
-	ConsolePrint("File version: ");
-	ConsolePrint(ver);
-	ConsolePrint(".\n");
-	ConsolePrint("Visit http://aghl.ru/forum for more info on this dll.\n");
+	ConPrintf("Bugfixed and improved Half-Life client\n");
+	ConPrintf("Version: " APP_VERSION "\n");
+	ConPrintf("Build options: ");
+#ifdef USE_VGUI2
+	ConPrintf("VGUI2 support    ");
+#ifdef VGUI2_BUILD_4554
+	ConPrintf("game build 4554    ");
+#endif
+#endif
+#ifdef USE_UPDATER
+	ConPrintf("auto-updater    ");
+#endif
+#ifdef _DEBUG
+	ConPrintf("debug build    ");
+#endif
+	ConPrintf("\n");
+	ConPrintf("Github: https://github.com/tmp64/BugfixedHL\n");
+	ConPrintf("Discussion forum: http://aghl.ru/forum/viewtopic.php?f=36&t=686\n");
 }
 
 // TFFree Command Menu
@@ -438,13 +473,26 @@ void __CmdFunc_Updater_PrintChangelog()
 		ConPrintf("Changelog not loaded yet.\n");
 		return;
 	}
-	ConPrintf("Update changelog:\n%s\n", changelog.c_str());
+
+	// Con_Printf has an internal limit of 4095 characters.
+	// Changelog may be longer than that so we split it up in chunks of 512 chars.
+	gEngfuncs.Con_Printf("Update changelog:\n");
+	size_t constexpr LOG_CHUNK_SIZE = 512;
+	for (size_t i = 0; LOG_CHUNK_SIZE * i <= changelog.length(); i++)
+	{
+		std::string substr = changelog.substr(LOG_CHUNK_SIZE * i, LOG_CHUNK_SIZE);
+		gEngfuncs.Con_Printf("%s", substr.c_str());
+	}
+	gEngfuncs.Con_Printf("\n");
 }
 #endif
 
 // This is called every time the DLL is loaded
 void CHud :: Init( void )
 {
+	// Init should never be called more than once
+	assert(m_HudList.size() == 0);
+
 	HOOK_MESSAGE( Logo );
 	HOOK_MESSAGE( ResetHUD );
 	HOOK_MESSAGE( GameMode );
@@ -490,33 +538,33 @@ void CHud :: Init( void )
 	CVAR_CREATE( "hud_classautokill", "1", FCVAR_ARCHIVE );		// controls whether or not to suicide immediately on TF class switch
 	CVAR_CREATE( "hud_takesshots", "0", FCVAR_ARCHIVE );		// controls whether or not to automatically take screenshots at the end of a round
 	CVAR_CREATE( "zoom_sensitivity_ratio", "1.2", 0 );
-	CVAR_CREATE( "cl_forceenemymodels", "", FCVAR_ARCHIVE );
-	CVAR_CREATE( "cl_forceenemycolors", "", FCVAR_ARCHIVE );
-	CVAR_CREATE( "cl_forceteammatesmodel", "", FCVAR_ARCHIVE );
-	CVAR_CREATE( "cl_forceteammatescolors", "", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_forceenemymodels", "", FCVAR_BHL_ARCHIVE );
+	CVAR_CREATE( "cl_forceenemycolors", "", FCVAR_BHL_ARCHIVE );
+	CVAR_CREATE( "cl_forceteammatesmodel", "", FCVAR_BHL_ARCHIVE );
+	CVAR_CREATE( "cl_forceteammatescolors", "", FCVAR_BHL_ARCHIVE );
 	m_pCvarBunnyHop = CVAR_CREATE( "cl_bunnyhop", "1", 0 );		// controls client-side bunnyhop enabling
-	CVAR_CREATE( "cl_autowepswitch", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );		// controls autoswitching to best weapon on pickup
+	CVAR_CREATE( "cl_autowepswitch", "1", FCVAR_BHL_ARCHIVE | FCVAR_USERINFO );		// controls autoswitching to best weapon on pickup
 
-	default_fov = CVAR_CREATE( "default_fov", "90", 0 );
+	default_fov = CVAR_CREATE( "default_fov", "90", FCVAR_BHL_ARCHIVE);
 	m_pCvarStealMouse = CVAR_CREATE( "hud_capturemouse", "1", FCVAR_ARCHIVE );
 	m_pCvarDraw = CVAR_CREATE( "hud_draw", "1", FCVAR_ARCHIVE );
-	m_pCvarDim = CVAR_CREATE( "hud_dim", "1", FCVAR_ARCHIVE );
-	m_pCvarColor = CVAR_CREATE( "hud_color", "255 160 0", FCVAR_ARCHIVE );
-	m_pCvarColor1 = CVAR_CREATE( "hud_color1", "0 255 0", FCVAR_ARCHIVE );
-	m_pCvarColor2 = CVAR_CREATE( "hud_color2", "255 160 0", FCVAR_ARCHIVE );
-	m_pCvarColor3 = CVAR_CREATE( "hud_color3", "255 96 0", FCVAR_ARCHIVE );
-	m_pCvarShowNextmap = CVAR_CREATE( "hud_shownextmapinscore", "1", FCVAR_ARCHIVE );	// controls whether or not to show nextmap in scoreboard table
-	m_pCvarShowLoss = CVAR_CREATE( "hud_showlossinscore", "1", FCVAR_ARCHIVE );	// controls whether or not to show loss in scoreboard table
-	m_pCvarShowSteamId = CVAR_CREATE( "hud_showsteamidinscore", "1", FCVAR_ARCHIVE );	// controls whether or not to show SteamId in scoreboard table
-	m_pCvarColorText = CVAR_CREATE( "hud_colortext", "1", FCVAR_ARCHIVE );
-	m_pCvarRDynamicEntLight = CVAR_CREATE("r_dynamic_ent_light", "1", FCVAR_ARCHIVE);
+	m_pCvarDim = CVAR_CREATE( "hud_dim", "1", FCVAR_BHL_ARCHIVE );
+	m_pCvarColor = CVAR_CREATE( "hud_color", "255 160 0", FCVAR_BHL_ARCHIVE );
+	m_pCvarColor1 = CVAR_CREATE( "hud_color1", "0 255 0", FCVAR_BHL_ARCHIVE );
+	m_pCvarColor2 = CVAR_CREATE( "hud_color2", "255 160 0", FCVAR_BHL_ARCHIVE );
+	m_pCvarColor3 = CVAR_CREATE( "hud_color3", "255 96 0", FCVAR_BHL_ARCHIVE );
+	m_pCvarShowNextmap = CVAR_CREATE( "hud_shownextmapinscore", "1", FCVAR_BHL_ARCHIVE );	// controls whether or not to show nextmap in scoreboard table
+	m_pCvarShowLoss = CVAR_CREATE( "hud_showlossinscore", "1", FCVAR_BHL_ARCHIVE );	// controls whether or not to show loss in scoreboard table
+	m_pCvarShowSteamId = CVAR_CREATE( "hud_showsteamidinscore", "1", FCVAR_BHL_ARCHIVE );	// controls whether or not to show SteamId in scoreboard table
+	m_pCvarColorText = CVAR_CREATE( "hud_colortext", "1", FCVAR_BHL_ARCHIVE );
+	m_pCvarRDynamicEntLight = CVAR_CREATE("r_dynamic_ent_light", "1", FCVAR_BHL_ARCHIVE);
 	m_pCvarVersion = CVAR_CREATE("aghl_version", APP_VERSION, 0);
 	m_pCvarSupports = CVAR_CREATE("aghl_supports", "0", 0);
 #if defined(USE_VGUI2) && !defined(VGUI2_BUILD_4554)
-	m_pCvarEnableHtmlMotd = CVAR_CREATE("cl_enable_html_motd", "1", FCVAR_ARCHIVE);
+	m_pCvarEnableHtmlMotd = CVAR_CREATE("cl_enable_html_motd", "1", FCVAR_BHL_ARCHIVE);
 #endif
 #ifdef USE_UPDATER
-	m_pCvarCheckUpdates = CVAR_CREATE("cl_check_for_updates", "1", FCVAR_ARCHIVE);
+	m_pCvarCheckUpdates = CVAR_CREATE("cl_check_for_updates", "1", FCVAR_BHL_ARCHIVE);
 #endif
 	UpdateSupportsCvar();
 
@@ -526,10 +574,6 @@ void CHud :: Init( void )
 	m_iFOV = 0;
 	m_pSpriteList = NULL;
 
-	// Clear any old HUD list
-	for (CHudBase *i : m_HudList) if (i->m_isDeletable) delete i;
-	m_HudList.clear();
-
 	// In case we get messages before the first update -- time will be valid
 	m_flTime = 1.0;
 
@@ -538,58 +582,72 @@ void CHud :: Init( void )
 	m_hudColor2.Set(255, 160, 0);
 	m_hudColor3.Set(255, 96, 0);
 
-	HUD_ELEM_INIT(Ammo);
-	HUD_ELEM_INIT(Health);
-	HUD_ELEM_INIT(SayText);
-	HUD_ELEM_INIT(Spectator);
-	HUD_ELEM_INIT(Geiger);
-	HUD_ELEM_INIT(Train);
-	HUD_ELEM_INIT(Battery);
-	HUD_ELEM_INIT_FULL(CHudFlashlight, m_Flash);
-	HUD_ELEM_INIT(Message);
-	HUD_ELEM_INIT(StatusBar);
-	HUD_ELEM_INIT(Speedometer);
-	HUD_ELEM_INIT(DeathNotice);
-	HUD_ELEM_INIT(AmmoSecondary);
-	HUD_ELEM_INIT(TextMessage);
-	HUD_ELEM_INIT(StatusIcons);
-	HUD_ELEM_INIT(Timer);
-	HUD_ELEM_INIT(Scores);
-	HUD_ELEM_INIT(Crosshair);
+
+	// Create all HUD elments
+	m_Ammo = new CHudAmmo();
+	m_Health = new CHudHealth();
+	m_SayText = new CHudSayText();
+	m_Spectator = new CHudSpectator();
+	m_Geiger = new CHudGeiger();
+	m_Train = new CHudTrain();
+	m_Battery = new CHudBattery();
+	m_Flash = new CHudFlashlight();
+	m_Message = new CHudMessage();
+	m_StatusBar = new CHudStatusBar();
+	m_Speedometer = new CHudSpeedometer();
+	m_DeathNotice = new CHudDeathNotice();
+	m_AmmoSecondary = new CHudAmmoSecondary();
+	m_TextMessage = new CHudTextMessage();
+	m_StatusIcons = new CHudStatusIcons();
+	m_Timer = new CHudTimer();
+	m_Scores = new CHudScores();
+	m_Crosshair = new CHudCrosshair();
+	m_Menu = new CHudMenu();
 #ifdef USE_VGUI2
-	HUD_ELEM_INIT(ScoreBoard);
-	HUD_ELEM_INIT(TextVgui);
+	m_ScoreBoard = new CHudScoreBoard();;
+	m_TextVgui = new CHudTextVgui();;
+	m_Chat = new CHudChat();
 #endif
 
-	if (g_iIsAg)
-	{
-		m_Global.Init();
-		m_Countdown.Init();
-		m_CTF.Init();
-		m_Location.Init();
-		m_Longjump.Init();
-		m_Nextmap.Init();
-		m_PlayerId.Init();
-		m_Settings.Init();
-		m_SuddenDeath.Init();
-		m_Timeout.Init();
-		m_Vote.Init();
-	}
+	// AG HUD - enabled on all clients. Should work with miniAG as well (not confirmed)
+	m_Global = new AgHudGlobal();
+	m_Countdown = new AgHudCountdown();
+	m_CTF = new AgHudCTF();
+	m_Location = new AgHudLocation();
+	m_Longjump = new AgHudLongjump();
+	m_Nextmap = new AgHudNextmap();
+	m_PlayerId = new AgHudPlayerId();
+	m_Settings = new AgHudSettings();
+	m_SuddenDeath = new AgHudSuddenDeath();
+	m_Timeout = new AgHudTimeout();
+	m_Vote = new AgHudVote();
 
+	CreateClientVoiceMgr();
+
+	// Init all HUD elements
+	for (CHudBase *i : m_HudList)
+		i->Init();
+
+	// Init other stuff
 	GetClientVoiceMgr()->Init(&g_VoiceStatusHelper, (vgui::Panel**)&gViewPort);
-	HUD_ELEM_INIT(Menu);
 	ServersInit();
-	MsgFunc_ResetHUD(0, 0, NULL );
 
 #ifdef USE_VGUI2
 	vgui2::TextImage::SetColorsArrayPointer(&g_iColorsCodes);
+	colorpicker::gTexMgr.Init();
+	g_pViewport->ReloadScheme();
 #endif
+
+	MsgFunc_ResetHUD(0, 0, NULL);
+
 #ifdef USE_UPDATER
 	gGameUpdater = new CGameUpdater();
 	gUpdateNotif = new CUpdateNotification();
 	HOOK_COMMAND("update_check", Updater_CheckUpdates);
 	HOOK_COMMAND("update_changelog", Updater_PrintChangelog);
 #endif
+
+	bhlcfg::Init();
 }
 
 void CHud :: Shutdown()
@@ -607,17 +665,55 @@ void CHud :: Shutdown()
 		gGameUpdater = nullptr;
 	}
 #endif
+
+#ifdef USE_VGUI2
+	colorpicker::gTexMgr.Shutdown();
+#endif
+
+	bhlcfg::Shutdown();
 }
 
 void CHud::Frame(double time)
 {
+	while (m_NextFrameQueue.size())
+	{
+		auto &i = m_NextFrameQueue.front();
+		i();
+		m_NextFrameQueue.pop();
+	}
+
+	// Check m_rawinput cvar
+#ifdef _WIN32
+	static cvar_t *rawInput = gEngfuncs.pfnGetCvarPointer("m_rawinput");
+	if (rawInput && rawInput->value)
+	{
+		ConPrintf(RGBA::ConColor::Cyan, "m_rawinput 1 is not supported. Setting m_input 2 (DirectInput) instead.\n");
+		gEngfuncs.pfnClientCmd("m_rawinput 0");
+		gEngfuncs.pfnClientCmd("m_input 2");
+	}
+#endif
+
 #ifdef USE_UPDATER
 	if (!m_bUpdatesChecked && time >= 0.05 )		// Wait for config.cfg to be executed
 	{
 		m_bUpdatesChecked = true;
 		if (m_pCvarCheckUpdates->value)
+		{
+			gUpdateNotif->SetActive(true);
 			gGameUpdater->CheckForUpdates();
+		}
+		else
+			gUpdateNotif->SetActive(false);
 	}
+#endif
+
+#ifdef USE_VGUI2
+	// Run VGUI2 animations
+	static double flTimeSum = 0;
+	vgui2::GetAnimationController()->UpdateAnimations(flTimeSum);
+	flTimeSum += time;
+
+	colorpicker::gTexMgr.RunFrame();
 #endif
 }
 
@@ -659,6 +755,25 @@ CHud :: ~CHud()
 		gGameUpdater = nullptr;
 	}
 #endif
+
+	// Delete all HUD elements
+	while (m_HudList.size() > 0)
+	{
+		CHudBase * i = *m_HudList.rbegin();
+#ifdef USE_VGUI2
+		// Do not delete VGUI2 HUD elements because CHud::Shutdown() and
+		// CHud::~CHud() are called after VGUI2 subsystem is shutdown
+		// Deatructors of VGUI2 panels call VGUI2 interfaces which are invalid
+		if (dynamic_cast<vgui2::Panel *>(i))
+		{
+			i->EraseFromHudList();
+		}
+		else
+#endif
+		{
+			delete i;
+		}
+	}
 }
 
 // GetSpriteIndex()
@@ -746,46 +861,9 @@ void CHud :: VidInit( void )
 
 	m_iFontHeight = m_rgrcRects[m_HUD_number_0].bottom - m_rgrcRects[m_HUD_number_0].top;
 
-	m_Ammo->VidInit();
-	m_Health->VidInit();
-	m_Spectator->VidInit();
-	m_Geiger->VidInit();
-	m_Train->VidInit();
-	m_Battery->VidInit();
-	m_Flash->VidInit();
-	m_Message->VidInit();
-	m_StatusBar->VidInit();
-	m_Speedometer->VidInit();
-	m_DeathNotice->VidInit();
-	m_SayText->VidInit();
-	m_Menu->VidInit();
-	m_AmmoSecondary->VidInit();
-	m_TextMessage->VidInit();
-	m_StatusIcons->VidInit();
-	m_Timer->VidInit();
-	m_Scores->VidInit();
-	m_Crosshair->VidInit();
-#ifdef USE_VGUI2
-	m_ScoreBoard->VidInit();
-	m_TextVgui->VidInit();
-#endif
-
-	if (g_iIsAg)
-	{
-		m_Global.VidInit();
-		m_Countdown.VidInit();
-		m_CTF.VidInit();
-		m_Location.VidInit();
-		m_Longjump.VidInit();
-		m_Nextmap.VidInit();
-		m_PlayerId.VidInit();
-		m_Settings.VidInit();
-		m_SuddenDeath.VidInit();
-		m_Timeout.VidInit();
-		m_Vote.VidInit();
-	}
-
-	GetClientVoiceMgr()->VidInit();
+	// VidInit all HUD elements
+	for (CHudBase *i : m_HudList)
+		i->VidInit();
 }
 
 void CHud::AddSprite(client_sprite_t *p)
@@ -970,13 +1048,6 @@ int CHud::MsgFunc_SetFOV(const char *pszName,  int iSize, void *pbuf)
 	return 1;
 }
 
-
-void CHud::AddHudElem(CHudBase *elem)
-{
-	if (!elem) return;
-	m_HudList.push_back(elem);
-}
-
 float CHud::GetSensitivity( void )
 {
 	return m_flMouseSensitivity;
@@ -1017,6 +1088,37 @@ void CHud::GetHudColor( int hudPart, int value, int &r, int &g, int &b )
 	b = c->b;
 }
 
+void CHud::GetHudAmmoColor(int value, int maxvalue, int &r, int &g, int &b)
+{
+	RGBA *c;
+	if (maxvalue == -1 || maxvalue == 0) // if you are using custom weapons, then default colors are going to be used....
+	{
+		ParseColor(m_pCvarColor->string, m_hudColor); c = &m_hudColor;
+	}
+	else if ((value * 100) / maxvalue > 90)
+	{
+		ParseColor(m_pCvarColor1->string, m_hudColor1); c = &m_hudColor1;
+	}
+	else if ((value * 100) / maxvalue > 50)
+	{
+		ParseColor(m_pCvarColor2->string, m_hudColor2); c = &m_hudColor2;
+	}
+	else if ((value * 100) / maxvalue > 20)
+	{
+		ParseColor(m_pCvarColor3->string, m_hudColor3); c = &m_hudColor3;
+	}
+	else
+	{
+		r = 255;
+		g = 0;
+		b = 0;
+		return; 
+	}
+	r = c->r;
+	g = c->g;
+	b = c->b;
+}
+
 float CHud::GetHudTransparency()
 {
 	float hud_draw = m_pCvarDraw->value;
@@ -1029,17 +1131,38 @@ float CHud::GetHudTransparency()
 
 void CHud::UpdateSupportsCvar()
 {
-	E_ClientSupports supports = AGHL_SUPPORTS_NONE;
+	bhl::E_ClientSupports supports = bhl::E_ClientSupports::None;
 #ifdef USE_VGUI2
-	supports |= AGHL_SUPPORTS_UNICODE_MOTD;
+	//supports |= bhl::AGHL_SUPPORTS_UNICODE_MOTD;
+	SetEnumFlag(supports, bhl::E_ClientSupports::UnicodeMotd);
 #ifndef VGUI2_BUILD_4554
-	if (m_bIsHtmlMotdEnabled) supports |= AGHL_SUPPORTS_HTML_MOTD;
+	if (m_bIsHtmlMotdEnabled)
+		SetEnumFlag(supports, bhl::E_ClientSupports::HtmlMotd);
 #endif
 #endif
 
 	char buf[32];
-	snprintf(buf, sizeof(buf), "aghl_supports %u", (unsigned int)supports);
+	snprintf(buf, sizeof(buf), "aghl_supports %u", static_cast<unsigned int>(supports));
 	ClientCmd(buf);
+}
+
+E_ColorCodeMode CHud::GetColorCodeMode()
+{
+	if (gHUD.m_pCvarColorText->value)
+	{
+		if (gHUD.m_pCvarColorText->value == 2)
+			return COLOR_CODES_REMOVE;
+		else
+			return COLOR_CODES_ON;
+	}
+	else
+		return COLOR_CODES_OFF;
+}
+
+void CHud::CallOnNextFrame(std::function<void()> f)
+{
+	assert(f);
+	m_NextFrameQueue.push(f);
 }
 
 void GetConsoleStringSize(const char *string, int *width, int *height)
@@ -1262,6 +1385,24 @@ void ConPrintf(const char *fmt, ...)
 	va_end(args);
 }
 
+void ConPrintf(RGBA color, const char *fmt, ...)
+{
+	static char str[1024];
+
+	RGBA oldcolor = SetConsoleColor(color);
+
+	va_list args;
+	va_start(args, fmt);
+
+	vsnprintf(str, sizeof(str), fmt, args);
+	str[sizeof(str) - 1] = '\0';
+	gEngfuncs.pfnConsolePrint(str);
+
+	va_end(args);
+
+	SetConsoleColor(oldcolor);
+}
+
 // Code by voogru
 // https://forums.alliedmods.net/showthread.php?t=60899?t=60899
 long long ParseSteamID(const char *pszAuthID)
@@ -1322,3 +1463,18 @@ long long GetPlayerSteamID64(int idx)
 	}
 	return ParseSteamID(g_PlayerSteamId[idx]);
 }
+
+#ifdef USE_VGUI2
+bool VGUI2_IsCursorVisible()
+{
+	return vgui2::surface()->IsCursorVisible();
+}
+#endif
+
+//-----------------------------------------------------
+// Colors for ConPrintf
+//-----------------------------------------------------
+RGBA RGBA::ConColor::Red = RGBA(249, 54, 54);
+RGBA RGBA::ConColor::Green = RGBA(77, 219, 83);
+RGBA RGBA::ConColor::Yellow = RGBA(240, 205, 65);
+RGBA RGBA::ConColor::Cyan = RGBA(111, 234, 247);

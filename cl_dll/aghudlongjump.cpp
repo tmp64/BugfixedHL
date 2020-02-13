@@ -3,37 +3,34 @@
 #include "hud.h"
 #include "cl_util.h"
 #include "parsemsg.h"
+#include "aghudlongjump.h"
+#include "aghudglobal.h"
 
-DECLARE_MESSAGE(m_Longjump, Longjump)
+DECLARE_MESSAGE_PTR(m_Longjump, Longjump)
 
-int AgHudLongjump::Init(void)
+void AgHudLongjump::Init()
 {
 	HOOK_MESSAGE(Longjump);
 
-	gHUD.AddHudElem(this);
-
 	m_iFlags = 0;
 	m_flTurnoff = 0;
-
-	return 1;
 }
 
-int AgHudLongjump::VidInit(void)
+void AgHudLongjump::VidInit()
 {
-	return 1;
 }
 
-void AgHudLongjump::Reset(void)
+void AgHudLongjump::Reset()
 {
 	m_iFlags &= ~HUD_ACTIVE;
 }
 
-int AgHudLongjump::Draw(float fTime)
+void AgHudLongjump::Draw(float fTime)
 {
 	if (gHUD.m_flTime > m_flTurnoff || gHUD.m_iIntermission)
 	{
 		Reset();
-		return 1;
+		return;
 	}
 
 	char szText[32];
@@ -45,8 +42,6 @@ int AgHudLongjump::Draw(float fTime)
 
 	sprintf(szText, "Longjump %d", (int)(m_flTurnoff - gHUD.m_flTime));
 	AgDrawHudStringCentered(ScreenWidth / 2, gHUD.m_scrinfo.iCharHeight * 2, ScreenWidth, szText, r, g, b);
-
-	return 0;
 }
 
 int AgHudLongjump::MsgFunc_Longjump(const char *pszName, int iSize, void *pbuf)

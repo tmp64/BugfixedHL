@@ -1,4 +1,5 @@
 add_sources(
+	CMakeLists.txt
 	aghudcountdown.cpp
     aghudcountdown.h
     aghudctf.cpp
@@ -26,7 +27,6 @@ add_sources(
     ammo.h
     ammohistory.cpp
     ammohistory.h
-	appversion.h
     camera.h
     cdll_int.cpp
     CHudAmmo.cpp
@@ -73,7 +73,6 @@ add_sources(
     cl_dll.dsp
     cl_dll.h
     cl_util.h
-    CMakeLists.txt
     com_weapons.cpp
     com_weapons.h
     demo.cpp
@@ -158,6 +157,8 @@ add_sources(
     ../dlls/tripmine.cpp
     memory.h
     memory_common.cpp
+	bhlcfg.h
+	bhlcfg.cpp
 )
 
 if( MSVC )

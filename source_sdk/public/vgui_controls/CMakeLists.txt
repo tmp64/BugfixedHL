@@ -1,4 +1,5 @@
 add_sources(
+	CMakeLists.txt
 	AnimatingImagePanel.h
 	AnimationController.h
 	BitmapImagePanel.h

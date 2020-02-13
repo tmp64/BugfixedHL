@@ -5,11 +5,8 @@
 #include <vgui/ISurface.h>
 #include "hud.h"
 #include "CHudScoreBoard.h"
-#include "GameUIPanelNames.h"
+#include "gameui/GameUIPanelNames.h"
 #include "IEngineVgui.h"
-#include "CGameUITestPanel.h"
-#include "CUpdaterDebugDialog.h"
-#include "CUpdateNotificationDialog.h"
 
 void CHudViewport::ApplySchemeSettings(vgui2::IScheme *pScheme)
 {
@@ -48,12 +45,6 @@ void CHudViewport::CreateDefaultPanels()
 {
 	AddNewPanel( CreatePanelByName( VIEWPORT_PANEL_MOTD ) );
 	AddNewPanel( CreatePanelByName( VIEWPORT_PANEL_SCORE ) );
-
-	AddNewGameUIPanel(CreateGameUIPanelByName(GAMEUI_PANEL_TEST));
-#ifdef USE_UPDATER
-	AddNewGameUIPanel(CreateGameUIPanelByName(GAMEUI_UPDATER_DEBUG));
-	AddNewGameUIPanel(CreateGameUIPanelByName(GAMEUI_UPDATE_NOTIF));
-#endif
 }
 
 IViewportPanel* CHudViewport::CreatePanelByName( const char* pszName )
@@ -68,28 +59,6 @@ IViewportPanel* CHudViewport::CreatePanelByName( const char* pszName )
 	{
 		pPanel = new CScorePanel(this);
 	}
-
-	return pPanel;
-}
-
-IGameUIPanel *CHudViewport::CreateGameUIPanelByName(const char *pszName)
-{
-	IGameUIPanel *pPanel = nullptr;
-
-	if (Q_strcmp(GAMEUI_PANEL_TEST, pszName) == 0)
-	{
-		pPanel = new CGameUITestPanel(engineVgui()->GetPanel(PANEL_ROOT));
-	}
-#ifdef USE_UPDATER
-	else if (Q_strcmp(GAMEUI_UPDATER_DEBUG, pszName) == 0)
-	{
-		pPanel = new CUpdaterDebugDialog(engineVgui()->GetPanel(PANEL_ROOT));
-	}
-	else if (Q_strcmp(GAMEUI_UPDATE_NOTIF, pszName) == 0)
-	{
-		pPanel = new CUpdateNotificationDialog(engineVgui()->GetPanel(PANEL_ROOT));
-	}
-#endif
 
 	return pPanel;
 }

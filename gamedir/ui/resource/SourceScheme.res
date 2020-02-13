@@ -61,9 +61,9 @@ Scheme
 		Frame.ClientInsetX				8
 		Frame.ClientInsetY				6
 		Frame.BgColor					"160 160 160 128"
-		Frame.OutOfFocusBgColor			"160 160 160 32"
+		Frame.OutOfFocusBgColor			"160 160 160 96"
 		Frame.FocusTransitionEffectTime	"0.3"	// time it takes for a window to fade in/out on focus/out of focus
-		Frame.TransitionEffectTime		"0.3"	// time it takes for a window to fade in/out on open/close
+		Frame.TransitionEffectTime		"0.1"	// time it takes for a window to fade in/out on open/close
 		Frame.AutoSnapRange				"0"
 		FrameGrip.Color1				"200 200 200 196"
 		FrameGrip.Color2				"0 0 0 196"
@@ -199,45 +199,53 @@ Scheme
 		// fonts listed later in the order will only be used if they fulfill a range not already filled
 		// if a font fails to load then the subsequent fonts will replace
 		// fonts are used in order that they are listed
+		"DebugFixed"
+		{
+			"1"
+			{
+				"name"		"Courier New"
+				"tall"		"10"
+				"weight"	"500"
+				"antialias" "1"
+			}
+		}
+		// fonts are used in order that they are listed
+		"DebugFixedSmall"
+		{
+			"1"
+			{
+				"name"		"Courier New"
+				"tall"		"7"
+				"weight"	"500"
+				"antialias" "1"
+			}
+		}
+		"DefaultFixedOutline"
+		{
+			"1"
+			{
+				"name"		"Lucida Console"
+				"tall"		"10"
+				"weight"	"0"
+				"outline"	"1"
+			}
+		}
 		"Default"
 		{
 			"1"
 			{
-				"name"		"Verdana"
-				"tall"		"12"
-				"weight"	"600"
-				"yres"	"480 599"
+				"name"		"Tahoma"
+				"tall"		"16"
+				"weight"	"500"
 			}
-			"2"
+		}
+		"DefaultBold"
+		{
+			"1"
 			{
-				"name"		"Verdana"
-				"tall"		"13"
-				"weight"	"600"
-				"yres"	"600 767"
-			}
-			"3"
-			{
-				"name"		"Verdana"
-				"tall"		"14"
-				"weight"	"600"
-				"yres"	"768 1023"
-				"antialias"	"1"
-			}
-			"4"
-			{
-				"name"		"Verdana"
-				"tall"		"20"
-				"weight"	"600"
-				"yres"	"1024 1199"
-				"antialias"	"1"
-			}
-			"5"
-			{
-				"name"		"Verdana"
-				"tall"		"24"
-				"weight"	"600"
-				"yres"	"1200 6000"
-				"antialias"	"1"
+				"name"		"Tahoma"
+				"tall"		"16"
+				"weight"	"1000"
 			}
 		}
 		"DefaultUnderline"
@@ -245,7 +253,7 @@ Scheme
 			"1"
 			{
 				"name"		"Tahoma"
-				"tall"		"12"
+				"tall"		"16"
 				"weight"	"500"
 				"underline" "1"
 			}
@@ -254,214 +262,68 @@ Scheme
 		{
 			"1"
 			{
-				"name"		"Verdana"
-				"tall"		"12"
-				"weight"	"0"
-				"yres"	"480 599"
-			}
-			"2"
-			{
-				"name"		"Verdana"
+				"name"		"Tahoma"
 				"tall"		"13"
 				"weight"	"0"
-				"yres"	"600 767"
 			}
-			"3"
+		}
+		"DefaultSmallDropShadow"
+		{
+			"1"
 			{
-				"name"		"Verdana"
-				"tall"		"14"
+				"name"		"Tahoma"
+				"tall"		"13"
 				"weight"	"0"
-				"yres"	"768 1023"
-				"antialias"	"1"
-			}
-			"4"
-			{
-				"name"		"Verdana"
-				"tall"		"20"
-				"weight"	"0"
-				"yres"	"1024 1199"
-				"antialias"	"1"
-			}
-			"5"
-			{
-				"name"		"Verdana"
-				"tall"		"24"
-				"weight"	"0"
-				"yres"	"1200 6000"
-				"antialias"	"1"
+				"dropshadow" "1"
 			}
 		}
 		"DefaultVerySmall"
 		{
 			"1"
 			{
-				"name"		"Verdana"
+				"name"		"Tahoma"
 				"tall"		"12"
-				"weight"	"600"
-				"yres"	"480 599"
-			}
-			"2"
-			{
-				"name"		"Verdana"
-				"tall"		"13"
-				"weight"	"600"
-				"yres"	"600 767"
-			}
-			"3"
-			{
-				"name"		"Verdana"
-				"tall"		"14"
-				"weight"	"600"
-				"yres"	"768 1023"
-				"antialias"	"1"
-			}
-			"4"
-			{
-				"name"		"Verdana"
-				"tall"		"20"
-				"weight"	"600"
-				"yres"	"1024 1199"
-				"antialias"	"1"
-			}
-			"5"
-			{
-				"name"		"Verdana"
-				"tall"		"24"
-				"weight"	"600"
-				"yres"	"1200 6000"
-				"antialias"	"1"
+				"weight"	"0"
 			}
 		}
-		// Used by scoreboard and spectator UI for names which don't map in the normal fashion
-		"DefaultVerySmallFallBack"
+
+		"DefaultLarge"
 		{
 			"1"
 			{
-				"name"		"Verdana"
-				"tall"		"10"
+				"name"		"Tahoma"
+				"tall"		"18"
 				"weight"	"0"
-				"range"		"0x0000 0x017F" //	Basic Latin, Latin-1 Supplement, Latin Extended-A
-				"yres"		"480 599"
-				"antialias"	"1"
-			}
-			"2"
-			{
-				"name"		"Verdana"
-				"tall"		"12"
-				"weight"	"0"
-				"range"		"0x0000 0x017F" //	Basic Latin, Latin-1 Supplement, Latin Extended-A
-				"yres"		"600 1199"
-				"antialias"	"1"
-			}
-			"3"
-			{
-				"name"		"Verdana"
-				"tall"		"15"
-				"weight"	"0"
-				"range"		"0x0000 0x017F" //	Basic Latin, Latin-1 Supplement, Latin Extended-A
-				"yres"		"1200 6000"
-				"antialias"	"1"
 			}
 		}
 		"UiBold"
 		{
 			"1"
 			{
-				"name"		"Tahoma"
-				"tall"		"14"
+				"name"		"Verdana"
+				"tall"		"16"
 				"weight"	"1000"
+				"antialias" "0"
 			}
 		}
-		"Title"
+		"MenuLarge"
 		{
 			"1"
 			{
-				"name"		"Verdana Bold"
-				"tall"		"18"
-				"weight"	"500"
-			}
-			"2"
-			{
-				"name"		"Arial"
+				"name"		"Verdana"
 				"tall"		"16"
 				"weight"	"600"
+				"antialias" "1"
 			}
 		}
-		// Credits ------------------------------------------------
-		"CreditsTitle"
+
+		"ConsoleText"
 		{
 			"1"
 			{
-				"name"		"Tahoma"
-				"tall"		"26"
-				"weight"	"800"
-			}
-			"2"
-			{
-				"name"		"Arial"
-				"tall"		"26"
-				"weight"	"700"
-			}
-		}
-		"CreditsStudioTitle"
-		{
-			"1"
-			{
-				"name"		"Tahoma"
-				"tall"		"24"
-				"weight"	"800"
-			}
-			"2"
-			{
-				"name"		"Arial"
-				"tall"		"24"
-				"weight"	"700"
-			}
-		}
-		"CreditsIndividualTitle"
-		{
-			"1"
-			{
-				"name"		"Tahoma"
-				"tall"		"22"
-				"weight"	"800"
-			}
-			"2"
-			{
-				"name"		"Arial"
-				"tall"		"22"
-				"weight"	"700"
-			}
-		}
-		"CreditsNormal"
-		{
-			"1"
-			{
-				"name"		"Tahoma"
-				"tall"		"20"
-				"weight"	"800"
-			}
-			"2"
-			{
-				"name"		"Arial"
-				"tall"		"20"
-				"weight"	"700"
-			}
-		}
-		// --------------------------------------------------------
-		"DialogTitle"
-		{
-			"1"
-			{
-				"name"		"Verdana Bold"
-				"tall"		"14"
+				"name"		"Lucida Console"
+				"tall"		"10"
 				"weight"	"500"
-			}
-			"2"
-			{
-				"name"		"Arial"
-				"tall"		"13"
-				"weight"	"600"
 			}
 		}
 
@@ -474,6 +336,189 @@ Scheme
 				"tall"		"14"
 				"weight"	"0"
 				"symbol"	"1"
+			}
+		}
+
+		"Trebuchet24"
+		{
+			"1"
+			{
+				"name"		"Trebuchet MS"
+				"tall"		"24"
+				"weight"	"900"
+			}
+		}
+
+
+		"Trebuchet20"
+		{
+			"1"
+			{
+				"name"		"Trebuchet MS"
+				"tall"		"20"
+				"weight"	"900"
+			}
+		}
+
+		"Trebuchet18"
+		{
+			"1"
+			{
+				"name"		"Trebuchet MS"
+				"tall"		"18"
+				"weight"	"900"
+			}
+		}
+
+		// HUD numbers
+		// We use multiple fonts to 'pulse' them in the HUD, hence the need for many of near size
+		"HUDNumber"
+		{
+			"1"
+			{
+				"name"		"Trebuchet MS"
+				"tall"		"40"
+				"weight"	"900"
+			}
+		}
+		"HUDNumber1"
+		{
+			"1"
+			{
+				"name"		"Trebuchet MS"
+				"tall"		"41"
+				"weight"	"900"
+			}
+		}
+		"HUDNumber2"
+		{
+			"1"
+			{
+				"name"		"Trebuchet MS"
+				"tall"		"42"
+				"weight"	"900"
+			}
+		}
+		"HUDNumber3"
+		{
+			"1"
+			{
+				"name"		"Trebuchet MS"
+				"tall"		"43"
+				"weight"	"900"
+			}
+		}
+		"HUDNumber4"
+		{
+			"1"
+			{
+				"name"		"Trebuchet MS"
+				"tall"		"44"
+				"weight"	"900"
+			}
+		}
+		"HUDNumber5"
+		{
+			"1"
+			{
+				"name"		"Trebuchet MS"
+				"tall"		"45"
+				"weight"	"900"
+			}
+		}
+		"DefaultFixed"
+		{
+			"1"
+			{
+				"name"		"Lucida Console"
+				"tall"		"10"
+				"weight"	"0"
+			}
+//			"1"
+//			{
+//				"name"		"FixedSys"
+//				"tall"		"20"
+//				"weight"	"0"
+//			}
+		}
+
+		"DefaultFixedDropShadow"
+		{
+			"1"
+			{
+				"name"		"Lucida Console"
+				"tall"		"10"
+				"weight"	"0"
+				"dropshadow" "1"
+			}
+//			"1"
+//			{
+//				"name"		"FixedSys"
+//				"tall"		"20"
+//				"weight"	"0"
+//			}
+		}
+
+		"CloseCaption_Normal"
+		{
+			"1"
+			{
+				"name"		"Tahoma"
+				"tall"		"16"
+				"weight"	"500"
+			}
+		}
+		"CloseCaption_Italic"
+		{
+			"1"
+			{
+				"name"		"Tahoma"
+				"tall"		"16"
+				"weight"	"500"
+				"italic"	"1"
+			}
+		}
+		"CloseCaption_Bold"
+		{
+			"1"
+			{
+				"name"		"Tahoma"
+				"tall"		"16"
+				"weight"	"900"
+			}
+		}
+		"CloseCaption_BoldItalic"
+		{
+			"1"
+			{
+				"name"		"Tahoma"
+				"tall"		"16"
+				"weight"	"900"
+				"italic"	"1"
+			}
+		}
+
+		TitleFont
+		{
+			"1"
+			{
+				"name"		"HalfLife2"
+				"tall"		"72"
+				"weight"	"400"
+				"antialias"	"1"
+				"custom"	"1"
+			}
+		}
+
+		TitleFont2
+		{
+			"1"
+			{
+				"name"		"HalfLife2"
+				"tall"		"120"
+				"weight"	"400"
+				"antialias"	"1"
+				"custom"	"1"
 			}
 		}
 	}

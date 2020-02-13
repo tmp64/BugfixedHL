@@ -1,13 +1,9 @@
 add_sources(
+	CMakeLists.txt
     voice_common.h
     bitvec.h
 	CGameVersion.h
 	CGameVersion.cpp
+	ClientSupportsFlags.h
+	IGameVersion.h
 )
-
-if( USE_UPDATER )
-	add_sources(
-		CGameUpdater.h
-		CGameUpdater.cpp
-	)
-endif()

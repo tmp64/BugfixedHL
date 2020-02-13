@@ -23,6 +23,9 @@
 #include "demo_api.h"
 #include "vgui_TeamFortressViewport.h"
 #include "memory.h"
+
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
 #include <windows.h>
 
 bool g_bFormatError = false;
@@ -87,7 +90,7 @@ bool DoSubstitutions(char filename[MAX_PATH], char fullpath[MAX_PATH], const cha
 }
 
 // Returns new results file name in relative to mod directory and rooted formats.
-bool GetResultsFilename(const char *extension, char filename[MAX_PATH], char fullpath[MAX_PATH])
+bool GetResultsFilename(const char *extension, char *filename, char *fullpath)
 {
 	// Get map name
 	if (g_szCurrentMap[0] == 0)
@@ -494,12 +497,12 @@ void ResultsThink(void)
 // Registers cvars and commands.
 void ResultsInit(void)
 {
-	m_pCvarResultsFileFormat = gEngfuncs.pfnRegisterVariable("results_file_format", g_szDefaultFilenameFormat, FCVAR_ARCHIVE);
-	m_pCvarResultsCounterFormat = gEngfuncs.pfnRegisterVariable("results_counter_format", g_szDefaultCounterFormat, FCVAR_ARCHIVE);
-	m_pCvarResultsDemoAutorecord = gEngfuncs.pfnRegisterVariable("results_demo_autorecord", "0", FCVAR_ARCHIVE);
-	m_pCvarResultsDemoKeepDays = gEngfuncs.pfnRegisterVariable("results_demo_keepdays", "14", FCVAR_ARCHIVE);
-	m_pCvarResultsLogChat = gEngfuncs.pfnRegisterVariable("results_log_chat", "0", FCVAR_ARCHIVE);
-	m_pCvarResultsLogOther = gEngfuncs.pfnRegisterVariable("results_log_other", "0", FCVAR_ARCHIVE);
+	m_pCvarResultsFileFormat = gEngfuncs.pfnRegisterVariable("results_file_format", g_szDefaultFilenameFormat, FCVAR_BHL_ARCHIVE);
+	m_pCvarResultsCounterFormat = gEngfuncs.pfnRegisterVariable("results_counter_format", g_szDefaultCounterFormat, FCVAR_BHL_ARCHIVE);
+	m_pCvarResultsDemoAutorecord = gEngfuncs.pfnRegisterVariable("results_demo_autorecord", "0", FCVAR_BHL_ARCHIVE);
+	m_pCvarResultsDemoKeepDays = gEngfuncs.pfnRegisterVariable("results_demo_keepdays", "14", FCVAR_BHL_ARCHIVE);
+	m_pCvarResultsLogChat = gEngfuncs.pfnRegisterVariable("results_log_chat", "0", FCVAR_BHL_ARCHIVE);
+	m_pCvarResultsLogOther = gEngfuncs.pfnRegisterVariable("results_log_other", "0", FCVAR_BHL_ARCHIVE);
 
 	gEngfuncs.pfnAddCommand("agrecord", ResultsStartDemoRecord);
 

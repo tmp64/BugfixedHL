@@ -46,31 +46,26 @@ static int DEATHNOTICE_DISPLAY_TIME = 6;
 
 DeathNoticeItem rgDeathNoticeList[ MAX_DEATHNOTICES + 1 ];
 
-int CHudDeathNotice :: Init( void )
+void CHudDeathNotice :: Init()
 {
-	gHUD.AddHudElem( this );
-
-	HOOK_MESSAGE( DeathMsg );
+HOOK_MESSAGE( DeathMsg );
 
 	CVAR_CREATE( "hud_deathnotice_time", "6", 0 );
-
-	return 1;
+	m_pCvarKillSnd = CVAR_CREATE("cl_killsound", "0", FCVAR_BHL_ARCHIVE);
 }
 
 
-void CHudDeathNotice :: InitHUDData( void )
+void CHudDeathNotice :: InitHUDData()
 {
 	memset( rgDeathNoticeList, 0, sizeof(rgDeathNoticeList) );
 }
 
-int CHudDeathNotice :: VidInit( void )
+void CHudDeathNotice :: VidInit()
 {
 	m_HUD_d_skull = gHUD.GetSpriteIndex( "d_skull" );
-
-	return 1;
 }
 
-int CHudDeathNotice :: Draw( float flTime )
+void CHudDeathNotice :: Draw( float flTime )
 {
 	int x, y, r, g, b;
 
@@ -127,8 +122,6 @@ int CHudDeathNotice :: Draw( float flTime )
 			}
 		}
 	}
-
-	return 1;
 }
 
 // This message handler may be better off elsewhere
@@ -224,6 +217,16 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 	DEATHNOTICE_DISPLAY_TIME = CVAR_GET_FLOAT( "hud_deathnotice_time" );
 	rgDeathNoticeList[i].flDisplayTime = gHUD.m_flTime + DEATHNOTICE_DISPLAY_TIME;
 
+	// Play kill sound
+	if (g_PlayerInfoList[killer].thisplayer &&
+		!rgDeathNoticeList[i].iNonPlayerKill &&
+		!rgDeathNoticeList[i].iSuicide &&
+		m_pCvarKillSnd->value)
+	{
+		PlaySound("buttons/bell1.wav", 1.0f);
+	}
+
+	// Print to console
 	if (rgDeathNoticeList[i].iNonPlayerKill)
 	{
 		ConsolePrint( rgDeathNoticeList[i].szKiller );

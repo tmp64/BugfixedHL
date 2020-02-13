@@ -1,4 +1,5 @@
 add_sources(
+	CMakeLists.txt
 	basetypes.h
 	commonmacros.h
 	coordsize.h

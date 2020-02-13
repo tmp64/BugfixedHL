@@ -1,4 +1,5 @@
 add_sources(
+	CMakeLists.txt
 	cvar.h
 	ICommandline.h
 	IKeyValuesSystem.h

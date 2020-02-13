@@ -19,17 +19,13 @@
 //
 
 #include <string.h>
-#ifdef _WIN32
-#include <windows.h>
-#include <psapi.h>
-#include <dbghelp.h>
-#endif
+#include <exception>
 
 #include "dllexport.h"
 #include "hud.h"
 #include "cl_util.h"
 #include "netadr.h"
-#include "../public/interface.h"
+#include <interface.h>
 #include "vgui_SchemeManager.h"
 #include "GameStudioModelRenderer.h"
 #include "CHudSpectator.h"
@@ -56,10 +52,6 @@ extern "C"
 cl_enginefunc_t gEngfuncs;
 CHud gHUD;
 TeamFortressViewport *gViewPort = NULL;
-#ifdef _WIN32
-PVOID hVehHandler = NULL;
-#endif
-bool g_bDllDetaching = false;
 
 void InitInput (void);
 void ShutdownInput (void);
@@ -116,6 +108,38 @@ void	_DLLEXPORT HUD_DrawTransparentTriangles(void);
 void	_DLLEXPORT HUD_PostRunCmd(struct local_state_s *from, struct local_state_s *to, struct usercmd_s *cmd, int runfuncs, double time, unsigned int random_seed);
 void	_DLLEXPORT Demo_ReadBuffer(int size, unsigned char *buffer);
 int		_DLLEXPORT HUD_GetStudioModelInterface(int version, struct r_studio_interface_s **ppinterface, struct engine_studio_api_s *pstudio);
+void	_DLLEXPORT ChatInputPosition(int *x, int *y);
+}
+
+//--------------------------------------------------------
+// Console hook
+// Hooks Con_Printf and pfnConsolePrint and redirects them
+// to Con_DPrintf during game inititalization.
+//--------------------------------------------------------
+typedef void (*Con_PrintfFn) (char *fmt, ...);
+typedef void (*ConsolePrintFn) (const char *string);
+
+static Con_PrintfFn g_fnEngineConPrintf = nullptr;
+static ConsolePrintFn g_fnEngineConsolePrint = nullptr;
+
+static void HookConsoleFunctions()
+{
+	assert(!g_fnEngineConPrintf && !g_fnEngineConsolePrint);
+	g_fnEngineConPrintf = gEngfuncs.Con_Printf;
+	g_fnEngineConsolePrint = gEngfuncs.pfnConsolePrint;
+
+	gEngfuncs.Con_Printf = gEngfuncs.Con_DPrintf;	// Declarations are identical
+	gEngfuncs.pfnConsolePrint = [](const char *string)
+	{
+		gEngfuncs.Con_DPrintf("%s", string);
+	};
+}
+
+static void UnhookConsoleFunctions()
+{
+	assert(g_fnEngineConPrintf && g_fnEngineConsolePrint);
+	gEngfuncs.Con_Printf = g_fnEngineConPrintf;
+	gEngfuncs.pfnConsolePrint = g_fnEngineConsolePrint;
 }
 
 /*
@@ -188,133 +212,6 @@ void _DLLEXPORT HUD_PlayerMove( struct playermove_s *ppmove, int server )
 	PM_Move( ppmove, server );
 }
 
-
-// Vectored Exceptions Handler for Windows
-#ifdef _WIN32
-LONG NTAPI VectoredExceptionsHandler(PEXCEPTION_POINTERS pExceptionInfo)
-{
-	long exceptionCode = pExceptionInfo->ExceptionRecord->ExceptionCode;
-	long exceptionAddress = (long)pExceptionInfo->ExceptionRecord->ExceptionAddress;
-
-	if (exceptionCode == 0xE06D7363)	// SEH
-		return EXCEPTION_CONTINUE_SEARCH;
-
-	// We will handle all fatal unexpected exceptions, like STATUS_ACCESS_VIOLATION
-	// But skip DLL Not Found exception, which happen on old non-steam when steam is running
-	// Also skip while detach is in process, cos we can't write files (not sure about message boxes, but anyway...)
-	if ((exceptionCode & 0xF0000000L) == 0xC0000000L && exceptionCode != 0xC0000139 && !g_bDllDetaching)
-	{
-		char buffer[1024];
-		long moduleBase, moduleSize;
-
-		HANDLE hProcess = GetCurrentProcess();
-		MODULEINFO moduleInfo;
-
-		// Get modules info
-		HMODULE hMods[1024];
-		DWORD cbNeeded;
-		EnumProcessModules(hProcess, hMods, sizeof(hMods), &cbNeeded);
-		int count = cbNeeded / sizeof(HMODULE);
-
-		// Write exception info to log
-		FILE *file = fopen("crash.log", "a");
-		if (file)
-		{
-			fputs("------------------------------------------------------------\n", file);
-			sprintf(buffer, "Exception 0x%08X at address 0x%08X.\n", exceptionCode, exceptionAddress);
-			fputs(buffer, file);
-
-			// Dump modules info
-			fputs("Modules:\n", file);
-			fputs("  Base     Size     Path (Exception Offset)\n", file);
-			for (int i = 0; i < count; i++)
-			{
-				GetModuleInformation(hProcess, hMods[i], &moduleInfo, sizeof(moduleInfo));
-				moduleBase = (long)moduleInfo.lpBaseOfDll;
-				moduleSize = (long)moduleInfo.SizeOfImage;
-				// Get the full path to the module's file.
-				TCHAR szModName[MAX_PATH];
-				if (GetModuleFileNameEx(hProcess, hMods[i], szModName, sizeof(szModName)/sizeof(TCHAR)))
-				{
-					if (moduleBase <= exceptionAddress && exceptionAddress <= (moduleBase + moduleSize))
-						sprintf(buffer, "=>%08X %08X %s  <==  %08X\n", moduleBase, moduleSize, szModName, exceptionAddress - moduleBase);
-					else
-						sprintf(buffer, "  %08X %08X %s\n", moduleBase, moduleSize, szModName);
-				}
-				else
-				{
-					if (moduleBase <= exceptionAddress && exceptionAddress <= (moduleBase + moduleSize))
-						sprintf(buffer, "=>%08X %08X  <==  %08X\n", moduleBase, moduleSize, exceptionAddress - moduleBase);
-					else
-						sprintf(buffer, "  %08X %08X\n", moduleBase, moduleSize);
-				}
-				fputs(buffer, file);
-			}
-
-			fclose(file);
-		}
-
-		// Create mini-dump
-		HANDLE hMiniDumpFile = CreateFile("crash.dmp", GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_WRITE_THROUGH, NULL);
-		if (hMiniDumpFile != INVALID_HANDLE_VALUE)
-		{
-			MINIDUMP_EXCEPTION_INFORMATION eInfo;
-			eInfo.ThreadId = GetCurrentThreadId();
-			eInfo.ExceptionPointers = pExceptionInfo;
-			eInfo.ClientPointers = FALSE;
-			MiniDumpWriteDump(hProcess, GetCurrentProcessId(), hMiniDumpFile, MiniDumpNormal, &eInfo, NULL, NULL);
-			CloseHandle(hMiniDumpFile);
-		}
-
-		// Display a message
-		HMODULE hModuleDll = GetModuleHandle("client.dll");
-		GetModuleInformation(hProcess, hModuleDll, &moduleInfo, sizeof(moduleInfo));
-		moduleBase = (long)moduleInfo.lpBaseOfDll;
-		moduleSize = (long)moduleInfo.SizeOfImage;
-		if (moduleBase <= exceptionAddress && exceptionAddress <= (moduleBase + moduleSize))
-		{
-			sprintf(buffer, "Exception in client.dll at offset 0x%08X.\n\nCrash dump and log files were created in game directory.\nPlease report them to http://aghl.ru/forum.", exceptionAddress - moduleBase);
-		}
-		else
-		{
-			sprintf(buffer, "Exception in the game.\n\nCrash dump and log files were created in game directory.\nPlease report them to http://aghl.ru/forum.");
-		}
-		MessageBox(GetActiveWindow(), buffer, "Error!", MB_OK | MB_ICONEXCLAMATION | MB_SETFOREGROUND | MB_TOPMOST);
-
-		// Application will die anyway, so futher exceptions are not interesting to us
-		RemoveVectoredExceptionHandler(hVehHandler);
-	}
-
-	return EXCEPTION_CONTINUE_SEARCH;
-}
-
-// DLL entry point
-BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
-{
-	if (fdwReason == DLL_PROCESS_ATTACH)
-	{
-		if (hVehHandler == NULL)
-			hVehHandler = AddVectoredExceptionHandler(1, VectoredExceptionsHandler);
-		Memory::OnLibraryInit();
-		HookSvcMessages();
-	}
-	else if (fdwReason == DLL_PROCESS_DETACH)
-	{
-		g_bDllDetaching = true;
-
-		UnHookSvcMessages();
-		Memory::OnLibraryDeinit();
-
-		if (hVehHandler != NULL)
-		{
-			RemoveVectoredExceptionHandler(hVehHandler);
-			hVehHandler = NULL;
-		}
-	}
-	return TRUE;
-}
-#endif
-
 int _DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 {
 	if (iVersion != CLDLL_INTERFACE_VERSION)
@@ -325,6 +222,8 @@ int _DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 	EV_HookEvents();
 
 	g_iIsAg = HUD_IsGame("ag");
+
+	HookConsoleFunctions();
 
 	return 1;
 }
@@ -340,12 +239,20 @@ Called whenever the client connects to a server.
 
 int _DLLEXPORT HUD_VidInit( void )
 {
-	gHUD.VidInit();
-	VGui_Startup();
-	g_StudioRenderer.InitOnConnect();
+	try
+	{
+		gHUD.VidInit();
+		VGui_Startup();
+		g_StudioRenderer.InitOnConnect();
 #ifdef _WIN32
-	ResultsStop();
+		ResultsStop();
 #endif
+	}
+	catch (const std::exception &e)
+	{
+		ConPrintf(RGBA::ConColor::Red, "HUD_VidInit: C++ exception thrown.\n");
+		ConPrintf(RGBA::ConColor::Red, "HUD_VidInit: %s.\n", e.what());
+	}
 	return 1;
 }
 
@@ -360,17 +267,27 @@ Reinitializes all the hud variables.
 
 void _DLLEXPORT HUD_Init( void )
 {
+	try
+	{
 #ifdef USE_VGUI2
-	ClientSteamContext().Activate();
+		ClientSteamContext().Activate();
 #endif
-	InitInput();
-	gHUD.Init();
-	Scheme_Init();
-	Memory::OnHudInit();
+		InitInput();
+		gHUD.Init();
+		Scheme_Init();
+		Memory::OnHudInit();
+		SvcMessagesInit();
 #ifdef _WIN32
-	SvcMessagesInit();
-	ResultsInit();
+		ResultsInit();
 #endif
+	}
+	catch (const std::exception &e)
+	{
+		ConPrintf(RGBA::ConColor::Red, "HUD_Init: C++ exception thrown.\n");
+		ConPrintf(RGBA::ConColor::Red, "HUD_Init: %s.\n", e.what());
+	}
+
+	UnhookConsoleFunctions();
 }
 
 
@@ -385,7 +302,15 @@ redraw the HUD.
 
 int _DLLEXPORT HUD_Redraw( float time, int intermission )
 {
-	gHUD.Redraw( time, intermission );
+	try
+	{
+		gHUD.Redraw(time, intermission);
+	}
+	catch (const std::exception &e)
+	{
+		ConPrintf(RGBA::ConColor::Red, "HUD_Redraw: C++ exception thrown.\n");
+		ConPrintf(RGBA::ConColor::Red, "HUD_Redraw: %s.\n", e.what());
+	}
 
 	return 1;
 }
@@ -406,9 +331,18 @@ returns 1 if anything has been changed, 0 otherwise.
 
 int _DLLEXPORT HUD_UpdateClientData(client_data_t *pcldata, float flTime )
 {
-	IN_Commands();
+	try
+	{
+		IN_Commands();
 
-	return gHUD.UpdateClientData(pcldata, flTime );
+		return gHUD.UpdateClientData(pcldata, flTime);
+	}
+	catch (const std::exception &e)
+	{
+		ConPrintf(RGBA::ConColor::Red, "HUD_UpdateClientData: C++ exception thrown.\n");
+		ConPrintf(RGBA::ConColor::Red, "HUD_UpdateClientData: %s.\n", e.what());
+		return 0;
+	}
 }
 
 /*
@@ -435,11 +369,19 @@ Called at game exit.
 
 void _DLLEXPORT HUD_Shutdown( void )
 {
-	gHUD.Shutdown();
-	ShutdownInput();
+	try
+	{
+		gHUD.Shutdown();
+		ShutdownInput();
 #ifdef USE_VGUI2
-	ClientSteamContext().Shutdown();
+		ClientSteamContext().Shutdown();
 #endif
+	}
+	catch (const std::exception &e)
+	{
+		ConPrintf(RGBA::ConColor::Red, "HUD_Shutdown: C++ exception thrown.\n");
+		ConPrintf(RGBA::ConColor::Red, "HUD_Shutdown: %s.\n", e.what());
+	}
 }
 
 /*
@@ -452,18 +394,26 @@ Called by engine every frame that client .dll is loaded
 
 void _DLLEXPORT HUD_Frame( double time )
 {
-	gHUD.Frame(time);
-	Memory::OnFrame();
+	try
+	{
+		gHUD.Frame(time);
+		Memory::OnFrame();
 #ifdef _WIN32
-	ResultsFrame(time);
+		ResultsFrame(time);
 #endif
 #ifdef USE_UPDATER
-	gGameUpdater->Frame();
+		gGameUpdater->Frame();
 #endif
 
-	ServersThink( time );
+		ServersThink(time);
 
-	GetClientVoiceMgr()->Frame(time);
+		GetClientVoiceMgr()->Frame(time);
+	}
+	catch (const std::exception &e)
+	{
+		ConPrintf(RGBA::ConColor::Red, "HUD_Frame: C++ exception thrown.\n");
+		ConPrintf(RGBA::ConColor::Red, "HUD_Frame: %s.\n", e.what());
+	}
 }
 
 
@@ -500,7 +450,11 @@ void _DLLEXPORT HUD_DirectorMessage( int iSize, void *pbuf )
 */
 extern "C" DLLEXPORT void* ClientFactory()
 {
+#ifdef WIN32
 	return CreateInterface;
+#else
+	return nullptr;		// Not called on Linux and CreateInterface causes a compilation error
+#endif
 }
 #endif
 
@@ -595,7 +549,7 @@ extern "C" void DLLEXPORT F(void *pv)
 	HUD_VoiceStatus,
 	HUD_DirectorMessage,
 	HUD_GetStudioModelInterface,
-	nullptr,	// pChatInputPosition
+	ChatInputPosition,
 	nullptr,	// pGetPlayerTeam
 #ifdef USE_VGUI2
 	ClientFactory

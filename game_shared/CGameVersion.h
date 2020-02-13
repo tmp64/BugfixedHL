@@ -1,43 +1,62 @@
 #ifndef CGAMEVERSION_H
 #define CGAMEVERSION_H
+#include <string>
+#include <semver.h>
+#include "IGameVersion.h"
 
-class CGameVersion
+/**
+ * Main implementation of IGameVersion.
+ * See IGameVersion for details.
+ * @see IGameVersion
+ */
+class CGameVersion : public IGameVersion
 {
 public:
-	inline CGameVersion() {}
-	inline CGameVersion(const char *str) { TryParse(str); }
+    CGameVersion();
+    CGameVersion(const IGameVersion *copy);
+    CGameVersion(const CGameVersion &);
+    CGameVersion &operator =(const CGameVersion &);
+    CGameVersion(const char *pszVersion);
+    virtual ~CGameVersion();
 
-	bool TryParse(const char *str);		// Tries to parse game version (e.g. 1.1.35+c4ddd6b+m)
-	bool TryParseTag(const char *str);	// Tries to parse Git tag (e.g. v1.2)
-	inline bool IsValid() const { return m_bIsValid; }
-	inline bool IsModified() const { return m_bIsModified; }
-	inline const char *GetFullString() const { return m_szString; }
-	inline const char *GetVersionString() const { return m_szVersion; }
-	inline const char *GetCommitString() const { return m_szCommit; }
-	inline void GetVersion(int &major, int &minor, int &patch) const
-	{
-		major = m_iMajor;
-		minor = m_iMinor;
-		patch = m_iPatch;
-	}
-	inline void RemovePatch()
-	{
-		m_iPatch = 0;
-	}
+    /**
+     * Attempts to parse pszVersion as version string.
+     * Returns IsValid().
+     */
+    bool TryParse(const char *pszVersion);
 
-	bool operator== (const CGameVersion &rhs) const;
-	bool operator>  (const CGameVersion &rhs) const;
-	bool operator>= (const CGameVersion &rhs) const;
-	bool operator<  (const CGameVersion &rhs) const;
-	bool operator<= (const CGameVersion &rhs) const;
+    // IGameVersion overrides
+    virtual void DeleteThis() override;
+    virtual bool IsValid() const override;
+    virtual int ToInt() const override;
+    virtual void GetVersion(int &major, int &minor, int &patch) const override;
+    virtual int GetMajor() const override;
+    virtual int GetMinor() const override;
+    virtual int GetPatch() const override;
+    virtual bool GetTag(char *buf, int size) const override;
+    virtual bool GetBuildMetadata(char *buf, int size) const override;
+    virtual bool GetBranch(char *buf, int size) const override;
+    virtual bool GetCommitHash(char *buf, int size) const override;
+    virtual bool IsDirtyBuild() const override;
+
+    // Comparison operators
+    bool operator==(const CGameVersion &rhs) const;
+    bool operator!=(const CGameVersion &rhs) const;
+    bool operator>(const CGameVersion &rhs) const;
+    bool operator<(const CGameVersion &rhs) const;
+    bool operator>=(const CGameVersion &rhs) const;
+    bool operator<=(const CGameVersion &rhs) const;
 
 private:
-	bool m_bIsValid = false;
-	bool m_bIsModified = false;
-	char m_szString[64] = "";
-	char m_szVersion[16] = "";
-	char m_szCommit[16] = "";
-	int m_iMajor = 0, m_iMinor = 0, m_iPatch = 0;
+    bool m_bIsValid = false;
+    semver_t m_SemVer;
+    std::string m_Branch;
+    std::string m_CommitHash;
+    bool m_bIsDirty = false;
+
+    void CopyFrom(const IGameVersion *copy);
 };
+
+
 
 #endif

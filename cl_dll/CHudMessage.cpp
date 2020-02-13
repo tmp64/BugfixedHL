@@ -32,8 +32,6 @@
 #include <Windows.h>
 #endif
 
-extern int g_iColorsCodes[10][3];
-
 DECLARE_MESSAGE_PTR( m_Message, HudText )
 DECLARE_MESSAGE_PTR( m_Message, GameTitle )
 
@@ -43,28 +41,22 @@ client_textmessage_t	g_pCustomMessage;
 char *g_pCustomName = "Custom";
 char g_pCustomText[MAX_MESSAGE_TEXT_LENGTH];
 
-int CHudMessage::Init(void)
+void CHudMessage::Init()
 {
 	HOOK_MESSAGE( HudText );
 	HOOK_MESSAGE( GameTitle );
 
-	gHUD.AddHudElem(this);
-
 	Reset();
-
-	return 1;
 };
 
-int CHudMessage::VidInit( void )
+void CHudMessage::VidInit()
 {
 	m_HUD_title_half = gHUD.GetSpriteIndex( "title_half" );
 	m_HUD_title_life = gHUD.GetSpriteIndex( "title_life" );
-
-	return 1;
 };
 
 
-void CHudMessage::Reset( void )
+void CHudMessage::Reset()
 {
  	memset( m_pMessages, 0, sizeof( m_pMessages[0] ) * maxHUDMessages );
 	memset( m_startTime, 0, sizeof( m_startTime[0] ) * maxHUDMessages );
@@ -173,14 +165,14 @@ int CHudMessage::YPosition( float y, int height )
 }
 
 
-void CHudMessage::MessageScanNextChar( void )
+void CHudMessage::MessageScanNextChar(RGBA srcColor)
 {
 	int srcRed, srcGreen, srcBlue, destRed, destGreen, destBlue;
 	int blend;
 
-	srcRed = m_parms.pMessage->r1;
-	srcGreen = m_parms.pMessage->g1;
-	srcBlue = m_parms.pMessage->b1;
+	srcRed = srcColor.r;
+	srcGreen = srcColor.g;
+	srcBlue = srcColor.b;
 	destRed = destGreen = destBlue = 0;
 	blend = 0;	// Pure source
 
@@ -279,9 +271,15 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time, c
 {
 	int i, j, width;
 	wchar_t wLine[MAX_HUD_STRING + 1];
+
+	// Alpha value is used as a boolean. 
+	// 1 means that this is the first char with new color
+	RGBA lineColor[MAX_HUD_STRING + 1];		
+	
 	const wchar_t *wText = wstr.c_str();
 	const wchar_t *pwText;
 	int lineHeight = gHUD.m_scrinfo.iCharHeight + ADJUST_MESSAGE;
+	E_ColorCodeMode nColorMode = gHUD.GetColorCodeMode();
 
 	// Count lines and width
 	m_parms.time = time;
@@ -294,7 +292,7 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time, c
 	pwText = wText;
 	while (*pwText)
 	{
-		if (gHUD.m_pCvarColorText->value && *pwText == L'^' && *(pwText + 1) >= L'0' && *(pwText + 1) <= L'9')
+		if (nColorMode && *(pwText + 0) == L'^' && IsColorCodeCharValid(*(pwText + 1)))
 		{
 			pwText += 2;
 		}
@@ -323,23 +321,39 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time, c
 	{
 		m_parms.lineLength = 0;
 		m_parms.width = 0;
+		memset(lineColor, 0, sizeof(lineColor));	// FIXME: Not very efficient
+		lineColor[0] = RGBA(pMessage->r1, pMessage->g1, pMessage->b1);
 		while (*pwText && *pwText != '\n')
 		{
 			int c = *pwText;
 			if (m_parms.lineLength < MAX_HUD_STRING)
 			{
-				wLine[m_parms.lineLength] = c;
-				if (gHUD.m_pCvarColorText->value && *pwText == L'^' && *(pwText + 1) >= L'0' && *(pwText + 1) <= L'9')
+				if (nColorMode && *pwText == L'^' && IsColorCodeCharValid(*(pwText + 1)))
 				{
-					// Skip two chars when counting line lenght
-					wLine[m_parms.lineLength + 1] = *(pwText + 1);
-					m_parms.lineLength += 2;
+					int coloridx = *(pwText + 1) - L'0';
+					if (coloridx == 0 || coloridx == 9 || nColorMode == COLOR_CODES_REMOVE)
+					{
+						// Reset
+						lineColor[m_parms.lineLength] = RGBA(pMessage->r1, pMessage->g1, pMessage->b1);
+					}
+					else
+					{
+						int *color = g_iColorsCodes[coloridx];
+						lineColor[m_parms.lineLength] = RGBA(color[0], color[1], color[2]);
+					}
+					lineColor[m_parms.lineLength].a = 1;
 					pwText += 2;
 					continue;
 				}
 				else
+				{
+					wLine[m_parms.lineLength] = c;
+					RGBA &color = lineColor[m_parms.lineLength];
+					if (m_parms.lineLength > 0 && !color.a)
+						color = lineColor[m_parms.lineLength - 1];
 					m_parms.width += gHUD.GetHudCharWidth(c);
-				m_parms.lineLength++;
+					m_parms.lineLength++;
+				}
 			}
 			pwText++;
 		}
@@ -347,41 +361,15 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time, c
 		wLine[m_parms.lineLength] = 0;
 
 		m_parms.x = XPosition(pMessage->x, m_parms.width, m_parms.totalWidth);
-		m_cColorNow = RGBA(m_parms.pMessage->r1, m_parms.pMessage->g1, m_parms.pMessage->b1);
-		m_bIsColorCoded = false;
 
 		for (j = 0; j < m_parms.lineLength; j++)
 		{
-			if (gHUD.m_pCvarColorText->value && wLine[j] == L'^')
-			{
-				wchar_t colorChar = wLine[j + 1];
-				if (colorChar >= L'0' && colorChar <= L'9')
-				{
-					if (gHUD.m_pCvarColorText->value == 1)
-					{
-						int colorIdx = colorChar - L'0';
-						if (colorIdx == 0 || colorIdx == 9)
-						{
-							m_cColorNow = RGBA(m_parms.r, m_parms.g, m_parms.b);
-							m_bIsColorCoded = false;
-						}
-						else
-						{
-							m_cColorNow = RGBA(g_iColorsCodes[colorIdx][0], g_iColorsCodes[colorIdx][1], g_iColorsCodes[colorIdx][2]);
-							m_bIsColorCoded = true;
-						}
-					}
-					j++;
-					continue;
-				}
-			}
-
 			m_parms.currentChar = wLine[j];
 			int nextX = m_parms.x + gHUD.GetHudCharWidth(m_parms.currentChar);
-			MessageScanNextChar();
+			MessageScanNextChar(lineColor[j]);
 
 			if (m_parms.x >= 0 && m_parms.y >= 0 && nextX <= ScreenWidth)
-				TextMessageDrawChar(m_parms.x, m_parms.y, m_parms.currentChar, m_cColorNow.r, m_cColorNow.g, m_cColorNow.b);
+				TextMessageDrawChar(m_parms.x, m_parms.y, m_parms.currentChar, m_parms.r, m_parms.g, m_parms.b);
 			m_parms.x = nextX;
 		}
 
@@ -390,7 +378,7 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time, c
 }
 
 
-int CHudMessage::Draw( float fTime )
+void CHudMessage::Draw( float fTime )
 {
 	int i, drawn;
 	client_textmessage_t *pMessage;
@@ -500,8 +488,6 @@ int CHudMessage::Draw( float fTime )
 	// Don't call until we get another message
 	if ( !drawn )
 		m_iFlags &= ~HUD_ACTIVE;
-
-	return 1;
 }
 
 

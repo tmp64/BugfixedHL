@@ -269,10 +269,8 @@ DECLARE_COMMAND_PTR(m_Ammo, PrevWeapon);
 
 #define HISTORY_DRAW_TIME	"5"
 
-int CHudAmmo::Init(void)
+void CHudAmmo::Init()
 {
-	gHUD.AddHudElem(this);
-
 	HOOK_MESSAGE(CurWeapon);
 	HOOK_MESSAGE(WeaponList);
 	HOOK_MESSAGE(AmmoPickup);
@@ -299,14 +297,12 @@ int CHudAmmo::Init(void)
 
 	CVAR_CREATE( "hud_drawhistory_time", HISTORY_DRAW_TIME, 0 );
 	CVAR_CREATE( "hud_fastswitch", "0", FCVAR_ARCHIVE );		// controls whether or not weapons can be selected in one keypress
-	m_pCvarHudWeapon = CVAR_CREATE( "hud_weapon", "0", FCVAR_ARCHIVE );			// controls displaying sprite of currently selected weapon
+	m_pCvarHudWeapon = CVAR_CREATE( "hud_weapon", "0", FCVAR_BHL_ARCHIVE );			// controls displaying sprite of currently selected weapon
 
 	m_iFlags |= HUD_ACTIVE; //!!!
 
 	gWR.Init();
 	gHR.Init();
-
-	return 1;
 };
 
 void CHudAmmo::Reset(void)
@@ -327,7 +323,7 @@ void CHudAmmo::Reset(void)
 	m_iMaxSlot = 4;
 }
 
-int CHudAmmo::VidInit(void)
+void CHudAmmo::VidInit()
 {
 	// Load sprites for buckets (top row of weapon menu)
 	m_HUD_bucket0 = gHUD.GetSpriteIndex( "bucket1" );
@@ -352,8 +348,6 @@ int CHudAmmo::VidInit(void)
 		giABWidth = 10;
 		giABHeight = 2;
 	}
-
-	return 1;
 }
 
 //
@@ -508,6 +502,8 @@ int CHudAmmo::MsgFunc_AmmoX(const char *pszName, int iSize, void *pbuf)
 	int iCount = READ_BYTE();
 
 	gWR.SetAmmo( iIndex, abs(iCount) );
+
+	m_fFade = HUD_FADE_TIME;
 
 	return 1;
 }
@@ -862,17 +858,17 @@ void CHudAmmo::UserCmd_PrevWeapon(void)
 // Drawing code
 //-------------------------------------------------------------------------
 
-int CHudAmmo::Draw(float flTime)
+void CHudAmmo::Draw(float flTime)
 {
 	int x, y, r, g, b;
 	float a;
 	int AmmoWidth;
 
 	if (!(gHUD.m_iWeaponBits & (1<<(WEAPON_SUIT)) ))
-		return 1;
+		return;
 
 	if ( (gHUD.m_iHideHUDDisplay & ( HIDEHUD_WEAPONS | HIDEHUD_ALL )) )
-		return 1;
+		return;
 
 	// Draw Weapon Menu
 	DrawWList(flTime);
@@ -881,10 +877,10 @@ int CHudAmmo::Draw(float flTime)
 	gHR.DrawAmmoHistory( flTime );
 
 	if (!(m_iFlags & HUD_ACTIVE))
-		return 0;
+		return;
 
 	if (!m_pWeapon)
-		return 0;
+		return;
 
 	WEAPON *pw = m_pWeapon; // shorthand
 
@@ -903,6 +899,8 @@ int CHudAmmo::Draw(float flTime)
 	else
 		a = MIN_ALPHA;
 
+	float alphaDim = a;
+
 	a *= gHUD.GetHudTransparency();
 	gHUD.GetHudColor(0, 0, r, g, b);
 	ScaleColors(r, g, b, a );
@@ -918,7 +916,7 @@ int CHudAmmo::Draw(float flTime)
 
 	// SPR_Draw Ammo
 	if ((pw->iAmmoType < 0) && (pw->iAmmo2Type < 0))
-		return 0;
+		return;
 
 	int iFlags = DHN_DRAWZERO; // draw 0 values
 
@@ -932,8 +930,11 @@ int CHudAmmo::Draw(float flTime)
 		
 		if (pw->iClip >= 0)
 		{
+			a = alphaDim * gHUD.GetHudTransparency();
+			gHUD.GetHudAmmoColor(pw->iClip, GetMaxClip(pw->szName), r, g, b);
+			ScaleColors(r, g, b, a);
+
 			// room for the number and the '|' and the current ammo
-			
 			x = ScreenWidth - (8 * AmmoWidth) - iIconWidth;
 			x = gHUD.DrawHudNumber(x, y, iFlags | DHN_3DIGITS, pw->iClip, r, g, b);
 
@@ -947,21 +948,22 @@ int CHudAmmo::Draw(float flTime)
 
 			x += AmmoWidth/2;
 
-			gHUD.GetHudColor(0, 0, r, g, b);
-
 			// draw the | bar
 			FillRGBA(x, y, iBarWidth, gHUD.m_iFontHeight, r, g, b, a);
 
 			x += iBarWidth + AmmoWidth/2;;
 
 			// GL Seems to need this
-			ScaleColors(r, g, b, a );
 			x = gHUD.DrawHudNumber(x, y, iFlags | DHN_3DIGITS, gWR.CountAmmo(pw->iAmmoType), r, g, b);		
 
 
 		}
 		else
 		{
+			a = alphaDim * gHUD.GetHudTransparency();
+			gHUD.GetHudAmmoColor(gWR.CountAmmo(pw->iAmmoType), pw->iMax1, r, g, b);
+			ScaleColors(r, g, b, a);
+
 			// SPR_Draw a bullets only line
 			x = ScreenWidth - 4 * AmmoWidth - iIconWidth;
 			x = gHUD.DrawHudNumber(x, y, iFlags | DHN_3DIGITS, gWR.CountAmmo(pw->iAmmoType), r, g, b);
@@ -981,6 +983,10 @@ int CHudAmmo::Draw(float flTime)
 		// Do we have secondary ammo?
 		if ((pw->iAmmo2Type != 0) && (gWR.CountAmmo(pw->iAmmo2Type) > 0))
 		{
+			a = alphaDim * gHUD.GetHudTransparency();
+			gHUD.GetHudAmmoColor(pw->iClip, GetMaxClip(pw->szName), r, g, b);
+			ScaleColors(r, g, b, a);
+
 			y -= gHUD.m_iFontHeight + gHUD.m_iFontHeight/4;
 			x = ScreenWidth - 4 * AmmoWidth - iIconWidth;
 			x = gHUD.DrawHudNumber(x, y, iFlags|DHN_3DIGITS, gWR.CountAmmo(pw->iAmmo2Type), r, g, b);
@@ -991,8 +997,6 @@ int CHudAmmo::Draw(float flTime)
 			SPR_DrawAdditive(0, x, y - iOffset, &m_pWeapon->rcAmmo2);
 		}
 	}
-
-	return 1;
 }
 
 
@@ -1232,6 +1236,38 @@ int CHudAmmo::DrawWList(float flTime)
 
 }
 
+// m_iMaxClip is never sended to the client, until i figure out another way, this is the best thing we can use
+int CHudAmmo::GetMaxClip(char *weaponname)
+{
+	if (!strcmp(weaponname, "weapon_9mmhandgun"))
+	{
+		return 17;
+	}
+	else if (!strcmp(weaponname, "weapon_9mmAR"))
+	{
+		return 50;
+	}
+	else if (!strcmp(weaponname, "weapon_shotgun"))
+	{
+		return 8;
+	}
+	else if (!strcmp(weaponname, "weapon_crossbow"))
+	{
+		return 5;
+	}
+	else if (!strcmp(weaponname, "weapon_rpg"))
+	{
+		return 1;
+	}
+	else if (!strcmp(weaponname, "weapon_357"))
+	{
+		return 6;
+	}
+	else // if you are using custom weapons, then custom colors for ammo hud aren't going to be used..
+	{
+		return -1;
+	}
+}
 
 /* =================================
 	GetSpriteFromList

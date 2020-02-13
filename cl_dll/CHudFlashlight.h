@@ -6,10 +6,10 @@
 class CHudFlashlight : public CHudBase
 {
 public:
-	int Init(void);
-	int VidInit(void);
-	int Draw(float flTime);
-	void Reset(void);
+	void Init();
+	void VidInit();
+	void Draw(float flTime);
+	void Reset();
 	int MsgFunc_Flashlight(const char *pszName, int iSize, void *pbuf);
 	int MsgFunc_FlashBat(const char *pszName, int iSize, void *pbuf);
 

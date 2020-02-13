@@ -28,6 +28,12 @@
 #include "parsemsg.h"
 #include "results.h"
 #include "vgui_TeamFortressViewport.h"
+#include "aghudlocation.h"
+#include "dllexport.h"
+
+#ifdef USE_VGUI2
+#include "vgui2/CHudChat.h"
+#endif
 
 #undef PlaySound
 
@@ -54,21 +60,34 @@ static int line_height = 0;
 
 DECLARE_MESSAGE_PTR( m_SayText, SayText );
 
-int CHudSayText :: Init( void )
+extern "C" void DLLEXPORT ChatInputPosition(int *x, int *y)
 {
-	gHUD.AddHudElem( this );
+	if (!gHUD.m_SayText->m_pCvarOldInputPos || !gHUD.m_SayText->m_pCvarOldInputPos->value)
+	{
+		*x = LINE_START;
+		*y = Y_START + line_height * MAX_LINES;
+	}
+	else
+	{
+		// Default position
+	}
+}
 
+void CHudSayText :: Init( void )
+{
 	HOOK_MESSAGE( SayText );
 
 	InitHUDData();
 
 	m_HUD_saytext = CVAR_CREATE( "hud_saytext", "1", 0 );
 	m_HUD_saytext_time = CVAR_CREATE( "hud_saytext_time", "5", 0 );
-	m_pCvarConSayColor = CVAR_CREATE( "con_say_color", "30 230 50", FCVAR_ARCHIVE );
+	m_pCvarConSayColor = CVAR_CREATE( "con_say_color", "30 230 50", FCVAR_BHL_ARCHIVE );
+	m_pCvarOldInputPos = CVAR_CREATE("hud_saytext_oldpos", "0", FCVAR_BHL_ARCHIVE);
+#ifdef USE_VGUI2
+	m_pCvarOldChat = CVAR_CREATE("hud_saytext_oldchat", "0", FCVAR_BHL_ARCHIVE);
+#endif
 
 	m_iFlags |= HUD_INTERMISSION; // is always drawn during an intermission
-
-	return 1;
 }
 
 
@@ -79,9 +98,12 @@ void CHudSayText :: InitHUDData( void )
 	memset( g_iNameLengths, 0, sizeof g_iNameLengths );
 }
 
-int CHudSayText :: VidInit( void )
+void CHudSayText :: VidInit( void )
 {
-	return 1;
+	if (ScreenHeight >= 480)
+		Y_START = ScreenHeight - 60;
+	else
+		Y_START = ScreenHeight - 45;
 }
 
 
@@ -102,12 +124,12 @@ int ScrollTextUp( void )
 	return 1;
 }
 
-int CHudSayText :: Draw( float flTime )
+void CHudSayText :: Draw( float flTime )
 {
 	int y = Y_START;
 
 	if ( ( gViewPort && gViewPort->AllowedToPrintText() == FALSE) || !m_HUD_saytext->value )
-		return 1;
+		return;
 
 	// make sure the scrolltime is within reasonable bounds,  to guard against the clock being reset
 	flScrollTime = min( flScrollTime, flTime + m_HUD_saytext_time->value );
@@ -151,9 +173,6 @@ int CHudSayText :: Draw( float flTime )
 
 		y += line_height;
 	}
-
-
-	return 1;
 }
 
 int CHudSayText :: MsgFunc_SayText( const char *pszName, int iSize, void *pbuf )
@@ -212,62 +231,77 @@ void CHudSayText :: SayTextPrint( const char *pszBuf, int iBufSize, int clientIn
 		return;
 	}
 
-	// find an empty string slot
-	int i;
-	for ( i = 0; i < MAX_LINES; i++ )
+#ifdef USE_VGUI2
+	if (m_pCvarOldChat->value)
+#endif
 	{
-		if ( ! *g_szLineBuffer[i] )
-			break;
-	}
-	if ( i == MAX_LINES )
-	{
-		// force scroll buffer up
-		ScrollTextUp();
-		i = MAX_LINES - 1;
-	}
-
-	g_iNameLengths[i] = 0;
-	g_pflNameColors[i] = NULL;
-
-	// if it's a say message, search for the players name in the string
-	if (*pszBuf == 2 && clientIndex > 0)
-	{
-		GetPlayerInfo(clientIndex, &g_PlayerInfoList[clientIndex]);
-		const char *pName = g_PlayerInfoList[clientIndex].name;
-		if (pName)
+		// find an empty string slot
+		int i;
+		for (i = 0; i < MAX_LINES; i++)
 		{
-			const char *nameInString = strstr(pszBuf, pName);
-			if (nameInString)
+			if (!*g_szLineBuffer[i])
+				break;
+		}
+		if (i == MAX_LINES)
+		{
+			// force scroll buffer up
+			ScrollTextUp();
+			i = MAX_LINES - 1;
+		}
+
+		g_iNameLengths[i] = 0;
+		g_pflNameColors[i] = NULL;
+
+		// if it's a say message, search for the players name in the string
+		if (*pszBuf == 2 && clientIndex > 0)
+		{
+			GetPlayerInfo(clientIndex, &g_PlayerInfoList[clientIndex]);
+			const char* pName = g_PlayerInfoList[clientIndex].name;
+			if (pName)
 			{
-				g_iNameLengths[i] = strlen( pName ) + (nameInString - pszBuf);
-				g_pflNameColors[i] = GetClientTeamColor(clientIndex);
+				const char* nameInString = strstr(pszBuf, pName);
+				if (nameInString)
+				{
+					g_iNameLengths[i] = strlen(pName) + (nameInString - pszBuf);
+					g_pflNameColors[i] = GetClientTeamColor(clientIndex);
+				}
 			}
 		}
+
+		strncpy(g_szLineBuffer[i], pszBuf, max(iBufSize - 1, MAX_CHARS_PER_LINE - 1));
+
+		// Substitute location
+		gHUD.m_Location->ParseAndEditSayString(clientIndex, g_szLineBuffer[i], HLARRAYSIZE(g_szLineBuffer[i]));
+
+		// make sure the text fits in one line
+		EnsureTextFitsInOneLineAndWrapIfHaveTo(i);
+
+		// Set scroll time
+		if (i == 0)
+		{
+			flScrollTime = gHUD.m_flTime + m_HUD_saytext_time->value;
+		}
+
+		m_iFlags |= HUD_ACTIVE;
+
+		if (ScreenHeight >= 480)
+			Y_START = ScreenHeight - 60;
+		else
+			Y_START = ScreenHeight - 45;
+		Y_START -= (line_height * (MAX_LINES + 1));
 	}
-
-
-	strncpy( g_szLineBuffer[i], pszBuf, max(iBufSize -1, MAX_CHARS_PER_LINE-1) );
-
-	// Substitute location
-	gHUD.m_Location.ParseAndEditSayString(clientIndex, g_szLineBuffer[i], HLARRAYSIZE(g_szLineBuffer[i]));
-
-	// make sure the text fits in one line
-	EnsureTextFitsInOneLineAndWrapIfHaveTo( i );
-
-	// Set scroll time
-	if ( i == 0 )
-	{
-		flScrollTime = gHUD.m_flTime + m_HUD_saytext_time->value;
-	}
-
-	m_iFlags |= HUD_ACTIVE;
-	PlaySound( "misc/talk.wav", 1 );
-
-	if ( ScreenHeight >= 480 )
-		Y_START = ScreenHeight - 60;
+#ifdef USE_VGUI2
 	else
-		Y_START = ScreenHeight - 45;
-	Y_START -= (line_height * (MAX_LINES+1));
+	{
+		char szBuf[1024];
+		strncpy(szBuf, pszBuf, sizeof(szBuf));
+		szBuf[sizeof(szBuf) - 1] = '\0';
+		gHUD.m_Location->ParseAndEditSayString(clientIndex, szBuf, sizeof(szBuf));	// Substitute location
+		gHUD.m_Chat->ChatPrintf(clientIndex, CHAT_FILTER_NONE, "%s", szBuf);
+	}
+#endif
+
+	PlaySound("misc/talk.wav", 1);
 }
 
 void CHudSayText :: EnsureTextFitsInOneLineAndWrapIfHaveTo( int line )

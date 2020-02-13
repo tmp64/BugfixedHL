@@ -1,4 +1,5 @@
 add_sources(
+	CMakeLists.txt
 	CBackGroundPanel.h
 	CBackGroundPanel.cpp
 	CBaseViewport.h
@@ -25,26 +26,16 @@ add_sources(
 	KeyValuesCompat.cpp
 	CPngImage.h
 	CPngImage.cpp
-	IGameUIPanel.h
-	GameUIPanelNames.h
 	IEngineVgui.h
 	
-	# HUD panels
 	CScorePanel.h
 	CScorePanel.cpp
 	CClientMOTD.h
 	CClientMOTD.cpp
-	
-	# GameUI panels
-	CGameUITestPanel.h
-	CGameUITestPanel.cpp
+	CBaseHudChat.h
+	CBaseHudChat.cpp
+	CHudChat.h
+	CHudChat.cpp
 )
 
-if( USE_UPDATER )
-	add_sources(
-		CUpdaterDebugDialog.h
-		CUpdaterDebugDialog.cpp
-		CUpdateNotificationDialog.h
-		CUpdateNotificationDialog.cpp
-	)
-endif()
+add_subdirectory( gameui )

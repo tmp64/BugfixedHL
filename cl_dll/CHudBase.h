@@ -5,6 +5,7 @@
 #define _cdecl 
 #endif
 
+#include <list>
 #include "cl_dll.h"
 #include "wrect.h"
 #include "cvardef.h"
@@ -46,11 +47,19 @@ union RGBA {
 	RGBA(unsigned int value) { c = value; }
 	RGBA(unsigned char r1, unsigned char g1, unsigned char b1) { r = r1; g = g1; b = b1; a = 255; }
 	void Set(unsigned char r1, unsigned char g1, unsigned char b1) { r = r1; g = g1; b = b1; a = 255; }
+
+	// Colors for printing info to console
+	class ConColor
+	{
+	public:
+		static RGBA Red, Green, Yellow, Cyan;
+	};
 };
 
-typedef struct {
+struct POSITION 
+{
 	int x, y;
-} POSITION;
+};
 
 typedef struct cvar_s cvar_t;
 
@@ -60,14 +69,22 @@ public:
 	POSITION  m_pos;
 	int   m_type;
 	int	  m_iFlags; // active, moving, 
-	virtual		~CHudBase() {}
-	virtual int Init(void);
-	virtual int VidInit(void);
-	virtual int Draw(float flTime);
-	virtual void Think(void);
-	virtual void Reset(void);
-	virtual void InitHUDData(void);		// called every time a server is connected to
-	bool m_isDeletable = false;
+	CHudBase();
+	virtual		~CHudBase();
+	virtual void Init();
+	virtual void VidInit();
+	virtual void Draw(float flTime);
+	virtual void Think();
+	virtual void Reset();
+	virtual void InitHUDData();		// called every time a server is connected to
+
+private:
+	bool m_bIsIteratorValid = false;
+	std::list<CHudBase *>::iterator m_ThisIterator;
+
+	void EraseFromHudList();
+
+	friend class CHud;
 };
 
 #endif

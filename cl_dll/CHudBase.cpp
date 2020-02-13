@@ -1,18 +1,39 @@
+#include "hud.h"
 #include "CHudBase.h"
 
-int CHudBase::Init(void)
+CHudBase::CHudBase()
 {
-	return 0;
+	gHUD.m_HudList.push_back(this);
+	m_ThisIterator = --gHUD.m_HudList.end();
+	m_bIsIteratorValid = true;
 }
 
-int CHudBase::VidInit(void)
+CHudBase::~CHudBase()
 {
-	return 0;
+	if (m_bIsIteratorValid)
+		EraseFromHudList();
 }
 
-int CHudBase::Draw(float flTime)
+void CHudBase::EraseFromHudList()
 {
-	return 0;
+	assert(m_bIsIteratorValid);
+	gHUD.m_HudList.erase(m_ThisIterator);
+	m_bIsIteratorValid = false;
+}
+
+void CHudBase::Init()
+{
+	return;
+}
+
+void CHudBase::VidInit()
+{
+	return;
+}
+
+void CHudBase::Draw(float flTime)
+{
+	return;
 }
 
 void CHudBase::Think(void)

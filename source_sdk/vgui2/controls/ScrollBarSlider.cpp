@@ -217,7 +217,16 @@ void ScrollBarSlider::RecomputeValueFromNobPos()
 		// actually only scroll through frange-frangewindow number of lines so we must take that 
 		// into account when we calculate the value
 		// convert to our local size system
-		fvalue = (frange - frangewindow) * ( fnob / ( length - fnobsize ) );
+
+		// Make sure we don't divide by zero
+		if (length - fnobsize == 0)
+		{
+			fvalue = 0.0f;
+		}
+		else
+		{
+			fvalue = (frange - frangewindow) * (fnob / (length - fnobsize));
+		}
 	}
 
 	// check to see if we should just snap to the bottom

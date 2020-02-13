@@ -23,6 +23,10 @@ class CBasePlayer;
 class CItem;
 class CBasePlayerAmmo;
 
+#define ITEM_RESPAWN_TIME	30
+#define WEAPON_RESPAWN_TIME	20
+#define AMMO_RESPAWN_TIME	20
+
 // weapon respawning return codes
 enum
 {	
@@ -157,6 +161,8 @@ public:
 
 	// Immediately end a multiplayer game
 	virtual void EndMultiplayerGame( void ) {}
+
+	virtual ~CGameRules() {}
 };
 
 extern CGameRules *InstallGameRules( void );
@@ -354,9 +360,31 @@ protected:
 	virtual void GoToIntermission( void );
 	float m_flIntermissionEndTime;
 	BOOL m_iEndIntermissionButtonHit;
-	void SendMOTDToClient( edict_t *client );
-	void SendUnicodeMOTDToClient( edict_t *client );
-	void SendHtmlMOTDToClient( edict_t *client );
+	bool m_bGiveDefaultWeapons = true;
+
+	void SendServerNameToClient( edict_t *client );
+
+public:
+	/**
+	 * Returns false on error (file not found)
+	 * @param file path to the file or nullptr for default
+	 */
+	bool SendMOTDFileToClient(edict_t *client, const char *file = nullptr);
+	void SendMOTDToClient(edict_t *client, char *string);
+
+	/**
+	 * Returns false on error (file not found)
+	 * @param file path to the file or nullptr for default
+	 */
+	bool SendUnicodeMOTDFileToClient(edict_t *client, const char *file = nullptr);
+	void SendUnicodeMOTDToClient(edict_t *client, char *string);
+
+	/**
+	 * Returns false on error (file not found)
+	 * @param file path to the file or nullptr for default
+	 */
+	bool SendHtmlMOTDFileToClient(edict_t *client, const char *file = nullptr);
+	void SendHtmlMOTDToClient(edict_t *client, char *string);
 };
 
 extern DLL_GLOBAL CGameRules*	g_pGameRules;

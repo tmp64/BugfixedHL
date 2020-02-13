@@ -29,13 +29,12 @@ class CAvatarImage;
 class CScorePanel : public vgui2::Frame, public IViewportPanel
 {
 public:
-	DECLARE_CLASS_SIMPLE(CScorePanel, vgui2::Frame);
+	DECLARE_CLASS_SIMPLE(CScorePanel, Frame);
 
 	// column widths at 640
 	enum
 	{
 		AVATAR_OFFSET = 4,
-		AVATAR_WIDTH = 34,
 		AVATAR_OFF_WIDTH = 22,
 		NAME_WIDTH = 184,
 		STEAMID_WIDTH = 100,
@@ -97,7 +96,7 @@ public:
 	}
 
 	// Messages
-	MESSAGE_FUNC_CHARPTR(OnCommandOverride, "Command", command);	// For some reason, virtual function override doesn't work
+	virtual void OnCommand(const char *command) override;
 	MESSAGE_FUNC_INT(OnItemContextMenu, "ItemContextMenu", itemID);
 	MESSAGE_FUNC_INT(OnCheckButtonChecked, "CheckButtonChecked", state);
 
@@ -132,8 +131,6 @@ private:
 		int frags = 0;
 		int deaths = 0;
 	};
-
-	static CScorePanel *m_sSingleton;
 	IViewport *m_pViewport;
 	CPlayerListPanel *m_pPlayerList = nullptr;
 	vgui2::Label *m_pServerNameLabel = nullptr;
@@ -153,6 +150,7 @@ private:
 	int m_iMargin = 100;
 	int m_iMinHeight = 320;
 	int m_iMutedIconIndex = 0;
+	int m_iSpectatorSection = -1;
 
 	vgui2::ImageList *m_pImageList;
 	CUtlMap<CSteamID, int> m_mapAvatarsToImageList;
@@ -173,6 +171,17 @@ private:
 	void UpdatePlayerAvatar(int playerIndex, KeyValues *kv);
 	void UpdateTeamScores();
 	void UpdateTeamScore(int i);
+	int GetLineSpacingForHeight(int h);
+	int GetAvatarSize();
+
+	int GetLineSpacingForNormal();
+	int GetLineSpacingForCompact();
+
+	// Mode:
+	// - 0 -- compact if overflows
+	// - 1 -- always big
+	// - 2 -- always compact
+	int GetSizeMode();
 
 	// Menu
 	void CreatePlayerMenu();

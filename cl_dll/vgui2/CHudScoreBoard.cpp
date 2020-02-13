@@ -4,34 +4,37 @@
 // implementation of CHudScoreBoard class, a VGUI2-based scorebard
 //
 
+#include <keydefs.h>
 #include "CHudScoreBoard.h"
 #include "hud.h"
 #include "cl_util.h"
 #include "vgui2/CBaseViewport.h"
 #include "CScorePanel.h"
 
-int CHudScoreBoard::Init(void)
+void CHudScoreBoard::Init()
 {
-	m_CvarMouseBtn = CVAR_CREATE("hud_scoreboard_mousebtn", "1", FCVAR_ARCHIVE);
-	m_CvarAvatars = CVAR_CREATE("hud_scoreboard_showavatars", "1", FCVAR_ARCHIVE);
-	m_CvarLoss = CVAR_CREATE("hud_scoreboard_showloss", "1", FCVAR_ARCHIVE);
-	m_CvarEffSort = CVAR_CREATE("hud_scoreboard_effsort", "0", FCVAR_ARCHIVE);
-	m_CvarEffType = CVAR_CREATE("hud_scoreboard_efftype", "1", FCVAR_ARCHIVE);
-	m_CvarEffPercent = CVAR_CREATE("hud_scoreboard_effpercent", "0", FCVAR_ARCHIVE);
+	m_CvarMouseBtn = CVAR_CREATE("hud_scoreboard_mousebtn", "1", FCVAR_BHL_ARCHIVE);
+	m_CvarAvatars = CVAR_CREATE("hud_scoreboard_showavatars", "1", FCVAR_BHL_ARCHIVE);
+	m_CvarLoss = CVAR_CREATE("hud_scoreboard_showloss", "1", FCVAR_BHL_ARCHIVE);
+	m_CvarEffSort = CVAR_CREATE("hud_scoreboard_effsort", "0", FCVAR_BHL_ARCHIVE);
+	m_CvarEffType = CVAR_CREATE("hud_scoreboard_efftype", "1", FCVAR_BHL_ARCHIVE);
+	m_CvarEffPercent = CVAR_CREATE("hud_scoreboard_effpercent", "0", FCVAR_BHL_ARCHIVE);
+	m_CvarShowSteamId = CVAR_CREATE("hud_scoreboard_showsteamid", "1", FCVAR_BHL_ARCHIVE);
+	m_CvarShowEff = CVAR_CREATE("hud_scoreboard_showeff", "1", FCVAR_BHL_ARCHIVE);
+	m_CvarSize = CVAR_CREATE("hud_scoreboard_size", "0", FCVAR_BHL_ARCHIVE);
+	m_CvarSpacingNormal = CVAR_CREATE("hud_scoreboard_spacing_normal", "0", FCVAR_BHL_ARCHIVE);
+	m_CvarSpacingCompact = CVAR_CREATE("hud_scoreboard_spacing_compact", "0", FCVAR_BHL_ARCHIVE);
 	m_iFlags |= HUD_ACTIVE;
-	gHUD.AddHudElem(this);
-	m_pScorePanel = CScorePanel::m_sSingleton;
-	return 1;
+	m_pScorePanel = dynamic_cast<CScorePanel *>(g_pViewport->FindPanelByName(VIEWPORT_PANEL_SCORE));
+	Assert(m_pScorePanel);
 }
 
-int CHudScoreBoard::VidInit(void)
+void CHudScoreBoard::VidInit()
 {
-	return 1;
 }
 
-int CHudScoreBoard::Draw(float flTime)
+void CHudScoreBoard::Draw(float flTime)
 {
-	return 0;
 }
 
 void CHudScoreBoard::Think()
@@ -91,4 +94,32 @@ bool CHudScoreBoard::IsVisible()
 void CHudScoreBoard::UpdateServerName()
 {
 	m_pScorePanel->UpdateServerName();
+}
+
+bool CHudScoreBoard::HandleKeyEvent(int down, int keynum, const char * pszCurrentBinding)
+{
+	int constexpr WHEEL_DELTA = 20;
+
+	if (!down)
+		return false;
+
+	if (!gHUD.m_ScoreBoard->IsVisible())
+		return false;
+
+	if ((keynum == K_MOUSE1 && m_CvarMouseBtn->value == 1) || (keynum == K_MOUSE2 && m_CvarMouseBtn->value == 2))
+	{
+		EnableMousePointer(true);
+	}
+	else if (keynum == K_MWHEELDOWN)
+	{
+		m_pScorePanel->OnMouseWheeled(WHEEL_DELTA);
+	}
+	else if (keynum == K_MWHEELUP)
+	{
+		m_pScorePanel->OnMouseWheeled(-WHEEL_DELTA);
+	}
+	else
+		return false;
+
+	return true;
 }

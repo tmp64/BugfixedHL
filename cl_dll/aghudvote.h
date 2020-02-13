@@ -8,10 +8,10 @@ class AgHudVote : public CHudBase
 public:
 	AgHudVote() : m_flTurnoff(0), m_iVoteStatus(0), m_iFor(0), m_iAgainst(0), m_iUndecided(0), m_byVoteStatus(0) { }
 
-	int Init(void) override;
-	int VidInit(void) override;
-	int Draw(float flTime) override;
-	void Reset(void) override;
+	void Init() override;
+	void VidInit() override;
+	void Draw(float flTime) override;
+	void Reset() override;
 
 	int MsgFunc_Vote(const char *pszName, int iSize, void *pbuf);
 

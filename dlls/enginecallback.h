@@ -85,6 +85,18 @@ inline void MESSAGE_BEGIN( int msg_dest, int msg_type, const float *pOrigin = NU
 #define WRITE_COORD		(*g_engfuncs.pfnWriteCoord)
 #define WRITE_STRING	(*g_engfuncs.pfnWriteString)
 #define WRITE_ENTITY	(*g_engfuncs.pfnWriteEntity)
+
+inline void WRITE_FLOAT(float fl)
+{
+	union
+	{
+		int i;
+		float f;
+	} val;
+	val.f = fl;
+	WRITE_LONG(val.i);
+}
+
 #define CVAR_REGISTER	(*g_engfuncs.pfnCVarRegister)
 #define CVAR_GET_FLOAT	(*g_engfuncs.pfnCVarGetFloat)
 #define CVAR_GET_STRING	(*g_engfuncs.pfnCVarGetString)

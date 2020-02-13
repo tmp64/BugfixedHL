@@ -39,10 +39,13 @@
 
 #include "tier0/vprof.h"
 #include "common/MinMax.h"
+#include "../../../cl_dll/vgui2/VGUI2Paths.h"
 // memdbgon must be the last include file in a .cpp file!!!
 #include <tier0/memdbgon.h>
 
 using namespace vgui2;
+
+extern bool g_bIsCreatingGameUIPanel;
 
 #define TRIPLE_PRESS_MSEC	300
 
@@ -677,6 +680,12 @@ void Panel::Init( int x, int y, int wide, int tall )
 	_tabPosition = 0;
 	m_iScheme = 0;
 
+	m_bIsGameUIPanel = g_bIsCreatingGameUIPanel;
+
+	// Set default scheme for GameUI panels
+	if (m_bIsGameUIPanel)
+		m_iScheme = vgui2::scheme()->LoadSchemeFromFile(UI_GAMEUISCHEME_FILENAME, "SourceScheme");
+
 	_buildModeFlags = 0; // not editable or deletable in buildmode dialog by default
 
 #ifndef _XBOX
@@ -704,6 +713,8 @@ void Panel::Init( int x, int y, int wide, int tall )
 
 	REGISTER_COLOR_AS_OVERRIDABLE( _fgColor, "fgcolor_override" );
 	REGISTER_COLOR_AS_OVERRIDABLE( _bgColor, "bgcolor_override" );
+
+	LoadCorners();
 }
 
 
@@ -3284,7 +3295,11 @@ void Panel::SetBorder(IBorder *border)
 		ipanel()->SetInset(GetVPanel(), x, y, x2, y2);
 
 		// update our background type based on the bord
-		//SetPaintBackgroundType(border->GetBackgroundType());
+		//SetPaintBackgroundType(border->GetBackgroundType());	// Not supported in GoldSource
+
+		// HUD panels should define it explicitly in .res or the code
+		if (m_bIsGameUIPanel && !strcmp(border->GetName(), "FrameBorder"))
+			SetPaintBackgroundType(2);
 	}
 	else
 	{
@@ -6591,9 +6606,9 @@ private:
 
 char const *CPanelMessageMapDictionary::StripNamespace( char const *className )
 {
-	if ( !strnicmp( className, "vgui2::", 6 ) )
+	if ( !strnicmp( className, "vgui2::", 7 ) )
 	{
-		return className + 6;
+		return className + 7;
 	}
 	return className;
 }
@@ -6755,5 +6770,34 @@ PanelKeyBindingMap *FindPanelKeyBindingMap( char const *className )
 	return GetPanelKeyBindingMapDictionary().FindPanelKeyBindingMap( className );
 }
 #endif // VGUI_USEKEYBINDINGMAPS
+
+//-----------------------------------------------------------------------------
+// Purpose: Load 800cornerX textures. CPanelAnimationVarAliasType doesn't do its job properly.
+//-----------------------------------------------------------------------------
+int Panel::m_siCorner1 = -1, Panel::m_siCorner2 = -1, Panel::m_siCorner3 = -1, Panel::m_siCorner4 = -1;
+bool Panel::m_sbAreCornersLoaded = false;
+void Panel::LoadCorners()
+{
+	if (!m_sbAreCornersLoaded)
+	{
+		// Load corners
+		auto LoadTexture = [](int &var, const char *filename)
+		{
+			var = vgui2::surface()->CreateNewTextureID(true);
+			vgui2::surface()->DrawSetTextureFile(var, filename, false, false);
+		};
+
+		LoadTexture(m_siCorner1, "ui/gfx/800corner1");
+		LoadTexture(m_siCorner2, "ui/gfx/800corner2");
+		LoadTexture(m_siCorner3, "ui/gfx/800corner3");
+		LoadTexture(m_siCorner4, "ui/gfx/800corner4");
+
+		m_sbAreCornersLoaded = true;
+	}
+	if (m_nBgTextureId1 == -1) m_nBgTextureId1 = m_siCorner1;
+	if (m_nBgTextureId2 == -1) m_nBgTextureId2 = m_siCorner2;
+	if (m_nBgTextureId3 == -1) m_nBgTextureId3 = m_siCorner3;
+	if (m_nBgTextureId4 == -1) m_nBgTextureId4 = m_siCorner4;
+}
 
 }

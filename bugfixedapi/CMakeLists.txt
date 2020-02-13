@@ -1,5 +1,4 @@
 add_sources(
+	CMakeLists.txt
 	IBugfixedServer.h
-	CBugfixedServer.h
-	CBugfixedServer.cpp
 )

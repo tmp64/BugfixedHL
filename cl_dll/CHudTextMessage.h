@@ -6,7 +6,7 @@
 class CHudTextMessage : public CHudBase
 {
 public:
-	int Init(void);
+	void Init();
 	static char *LocaliseTextString(const char *msg, char *dst_buffer, int buffer_size);
 	static char *BufferedLocaliseTextString(const char *msg);
 	char *LookupString(const char *msg_name, int *msg_dest = NULL);

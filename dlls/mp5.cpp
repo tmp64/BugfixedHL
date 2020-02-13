@@ -23,6 +23,12 @@
 #include "soundent.h"
 #include "gamerules.h"
 
+#ifdef SERVER_DLL
+#include "convar.h"
+
+ConVar mp_fix_mp5_ammo("mp_fix_mp5_ammo", "1");
+#endif
+
 enum mp5_e
 {
 	MP5_LONGIDLE = 0,
@@ -40,7 +46,6 @@ enum mp5_e
 LINK_ENTITY_TO_CLASS( weapon_mp5, CMP5 );
 LINK_ENTITY_TO_CLASS( weapon_9mmAR, CMP5 );
 
-
 //=========================================================
 //=========================================================
 int CMP5::SecondaryAmmoIndex( void )
@@ -55,7 +60,14 @@ void CMP5::Spawn( )
 	SET_MODEL(ENT(pev), "models/w_9mmAR.mdl");
 	m_iId = WEAPON_MP5;
 
+#ifdef SERVER_DLL
+	if (mp_fix_mp5_ammo)
+		m_iDefaultAmmo = 50;
+	else
+		m_iDefaultAmmo = 25;
+#else
 	m_iDefaultAmmo = MP5_DEFAULT_GIVE;
+#endif
 
 	FallInit();// get ready to fall down.
 }
