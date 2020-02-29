@@ -16,7 +16,7 @@
 #include "biohazard_mode.h"
 #include "slowrockets_mode.h"
 
-extern ConVar mp_multimode;
+extern int g_multimode;
 
 ConVar mp_mm_min_players("mp_mm_min_players", "1");
 ConVar mp_mm_warmup_time("mp_mm_warmup_time", "45");
@@ -906,16 +906,16 @@ void CHalfLifeMultimode::ResetTimerUpdate()
 
 bool IsRunningMultimode()
 {
-	return mp_multimode.operator bool();
+	return g_multimode;
 }
 
 bool IsRunningMultimode(ModeID mode)
 {
-	return (mp_multimode && static_cast<CHalfLifeMultimode *>(g_pGameRules)->m_CurModeId == mode);
+	return (g_multimode && static_cast<CHalfLifeMultimode *>(g_pGameRules)->m_CurModeId == mode);
 }
 
 CHalfLifeMultimode *GetMultimodeGR()
 {
-	ASSERT(mp_multimode.operator bool());
+	ASSERT(g_multimode);
 	return static_cast<CHalfLifeMultimode *>(g_pGameRules);
 }

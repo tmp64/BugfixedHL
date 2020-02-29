@@ -37,6 +37,7 @@ extern int gmsgDeathMsg;	// client dll messages
 extern int gmsgMOTD;
 
 int g_teamplay = 0;
+int g_multimode = 0;
 
 //=========================================================
 //=========================================================
@@ -317,6 +318,9 @@ CGameRules *InstallGameRules( void )
 	SERVER_COMMAND( "exec game.cfg\n" );
 	SERVER_EXECUTE( );
 
+	g_teamplay = 0;
+	g_multimode = 0;
+
 	if ( !gpGlobals->deathmatch )
 	{
 		// generic half-life
@@ -327,6 +331,7 @@ CGameRules *InstallGameRules( void )
 	{
 		if (mp_multimode)
 		{
+			g_multimode = 1;
 			return new CHalfLifeMultimode;
 		}
 		else if ( teamplay.value > 0 )
