@@ -13,6 +13,7 @@ enum class ModeID : int
 	WpnDrop,
 	Biohazard,
 	SlowRockets,
+	Speed,
 	ModeCount
 };
 

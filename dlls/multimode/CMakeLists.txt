@@ -20,4 +20,6 @@ add_sources(
 	biohazard_mode.cpp
 	slowrockets_mode.h
 	slowrockets_mode.cpp
+	speed_mode.h
+	speed_mode.cpp
 )

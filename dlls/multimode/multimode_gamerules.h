@@ -23,6 +23,8 @@ public:
 	CHalfLifeMultimode();
 	virtual ~CHalfLifeMultimode();
 
+	State GetState();
+
 	void SwitchToWaiting();
 	void SwitchToWarmup();
 	void SwitchToNextMode();

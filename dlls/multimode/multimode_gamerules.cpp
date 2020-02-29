@@ -15,6 +15,7 @@
 #include "warmup_mode.h"
 #include "biohazard_mode.h"
 #include "slowrockets_mode.h"
+#include "speed_mode.h"
 
 extern int g_multimode;
 
@@ -89,6 +90,7 @@ CHalfLifeMultimode::CHalfLifeMultimode() : CHalfLifeMultiplay()
 	m_pModes[(int)ModeID::WpnDrop] = new CWpnDropMode();
 	m_pModes[(int)ModeID::Biohazard] = new CBiohazardMode();
 	m_pModes[(int)ModeID::SlowRockets] = new CSlowRocketsMode();
+	m_pModes[(int)ModeID::Speed] = new CSpeedMode();
 
 	// Remove timelimit
 	g_engfuncs.pfnCvar_DirectSet(&timelimit, "0");
@@ -98,6 +100,11 @@ CHalfLifeMultimode::~CHalfLifeMultimode()
 {
 	for (int i = (int)ModeID::ModeCount - 1; i >= 0; i--)
 		delete m_pModes[i];
+}
+
+CHalfLifeMultimode::State CHalfLifeMultimode::GetState()
+{
+	return m_State;
 }
 
 void CHalfLifeMultimode::SwitchToWaiting()
