@@ -6,16 +6,7 @@ image:
 
 environment:
   matrix:
-    - TARGET: Client
-    - TARGET: ClientVGUI2
-    - TARGET: Client4554
     - TARGET: Server
-    - TARGET: Amxx
-
-matrix:
-  exclude:
-    - image: Ubuntu1804
-      TARGET: Client4554
 
 install:
   - sh: sudo dpkg --add-architecture i386
