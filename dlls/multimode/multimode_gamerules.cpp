@@ -162,7 +162,7 @@ void CHalfLifeMultimode::SwitchToNextMode()
 		}
 		case 1:
 		{
-			m_State = State::Intermission;
+			m_State = State::FinalIntermission;
 			GoToIntermission();
 			return;
 		}
@@ -616,7 +616,7 @@ void CHalfLifeMultimode::Think()
 		break;
 	}
 	case State::Endgame:
-	case State::Intermission:
+	case State::FinalIntermission:
 	{
 		break;
 	}

@@ -17,7 +17,7 @@ public:
 		FreezeTime,
 		Game,
 		Endgame,
-		Intermission
+		FinalIntermission
 	};
 
 	CHalfLifeMultimode();
