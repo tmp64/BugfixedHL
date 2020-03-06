@@ -38,6 +38,11 @@ public:
 
 	virtual const char *GetGameDescription();
 
+	void ThinkWaiting();
+	void ThinkWarmup();
+	void ThinkFreezeTime();
+	void ThinkGame();
+	
 	virtual void Think();
 
 	// After primary attack

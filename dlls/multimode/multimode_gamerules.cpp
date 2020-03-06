@@ -428,6 +428,144 @@ const char *CHalfLifeMultimode::GetGameDescription()
 	return "HL Multimode";
 }
 
+void CHalfLifeMultimode::ThinkWaiting()
+{
+	if (gpGlobals->time >= m_flNextTimerUpdate)
+	{
+		// Count connected players
+		int iPlayerCount = 0;
+		int iMinPlayerCount = mp_mm_min_players.Get();
+		for (int i = 1; i <= gpGlobals->maxClients; i++)
+		{
+			edict_t *pEdict = INDEXENT(i);
+			if (!pEdict || pEdict->free)
+				continue;
+
+			CBasePlayer *pPlayer = (CBasePlayer *)CBaseEntity::Instance(pEdict);
+			if (pPlayer && !pPlayer->m_bIsBot)
+				iPlayerCount++;
+		}
+
+		if (iPlayerCount >= iMinPlayerCount)
+		{
+			// Start warmup
+			SwitchToWarmup();
+		}
+		else
+		{
+			// Show hud message
+			char buf[128];
+			snprintf(buf, sizeof(buf), "Waiting for players [%d / %d]", iPlayerCount, iMinPlayerCount);
+			UTIL_DirectorHudMessageAll(m_WarmupTextParams, buf, false);
+		}
+
+		m_flNextTimerUpdate = gpGlobals->time + 1;
+	}
+}
+
+void CHalfLifeMultimode::ThinkWarmup()
+{
+	if (gpGlobals->time >= m_flNextTimerUpdate)
+	{
+		char buf[128];
+		int seconds = m_flWarmupEndTime - gpGlobals->time;
+		snprintf(buf, sizeof(buf), "Warm-up [%d:%02d]", seconds / 60, seconds % 60);
+		UTIL_DirectorHudMessageAll(m_WarmupTextParams, buf, false);
+		m_flNextTimerUpdate = gpGlobals->time + 1;
+	}
+
+	if (gpGlobals->time >= m_flWarmupEndTime)
+	{
+		SwitchToNextMode();
+	}
+}
+
+void CHalfLifeMultimode::ThinkFreezeTime()
+{
+	if (gpGlobals->time >= m_flFreezeEndTime)
+	{
+		StartCurMode();
+	}
+	else if (gpGlobals->time >= m_flNextTimerUpdate)
+	{
+		const char *szSuitVoice[10] = {
+			nullptr,
+			"fvox/one.wav",
+			"fvox/two.wav",
+			"fvox/three.wav",
+			"fvox/four.wav",
+			"fvox/five.wav",
+			"fvox/six.wav",
+			"fvox/seven.wav",
+			"fvox/eight.wav",
+			"fvox/nine.wav"
+		};
+
+		// Play sound on all clients
+		for (int i = 1; i <= gpGlobals->maxClients; i++)
+		{
+			edict_t *pEdict = INDEXENT(i);
+
+			if (!pEdict || pEdict->free)
+				continue;
+
+			CBasePlayer *pPlayer = (CBasePlayer *)CBaseEntity::Instance(pEdict);
+			if (pPlayer)
+			{
+				if (m_iFreezeNextSec >= 1 && m_iFreezeNextSec <= 9 && !pPlayer->m_bIsBot)
+				{
+					CLIENT_COMMAND(pEdict, "spk %s\n", szSuitVoice[m_iFreezeNextSec]);
+				}
+			}
+		}
+
+		m_iFreezeNextSec--;
+		m_flNextTimerUpdate = gpGlobals->time + 1;
+	}
+}
+
+void CHalfLifeMultimode::ThinkGame()
+{
+	// Update timer
+	if (gpGlobals->time >= m_flNextTimerUpdate)
+	{
+		char buf[128];
+		int seconds = m_flEndTime - gpGlobals->time;
+		snprintf(buf, sizeof(buf), "%d:%02d", seconds / 60, seconds % 60);
+		UTIL_DirectorHudMessageAll(m_TimerTextParams, buf, false);
+
+		if (seconds <= 4)
+		{
+			// Play blip sound to signal the end
+			const char *snd;
+
+			if (seconds <= 1)
+				snd = "blip2";
+			else
+				snd = "blip1";
+
+			for (int i = 1; i <= gpGlobals->maxClients; i++)
+			{
+				edict_t *pEdict = INDEXENT(i);
+
+				if (!pEdict || pEdict->free)
+					continue;
+
+				CBasePlayer *pPlayer = (CBasePlayer *)CBaseEntity::Instance(pEdict);
+				if (pPlayer && !pPlayer->m_bIsBot)
+					CLIENT_COMMAND(pEdict, "spk buttons/%s.wav\n", snd);
+			}
+		}
+
+		m_flNextTimerUpdate = gpGlobals->time + 1;
+	}
+
+	if (gpGlobals->time >= m_flEndTime)
+	{
+		SwitchToNextMode();
+	}
+}
+
 void CHalfLifeMultimode::Think()
 {
 	BaseClass::Think();
@@ -459,144 +597,22 @@ void CHalfLifeMultimode::Think()
 	}
 	case State::Waiting:
 	{
-		if (gpGlobals->time >= m_flNextTimerUpdate)
-		{
-			// Count connected players
-			int iPlayerCount = 0;
-			int iMinPlayerCount = mp_mm_min_players.Get();
-			for (int i = 1; i <= gpGlobals->maxClients; i++)
-			{
-				edict_t *pEdict = INDEXENT(i);
-				if (!pEdict || pEdict->free)
-					continue;
-
-				CBasePlayer *pPlayer = (CBasePlayer *)CBaseEntity::Instance(pEdict);
-				if (pPlayer && !pPlayer->m_bIsBot)
-					iPlayerCount++;
-			}
-
-			if (iPlayerCount >= iMinPlayerCount)
-			{
-				// Start warmup
-				SwitchToWarmup();
-			}
-			else
-			{
-				// Show hud message
-				char buf[128];
-				snprintf(buf, sizeof(buf), "Waiting for players [%d / %d]", iPlayerCount, iMinPlayerCount);
-				UTIL_DirectorHudMessageAll(m_WarmupTextParams, buf, false);
-			}
-
-			m_flNextTimerUpdate = gpGlobals->time + 1;
-		}
-
+		ThinkWaiting();
 		break;
 	}
 	case State::Warmup:
 	{
-		if (gpGlobals->time >= m_flNextTimerUpdate)
-		{
-			char buf[128];
-			int seconds = m_flWarmupEndTime - gpGlobals->time;
-			snprintf(buf, sizeof(buf), "Warm-up [%d:%02d]", seconds / 60, seconds % 60);
-			UTIL_DirectorHudMessageAll(m_WarmupTextParams, buf, false);
-			m_flNextTimerUpdate = gpGlobals->time + 1;
-		}
-
-		if (gpGlobals->time >= m_flWarmupEndTime)
-		{
-			SwitchToNextMode();
-		}
-
+		ThinkWarmup();
 		break;
 	}
 	case State::FreezeTime:
 	{
-		if (gpGlobals->time >= m_flFreezeEndTime)
-		{
-			StartCurMode();
-		}
-		else if (gpGlobals->time >= m_flNextTimerUpdate)
-		{
-			const char *szSuitVoice[10] = {
-				nullptr,
-				"fvox/one.wav",
-				"fvox/two.wav",
-				"fvox/three.wav",
-				"fvox/four.wav",
-				"fvox/five.wav",
-				"fvox/six.wav",
-				"fvox/seven.wav",
-				"fvox/eight.wav",
-				"fvox/nine.wav"
-			};
-
-			// Play sound on all clients
-			for (int i = 1; i <= gpGlobals->maxClients; i++)
-			{
-				edict_t *pEdict = INDEXENT(i);
-
-				if (!pEdict || pEdict->free)
-					continue;
-
-				CBasePlayer *pPlayer = (CBasePlayer *)CBaseEntity::Instance(pEdict);
-				if (pPlayer)
-				{
-					if (m_iFreezeNextSec >= 1 && m_iFreezeNextSec <= 9 && !pPlayer->m_bIsBot)
-					{
-						CLIENT_COMMAND(pEdict, "spk %s\n", szSuitVoice[m_iFreezeNextSec]);
-					}
-				}
-			}
-
-			m_iFreezeNextSec--;
-			m_flNextTimerUpdate = gpGlobals->time + 1;
-		}
-
+		ThinkFreezeTime();
 		break;
 	}
 	case State::Game:
 	{
-		// Update timer
-		if (gpGlobals->time >= m_flNextTimerUpdate)
-		{
-			char buf[128];
-			int seconds = m_flEndTime - gpGlobals->time;
-			snprintf(buf, sizeof(buf), "%d:%02d", seconds / 60, seconds % 60);
-			UTIL_DirectorHudMessageAll(m_TimerTextParams, buf, false);
-
-			if (seconds <= 4)
-			{
-				// Play blip sound to signal the end
-				const char *snd;
-
-				if (seconds <= 1)
-					snd = "blip2";
-				else
-					snd = "blip1";
-
-				for (int i = 1; i <= gpGlobals->maxClients; i++)
-				{
-					edict_t *pEdict = INDEXENT(i);
-
-					if (!pEdict || pEdict->free)
-						continue;
-
-					CBasePlayer *pPlayer = (CBasePlayer *)CBaseEntity::Instance(pEdict);
-					if (pPlayer && !pPlayer->m_bIsBot)
-						CLIENT_COMMAND(pEdict, "spk buttons/%s.wav\n", snd);
-				}
-			}
-
-			m_flNextTimerUpdate = gpGlobals->time + 1;
-		}
-
-		if (gpGlobals->time >= m_flEndTime)
-		{
-			SwitchToNextMode();
-		}
-
+		ThinkGame();
 		break;
 	}
 	case State::Endgame:
