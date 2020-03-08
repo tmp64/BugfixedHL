@@ -294,7 +294,7 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time, c
 	{
 		if (nColorMode && *(pwText + 0) == L'^' && IsColorCodeCharValid(*(pwText + 1)))
 		{
-			pwText += 2;
+			pwText += 1;
 		}
 		else if (*pwText == '\n')
 		{
