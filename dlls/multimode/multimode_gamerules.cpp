@@ -565,13 +565,15 @@ void CHalfLifeMultimode::StartCurMode()
 			if (!pPlayer->m_bIsBot)
 				CLIENT_COMMAND(pEdict, "spk buttons/bell1.wav\n");
 
-			if (IsSpectator(pPlayer))
-				continue;
-
-			pPlayer->m_flNextAttack = 0;
 			pPlayer->pev->flags &= ~FL_FROZEN;
-			pPlayer->m_iMultimodeScore = 0;
-			pPlayer->m_iMultimodeDeaths = 0;
+			pPlayer->pev->flags &= ~FL_GODMODE;
+
+			if (!IsSpectator(pPlayer))
+			{
+				pPlayer->m_flNextAttack = 0;
+				pPlayer->m_iMultimodeScore = 0;
+				pPlayer->m_iMultimodeDeaths = 0;
+			}
 		}
 	}
 }
@@ -848,8 +850,8 @@ void CHalfLifeMultimode::PlayerSpawn(CBasePlayer *pPlayer)
 		// Disable attack
 		pPlayer->m_flNextAttack = gpGlobals->time + 9999999;
 
-		// Freeze
 		pPlayer->pev->flags |= FL_FROZEN;
+		pPlayer->pev->flags |= FL_GODMODE;
 
 		DROP_TO_FLOOR(pPlayer->edict());
 	}
