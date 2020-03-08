@@ -304,6 +304,9 @@ extern BOOL UTIL_GetNextBestWeapon( CBasePlayer *pPlayer, CBasePlayerItem *pCurr
 // prints messages through the HUD
 extern void ClientPrint( entvars_t *client, int msg_dest, const char *msg_name, const char *param1 = NULL, const char *param2 = NULL, const char *param3 = NULL, const char *param4 = NULL );
 
+extern void ColoredClientPrint(CBaseEntity *pEntity, int msg_dest, const char *msg_name, const char *param1 = NULL, const char *param2 = NULL, const char *param3 = NULL, const char *param4 = NULL);
+extern void	UTIL_ColoredClientPrintAll(int msg_dest, const char *msg_name, const char *param1 = NULL, const char *param2 = NULL, const char *param3 = NULL, const char *param4 = NULL);
+
 // prints a message to the HUD say (chat)
 extern void			UTIL_SayText( const char *pText, CBaseEntity *pEntity );
 extern void			UTIL_SayTextAll( const char *pText, CBaseEntity *pEntity );
@@ -330,6 +333,10 @@ extern void			UTIL_HudMessage( CBaseEntity *pEntity, const hudtextparms_t &textp
 // HUD messages that don't use channel
 extern void			UTIL_DirectorHudMessageAll(const hudtextparms_t &textparms, const char *pMessage, bool reliable);
 extern void			UTIL_DirectorHudMessage(CBaseEntity *pEntity, const hudtextparms_t &textparms, const char *pMessage, bool reliable);
+
+// These handle color code (^1...) specially: color codes are only sent to clients that support them.
+extern void			UTIL_ColoredDirectorHudMessageAll(const hudtextparms_t &textparms, const char *pMessage, bool reliable);
+extern void			UTIL_ColoredDirectorHudMessage(CBaseEntity *pEntity, const hudtextparms_t &textparms, const char *pMessage, bool reliable);
 
 // for handy use with ClientPrint params
 extern char *UTIL_dtos1( int d );
@@ -546,5 +553,8 @@ int UTIL_SharedRandomLong( unsigned int seed, int low, int high );
 float UTIL_SharedRandomFloat( unsigned int seed, float low, float high );
 
 float UTIL_WeaponTimeBase( void );
+
+// Removes all ^[number] from the string
+void UTIL_RemoveColorCodes(const char *src, char *dst, int size);
 
 #endif

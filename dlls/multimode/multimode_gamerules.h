@@ -16,6 +16,7 @@ public:
 		Warmup,
 		FreezeTime,
 		Game,
+		Intermission,
 		Endgame,
 		FinalIntermission
 	};
@@ -27,6 +28,7 @@ public:
 
 	void SwitchToWaiting();
 	void SwitchToWarmup();
+	void SwitchToIntermission();
 	void SwitchToNextMode();
 	void SwitchToEndgame();
 
@@ -42,6 +44,7 @@ public:
 	void ThinkWarmup();
 	void ThinkFreezeTime();
 	void ThinkGame();
+	void ThinkIntermission();
 	
 	virtual void Think();
 
@@ -55,6 +58,7 @@ private:
 	hudtextparms_t m_TimerTextParams;
 	hudtextparms_t m_ModeTitleTextParams;
 	hudtextparms_t m_ModeInfoTextParams;
+	hudtextparms_t m_IntermStatsTextParams;
 
 	State m_State = State::Invalid;
 	float m_flNextTimerUpdate = 0;
@@ -72,6 +76,10 @@ private:
 	CBaseMode *m_pCurMode = nullptr;
 	ModeID m_CurModeId = ModeID::None;
 	float m_flEndTime = 0;
+
+	// Intermission
+	float m_flDefaultMaxSpeed = -1;
+	float m_flIntermEndTime = 0;
 
 	CHalfLifeMultimode(const CHalfLifeMultimode &&) = delete;
 	CHalfLifeMultimode &operator=(const CHalfLifeMultimode &&) = delete;

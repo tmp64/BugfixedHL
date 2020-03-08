@@ -1,3 +1,5 @@
+#include <string>
+
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
@@ -23,6 +25,7 @@ ConVar mp_mm_min_players("mp_mm_min_players", "1");
 ConVar mp_mm_warmup_time("mp_mm_warmup_time", "45");
 ConVar mp_mm_freeze_time("mp_mm_freeze_time", "5");
 ConVar mp_mm_game_time("mp_mm_game_time", "60");
+ConVar mp_mm_interm_time("mp_mm_interm_time", "5");
 
 ConVar mp_mm_skip_warmup("mp_mm_skip_warmup", "0");
 ConVar mp_mm_skip_mode("mp_mm_skip_mode", "0");
@@ -33,6 +36,32 @@ ConVar mp_mm_skip_mode("mp_mm_skip_mode", "0");
 //   2: the game will go in "endgame" state to choose a
 //      new map using mapchooser_multimode AMXX plugin.
 ConVar mp_mm_on_end("mp_mm_on_end", "0");
+
+struct MultimodePlayerScore
+{
+	int idx;
+	int score;
+	int deaths;
+};
+
+static MultimodePlayerScore s_PlayerScores[MAX_PLAYERS + 1];
+
+static int SortMultimodePlayerScore(const void *plhs, const void *prhs)
+{
+	MultimodePlayerScore &lhs = *(MultimodePlayerScore *)plhs;
+	MultimodePlayerScore &rhs = *(MultimodePlayerScore *)prhs;
+	if (lhs.score > rhs.score)
+		return -1;
+	if (lhs.score < rhs.score)
+		return 1;
+
+	if (lhs.deaths < rhs.deaths)
+		return -1;
+	if (lhs.deaths > rhs.deaths)
+		return 1;
+
+	return 0;
+}
 
 CHalfLifeMultimode::CHalfLifeMultimode() : CHalfLifeMultiplay()
 {
@@ -74,6 +103,17 @@ CHalfLifeMultimode::CHalfLifeMultimode() : CHalfLifeMultiplay()
 	m_ModeInfoTextParams.g1 = 255;
 	m_ModeInfoTextParams.b1 = 255;
 
+	m_IntermStatsTextParams.x = 0.75;
+	m_IntermStatsTextParams.y = 0.4f;
+	m_IntermStatsTextParams.effect = 0;
+	m_IntermStatsTextParams.r1 = 255;
+	m_IntermStatsTextParams.g1 = 255;
+	m_IntermStatsTextParams.b1 = 255;
+	m_IntermStatsTextParams.fadeinTime = 1.f;
+	m_IntermStatsTextParams.fadeoutTime = 0.1f;
+	m_IntermStatsTextParams.holdTime = mp_mm_interm_time.Get() - 0.6f;
+	m_IntermStatsTextParams.fxTime = mp_mm_interm_time.Get() - 0.6f;
+
 	// Do not give crowbar and glock
 	m_bGiveDefaultWeapons = false;
 
@@ -94,6 +134,9 @@ CHalfLifeMultimode::CHalfLifeMultimode() : CHalfLifeMultiplay()
 
 	// Remove timelimit
 	g_engfuncs.pfnCvar_DirectSet(&timelimit, "0");
+
+	// Save maxspeed before it is modified by modes
+	m_flDefaultMaxSpeed = CVAR_GET_FLOAT("sv_maxspeed");
 }
 
 CHalfLifeMultimode::~CHalfLifeMultimode()
@@ -146,8 +189,91 @@ void CHalfLifeMultimode::SwitchToWarmup()
 	BeginCurMode(false, false);
 }
 
+void CHalfLifeMultimode::SwitchToIntermission()
+{
+	if (m_State == State::Intermission)
+		return;
+
+	m_State = State::Intermission;
+	m_flIntermEndTime = gpGlobals->time + mp_mm_interm_time.Get();
+
+	// Freeze all players by changing max speed
+	// (for slow down effect instead of immediate freeze)
+	CVAR_SET_FLOAT("sv_maxspeed", 0);
+
+	int iPlayerCount = 0;
+	int iPlayerScoresIdx = 1;
+	
+	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	{
+		CBasePlayer *pPlayer = (CBasePlayer *)UTIL_PlayerByIndex(i);
+		if (pPlayer)
+		{
+			if (!IsSpectator(pPlayer))
+			{
+				// Disable weapons
+				pPlayer->m_flNextAttack = gpGlobals->time + 99999999;	// never
+
+				// Give god mode
+				pPlayer->pev->flags |= FL_GODMODE;
+			}
+
+			// Play round end sound
+			CLIENT_COMMAND(pPlayer->edict(), "spk buttons/button8.wav\n");
+
+			// Set in score array
+			s_PlayerScores[iPlayerScoresIdx].idx = i;
+			s_PlayerScores[iPlayerScoresIdx].score = pPlayer->m_iMultimodeScore;
+			s_PlayerScores[iPlayerScoresIdx].deaths = pPlayer->m_iMultimodeDeaths;
+
+			iPlayerCount++;
+			iPlayerScoresIdx++;
+		}
+	}
+
+	// Sort scores
+	qsort(s_PlayerScores + 1, iPlayerCount, sizeof(s_PlayerScores[0]), SortMultimodePlayerScore);
+
+	// Show message
+	std::string str;
+
+	if (iPlayerCount < 2 || s_PlayerScores[1].score == s_PlayerScores[2].score)
+		str = "^3Draw!^0\n\n";
+	else
+		str = STRING(UTIL_PlayerByIndex(s_PlayerScores[1].idx)->pev->netname) + std::string("^0 is the winner!\n\n");
+
+	for (int i = 1, len = min(iPlayerCount, 7) ; i <= len; i++)
+	{
+		char buf[128];
+		const char *playerName = STRING(UTIL_PlayerByIndex(s_PlayerScores[i].idx)->pev->netname);
+		snprintf(buf, sizeof(buf), "%d. %s^0 - %d\n", i, playerName, s_PlayerScores[i].score);
+		str += buf;
+	}
+
+	UTIL_ColoredDirectorHudMessageAll(m_IntermStatsTextParams, str.c_str(), true);
+}
+
 void CHalfLifeMultimode::SwitchToNextMode()
 {
+	if (m_State == State::Intermission)
+	{
+		// Restore speed
+		CVAR_SET_FLOAT("sv_maxspeed", m_flDefaultMaxSpeed);
+
+		for (int i = 1; i <= gpGlobals->maxClients; i++)
+		{
+			CBasePlayer *pPlayer = (CBasePlayer *)UTIL_PlayerByIndex(i);
+			if (pPlayer)
+			{
+				// Reenable weapons
+				pPlayer->m_flNextAttack = 0;
+
+				// Take god mode
+				pPlayer->pev->flags &= ~FL_GODMODE;
+			}
+		}
+	}
+
 	FinishCurMode();
 
 	m_CurModeId = (ModeID)((int)m_CurModeId + 1);
@@ -203,6 +329,46 @@ void CHalfLifeMultimode::SwitchToEndgame()
 	m_State = State::Endgame;
 	m_pCurMode = m_pWarmupMode;
 	BeginCurMode(false, false);
+
+	// Sort scores
+	int iPlayerScoresIdx = 1;
+	int iPlayerCount = 0;
+
+	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	{
+		CBasePlayer *pPlayer = (CBasePlayer *)UTIL_PlayerByIndex(i);
+		if (pPlayer)
+		{
+			// Set in score array
+			s_PlayerScores[iPlayerScoresIdx].idx = i;
+			s_PlayerScores[iPlayerScoresIdx].score = pPlayer->pev->frags;
+			s_PlayerScores[iPlayerScoresIdx].deaths = pPlayer->m_iDeaths;
+
+			iPlayerCount++;
+			iPlayerScoresIdx++;
+		}
+	}
+
+	UTIL_ColoredClientPrintAll(HUD_PRINTTALK, "^2* The game has finished!");
+
+	if (iPlayerCount > 0)
+	{
+		qsort(s_PlayerScores + 1, iPlayerCount, sizeof(s_PlayerScores[0]), SortMultimodePlayerScore);
+
+		char buf[512];
+		CBasePlayer *pWinner = (CBasePlayer *)UTIL_PlayerByIndex(s_PlayerScores[1].idx);
+
+		// Say to all
+		const char *playerName = STRING(pWinner->pev->netname);
+		snprintf(buf, sizeof(buf), "^2* %s^8 is the winner with %d kills/%d deaths.",
+			playerName, (int)pWinner->pev->frags, pWinner->m_iDeaths
+		);
+
+		UTIL_ColoredClientPrintAll(HUD_PRINTTALK, buf);
+
+		// Say to the winner
+		ColoredClientPrint(pWinner, HUD_PRINTTALK, "^1* Congratulations! ^8You have won the game!");
+	}
 }
 
 void CHalfLifeMultimode::BeginCurMode(bool bEnableFreezeTime, bool bShowModeInfo)
@@ -404,6 +570,8 @@ void CHalfLifeMultimode::StartCurMode()
 
 			pPlayer->m_flNextAttack = 0;
 			pPlayer->pev->flags &= ~FL_FROZEN;
+			pPlayer->m_iMultimodeScore = 0;
+			pPlayer->m_iMultimodeDeaths = 0;
 		}
 	}
 }
@@ -562,6 +730,14 @@ void CHalfLifeMultimode::ThinkGame()
 
 	if (gpGlobals->time >= m_flEndTime)
 	{
+		SwitchToIntermission();
+	}
+}
+
+void CHalfLifeMultimode::ThinkIntermission()
+{
+	if (gpGlobals->time >= m_flIntermEndTime)
+	{
 		SwitchToNextMode();
 	}
 }
@@ -613,6 +789,11 @@ void CHalfLifeMultimode::Think()
 	case State::Game:
 	{
 		ThinkGame();
+		break;
+	}
+	case State::Intermission:
+	{
+		ThinkIntermission();
 		break;
 	}
 	case State::Endgame:
@@ -695,6 +876,9 @@ void CHalfLifeMultimode::PlayerThink(CBasePlayer *pPlayer)
 
 BOOL CHalfLifeMultimode::FPlayerCanRespawn(CBasePlayer *pPlayer)
 {
+	if (m_State == State::Intermission)
+		return false;
+
 	if (m_pCurMode)
 	{
 		return m_pCurMode->PlayerCanRespawn(pPlayer);
@@ -738,6 +922,30 @@ int CHalfLifeMultimode::IPointsForKill(CBasePlayer *pAttacker, CBasePlayer *pKil
 void CHalfLifeMultimode::PlayerKilled(CBasePlayer *pVictim, entvars_t *pKiller, entvars_t *pInflictor)
 {
 	BaseClass::PlayerKilled(pVictim, pKiller, pInflictor);
+
+	pVictim->m_iMultimodeDeaths++;
+
+	CBaseEntity *ktmp = CBaseEntity::Instance(pKiller);
+
+	if (ktmp && ktmp->IsPlayer())
+	{
+		CBasePlayer *pKillerEnt = (CBasePlayer *)ktmp;
+
+		if (pVictim->pev == pKiller)
+		{
+			// killed self
+			pKillerEnt->m_iMultimodeScore -= 1;
+		}
+		else if (ktmp && ktmp->IsPlayer())
+		{
+			pKillerEnt->m_iMultimodeScore += IPointsForKill(pKillerEnt, pVictim);
+		}
+		else
+		{
+			// killed by the world
+			pKillerEnt->m_iMultimodeScore -= 1;
+		}
+	}
 
 	if (m_pCurMode)
 	{

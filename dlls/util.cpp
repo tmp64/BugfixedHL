@@ -31,6 +31,7 @@
 #include "player.h"
 #include "weapons.h"
 #include "gamerules.h"
+#include "CBugfixedServer.h"
 
 float UTIL_WeaponTimeBase( void )
 {
@@ -938,7 +939,63 @@ void UTIL_DirectorHudMessageAll(const hudtextparms_t &textparms, const char *pMe
 
 void UTIL_DirectorHudMessage(CBaseEntity *pEntity, const hudtextparms_t &textparms, const char *pMessage, bool reliable)
 {
+	if (!pEntity || !pEntity->IsNetClient())
+		return;
+
 	UTIL_DirectorHudMessage(reliable ? MSG_ONE : MSG_ONE_UNRELIABLE, pEntity->edict(), textparms, pMessage);
+}
+
+void UTIL_ColoredDirectorHudMessageAll(const hudtextparms_t &textparms, const char *pMessage, bool reliable)
+{
+	if (pMessage[0] == '\0')
+	{
+		// Empty string
+		UTIL_DirectorHudMessageAll(textparms, pMessage, reliable);
+		return;
+	}
+
+	static char buf[512];
+	buf[0] = '\0';
+
+	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	{
+		CBaseEntity *pEntity = UTIL_PlayerByIndex(i);
+		if (pEntity && pEntity->IsNetClient())
+		{
+			const char *msg;
+
+			if (serverapi()->GetColorSupport(i))
+			{
+				msg = pMessage;
+			}
+			else
+			{
+				if (buf[0] == '\0')
+					UTIL_RemoveColorCodes(pMessage, buf, sizeof(buf));
+				msg = buf;
+			}
+
+			UTIL_DirectorHudMessageAll(textparms, msg, reliable);
+		}
+	}
+}
+
+void UTIL_ColoredDirectorHudMessage(CBaseEntity *pEntity, const hudtextparms_t &textparms, const char *pMessage, bool reliable)
+{
+	static char buf[512];
+
+	if (!pEntity || !pEntity->IsNetClient())
+		return;
+
+	int idx = ENTINDEX(pEntity->edict());
+
+	if (!serverapi()->GetColorSupport(idx))
+	{
+		UTIL_RemoveColorCodes(pMessage, buf, sizeof(buf));
+		pMessage = buf;
+	}
+
+	UTIL_DirectorHudMessage(pEntity, textparms, pMessage, reliable);
 }
 					 
 extern int gmsgTextMsg, gmsgSayText;
@@ -976,6 +1033,59 @@ void ClientPrint( entvars_t *client, int msg_dest, const char *msg_name, const c
 			WRITE_STRING( param4 );
 
 	MESSAGE_END();
+}
+
+void ColoredClientPrint(CBaseEntity *pEntity, int msg_dest, const char *msg_name, const char *param1, const char *param2, const char *param3, const char *param4)
+{
+	static char buf[512];
+
+	if (!pEntity || !pEntity->IsNetClient())
+		return;
+
+	int idx = ENTINDEX(pEntity->edict());
+
+	if (!serverapi()->GetColorSupport(idx))
+	{
+		UTIL_RemoveColorCodes(msg_name, buf, sizeof(buf));
+		msg_name = buf;
+	}
+
+	ClientPrint(pEntity->pev, msg_dest, msg_name, param1, param2, param3, param4);
+}
+
+void UTIL_ColoredClientPrintAll(int msg_dest, const char *msg_name, const char *param1, const char *param2, const char *param3, const char *param4)
+{
+	if (msg_name[0] == '\0')
+	{
+		// Empty string
+		UTIL_ClientPrintAll(msg_dest, msg_name, param1, param2, param3, param4);
+		return;
+	}
+
+	static char buf[512];
+	buf[0] = '\0';
+
+	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	{
+		CBaseEntity *pEntity = UTIL_PlayerByIndex(i);
+		if (pEntity && pEntity->IsNetClient())
+		{
+			const char *msg;
+
+			if (serverapi()->GetColorSupport(i))
+			{
+				msg = msg_name;
+			}
+			else
+			{
+				if (buf[0] == '\0')
+					UTIL_RemoveColorCodes(msg_name, buf, sizeof(buf));
+				msg = buf;
+			}
+
+			UTIL_ClientPrintAll(msg_dest, msg, param1, param2, param3, param4);
+		}
+	}
 }
 
 void UTIL_SayText( const char *pText, CBaseEntity *pEntity )
@@ -2643,3 +2753,24 @@ int	CRestore::BufferCheckZString( const char *string )
 	return 0;
 }
 
+void UTIL_RemoveColorCodes(const char *src, char *dst, int size)
+{
+	int i = 0, j = 0;
+	while (src[i] != '\0' && j < size)
+	{
+		if (src[i] == '^' && (src[i + 1] >= '0' && src[i + 1] <= '9'))
+		{
+			i += 2;
+		}
+		else
+		{
+			dst[j] = src[i];
+			i++;
+			j++;
+		}
+	}
+
+	if (j < size)
+		dst[j] = '\0';
+	dst[size - 1] = '\0';
+}
