@@ -76,7 +76,7 @@ void CBugfixedServer::PlayerPostThink(edict_t *pEntity)
 
 					if (!strcmp(authId, "STEAM_ID_LAN") || !strncmp(authId, "VALVE_", 6))
 					{
-						// p47 clients don't stupport QueryClientCvarValue2
+						// p47 clients don't support QueryClientCvarValue2
 						allowQuery = false;
 					}
 					else
