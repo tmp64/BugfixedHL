@@ -20,10 +20,13 @@ public:
 	CBugfixedServer();
 	void Init();
 	void ClientConnect(edict_t *pEntity);
+	void PlayerPostThink(edict_t *pEntity);
 	void CvarValueCallback(const edict_t *pEnt, int requestID, const char *cvarName, const char *value);
-	//void Think();
 
 private:
+	cvar_t *m_pLanCvar = nullptr;
+	cvar_t m_NoQueryCvar = { "sv_disable_cvar_query", "0", 0 };
+
 	enum E_RequestType
 	{
 		REQUEST_VERSION = 0,
@@ -33,17 +36,20 @@ private:
 
 	enum E_RequestId
 	{
-		REQUESTID_VERSION = BUGFIXEDAPI_REQUEST_BASE - 1,
-		REQUESTID_SUPPORTS = BUGFIXEDAPI_REQUEST_BASE + 31,
-		REQUESTID_COLOR = BUGFIXEDAPI_REQUEST_BASE + 63,
-		REQUESTID_END = BUGFIXEDAPI_REQUEST_BASE + 95
+		REQUESTID_VERSION = 0,
+		REQUESTID_SUPPORTS,
+		REQUESTID_COLOR,
+		REQUESTID_END
 	};
 
 	struct bhl_client_info_t
 	{
 		CGameVersion version;
-		bhl::E_ClientSupports supports;
+		bhl::E_ClientSupports supports = bhl::E_ClientSupports::None;
 		bool isColorEnabled = false;
+
+		bool isAuthed = false;
+		float nextAuthCheck = 0;
 	};
 
 	bhl_client_info_t m_pClientInfo[MAX_PLAYERS + 1];
@@ -51,7 +57,7 @@ private:
 	bhl::E_MotdType m_nMotdType = bhl::E_MotdType::All;
 	
 	void ResetPlayerData(int idx);
-	//int strcopy(char *to, const char *from, int toSize);
+	void QueryClientCvars(edict_t *pEntity);
 
 public:
 	//----------------------------------------------------------------------------------------------------
