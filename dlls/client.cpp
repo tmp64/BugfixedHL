@@ -815,6 +815,8 @@ void PlayerPostThink( edict_t *pEntity )
 
 	if (pPlayer)
 		pPlayer->PostThink( );
+
+	serverapi()->PlayerPostThink(pEntity);
 }
 
 

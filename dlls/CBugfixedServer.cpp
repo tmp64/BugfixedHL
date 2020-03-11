@@ -28,28 +28,71 @@ CBugfixedServer::CBugfixedServer()
 
 void CBugfixedServer::Init()
 {
+	m_pLanCvar = CVAR_GET_POINTER("sv_lan");
+	CVAR_REGISTER(&m_NoQueryCvar);
 }
 
 void CBugfixedServer::ClientConnect(edict_t *pEntity)
 {
 	int idx = ENTINDEX(pEntity);
-	
-	if (idx < 1 || idx > 32)
-	{
-		UTIL_LogPrintf("CBugfixedServer::ClientConnect: player has invalid index (%d)\n", idx);
-		return;
-	}
 
-	// Reset player data
 	ResetPlayerData(idx);
 
-	// Query vars but don't query bots
-	const char *auth = GETPLAYERAUTHID(pEntity);
-	if (!auth || strcmp(auth, "BOT") != 0)
+	// Bots can't receive network messages
+	if (pEntity->v.flags & FL_FAKECLIENT)
 	{
-		g_engfuncs.pfnQueryClientCvarValue2(pEntity, "aghl_version", REQUESTID_VERSION + idx);
-		g_engfuncs.pfnQueryClientCvarValue2(pEntity, "aghl_supports", REQUESTID_SUPPORTS + idx);
-		g_engfuncs.pfnQueryClientCvarValue2(pEntity, "hud_colortext", REQUESTID_COLOR + idx);
+		m_pClientInfo[idx].isAuthed = true;
+	}
+}
+
+void CBugfixedServer::PlayerPostThink(edict_t *pEntity)
+{
+	int idx = ENTINDEX(pEntity);
+	
+	if (!m_pClientInfo[idx].isAuthed && gpGlobals->time >= m_pClientInfo[idx].nextAuthCheck)
+	{
+		CBasePlayer *pPlayer = (CBasePlayer *)CBaseEntity::Instance(pEntity);
+		if (pPlayer->m_bIsBot || m_NoQueryCvar.value)
+		{
+			// Bots can't receive network messages
+			// If sv_disable_cvar_query = 1, don't query
+			m_pClientInfo[idx].isAuthed = true;
+		}
+		else
+		{
+			bool allowQuery = false;
+			const char *authId = GETPLAYERAUTHID(pEntity);
+			if (m_pLanCvar->value)
+			{
+				// If sv_lan = 1, all SteamID are STEAM_ID_LAN
+				m_pClientInfo[idx].isAuthed = true;
+				allowQuery = true;
+			}
+			else if (authId)
+			{
+				if (strcmp(authId, "STEAM_ID_PENDING") != 0)
+				{
+					m_pClientInfo[idx].isAuthed = true;
+
+					if (!strcmp(authId, "STEAM_ID_LAN") || !strncmp(authId, "VALVE_", 6))
+					{
+						// p47 clients don't support QueryClientCvarValue2
+						allowQuery = false;
+					}
+					else
+					{
+						allowQuery = true;
+					}
+				}
+			}
+
+			if (allowQuery)
+			{
+				QueryClientCvars(pEntity);
+			}
+		}
+
+		m_pClientInfo[idx].nextAuthCheck = gpGlobals->time + 0.1;
 	}
 }
 
@@ -58,12 +101,12 @@ void CBugfixedServer::CvarValueCallback(const edict_t *pEnt, int requestID, cons
 	int idx = ENTINDEX(pEnt);
 	if (idx < 1 || idx > gpGlobals->maxClients)
 		return;	// Invalid pEnt
-	if (requestID > REQUESTID_VERSION && requestID <= REQUESTID_SUPPORTS)
+	if (requestID == REQUESTID_VERSION)
 	{
 		// aghl_version
 		m_pClientInfo[idx].version.TryParse(value);
 	}
-	else if (requestID > REQUESTID_SUPPORTS && requestID <= REQUESTID_COLOR)
+	else if (requestID == REQUESTID_SUPPORTS)
 	{
 		// aghl_supports
 		unsigned int iValue = strtoul(value, nullptr, 10);
@@ -71,7 +114,7 @@ void CBugfixedServer::CvarValueCallback(const edict_t *pEnt, int requestID, cons
 			iValue = 0;
 		m_pClientInfo[idx].supports = (bhl::E_ClientSupports)iValue;
 	}
-	else if (requestID > REQUESTID_COLOR && requestID <= REQUESTID_END)
+	else if (requestID == REQUESTID_COLOR)
 	{
 		// hud_colortext
 		int iValue = atoi(value);
@@ -79,35 +122,17 @@ void CBugfixedServer::CvarValueCallback(const edict_t *pEnt, int requestID, cons
 	}
 }
 
-/*void CBugfixedServer::Think()
-{
-}*/
-
 void CBugfixedServer::ResetPlayerData(int idx)
 {
-	m_pClientInfo[idx].isColorEnabled = false;
-	m_pClientInfo[idx].supports = bhl::E_ClientSupports::None;
-	m_pClientInfo[idx].version = CGameVersion();
+	m_pClientInfo[idx] = bhl_client_info_t();
 }
 
-#if 0
-int CBugfixedServer::strcopy(char *to, const char *from, int toSize)
+void CBugfixedServer::QueryClientCvars(edict_t *pEntity)
 {
-	int i = 0;
-	while (i < toSize && *from != '\0')
-	{
-		*to = *from;
-		to++;
-		from++;
-		i++;
-	}
-	if (i == toSize)
-		*(to - 1) = '\0';
-	else
-		*to = '\0';
-	return i;
+	g_engfuncs.pfnQueryClientCvarValue2(pEntity, "aghl_version", REQUESTID_VERSION);
+	g_engfuncs.pfnQueryClientCvarValue2(pEntity, "aghl_supports", REQUESTID_SUPPORTS);
+	g_engfuncs.pfnQueryClientCvarValue2(pEntity, "hud_colortext", REQUESTID_COLOR);
 }
-#endif
 
 //----------------------------------------------------------------------------------------------------
 // IBugfixedServer methods
