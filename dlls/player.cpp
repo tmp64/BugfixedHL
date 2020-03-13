@@ -35,6 +35,7 @@
 #include "gamerules.h"
 #include "game.h"
 #include "hltv.h"
+#include "multimode/multimode.h"
 
 // #define DUCKFIX
 
@@ -1314,12 +1315,24 @@ void CBasePlayer::PlayerDeathThink(void)
 	// Clear inclination came from client view
 	pev->angles.x = 0;
 
-	if (pev->modelindex && (!m_fSequenceFinished) && (pev->deadflag == DEAD_DYING))
-		StudioFrameAdvance( );
+	if (IsRunningMultimode(ModeID::OneShot))
+	{
+		// Hide the body if it wasn't gibbed
+		pev->effects |= EF_NODRAW;
 
-	// time given to animate corpse and don't allow to respawn till this time ends
-	if (gpGlobals->time < m_flDeathAnimationStartTime + 1.5)
-		return;
+		// Decrease respawn delay for OneShot
+		if (gpGlobals->time < m_flDeathAnimationStartTime + 0.5)
+			return;
+	}
+	else
+	{
+		if (pev->modelindex && (!m_fSequenceFinished) && (pev->deadflag == DEAD_DYING))
+			StudioFrameAdvance();
+
+		// time given to animate corpse and don't allow to respawn till this time ends
+		if (gpGlobals->time < m_flDeathAnimationStartTime + 1.5)
+			return;
+	}
 
 	// once we're done animating our death and we're on the ground, we want to set movetype to None so our dead body won't do collisions and stuff anymore
 	// this prevents a bug where the dead body would go to a player's head if he walked over it while the dead player was clicking their button to respawn
