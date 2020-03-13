@@ -24,7 +24,7 @@
 #include	"soundent.h"
 #include	"hornet.h"
 #include	"gamerules.h"
-
+#include	"multimode/multimode.h"
 
 int iHornetTrail;
 int iHornetPuff;
@@ -142,6 +142,12 @@ int CHornet::IRelationship ( CBaseEntity *pTarget )
 {
 	if ( pTarget->pev->modelindex == pev->modelindex )
 	{
+		return R_NO;
+	}
+
+	if (IsRunningMultimode(ModeID::Biohazard) && !strcmp(STRING(pTarget->pev->classname), "monster_snark"))
+	{
+		// Hornets ignore snarks in Biohazard
 		return R_NO;
 	}
 
