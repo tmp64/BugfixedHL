@@ -70,6 +70,8 @@ void CBiohazardMode::PlayerThink(CBasePlayer *pPlayer)
 	if (!pPlayer->IsAlive())
 		return;
 
+	pPlayer->m_rgAmmo[pPlayer->GetAmmoIndex("Hornets")] = 8;
+
 	if (m_Players[pPlayer->entindex()].wpnType == WeaponType::Snark &&
 		gpGlobals->time >= m_Players[pPlayer->entindex()].flNextTimerCheck)
 	{
