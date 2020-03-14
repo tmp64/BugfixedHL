@@ -11,6 +11,8 @@
 // Period in seconds in which weapons are regiven to players
 ConVar mp_mm_wpndrop_respawn("mp_mm_wpndrop_respawn", "4.5");
 
+ConVar mp_mm_wpndrop_infammo("mp_mm_wpndrop_infammo", "1");
+
 CWpnDropMode::CWpnDropMode() : CBaseMode()
 {
 }
@@ -47,6 +49,14 @@ bool CWpnDropMode::ShouldRespawnAmmo()
 
 void CWpnDropMode::OnPrimaryAttack(CBasePlayer *pPlayer, CBasePlayerItem *pWeapon)
 {
+	// Infinite 357 ammo
+	if (mp_mm_wpndrop_infammo && pPlayer->m_pActiveItem &&
+		pPlayer->m_pActiveItem->m_iId == WEAPON_PYTHON)
+	{
+		CPython *pWeapon = (CPython *)pPlayer->m_pActiveItem;
+		pWeapon->m_iClip = 6;
+	}
+
 	// Drop active weapon
 	pPlayer->DropPlayerItem("");
 }
