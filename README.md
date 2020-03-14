@@ -47,6 +47,7 @@ The mod is fully compatible with Metamod and partially with AMXX.
 | mp_mm_on_end | **0**/1/2 | 0: the game will continue from the first mode;<br>1: the game will go in intermission;<br>2: the game will go in "endgame" state to choose a new map using mapchooser_multimode AMXX plugin (based on mapchooser.sma, not yet released). |
 | mp_mm_wpndrop_respawn | seconds **(7)** | Heavy Weapons: How long it takes for revolver to be regiven. |
 | mp_mm_wpndrop_infammo | 0/**1** | Heavy Weapons: Should revolver have infinite ammo |
+| mp_mm_wpndrop_rndangle | 0-180 **(60)** | Heavy Weapons: Random angle variation |
 | mp_mm_biohaz_snark_respawn | seconds **(10)** | Biohazard: How long it takes for snarks to be regiven. |
 | mp_mm_rocket_respawn | seconds **(10)** | Slow Rockets: How long it takes for rockets to be regiven. |
 | mp_mm_rocket_speed | u/s **(120)** | Slow Rockets: Speed of the rockets. |

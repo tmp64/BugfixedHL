@@ -11,7 +11,11 @@
 // Period in seconds in which weapons are regiven to players
 ConVar mp_mm_wpndrop_respawn("mp_mm_wpndrop_respawn", "4.5");
 
+// Should revolver have infinite ammo
 ConVar mp_mm_wpndrop_infammo("mp_mm_wpndrop_infammo", "1");
+
+// Random angle variation
+ConVar mp_mm_wpndrop_rndangle("mp_mm_wpndrop_rndangle", "60");
 
 CWpnDropMode::CWpnDropMode() : CBaseMode()
 {
@@ -58,7 +62,46 @@ void CWpnDropMode::OnPrimaryAttack(CBasePlayer *pPlayer, CBasePlayerItem *pWeapo
 	}
 
 	// Drop active weapon
-	pPlayer->DropPlayerItem("");
+	g_pGameRules->GetNextBestWeapon(pPlayer, pWeapon);
+
+	UTIL_MakeVectors(pPlayer->pev->angles);
+
+	CWeaponBox *pWeaponBox = (CWeaponBox *)CBaseEntity::Create("weaponbox",
+		pPlayer->pev->origin + gpGlobals->v_forward * 10, pPlayer->pev->angles, pPlayer->edict());
+	pWeaponBox->pev->angles.x = 0;
+	pWeaponBox->pev->angles.z = 0;
+	pWeaponBox->PackWeapon(pWeapon);
+
+	Vector drop_dir = pPlayer->pev->angles;
+	drop_dir.y += RANDOM_FLOAT(-1.0f, 1.0f) * mp_mm_wpndrop_rndangle.Get();
+	if (drop_dir.y >= 360)
+		drop_dir.y -= 360;
+	else if (drop_dir.y < 0)
+		drop_dir.y += 360;
+
+	UTIL_MakeVectors(drop_dir);
+	pWeaponBox->pev->velocity = gpGlobals->v_forward * 300 + gpGlobals->v_forward * 100;
+
+	// drop half of the ammo for this weapon.
+	int iAmmoIndex = pPlayer->GetAmmoIndex(pWeapon->pszAmmo1()); // ???
+
+	if (iAmmoIndex != -1)
+	{
+		// this weapon weapon uses ammo, so pack an appropriate amount.
+		if (pWeapon->iFlags() & ITEM_FLAG_EXHAUSTIBLE)
+		{
+			// pack up all the ammo, this weapon is its own ammo type
+			pWeaponBox->PackAmmo(MAKE_STRING(pWeapon->pszAmmo1()), pPlayer->m_rgAmmo[iAmmoIndex]);
+			pPlayer->m_rgAmmo[iAmmoIndex] = 0;
+		}
+		else
+		{
+			// pack half of the ammo
+			int ammoDrop = pPlayer->m_rgAmmo[iAmmoIndex] / 2;
+			pWeaponBox->PackAmmo(MAKE_STRING(pWeapon->pszAmmo1()), ammoDrop);
+			pPlayer->m_rgAmmo[iAmmoIndex] -= ammoDrop;
+		}
+	}
 }
 
 void CWpnDropMode::PlayerThink(CBasePlayer *pPlayer)
