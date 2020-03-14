@@ -9,7 +9,7 @@
 #include "wpn_drop_mode.h"
 
 // Period in seconds in which weapons are regiven to players
-ConVar mp_mm_wpndrop_respawn("mp_mm_wpndrop_respawn", "7");
+ConVar mp_mm_wpndrop_respawn("mp_mm_wpndrop_respawn", "4.5");
 
 CWpnDropMode::CWpnDropMode() : CBaseMode()
 {
