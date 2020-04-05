@@ -1328,19 +1328,23 @@ void CBaseHudChatLine::InsertAndColorizeText( wchar_t *buf, int clientIndex )
 			m_textRanges.AddToTail(range);
 		}
 		int last_range_idx = 0;
+		int is_player_msg = *buf2 == 2 ? 1 : 0;
 		while (*buf2)
 		{
 			int pos = str - m_text;
 
-			if (pos == m_iNameStart + m_iNameLength - 1 && m_textRanges[last_range_idx].end == pos - 1)
+			if (pos == m_iNameStart + m_iNameLength && is_player_msg) // only do coloring on player messages
 			{
 				TextRange range;
 				range.start = pos;
 				range.color = pChat->GetTextColorForClient(COLOR_NORMAL, clientIndex);
 				range.end = len;
 
-				last_range_idx = m_textRanges.Count();
+				m_textRanges[last_range_idx].end = pos;
+
 				m_textRanges.AddToTail(range);
+
+				last_range_idx = m_textRanges.Count() - 1;
 			}
 
 			if (*buf2 == '^' && *(buf2 + 1) >= '0' && *(buf2 + 1) <= '9')
@@ -1363,26 +1367,27 @@ void CBaseHudChatLine::InsertAndColorizeText( wchar_t *buf, int clientIndex )
 				range.end = len;
 
 				m_textRanges[last_range_idx].end = pos;
-				last_range_idx = m_textRanges.Count();
 				m_textRanges.AddToTail(range);
+				last_range_idx = m_textRanges.Count() - 1;
 
-				if (pos < m_iNameStart)
-					m_iNameStart -= 2;
-				else if (pos >= m_iNameStart && pos < m_iNameStart + m_iNameLength)
+				if (pos >= m_iNameStart && pos < m_iNameStart + m_iNameLength)
 					m_iNameLength -= 2;
 
 				buf2 += 2;
 			}
-			else if (*buf2 == 2)	// COLOR_PLAYERNAME but for GoldSrc
+			else if (*buf2 == 2 && pos == 0)	// COLOR_PLAYERNAME but for GoldSrc
 			{
 				TextRange range;
 				range.start = pos;
 				range.color = pChat->GetTextColorForClient(COLOR_PLAYERNAME, clientIndex);
-				range.end = pos + m_iNameLength;
+				range.end = len;
 
 				m_textRanges[last_range_idx].end = pos;
-				last_range_idx = m_textRanges.Count();
 				m_textRanges.AddToTail(range);
+				last_range_idx = m_textRanges.Count() - 1;
+
+				// shift name start position since we are removing a character
+				m_iNameStart--;
 				buf2++;
 			}
 			else
