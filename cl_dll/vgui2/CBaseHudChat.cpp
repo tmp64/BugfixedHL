@@ -1299,6 +1299,19 @@ SDK_Color CBaseHudChat::GetClientColor( int clientIndex )
 //-----------------------------------------------------------------------------
 void CBaseHudChatLine::InsertAndColorizeText( wchar_t *buf, int clientIndex )
 {
+	// buf will look something like this
+	// \x02PlayerName: A chat message!\0
+	//     ^~~~~~~~~~^~~~~~~~~~~~~~~~~
+	// <player color>   <default color>
+	// \x02 is COLOR_PLAYERNAME
+
+	// m_textRanges contains TextRanges.
+	// Each TextRange describes color of a substring of the chat message.
+	//
+	// start - index of the first char of the substring
+	// end - index AFTER the last char of the substring
+	// color - color of the substring
+
 	if ( m_text )
 	{
 		delete[] m_text;
@@ -1306,14 +1319,12 @@ void CBaseHudChatLine::InsertAndColorizeText( wchar_t *buf, int clientIndex )
 	}
 	m_textRanges.RemoveAll();
 
-	//m_text = CloneWString( buf );
-
 	CBaseHudChat *pChat = dynamic_cast<CBaseHudChat*>(GetParent());
 
 	if (pChat == NULL)
 		return;
 
-	// Parse colorcodes
+	// Color the message
 	{
 		wchar_t *buf2 = buf;
 		int len = wcslen(buf2);
@@ -1321,6 +1332,7 @@ void CBaseHudChatLine::InsertAndColorizeText( wchar_t *buf, int clientIndex )
 
 		wchar_t *str = m_text;
 
+		// Add initial color of the message
 		{
 			TextRange range;
 			range.start = 0;
@@ -1328,14 +1340,17 @@ void CBaseHudChatLine::InsertAndColorizeText( wchar_t *buf, int clientIndex )
 			range.end = len;
 			m_textRanges.AddToTail(range);
 		}
+
 		int last_range_idx = 0;
 		int is_player_msg = *buf2 == 2 ? 1 : 0;
+
 		while (*buf2)
 		{
 			int pos = str - m_text;
 
-			// only do coloring on player messages
-			// only add color if there were no colorcodes
+			// Reset color after player name to default.
+			// Only reset color on player messages and if there were no colorcodes
+			// (allows players to change color of their messages)
 			if (pos == m_iNameStart + m_iNameLength &&
 				is_player_msg && m_textRanges.Count() == 1)		// The only color is player name
 			{
@@ -1351,7 +1366,7 @@ void CBaseHudChatLine::InsertAndColorizeText( wchar_t *buf, int clientIndex )
 				last_range_idx = m_textRanges.Count() - 1;
 			}
 
-			if (*buf2 == '^' && *(buf2 + 1) >= '0' && *(buf2 + 1) <= '9')
+			if (*buf2 == '^' && *(buf2 + 1) >= '0' && *(buf2 + 1) <= '9')	// Parse colorcodes
 			{
 				TextRange range;
 				int idx = *(buf2 + 1) - '0';
@@ -1379,7 +1394,7 @@ void CBaseHudChatLine::InsertAndColorizeText( wchar_t *buf, int clientIndex )
 
 				buf2 += 2;
 			}
-			else if (*buf2 == 2 && pos == 0)	// COLOR_PLAYERNAME but for GoldSrc
+			else if (*buf2 == COLOR_PLAYERNAME && pos == 0)	// Color of the player name
 			{
 				TextRange range;
 				range.start = pos;
@@ -1403,6 +1418,7 @@ void CBaseHudChatLine::InsertAndColorizeText( wchar_t *buf, int clientIndex )
 		}
 		*str = '\0';
 
+		// Add final text range if need to
 		if (m_textRanges[last_range_idx].end != len)
 		{
 			TextRange range;
@@ -1412,6 +1428,9 @@ void CBaseHudChatLine::InsertAndColorizeText( wchar_t *buf, int clientIndex )
 			m_textRanges.AddToTail(range);
 		}
 	}
+
+	// Add text to the history as described in m_textRanges
+	Colorize();
 
 	// Color range debugging
 	// Change 0 to 1 to enable.
@@ -1428,148 +1447,6 @@ void CBaseHudChatLine::InsertAndColorizeText( wchar_t *buf, int clientIndex )
 	}
 	ConPrintf("m_text %ls\n", m_text);
 #endif
-
-#if 0
-	wchar_t *txt = m_text;
-	int lineLen = wcslen( m_text );
-	SDK_Color colCustom;
-	if ( m_text[0] == COLOR_PLAYERNAME || m_text[0] == COLOR_LOCATION || m_text[0] == COLOR_NORMAL || m_text[0] == COLOR_ACHIEVEMENT || m_text[0] == COLOR_CUSTOM || m_text[0] == COLOR_HEXCODE || m_text[0] == COLOR_HEXCODE_ALPHA )
-	{
-		while ( txt && *txt )
-		{
-			TextRange range;
-			bool bFoundColorCode = false;
-			bool bDone = false;
-			int nBytesIn = txt - m_text;
-
-			switch ( *txt )
-			{
-			case COLOR_CUSTOM:
-			case COLOR_PLAYERNAME:
-			case COLOR_LOCATION:
-			case COLOR_ACHIEVEMENT:
-			case COLOR_NORMAL:
-				{
-					// save this start
-					range.start = nBytesIn + 1;
-					range.color = pChat->GetTextColorForClient( (TextColor)(*txt), clientIndex );
-					range.end = lineLen;
-					bFoundColorCode = true;
-				}
-				++txt;
-				break;
-			/*case COLOR_HEXCODE:
-			case COLOR_HEXCODE_ALPHA:
-				{
-					bool bReadAlpha = ( *txt == COLOR_HEXCODE_ALPHA );
-					const int nCodeBytes = ( bReadAlpha ? 8 : 6 );
-					range.start = nBytesIn + nCodeBytes + 1;
-					range.end = lineLen;
-					range.preserveAlpha = bReadAlpha;
-					++txt;
-
-					if ( range.end > range.start )
-					{
-						int r = V_nibble( txt[0] ) << 4 | V_nibble( txt[1] );
-						int g = V_nibble( txt[2] ) << 4 | V_nibble( txt[3] );
-						int b = V_nibble( txt[4] ) << 4 | V_nibble( txt[5] );
-						int a = 255;
-
-						if ( bReadAlpha )
-						{
-							a = V_nibble( txt[6] ) << 4 | V_nibble( txt[7] );
-						}
-
-						range.color = SDK_Color( r, g, b, a );
-						bFoundColorCode = true;
-
-						txt += nCodeBytes;
-					}
-					else
-					{
-						// Not enough characters remaining for a hex code. Skip the rest of the string.
-						bDone = true;
-					}
-				}*/
-				break;
-			/*case '^':
-				{
-					++txt;
-					if (*txt >= '0' && *txt <= '9')
-					{
-						TextRange range2;		// There may be multiple color codes.
-						range2.start = nBytesIn + 1;
-						range2.end = lineLen;
-
-						if (last_range_idx != -1)
-							m_textRanges[last_range_idx].end = nBytesIn + 1;
-						
-						++txt;
-					}
-				}
-				break;*/
-			default:
-				++txt;
-			}
-
-			if ( bDone )
-			{
-				break;
-			}
-
-			if ( bFoundColorCode )
-			{
-				int count = m_textRanges.Count();
-				if ( count )
-				{
-					m_textRanges[count-1].end = nBytesIn;
-				}
-
-				m_textRanges.AddToTail( range );
-			}
-		}
-	}
-
-	if ( !m_textRanges.Count() && m_iNameLength > 0 && m_text[0] == COLOR_USEOLDCOLORS )
-	{
-		TextRange range;
-		range.start = 0;
-		range.end = m_iNameStart;
-		range.color = pChat->GetTextColorForClient( COLOR_NORMAL, clientIndex );
-		m_textRanges.AddToTail( range );
-
-		range.start = m_iNameStart;
-		range.end = m_iNameStart + m_iNameLength;
-		range.color = pChat->GetTextColorForClient( COLOR_PLAYERNAME, clientIndex );
-		m_textRanges.AddToTail( range );
-
-		range.start = range.end;
-		range.end = wcslen( m_text );
-		range.color = pChat->GetTextColorForClient( COLOR_NORMAL, clientIndex );
-		m_textRanges.AddToTail( range );
-	}
-
-	if ( !m_textRanges.Count() )
-	{
-		TextRange range;
-		range.start = 0;
-		range.end = wcslen( m_text );
-		range.color = pChat->GetTextColorForClient( COLOR_NORMAL, clientIndex );
-		m_textRanges.AddToTail( range );
-	}
-
-	for ( int i=0; i<m_textRanges.Count(); ++i )
-	{
-		wchar_t * start = m_text + m_textRanges[i].start;
-		if ( *start > 0 && *start < COLOR_MAX )
-		{
-			Assert( *start != COLOR_HEXCODE && *start != COLOR_HEXCODE_ALPHA );
-			m_textRanges[i].start += 1;
-		}
-	}
-#endif
-
-	Colorize();
 }
 
 //-----------------------------------------------------------------------------
