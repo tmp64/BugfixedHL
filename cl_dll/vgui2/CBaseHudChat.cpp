@@ -5,6 +5,7 @@
 // $NoKeywords: $
 //=============================================================================//
 
+#include <string>	// For color range debugging
 #include <ctime>
 #include "CClientVGUI.h"
 #include "CBaseViewport.h"
@@ -1333,7 +1334,10 @@ void CBaseHudChatLine::InsertAndColorizeText( wchar_t *buf, int clientIndex )
 		{
 			int pos = str - m_text;
 
-			if (pos == m_iNameStart + m_iNameLength && is_player_msg) // only do coloring on player messages
+			// only do coloring on player messages
+			// only add color if there were no colorcodes
+			if (pos == m_iNameStart + m_iNameLength &&
+				is_player_msg && m_textRanges.Count() == 1)		// The only color is player name
 			{
 				TextRange range;
 				range.start = pos;
@@ -1408,6 +1412,22 @@ void CBaseHudChatLine::InsertAndColorizeText( wchar_t *buf, int clientIndex )
 			m_textRanges.AddToTail(range);
 		}
 	}
+
+	// Color range debugging
+	// Change 0 to 1 to enable.
+	// Make sure to disable it before commiting.
+#if 0
+	std::wstring str = std::wstring(m_text);
+	for (int i = 0; i < m_textRanges.Count(); i++)
+	{
+		ConPrintf("%2d. start: %3d end: %3d color: [%3d %3d %3d] %ls\n",
+			i + 1, m_textRanges[i].start, m_textRanges[i].end,
+			m_textRanges[i].color.r(), m_textRanges[i].color.g(), m_textRanges[i].color.b(),
+			str.substr(m_textRanges[i].start, m_textRanges[i].end - m_textRanges[i].start).c_str());
+
+	}
+	ConPrintf("m_text %ls\n", m_text);
+#endif
 
 #if 0
 	wchar_t *txt = m_text;
