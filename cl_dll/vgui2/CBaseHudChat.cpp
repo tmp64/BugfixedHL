@@ -1394,7 +1394,9 @@ void CBaseHudChatLine::InsertAndColorizeText( wchar_t *buf, int clientIndex )
 
 				buf2 += 2;
 			}
-			else if (*buf2 == COLOR_PLAYERNAME && pos == 0)	// Color of the player name
+			// m_iNameLength > 0 fixes the miniag issue too, but with the drawback of not coloring
+			// the player name according to the player team
+			else if (*buf2 == COLOR_PLAYERNAME && pos == 0 && m_iNameLength > 0)	// Color of the player name
 			{
 				TextRange range;
 				range.start = pos;
@@ -1722,6 +1724,12 @@ void CBaseHudChat::ChatPrintf( int iPlayerIndex, int iFilter, const char *fmt, .
 
 		if ( pName )
 		{
+            // miniag issue: server-side is giving a name with colorcodes while say message doesn't have them
+			// server-side will give the name with colors removed after first name change
+			// so until that, we need to remove them by ourselves and try to find again
+			if (!strstr(pmsg, sPlayerInfo.name))
+				pName = RemoveColorCodes(pName);
+
 			wchar_t wideName[MAX_PLAYER_NAME];
 			vgui2::localize()->ConvertANSIToUnicode( pName, wideName, sizeof( wideName ) );
 
