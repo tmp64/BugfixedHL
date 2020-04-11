@@ -1369,7 +1369,7 @@ void CBaseHudChatLine::InsertAndColorizeText( wchar_t *buf, int clientIndex )
 				int idx = *(buf2 + 1) - '0';
 				if (idx == 0 || idx == 9)
 				{
-					if (pos <= m_iNameStart + m_iNameLength)
+					if (pos <= m_iNameStart + m_iNameLength && is_player_msg)
 						range.color = pChat->GetTextColorForClient(COLOR_PLAYERNAME, clientIndex);
 					else
 						range.color = pChat->GetTextColorForClient(COLOR_NORMAL, clientIndex);
