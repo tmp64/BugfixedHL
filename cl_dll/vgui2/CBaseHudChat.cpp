@@ -1348,11 +1348,8 @@ void CBaseHudChatLine::InsertAndColorizeText( wchar_t *buf, int clientIndex )
 		{
 			int pos = str - m_text;
 
-			// Reset color after player name to default.
-			// Only reset color on player messages and if there were no colorcodes
-			// (allows players to change color of their messages)
-			if (pos == m_iNameStart + m_iNameLength &&
-				is_player_msg && m_textRanges.Count() == 2)		// The only color is player name
+			// Reset color after player name to default
+			if (pos == m_iNameStart + m_iNameLength && is_player_msg)	// The only color is player name
 			{
 				TextRange range;
 				range.start = pos;
