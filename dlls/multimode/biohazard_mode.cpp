@@ -8,8 +8,10 @@
 #include "game.h"
 #include "biohazard_mode.h"
 
-// Period in seconds in which snarks are given to players
-ConVar mp_mm_biohaz_snark_respawn("mp_mm_biohaz_snark_respawn", "10");
+EHANDLE GetSnarkOwner(CBaseEntity *pEnt);
+
+// Maximum count of snarks a player can have deployed
+ConVar mp_mm_biohaz_snark_count("mp_mm_biohaz_snark_count", "10");
 
 CBiohazardMode::CBiohazardMode() : CBaseMode()
 {
@@ -38,21 +40,56 @@ const char *CBiohazardMode::GetDescription()
 	return "Only biological weapons are available";
 }
 
+void CBiohazardMode::OnSnarkSpawn(CBaseEntity *pSnark, CBasePlayer *pPlayer)
+{
+	int idx = pPlayer->entindex();
+	if (m_Players[idx].snarkCount > 0)
+		m_Players[idx].snarkCount--;
+}
+
+void CBiohazardMode::OnSnarkDeath(CBaseEntity *pSnark, CBasePlayer *pPlayer)
+{
+	int idx = pPlayer->entindex();
+	m_Players[idx].snarkCount++;
+}
+
+void CBiohazardMode::ClientDisconnected(edict_t *pClient)
+{
+	CBasePlayer *pPlayer = (CBasePlayer *)CBaseEntity::Instance(pClient);
+
+	KillAllSnarks(pPlayer);
+}
+
 void CBiohazardMode::GivePlayerWeapons(CBasePlayer *pPlayer)
 {
+	PlayerInfo &plInfo = m_Players[pPlayer->entindex()];
+	WeaponType oldWpnType = plInfo.wpnType;
+	WeaponType newWpnType = WeaponType::None;
+
 	if (RANDOM_FLOAT(0, 1) >= 0.5)
 	{
-		// 15 snarks
 		pPlayer->GiveNamedItem("weapon_snark");
-		pPlayer->GiveNamedItem("weapon_snark");
-		pPlayer->GiveNamedItem("weapon_snark");
-		m_Players[pPlayer->entindex()].wpnType = WeaponType::Snark;
+		newWpnType = WeaponType::Snark;
 	}
 	else
 	{
 		pPlayer->GiveNamedItem("weapon_hornetgun");
-		m_Players[pPlayer->entindex()].wpnType = WeaponType::Hornet;
+		newWpnType = WeaponType::Hornet;
 	}
+
+	if (oldWpnType == WeaponType::Snark && newWpnType != WeaponType::Snark)
+	{
+		// Kill any remaining snarks
+		KillAllSnarks(pPlayer);
+	}
+
+	if (newWpnType == WeaponType::Snark && oldWpnType != WeaponType::Snark)
+	{
+		// Reset snark counter
+		plInfo.snarkCount = mp_mm_biohaz_snark_count.Get();
+	}
+
+	plInfo.wpnType = newWpnType;
 }
 
 bool CBiohazardMode::ShouldRespawnWeapons()
@@ -70,26 +107,33 @@ void CBiohazardMode::PlayerThink(CBasePlayer *pPlayer)
 	if (!pPlayer->IsAlive())
 		return;
 
-	pPlayer->m_rgAmmo[pPlayer->GetAmmoIndex("Hornets")] = 8;
+	int idx = pPlayer->entindex();
 
-	if (m_Players[pPlayer->entindex()].wpnType == WeaponType::Snark &&
-		gpGlobals->time >= m_Players[pPlayer->entindex()].flNextTimerCheck)
+	if (m_Players[idx].wpnType == WeaponType::Snark)
 	{
-		int ammo = pPlayer->m_rgAmmo[pPlayer->GetAmmoIndex("Snarks")];
-		//if (ammo < 15)
-		//	ammo = 15;
+		ASSERT(m_Players[idx].snarkCount >= 0);
 
-		if (ammo < 15)
+		int &ammo = pPlayer->m_rgAmmo[pPlayer->GetAmmoIndex("Snarks")];
+
+		if (ammo == 0 && m_Players[idx].snarkCount != 0)
 		{
-			for (; ammo < 15; ammo += 5)
-				pPlayer->GiveNamedItem("weapon_snark");
+			pPlayer->GiveNamedItem("weapon_snark");
 		}
 
-		m_Players[pPlayer->entindex()].flNextTimerCheck = gpGlobals->time + mp_mm_biohaz_snark_respawn.Get();
+		ammo = m_Players[idx].snarkCount;
+	}
+	else if (m_Players[idx].wpnType == WeaponType::Hornet)
+	{
+		pPlayer->m_rgAmmo[pPlayer->GetAmmoIndex("Hornets")] = 8;
 	}
 }
 
-void CBiohazardMode::PlayerSpawn(CBasePlayer *pPlayer)
+void CBiohazardMode::KillAllSnarks(CBasePlayer *pPlayer)
 {
-	m_Players[pPlayer->entindex()].flNextTimerCheck = gpGlobals->time + mp_mm_biohaz_snark_respawn.Get();
+	CBaseEntity *i = UTIL_FindEntityByClassname(nullptr, "monster_snark");
+	for (; i; i = UTIL_FindEntityByClassname(i, "monster_snark"))
+	{
+		if (GetSnarkOwner(i) == pPlayer)
+			i->Killed(nullptr, GIB_ALWAYS);
+	}
 }

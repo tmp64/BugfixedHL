@@ -23,6 +23,9 @@
 #include "player.h"
 #include "soundent.h"
 #include "gamerules.h"
+#include "multimode/multimode.h"
+#include "multimode/multimode_gamerules.h"
+#include "multimode/biohazard_mode.h"
 
 enum w_squeak_e {
 	WSQUEAK_IDLE1 = 0,
@@ -68,6 +71,8 @@ class CSqueakGrenade : public CGrenade
 	Vector m_posPrev;
 	EHANDLE m_hOwner;
 	int  m_iMyClass;
+
+	friend EHANDLE GetSnarkOwner(CBaseEntity *pEnt);
 };
 
 float CSqueakGrenade::m_flNextBounceSoundTime = 0;
@@ -86,6 +91,12 @@ TYPEDESCRIPTION	CSqueakGrenade::m_SaveData[] =
 IMPLEMENT_SAVERESTORE( CSqueakGrenade, CGrenade );
 
 #define SQUEEK_DETONATE_DELAY	15.0
+
+// HACK
+EHANDLE GetSnarkOwner(CBaseEntity *pEnt)
+{
+	return static_cast<CSqueakGrenade *>(pEnt)->m_hOwner;
+}
 
 int CSqueakGrenade :: Classify ( void )
 {
@@ -138,7 +149,12 @@ void CSqueakGrenade :: Spawn( void )
 	m_flFieldOfView = 0; // 180 degrees
 
 	if ( pev->owner )
+	{
 		m_hOwner = Instance( pev->owner );
+
+		if (IsRunningMultimode(ModeID::Biohazard) && m_hOwner->IsPlayer())
+			GetMultimodeGR()->GetMode<CBiohazardMode>()->OnSnarkSpawn(this, (CBasePlayer *)Instance(pev->owner));
+	}
 
 	m_flNextBounceSoundTime = gpGlobals->time;// reset each time a snark is spawned.
 
@@ -185,7 +201,12 @@ void CSqueakGrenade :: Killed( entvars_t *pevAttacker, int iGib )
 
 	// reset owner so death message happens
 	if (m_hOwner != NULL)
+	{
 		pev->owner = m_hOwner->edict();
+
+		if (IsRunningMultimode(ModeID::Biohazard) && m_hOwner->IsPlayer())
+			GetMultimodeGR()->GetMode<CBiohazardMode>()->OnSnarkDeath(this, (CBasePlayer *)Instance(pev->owner));
+	}
 
 	CBaseMonster :: Killed( pevAttacker, GIB_ALWAYS );
 }

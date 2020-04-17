@@ -48,6 +48,17 @@ public:
 	
 	virtual void Think();
 
+	inline CBaseMode *GetModeBase()
+	{
+		return m_pCurMode;
+	}
+
+	template <typename T>
+	inline T *GetMode()
+	{
+		return static_cast<T *>(GetModeBase());
+	}
+
 	// After primary attack
 	void OnPrimaryAttack(CBasePlayer *pPlayer, CBasePlayerItem *pWeapon);
 

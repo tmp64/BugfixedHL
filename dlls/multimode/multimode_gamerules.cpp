@@ -760,9 +760,9 @@ void CHalfLifeMultimode::Think()
 		if (m_State == State::Warmup)
 			SwitchToNextMode();
 	}
-	else if (mp_mm_skip_mode)
+	else if (mp_mm_skip_mode.Get() > 0)
 	{
-		mp_mm_skip_mode.Set(0.0);
+		mp_mm_skip_mode.Set(mp_mm_skip_mode.Get() - 1);
 		SwitchToNextMode();
 	}
 

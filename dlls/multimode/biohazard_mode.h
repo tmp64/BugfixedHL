@@ -12,11 +12,14 @@ public:
 	virtual void GetShortTitleColor(byte &r, byte &g, byte &b);
 	virtual const char *GetDescription();
 
+	void OnSnarkSpawn(CBaseEntity *pSnark, CBasePlayer *pPlayer);
+	void OnSnarkDeath(CBaseEntity *pSnark, CBasePlayer *pPlayer);
+
+	virtual void ClientDisconnected(edict_t *pClient);
 	virtual void GivePlayerWeapons(CBasePlayer *pPlayer);
 	virtual bool ShouldRespawnWeapons();
 	virtual bool ShouldRespawnAmmo();
 	virtual void PlayerThink(CBasePlayer *pPlayer);
-	virtual void PlayerSpawn(CBasePlayer *pPlayer);
 
 private:
 	enum class WeaponType
@@ -29,10 +32,12 @@ private:
 	struct PlayerInfo
 	{
 		WeaponType wpnType = WeaponType::None;
-		float flNextTimerCheck = 0;
+		int snarkCount = 0;
 	};
 
 	PlayerInfo m_Players[MAX_PLAYERS];
+
+	void KillAllSnarks(CBasePlayer *pPlayer);
 };
 
 #endif
