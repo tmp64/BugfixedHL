@@ -60,6 +60,7 @@ using std::max;
 #define NOSERVICE
 #define NOMCX
 #define NOIME
+#define NOMINMAX
 #include "windows.h"
 #else // _WIN32
 #define FALSE 0

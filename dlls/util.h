@@ -329,6 +329,7 @@ typedef struct hudtextparms_s
 // prints as transparent 'title' to the HUD
 extern void			UTIL_HudMessageAll( const hudtextparms_t &textparms, const char *pMessage );
 extern void			UTIL_HudMessage( CBaseEntity *pEntity, const hudtextparms_t &textparms, const char *pMessage );
+extern void			UTIL_ColoredHudMessageAll(const hudtextparms_t &textparms, const char *pMessage);
 
 // HUD messages that don't use channel
 extern void			UTIL_DirectorHudMessageAll(const hudtextparms_t &textparms, const char *pMessage, bool reliable);

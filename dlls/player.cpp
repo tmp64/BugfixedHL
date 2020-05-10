@@ -36,6 +36,8 @@
 #include "game.h"
 #include "hltv.h"
 #include "multimode/multimode.h"
+#include "multimode/multimode_gamerules.h"
+#include "multimode/boss_mode.h"
 
 // #define DUCKFIX
 
@@ -505,6 +507,14 @@ int CBasePlayer :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, 
 
 	// keep track of amount of damage last sustained
 	m_lastDamageAmount = flDamage;
+
+	if (IsRunningMultimode(ModeID::Boss))
+	{
+		if (pAttacker->IsPlayer())
+		{
+			GetMultimodeGR()->GetMode<CBossMode>()->PlayerTookDamage(this, (CBasePlayer *)pAttacker, flDamage);
+		}
+	}
 
 	// Armor. 
 	if (pev->armorvalue && !(bitsDamageType & (DMG_FALL | DMG_DROWN)) )// armor doesn't protect against fall or drown damage!

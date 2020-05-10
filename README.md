@@ -10,6 +10,7 @@ Currently implemented modes:
 - Biohazard - only snarks and hornet are available;
 - Slow Rockets - everyone has RPG but rockets fly very slow and do more damage.
 - Ludicrous Speed - [Light speed is too slow.](https://www.youtube.com/watch?v=ygE01sOhzz0) You're gonna have to run at constant ~~ridiculous~~ ludicrous speed.
+- Boss Fight - one player becomes The Boss with all weapons and a lot of HP, other players must kill them.
 
 
 ## Downloads
@@ -53,6 +54,15 @@ The mod is fully compatible with Metamod and partially with AMXX.
 | mp_mm_rocket_speed | u/s **(120)** | Slow Rockets: Speed of the rockets. |
 | mp_mm_speed_maxspeed | u/s **(600)** | Ludicrous Speed: Max horizontal speed of the players. |
 | mp_mm_speed_accel | u/s/t **(50)** | Ludicrous Speed: At which rate the speed increases (units per second per tick) |
+| mp_mm_boss_hp | integer **(350)** | Boss Fight: Health of the boss |
+| mp_mm_boss_ap | integer **(300)** | Boss Fight: Armor of the boss |
+| mp_mm_boss_player_num | integer **(5)** | Boss Fight: Number of players shown in the stats |
+| mp_mm_boss_stats_channel | integer **(1)** | Boss Fight: HUD message channel to use for stats |
+| mp_mm_boss_ban_egon | boolean **(1)** | Boss Fight: Egon won't be available to anyone |
+| mp_mm_boss_pl_score | integer **(10)** | Boss Fight: How many points to award the player who dealt the most damage. |
+| mp_mm_boss_win_min_score | integer **(5)** | Boss Fight: How many points the boss gets after win with 0 EffHP left (excluding kills) |
+| mp_mm_boss_win_max_score | integer **(10)** | Boss Fight: How many points the boss gets after win with max EffHP left (excluding kills) |
+| mp_mm_boss_lose_score | integer **(3)** | Boss Fight: How many points the boss gets after loss (excluding kills) |
 
 
 ## Thanks

@@ -344,6 +344,12 @@ public:
 
 	int m_iMultimodeScore = 0;
 	int m_iMultimodeDeaths = 0;
+
+	// Returns true if the player is a spectator or in welcome cam
+	inline bool IsSpectator()
+	{
+		return (pev->iuser1 || pev->iuser2 || m_bInWelcomeCam);
+	}
 };
 
 #define AUTOAIM_2DEGREES  0.0348994967025

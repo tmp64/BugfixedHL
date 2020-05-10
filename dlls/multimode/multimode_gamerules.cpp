@@ -18,6 +18,7 @@
 #include "biohazard_mode.h"
 #include "slowrockets_mode.h"
 #include "speed_mode.h"
+#include "boss_mode.h"
 
 extern int g_multimode;
 
@@ -131,6 +132,7 @@ CHalfLifeMultimode::CHalfLifeMultimode() : CHalfLifeMultiplay()
 	m_pModes[(int)ModeID::Biohazard] = new CBiohazardMode();
 	m_pModes[(int)ModeID::SlowRockets] = new CSlowRocketsMode();
 	m_pModes[(int)ModeID::Speed] = new CSpeedMode();
+	m_pModes[(int)ModeID::Boss] = new CBossMode();
 
 	// Remove timelimit
 	g_engfuncs.pfnCvar_DirectSet(&timelimit, "0");
@@ -201,7 +203,10 @@ void CHalfLifeMultimode::SwitchToIntermission()
 	// (for slow down effect instead of immediate freeze)
 	CVAR_SET_FLOAT("sv_maxspeed", 0);
 
+	m_pCurMode->OnEnd();
+
 	int iPlayerCount = 0;
+	int iPlayerScoreCount = 0;
 	int iPlayerScoresIdx = 1;
 	
 	for (int i = 1; i <= gpGlobals->maxClients; i++)
@@ -209,7 +214,7 @@ void CHalfLifeMultimode::SwitchToIntermission()
 		CBasePlayer *pPlayer = (CBasePlayer *)UTIL_PlayerByIndex(i);
 		if (pPlayer)
 		{
-			if (!IsSpectator(pPlayer))
+			if (!pPlayer->IsSpectator())
 			{
 				// Disable weapons
 				pPlayer->m_flNextAttack = gpGlobals->time + 99999999;	// never
@@ -222,35 +227,43 @@ void CHalfLifeMultimode::SwitchToIntermission()
 			CLIENT_COMMAND(pPlayer->edict(), "spk buttons/button8.wav\n");
 
 			// Set in score array
-			s_PlayerScores[iPlayerScoresIdx].idx = i;
-			s_PlayerScores[iPlayerScoresIdx].score = pPlayer->m_iMultimodeScore;
-			s_PlayerScores[iPlayerScoresIdx].deaths = pPlayer->m_iMultimodeDeaths;
+			if (pPlayer->m_iMultimodeScore != MULTIMODE_NO_SCORE)
+			{
+				s_PlayerScores[iPlayerScoresIdx].idx = i;
+				s_PlayerScores[iPlayerScoresIdx].score = pPlayer->m_iMultimodeScore;
+				s_PlayerScores[iPlayerScoresIdx].deaths = pPlayer->m_iMultimodeDeaths;
 
+				iPlayerScoreCount++;
+				iPlayerScoresIdx++;
+			}
+			
 			iPlayerCount++;
-			iPlayerScoresIdx++;
 		}
 	}
 
 	// Sort scores
-	qsort(s_PlayerScores + 1, iPlayerCount, sizeof(s_PlayerScores[0]), SortMultimodePlayerScore);
-
-	// Show message
-	std::string str;
-
-	if (iPlayerCount < 2 || s_PlayerScores[1].score == s_PlayerScores[2].score)
-		str = "^3Draw!^0\n\n";
-	else
-		str = STRING(UTIL_PlayerByIndex(s_PlayerScores[1].idx)->pev->netname) + std::string("^0 is the winner!\n\n");
-
-	for (int i = 1, len = min(iPlayerCount, 7) ; i <= len; i++)
+	if (iPlayerCount > 0)
 	{
-		char buf[128];
-		const char *playerName = STRING(UTIL_PlayerByIndex(s_PlayerScores[i].idx)->pev->netname);
-		snprintf(buf, sizeof(buf), "%d. %s^0 - %d\n", i, playerName, s_PlayerScores[i].score);
-		str += buf;
-	}
+		qsort(s_PlayerScores + 1, iPlayerScoreCount, sizeof(s_PlayerScores[0]), SortMultimodePlayerScore);
 
-	UTIL_ColoredDirectorHudMessageAll(m_IntermStatsTextParams, str.c_str(), true);
+		// Show message
+		std::string str;
+
+		if (iPlayerCount < 2 || (iPlayerScoreCount >= 2 && s_PlayerScores[1].score == s_PlayerScores[2].score))
+			str = "^3Draw!^0\n\n";
+		else
+			str = STRING(UTIL_PlayerByIndex(s_PlayerScores[1].idx)->pev->netname) + std::string("^0 is the winner!\n\n");
+
+		for (int i = 1, len = min(iPlayerScoreCount, 7); i <= len; i++)
+		{
+			char buf[128];
+			const char *playerName = STRING(UTIL_PlayerByIndex(s_PlayerScores[i].idx)->pev->netname);
+			snprintf(buf, sizeof(buf), "%d. %s^0 - %d\n", i, playerName, s_PlayerScores[i].score);
+			str += buf;
+		}
+
+		UTIL_ColoredDirectorHudMessageAll(m_IntermStatsTextParams, str.c_str(), true);
+	}
 }
 
 void CHalfLifeMultimode::SwitchToNextMode()
@@ -480,28 +493,6 @@ void CHalfLifeMultimode::BeginCurMode(bool bEnableFreezeTime, bool bShowModeInfo
 		}
 	}
 
-	// Respawn all players
-	m_bFreezeOnSpawn = true;
-
-	for (int i = 1; i <= gpGlobals->maxClients; i++)
-	{
-		edict_t *pEdict = INDEXENT(i);
-		if (!pEdict || pEdict->free)
-			continue;
-		CBasePlayer *pPlayer = (CBasePlayer *)CBaseEntity::Instance(pEdict);
-
-		if (pPlayer)
-		{
-			if (IsSpectator(pPlayer))
-				continue;
-
-			pEdict->v.health = 0;
-			pPlayer->Spawn(); // See PlayerSpawn
-		}
-	}
-
-	m_bFreezeOnSpawn = false;
-
 	// Restore skill data
 	gSkillData = m_DefSkillData;
 
@@ -510,6 +501,8 @@ void CHalfLifeMultimode::BeginCurMode(bool bEnableFreezeTime, bool bShowModeInfo
 
 	if (m_State != State::Waiting && m_State != State::Warmup)
 	{
+		m_pCurMode->OnFreezeStart();
+
 		if (bShowModeInfo)
 		{
 			// Show mode info message
@@ -517,8 +510,6 @@ void CHalfLifeMultimode::BeginCurMode(bool bEnableFreezeTime, bool bShowModeInfo
 			UTIL_DirectorHudMessageAll(m_ModeTitleTextParams, m_pCurMode->GetShortTitle(), true);
 			UTIL_DirectorHudMessageAll(m_ModeInfoTextParams, m_pCurMode->GetDescription(), true);
 		}
-
-		m_pCurMode->OnFreezeStart();
 
 		if (bEnableFreezeTime)
 		{
@@ -537,6 +528,28 @@ void CHalfLifeMultimode::BeginCurMode(bool bEnableFreezeTime, bool bShowModeInfo
 		m_pCurMode->OnFreezeStart();
 		StartCurMode();
 	}
+
+	// Respawn all players
+	m_bFreezeOnSpawn = true;
+
+	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	{
+		edict_t *pEdict = INDEXENT(i);
+		if (!pEdict || pEdict->free)
+			continue;
+		CBasePlayer *pPlayer = (CBasePlayer *)CBaseEntity::Instance(pEdict);
+
+		if (pPlayer)
+		{
+			if (pPlayer->IsSpectator())
+				continue;
+
+			pEdict->v.health = 0;
+			pPlayer->Spawn(); // See PlayerSpawn
+		}
+	}
+
+	m_bFreezeOnSpawn = false;
 }
 
 void CHalfLifeMultimode::StartCurMode()
@@ -568,7 +581,7 @@ void CHalfLifeMultimode::StartCurMode()
 			pPlayer->pev->flags &= ~FL_FROZEN;
 			pPlayer->pev->flags &= ~FL_GODMODE;
 
-			if (!IsSpectator(pPlayer))
+			if (!pPlayer->IsSpectator())
 			{
 				pPlayer->m_flNextAttack = 0;
 				pPlayer->m_iMultimodeScore = 0;
@@ -582,15 +595,10 @@ void CHalfLifeMultimode::FinishCurMode()
 {
 	if (m_pCurMode)
 	{
-		m_pCurMode->OnEnd();
+		m_pCurMode->OnSwitchOff();
 	}
 
 	m_pCurMode = nullptr;
-}
-
-bool CHalfLifeMultimode::IsSpectator(CBasePlayer *pPlayer)
-{
-	return (pPlayer->pev->iuser1 || pPlayer->pev->iuser2 || pPlayer->m_bInWelcomeCam);
 }
 
 const char *CHalfLifeMultimode::GetGameDescription()
@@ -842,7 +850,7 @@ void CHalfLifeMultimode::PlayerSpawn(CBasePlayer *pPlayer)
 {
 	BaseClass::PlayerSpawn(pPlayer);
 
-	if (IsSpectator(pPlayer))
+	if (pPlayer->IsSpectator())
 		return;
 
 	if (m_State == State::FreezeTime || m_bFreezeOnSpawn)

@@ -36,8 +36,6 @@ public:
 	void StartCurMode();
 	void FinishCurMode();
 
-	bool IsSpectator(CBasePlayer *pPlayer);
-
 	virtual const char *GetGameDescription();
 
 	void ThinkWaiting();

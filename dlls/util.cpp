@@ -345,6 +345,11 @@ DBG_AssertFunction(
 	else
 		sprintf(szOut, "ASSERT FAILED:\n %s \n(%s@%d)", szExpr, szFile, szLine);
 	ALERT(at_console, szOut);
+
+#ifdef _WIN32
+	__asm int 3;
+#endif
+
 	}
 #endif	// DEBUG
 
@@ -913,6 +918,41 @@ void UTIL_HudMessageAll( const hudtextparms_t &textparms, const char *pMessage )
 	}
 }
 
+void UTIL_ColoredHudMessageAll(const hudtextparms_t &textparms, const char *pMessage)
+{
+	if (pMessage[0] == '\0')
+	{
+		// Empty string
+		UTIL_HudMessageAll(textparms, pMessage);
+		return;
+	}
+
+	static char buf[512];
+	buf[0] = '\0';
+
+	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	{
+		CBaseEntity *pEntity = UTIL_PlayerByIndex(i);
+		if (pEntity && pEntity->IsNetClient())
+		{
+			const char *msg;
+
+			if (serverapi()->GetColorSupport(i))
+			{
+				msg = pMessage;
+			}
+			else
+			{
+				if (buf[0] == '\0')
+					UTIL_RemoveColorCodes(pMessage, buf, sizeof(buf));
+				msg = buf;
+			}
+
+			UTIL_HudMessage(pEntity, textparms, msg);
+		}
+	}
+}
+
 static void UTIL_DirectorHudMessage(int dest, edict_t *ed, const hudtextparms_t &textparms, const char *pMessage)
 {
 	MESSAGE_BEGIN(dest, SVC_DIRECTOR, NULL, ed);
@@ -975,7 +1015,7 @@ void UTIL_ColoredDirectorHudMessageAll(const hudtextparms_t &textparms, const ch
 				msg = buf;
 			}
 
-			UTIL_DirectorHudMessageAll(textparms, msg, reliable);
+			UTIL_DirectorHudMessage(pEntity, textparms, msg, reliable);
 		}
 	}
 }
@@ -1083,7 +1123,7 @@ void UTIL_ColoredClientPrintAll(int msg_dest, const char *msg_name, const char *
 				msg = buf;
 			}
 
-			UTIL_ClientPrintAll(msg_dest, msg, param1, param2, param3, param4);
+			ClientPrint(pEntity->pev, msg_dest, msg, param1, param2, param3, param4);
 		}
 	}
 }

@@ -37,6 +37,10 @@ void CBaseMode::OnEnd()
 {
 }
 
+void CBaseMode::OnSwitchOff()
+{
+}
+
 void CBaseMode::Think()
 {
 }

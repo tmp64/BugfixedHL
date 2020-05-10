@@ -52,9 +52,14 @@ public:
 	virtual void OnStart();
 
 	/**
-	 * Called at the end of the mode
+	 * Called at the end of the mode, before intermission
 	 */
 	virtual void OnEnd();
+
+	/**
+	 * Called at the end of the mode, before switching to the other mode
+	 */
+	virtual void OnSwitchOff();
 
 	/**
 	 * Runs every server frame, should handle any timer tasks, periodic events, etc.

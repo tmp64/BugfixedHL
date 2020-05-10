@@ -22,4 +22,6 @@ add_sources(
 	slowrockets_mode.cpp
 	speed_mode.h
 	speed_mode.cpp
+	boss_mode.h
+	boss_mode.cpp
 )
