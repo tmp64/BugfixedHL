@@ -290,7 +290,7 @@ bool CBossMode::CanHaveWeapon(CBasePlayer *pPlayer, CBasePlayerItem *pWeapon)
 	if (pPlayer == m_pBoss)
 	{
 		// Boss can only pick up specific weapons (so they are not OP AF)
-		for (int i = 0; i < ARRAYSIZE(s_AllowedBossWeapons); i++)
+		for (int i = 0; i < HLARRAYSIZE(s_AllowedBossWeapons); i++)
 		{
 			if (s_AllowedBossWeapons[i] == pWeapon->m_iId)
 				return true;
@@ -366,7 +366,7 @@ void CBossMode::SetBoss(CBasePlayer *pPlayer)
 		pPlayer->RemoveAllItems(false);
 		
 		// Give weapons
-		for (int i = 0; i < ARRAYSIZE(s_BossSpawnInv); i++)
+		for (int i = 0; i < HLARRAYSIZE(s_BossSpawnInv); i++)
 		{
 			for (int j = 0; j < s_BossSpawnInv[i].times; j++)
 			{
