@@ -21,9 +21,14 @@ CWpnDropMode::CWpnDropMode() : CBaseMode()
 {
 }
 
+ModeID CWpnDropMode::GetModeID()
+{
+	return MODE_ID;
+}
+
 const char *CWpnDropMode::GetModeName()
 {
-	return "WpnDropMode";
+	return MODE_NAME;
 }
 
 const char *CWpnDropMode::GetShortTitle()

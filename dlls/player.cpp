@@ -508,7 +508,7 @@ int CBasePlayer :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, 
 	// keep track of amount of damage last sustained
 	m_lastDamageAmount = flDamage;
 
-	if (IsRunningMultimode(ModeID::Boss))
+	if (IsRunningMultimode(ModeID::BossFight))
 	{
 		if (pAttacker->IsPlayer())
 		{

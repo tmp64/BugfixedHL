@@ -12,9 +12,14 @@ CDmMode::CDmMode() : CBaseMode()
 {
 }
 
+ModeID CDmMode::GetModeID()
+{
+	return MODE_ID;
+}
+
 const char *CDmMode::GetModeName()
 {
-	return "DmMode";
+	return MODE_NAME;
 }
 
 const char *CDmMode::GetShortTitle()

@@ -13,9 +13,14 @@ COneshotMode::COneshotMode() : CBaseMode()
 {
 }
 
+ModeID COneshotMode::GetModeID()
+{
+	return MODE_ID;
+}
+
 const char *COneshotMode::GetModeName()
 {
-	return "OneShotMode";
+	return MODE_NAME;
 }
 
 const char *COneshotMode::GetShortTitle()

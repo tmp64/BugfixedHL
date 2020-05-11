@@ -5,8 +5,12 @@
 class CRecoilMode : public CBaseMode
 {
 public:
+	static constexpr ModeID MODE_ID = ModeID::Recoil;
+	static constexpr char MODE_NAME[] = "recoil";
+
 	CRecoilMode();
 
+	virtual ModeID GetModeID();
 	virtual const char *GetModeName();
 	virtual const char *GetShortTitle();
 	virtual const char *GetDescription();

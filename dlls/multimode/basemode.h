@@ -1,5 +1,6 @@
 #ifndef MULTIMODE_BASEMODE_H
 #define MULTIMODE_BASEMODE_H
+#include "multimode.h"
 
 class CBaseMode
 {
@@ -9,6 +10,11 @@ public:
 	//-----------------------------------------------------------------
 	// Mode info
 	//-----------------------------------------------------------------
+	/**
+	 * Returns ID of the mode.
+	 */
+	virtual ModeID GetModeID() = 0;
+
 	/**
 	 * Returns the name of the gamemode (usually class name)
 	 */
@@ -21,7 +27,7 @@ public:
 	virtual const char *GetShortTitle() = 0;
 
 	/**
-	 * Sets r, g, b to color of the sgort title
+	 * Sets r, g, b to color of the short title
 	 */
 	virtual void GetShortTitleColor(byte &r, byte &g, byte &b);
 
@@ -31,9 +37,16 @@ public:
 	 */
 	virtual const char *GetDescription() = 0;
 
+protected:
+	CBaseMode();
+
 	//-----------------------------------------------------------------
 	// CHalfLifeMultimode callbacks
 	//-----------------------------------------------------------------
+	/**
+	 * Called once at the start of the map.
+	 */
+	virtual void OnInit();
 	/**
 	 * Called at the start of the freeze time before start
 	 * You can change gSkillData, it will be restored automatically later.
@@ -240,12 +253,11 @@ public:
 	 */
 	virtual int DeadPlayerAmmo(CBasePlayer *pPlayer);
 
-protected:
-	CBaseMode();
-
 private:
 	CBaseMode(const CBaseMode &) = delete;
 	CBaseMode &operator=(const CBaseMode &) = delete;
+
+	friend class CHalfLifeMultimode;
 };
 
 #endif

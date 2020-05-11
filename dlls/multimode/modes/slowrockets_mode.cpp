@@ -19,9 +19,14 @@ CSlowRocketsMode::CSlowRocketsMode() : CBaseMode()
 {
 }
 
+ModeID CSlowRocketsMode::GetModeID()
+{
+	return MODE_ID;
+}
+
 const char *CSlowRocketsMode::GetModeName()
 {
-	return "SlowRocketsMode";
+	return MODE_NAME;
 }
 
 const char *CSlowRocketsMode::GetShortTitle()

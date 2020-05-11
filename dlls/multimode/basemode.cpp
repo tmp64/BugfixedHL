@@ -18,6 +18,10 @@ void CBaseMode::GetShortTitleColor(byte &r, byte &g, byte &b)
 	b = 3;
 }
 
+void CBaseMode::OnInit()
+{
+}
+
 void CBaseMode::OnFreezeStart()
 {
 }

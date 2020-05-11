@@ -40,9 +40,14 @@ CRecoilMode::CRecoilMode() : CBaseMode()
 	}
 }
 
+ModeID CRecoilMode::GetModeID()
+{
+	return MODE_ID;
+}
+
 const char *CRecoilMode::GetModeName()
 {
-	return "RecoilMode";
+	return MODE_NAME;
 }
 
 const char *CRecoilMode::GetShortTitle()

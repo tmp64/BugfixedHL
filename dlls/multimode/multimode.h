@@ -7,22 +7,37 @@ class CHalfLifeMultimode;
 enum class ModeID : int
 {
 	None = 0,
-	DM,
+	WarmUp,
+	Deathmatch,
 	OneShot,
 	Recoil,
 	WpnDrop,
 	Biohazard,
 	SlowRockets,
 	Speed,
-	Boss,
+	BossFight,
 	ModeCount
 };
 
-// Players with this value of m_iMultimodeScore won't be shown in the intermission stats and can never be winners
+/**
+ * Players with this value of m_iMultimodeScore won't be shown in the intermission stats and can never be winners
+ */
 constexpr int MULTIMODE_NO_SCORE = -999999;
 
+/**
+ * Returns true if the server is running Multimode at the moment.
+ */
 bool IsRunningMultimode();
+
+/**
+ * Returns true if `mode` is being played at the moment.
+ */
 bool IsRunningMultimode(ModeID mode);
+
+/**
+ * Returns instance of CHalfLifeMultimode.
+ * MUST only be called if IsRunningMultimode() == true.
+ */
 CHalfLifeMultimode *GetMultimodeGR();
 
 #endif

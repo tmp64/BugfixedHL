@@ -5,8 +5,12 @@
 class CBiohazardMode : public CBaseMode
 {
 public:
+	static constexpr ModeID MODE_ID = ModeID::Biohazard;
+	static constexpr char MODE_NAME[] = "biohazard";
+
 	CBiohazardMode();
 
+	virtual ModeID GetModeID();
 	virtual const char *GetModeName();
 	virtual const char *GetShortTitle();
 	virtual void GetShortTitleColor(byte &r, byte &g, byte &b);

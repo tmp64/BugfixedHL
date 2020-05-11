@@ -1,8 +1,10 @@
 #ifndef MULTIMODE_GAMERULES_H
 #define MULTIMODE_GAMERULES_H
+#include <cassert>
 #include "cdll_dll.h"
 #include "skill.h"
 #include "multimode.h"
+#include "basemode.h"
 
 class CHalfLifeMultimode : public CHalfLifeMultiplay
 {
@@ -93,6 +95,23 @@ private:
 	CHalfLifeMultimode &operator=(const CHalfLifeMultimode &&) = delete;
 
 	void ResetTimerUpdate();
+
+	template <typename T>
+	inline T *RegisterMode()
+	{
+		static_assert((int)T::MODE_ID < (int)ModeID::ModeCount, "mode ID is invalid");
+
+		T *pMode = new T();
+		m_pModes[(int)T::MODE_ID] = pMode;
+
+		// Sanity checks
+		ASSERT(pMode->GetModeID() == T::MODE_ID);
+		ASSERT(!strcmp(pMode->GetModeName(), T::MODE_NAME));
+
+		pMode->OnInit();
+
+		return pMode;
+	}
 
 	friend bool IsRunningMultimode(ModeID mode);
 

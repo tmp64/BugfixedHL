@@ -17,9 +17,14 @@ CBiohazardMode::CBiohazardMode() : CBaseMode()
 {
 }
 
+ModeID CBiohazardMode::GetModeID()
+{
+	return MODE_ID;
+}
+
 const char *CBiohazardMode::GetModeName()
 {
-	return "BiohazardMode";
+	return MODE_NAME;
 }
 
 const char *CBiohazardMode::GetShortTitle()

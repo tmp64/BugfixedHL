@@ -5,8 +5,12 @@
 class CBossMode : public CBaseMode
 {
 public:
+	static constexpr ModeID MODE_ID = ModeID::BossFight;
+	static constexpr char MODE_NAME[] = "boss_fight";
+
 	CBossMode();
 
+	virtual ModeID GetModeID();
 	virtual const char *GetModeName();
 	virtual const char *GetShortTitle();
 	virtual const char *GetDescription();

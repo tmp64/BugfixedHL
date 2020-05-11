@@ -12,9 +12,14 @@ CWarmupMode::CWarmupMode() : CBaseMode()
 {
 }
 
+ModeID CWarmupMode::GetModeID()
+{
+	return MODE_ID;
+}
+
 const char *CWarmupMode::GetModeName()
 {
-	return "WarmupMode";
+	return MODE_NAME;
 }
 
 const char *CWarmupMode::GetShortTitle()

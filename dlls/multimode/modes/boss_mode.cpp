@@ -87,9 +87,14 @@ CBossMode::CBossMode() : CBaseMode()
 	m_StatsTextParams.channel = (int)mp_mm_boss_stats_channel.Get();
 }
 
+ModeID CBossMode::GetModeID()
+{
+	return MODE_ID;
+}
+
 const char *CBossMode::GetModeName()
 {
-	return "BossMode";
+	return MODE_NAME;
 }
 
 const char *CBossMode::GetShortTitle()

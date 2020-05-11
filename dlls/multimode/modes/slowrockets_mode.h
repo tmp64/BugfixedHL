@@ -19,8 +19,12 @@
 class CSlowRocketsMode : public CBaseMode
 {
 public:
+    static constexpr ModeID MODE_ID = ModeID::SlowRockets;
+    static constexpr char MODE_NAME[] = "slow_rockets";
+
 	CSlowRocketsMode();
 
+    virtual ModeID GetModeID();
 	virtual const char *GetModeName();
 	virtual const char *GetShortTitle();
 	virtual void GetShortTitleColor(byte &r, byte &g, byte &b);

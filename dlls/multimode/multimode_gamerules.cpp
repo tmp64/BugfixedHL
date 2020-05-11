@@ -121,18 +121,15 @@ CHalfLifeMultimode::CHalfLifeMultimode() : CHalfLifeMultiplay()
 	// Back up skill data
 	m_DefSkillData = gSkillData;
 
-	// Warmup
-	m_pWarmupMode = new CWarmupMode();
-
-	// Create mode instances
-	//m_pModes[(int)ModeID::DM] = new CDmMode();
-	m_pModes[(int)ModeID::OneShot] = new COneshotMode();
-	m_pModes[(int)ModeID::Recoil] = new CRecoilMode();
-	m_pModes[(int)ModeID::WpnDrop] = new CWpnDropMode();
-	m_pModes[(int)ModeID::Biohazard] = new CBiohazardMode();
-	m_pModes[(int)ModeID::SlowRockets] = new CSlowRocketsMode();
-	m_pModes[(int)ModeID::Speed] = new CSpeedMode();
-	m_pModes[(int)ModeID::Boss] = new CBossMode();
+	// Register all modes
+	m_pWarmupMode = RegisterMode<CWarmupMode>();
+	RegisterMode<CDmMode>();
+	RegisterMode<COneshotMode>();
+	RegisterMode<CRecoilMode>();
+	RegisterMode<CBiohazardMode>();
+	RegisterMode<CSlowRocketsMode>();
+	RegisterMode<CSpeedMode>();
+	RegisterMode<CBossMode>();
 
 	// Remove timelimit
 	g_engfuncs.pfnCvar_DirectSet(&timelimit, "0");

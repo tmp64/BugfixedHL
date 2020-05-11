@@ -15,9 +15,14 @@ CSpeedMode::CSpeedMode() : CBaseMode()
 {
 }
 
+ModeID CSpeedMode::GetModeID()
+{
+	return MODE_ID;
+}
+
 const char *CSpeedMode::GetModeName()
 {
-	return "SpeedMode";
+	return MODE_NAME;
 }
 
 const char *CSpeedMode::GetShortTitle()

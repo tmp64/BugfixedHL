@@ -5,8 +5,12 @@
 class COneshotMode : public CBaseMode
 {
 public:
+	static constexpr ModeID MODE_ID = ModeID::OneShot;
+	static constexpr char MODE_NAME[] = "one_shot";
+
 	COneshotMode();
 
+	virtual ModeID GetModeID();
 	virtual const char *GetModeName();
 	virtual const char *GetShortTitle();
 	virtual void GetShortTitleColor(byte &r, byte &g, byte &b);

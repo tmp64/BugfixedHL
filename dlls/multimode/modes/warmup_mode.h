@@ -5,8 +5,12 @@
 class CWarmupMode : public CBaseMode
 {
 public:
+	static constexpr ModeID MODE_ID = ModeID::WarmUp;
+	static constexpr char MODE_NAME[] = "warmup";
+
 	CWarmupMode();
 
+	virtual ModeID GetModeID();
 	virtual const char *GetModeName();
 	virtual const char *GetShortTitle();
 	virtual const char *GetDescription();
