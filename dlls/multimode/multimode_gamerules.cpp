@@ -1092,7 +1092,9 @@ float CHalfLifeMultimode::FlHealthChargerRechargeTime()
 {
 	if (m_pCurMode)
 	{
-		return m_pCurMode->HealthChargerRechargeTime();
+		float time = m_pCurMode->HealthChargerRechargeTime();
+		if (time != -1)
+			return time;
 	}
 
 	return BaseClass::FlHealthChargerRechargeTime();
@@ -1102,7 +1104,9 @@ float CHalfLifeMultimode::FlHEVChargerRechargeTime()
 {
 	if (m_pCurMode)
 	{
-		return m_pCurMode->SuitChargerRechargeTime();
+		float time = m_pCurMode->SuitChargerRechargeTime();
+		if (time != -1)
+			return time;
 	}
 
 	return BaseClass::FlHEVChargerRechargeTime();
