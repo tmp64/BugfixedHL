@@ -45,6 +45,14 @@ const char *CBiohazardMode::GetDescription()
 	return "Only biological weapons are available";
 }
 
+void CBiohazardMode::OnFreezeStart()
+{
+	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	{
+		m_Players[i] = PlayerInfo();
+	}
+}
+
 void CBiohazardMode::OnSnarkSpawn(CBaseEntity *pSnark, CBasePlayer *pPlayer)
 {
 	int idx = pPlayer->entindex();
@@ -63,6 +71,7 @@ void CBiohazardMode::ClientDisconnected(edict_t *pClient)
 	CBasePlayer *pPlayer = (CBasePlayer *)CBaseEntity::Instance(pClient);
 
 	KillAllSnarks(pPlayer);
+	m_Players[pPlayer->entindex()] = PlayerInfo();
 }
 
 void CBiohazardMode::GivePlayerWeapons(CBasePlayer *pPlayer)

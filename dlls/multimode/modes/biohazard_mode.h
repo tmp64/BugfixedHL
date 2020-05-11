@@ -16,6 +16,8 @@ public:
 	virtual void GetShortTitleColor(byte &r, byte &g, byte &b);
 	virtual const char *GetDescription();
 
+	virtual void OnFreezeStart();
+
 	void OnSnarkSpawn(CBaseEntity *pSnark, CBasePlayer *pPlayer);
 	void OnSnarkDeath(CBaseEntity *pSnark, CBasePlayer *pPlayer);
 
