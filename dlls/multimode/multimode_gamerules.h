@@ -87,7 +87,6 @@ private:
 	float m_flEndTime = 0;
 
 	// Intermission
-	float m_flDefaultMaxSpeed = -1;
 	float m_flIntermEndTime = 0;
 
 	CHalfLifeMultimode(const CHalfLifeMultimode &&) = delete;

@@ -136,9 +136,6 @@ CHalfLifeMultimode::CHalfLifeMultimode() : CHalfLifeMultiplay()
 
 	// Remove timelimit
 	g_engfuncs.pfnCvar_DirectSet(&timelimit, "0");
-
-	// Save maxspeed before it is modified by modes
-	m_flDefaultMaxSpeed = CVAR_GET_FLOAT("sv_maxspeed");
 }
 
 CHalfLifeMultimode::~CHalfLifeMultimode()
@@ -199,11 +196,11 @@ void CHalfLifeMultimode::SwitchToIntermission()
 	m_State = State::Intermission;
 	m_flIntermEndTime = gpGlobals->time + mp_mm_interm_time.Get();
 
+	m_pCurMode->OnEnd();
+
 	// Freeze all players by changing max speed
 	// (for slow down effect instead of immediate freeze)
-	CVAR_SET_FLOAT("sv_maxspeed", 0);
-
-	m_pCurMode->OnEnd();
+	UTIL_SetPlayerMaxSpeed(0.01);
 
 	int iPlayerCount = 0;
 	int iPlayerScoreCount = 0;
@@ -270,8 +267,7 @@ void CHalfLifeMultimode::SwitchToNextMode()
 {
 	if (m_State == State::Intermission)
 	{
-		// Restore speed
-		CVAR_SET_FLOAT("sv_maxspeed", m_flDefaultMaxSpeed);
+		UTIL_ResetPlayerMaxSpeed();
 
 		for (int i = 1; i <= gpGlobals->maxClients; i++)
 		{

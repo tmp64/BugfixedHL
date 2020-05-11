@@ -2814,3 +2814,23 @@ void UTIL_RemoveColorCodes(const char *src, char *dst, int size)
 		dst[j] = '\0';
 	dst[size - 1] = '\0';
 }
+
+void UTIL_SetPlayerMaxSpeed(float maxspeed)
+{
+	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	{
+		CBasePlayer *pPlayer = (CBasePlayer *)UTIL_PlayerByIndex(i);
+		if (pPlayer)
+			g_engfuncs.pfnSetClientMaxspeed(pPlayer->edict(), maxspeed);
+	}
+}
+
+void UTIL_ResetPlayerMaxSpeed()
+{
+	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	{
+		CBasePlayer *pPlayer = (CBasePlayer *)UTIL_PlayerByIndex(i);
+		if (pPlayer)
+			g_engfuncs.pfnSetClientMaxspeed(pPlayer->edict(), 0);
+	}
+}

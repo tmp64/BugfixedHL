@@ -558,4 +558,10 @@ float UTIL_WeaponTimeBase( void );
 // Removes all ^[number] from the string
 void UTIL_RemoveColorCodes(const char *src, char *dst, int size);
 
+// Sets maxspeed of all players
+void UTIL_SetPlayerMaxSpeed(float maxspeed);
+
+// Restores default maxspeed of all players
+void UTIL_ResetPlayerMaxSpeed();
+
 #endif
