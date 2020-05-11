@@ -1,6 +1,6 @@
 #ifndef MULTIMODE_WARMUP_MODE_H
 #define MULTIMODE_WARMUP_MODE_H
-#include "basemode.h"
+#include "multimode/basemode.h"
 
 class CWarmupMode : public CBaseMode
 {

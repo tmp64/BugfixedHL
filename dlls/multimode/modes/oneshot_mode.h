@@ -1,6 +1,6 @@
 #ifndef MULTIMODE_ONESHOT_H
 #define MULTIMODE_ONESHOT_H
-#include "basemode.h"
+#include "multimode/basemode.h"
 
 class COneshotMode : public CBaseMode
 {

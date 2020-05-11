@@ -1,6 +1,6 @@
 #ifndef MULTIMODE_RECOIL_MODE_H
 #define MULTIMODE_RECOIL_MODE_H
-#include "basemode.h"
+#include "multimode/basemode.h"
 
 class CRecoilMode : public CBaseMode
 {

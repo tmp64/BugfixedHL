@@ -1,6 +1,6 @@
 #ifndef MULTIMODE_BIOHAZARD_MODE_H
 #define MULTIMODE_DM_MODE_H
-#include "basemode.h"
+#include "multimode/basemode.h"
 
 class CBiohazardMode : public CBaseMode
 {

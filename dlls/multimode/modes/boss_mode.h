@@ -1,6 +1,6 @@
 #ifndef MULTIMODE_BOSS_MODE_H
 #define MULTIMODE_BOSS_MODE_H
-#include "basemode.h"
+#include "multimode/basemode.h"
 
 class CBossMode : public CBaseMode
 {

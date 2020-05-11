@@ -37,7 +37,7 @@
 #include "hltv.h"
 #include "multimode/multimode.h"
 #include "multimode/multimode_gamerules.h"
-#include "multimode/boss_mode.h"
+#include "multimode/modes/boss_mode.h"
 
 // #define DUCKFIX
 

@@ -1,6 +1,6 @@
 #ifndef MULTIMODE_SLOW_ROCKETS_MODE_H
 #define MULTIMODE_SLOW_ROCKETS_MODE_H
-#include "basemode.h"
+#include "multimode/basemode.h"
 /**
  * Slow rockets
  *

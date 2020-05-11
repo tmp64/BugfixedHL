@@ -1,6 +1,6 @@
 #ifndef MULTIMODE_SPEED_MODE_H
 #define MULTIMODE_SPEED_MODE_H
-#include "basemode.h"
+#include "multimode/basemode.h"
 
 class CSpeedMode : public CBaseMode
 {

@@ -10,15 +10,15 @@
 #include "multimode_gamerules.h"
 #include "game.h"
 
-#include "dm_mode.h"
-#include "oneshot_mode.h"
-#include "recoil_mode.h"
-#include "wpn_drop_mode.h"
-#include "warmup_mode.h"
-#include "biohazard_mode.h"
-#include "slowrockets_mode.h"
-#include "speed_mode.h"
-#include "boss_mode.h"
+#include "modes/dm_mode.h"
+#include "modes/oneshot_mode.h"
+#include "modes/recoil_mode.h"
+#include "modes/wpn_drop_mode.h"
+#include "modes/warmup_mode.h"
+#include "modes/biohazard_mode.h"
+#include "modes/slowrockets_mode.h"
+#include "modes/speed_mode.h"
+#include "modes/boss_mode.h"
 
 extern int g_multimode;
 

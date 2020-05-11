@@ -4,7 +4,7 @@
 #include "player.h"
 #include "weapons.h"
 #include "gamerules.h"
-#include "multimode_gamerules.h"
+#include "multimode/multimode_gamerules.h"
 #include "game.h"
 #include "oneshot_mode.h"
 #include "skill.h"

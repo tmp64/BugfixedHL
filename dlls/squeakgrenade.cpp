@@ -23,9 +23,12 @@
 #include "player.h"
 #include "soundent.h"
 #include "gamerules.h"
+
+#ifdef SERVER_DLL
 #include "multimode/multimode.h"
 #include "multimode/multimode_gamerules.h"
-#include "multimode/biohazard_mode.h"
+#include "multimode/modes/biohazard_mode.h"
+#endif
 
 enum w_squeak_e {
 	WSQUEAK_IDLE1 = 0,

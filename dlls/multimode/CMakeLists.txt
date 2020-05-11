@@ -6,22 +6,22 @@ add_sources(
 	basemode.h
 	basemode.cpp
 	
-	dm_mode.h
-	dm_mode.cpp
-	oneshot_mode.h
-	oneshot_mode.cpp
-	recoil_mode.h
-	recoil_mode.cpp
-	wpn_drop_mode.h
-	wpn_drop_mode.cpp
-	warmup_mode.h
-	warmup_mode.cpp
-	biohazard_mode.h
-	biohazard_mode.cpp
-	slowrockets_mode.h
-	slowrockets_mode.cpp
-	speed_mode.h
-	speed_mode.cpp
-	boss_mode.h
-	boss_mode.cpp
+	modes/dm_mode.h
+	modes/dm_mode.cpp
+	modes/oneshot_mode.h
+	modes/oneshot_mode.cpp
+	modes/recoil_mode.h
+	modes/recoil_mode.cpp
+	modes/wpn_drop_mode.h
+	modes/wpn_drop_mode.cpp
+	modes/warmup_mode.h
+	modes/warmup_mode.cpp
+	modes/biohazard_mode.h
+	modes/biohazard_mode.cpp
+	modes/slowrockets_mode.h
+	modes/slowrockets_mode.cpp
+	modes/speed_mode.h
+	modes/speed_mode.cpp
+	modes/boss_mode.h
+	modes/boss_mode.cpp
 )

@@ -1,6 +1,6 @@
 #ifndef MULTIMODE_WON_DROP_MODE_H
 #define MULTIMODE_WON_DROP_MODE_H
-#include "basemode.h"
+#include "multimode/basemode.h"
 
 class CWpnDropMode : public CBaseMode
 {
