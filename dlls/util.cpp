@@ -2831,6 +2831,6 @@ void UTIL_ResetPlayerMaxSpeed()
 	{
 		CBasePlayer *pPlayer = (CBasePlayer *)UTIL_PlayerByIndex(i);
 		if (pPlayer)
-			g_engfuncs.pfnSetClientMaxspeed(pPlayer->edict(), 0);
+			g_engfuncs.pfnSetClientMaxspeed(pPlayer->edict(), 2000);
 	}
 }
