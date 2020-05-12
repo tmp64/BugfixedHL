@@ -22,21 +22,12 @@
 
 extern int g_multimode;
 
-ConVar mp_mm_min_players("mp_mm_min_players", "1");
-ConVar mp_mm_warmup_time("mp_mm_warmup_time", "45");
-ConVar mp_mm_freeze_time("mp_mm_freeze_time", "5");
-ConVar mp_mm_game_time("mp_mm_game_time", "60");
-ConVar mp_mm_interm_time("mp_mm_interm_time", "5");
+constexpr float ERROR_MESSAGE_PERIOD = 5;
+
+ConVar mp_mm_config_file("mp_mm_config_file", "hl_multimode.json");
 
 ConVar mp_mm_skip_warmup("mp_mm_skip_warmup", "0");
 ConVar mp_mm_skip_mode("mp_mm_skip_mode", "0");
-
-// Selects behavior when all modes have been played:
-//   0: the game will continue from the first mode;
-//   1: the game will go in intermission
-//   2: the game will go in "endgame" state to choose a
-//      new map using mapchooser_multimode AMXX plugin.
-ConVar mp_mm_on_end("mp_mm_on_end", "0");
 
 struct MultimodePlayerScore
 {
@@ -66,55 +57,6 @@ static int SortMultimodePlayerScore(const void *plhs, const void *prhs)
 
 CHalfLifeMultimode::CHalfLifeMultimode() : CHalfLifeMultiplay()
 {
-	// Init HUD texts
-	m_WarmupTextParams.x = -1.0f;
-	m_WarmupTextParams.y = 0.25f;
-	m_WarmupTextParams.effect = 0;
-	m_WarmupTextParams.r1 = 255;
-	m_WarmupTextParams.g1 = 255;
-	m_WarmupTextParams.b1 = 255;
-	m_WarmupTextParams.fadeinTime = 0.1f;
-	m_WarmupTextParams.fadeoutTime = 0.1f;
-	m_WarmupTextParams.holdTime = 0.9f;
-	m_WarmupTextParams.fxTime = 0.9f;
-
-	m_TimerTextParams.x = -1.0f;
-	m_TimerTextParams.y = 0.05f;
-	m_TimerTextParams.effect = 0;
-	m_TimerTextParams.r1 = 0xF2;	// Orange color
-	m_TimerTextParams.g1 = 0x9D;
-	m_TimerTextParams.b1 = 0x35;
-	m_TimerTextParams.fadeinTime = 0.1f;
-	m_TimerTextParams.fadeoutTime = 0.1f;
-	m_TimerTextParams.holdTime = 0.9f;
-	m_TimerTextParams.fxTime = 0.9f;
-
-	m_ModeTitleTextParams.x = -1.0f;
-	m_ModeTitleTextParams.effect = 0;
-	m_ModeTitleTextParams.fadeinTime = 0.3f;
-	m_ModeTitleTextParams.fadeoutTime = 0.6f;
-	m_ModeTitleTextParams.holdTime = mp_mm_freeze_time.Get() - 0.6f;
-	m_ModeTitleTextParams.fxTime = mp_mm_freeze_time.Get() - 0.6f;
-
-	m_ModeTitleTextParams.y = 0.3f;
-
-	m_ModeInfoTextParams = m_ModeTitleTextParams;
-	m_ModeInfoTextParams.y = 0.35f;
-	m_ModeInfoTextParams.r1 = 255;
-	m_ModeInfoTextParams.g1 = 255;
-	m_ModeInfoTextParams.b1 = 255;
-
-	m_IntermStatsTextParams.x = 0.75;
-	m_IntermStatsTextParams.y = 0.4f;
-	m_IntermStatsTextParams.effect = 0;
-	m_IntermStatsTextParams.r1 = 255;
-	m_IntermStatsTextParams.g1 = 255;
-	m_IntermStatsTextParams.b1 = 255;
-	m_IntermStatsTextParams.fadeinTime = 1.f;
-	m_IntermStatsTextParams.fadeoutTime = 0.1f;
-	m_IntermStatsTextParams.holdTime = mp_mm_interm_time.Get() - 0.6f;
-	m_IntermStatsTextParams.fxTime = mp_mm_interm_time.Get() - 0.6f;
-
 	// Do not give crowbar and glock
 	m_bGiveDefaultWeapons = false;
 
@@ -133,6 +75,22 @@ CHalfLifeMultimode::CHalfLifeMultimode() : CHalfLifeMultiplay()
 
 	// Remove timelimit
 	g_engfuncs.pfnCvar_DirectSet(&timelimit, "0");
+
+	// Load config file
+	try
+	{
+		nlohmann::json config = LoadConfigFile();
+		ApplyConfigFile(config);
+	}
+	catch (const std::exception &e)
+	{
+		UTIL_LogPrintf("[Multimode] ERROR: Failed to load config file.\n");
+		UTIL_LogPrintf("[Multimode] ERROR: File: %s\n", mp_mm_config_file.GetString());
+		UTIL_LogPrintf("[Multimode] ERROR: Message:\n");
+		UTIL_LogPrintf("[Multimode] ERROR: %s\n", e.what());
+		SwitchToInvalidConfig();
+	}
+
 }
 
 CHalfLifeMultimode::~CHalfLifeMultimode()
@@ -144,6 +102,17 @@ CHalfLifeMultimode::~CHalfLifeMultimode()
 CHalfLifeMultimode::State CHalfLifeMultimode::GetState()
 {
 	return m_State;
+}
+
+void CHalfLifeMultimode::SwitchToInvalidConfig()
+{
+	if (m_State == State::InvalidConfig)
+		return;
+	ResetTimerUpdate();
+	FinishCurMode();
+	m_State = State::InvalidConfig;
+	m_pCurMode = m_pWarmupMode;
+	BeginCurMode(false, false);
 }
 
 void CHalfLifeMultimode::SwitchToWaiting()
@@ -171,7 +140,7 @@ void CHalfLifeMultimode::SwitchToWarmup()
 		return;
 
 	ResetTimerUpdate();
-	m_flWarmupEndTime = gpGlobals->time + mp_mm_warmup_time.Get();
+	m_flWarmupEndTime = gpGlobals->time + m_ParsedConfig.warmupTime;
 
 	if (m_State == State::Waiting)
 	{
@@ -191,7 +160,7 @@ void CHalfLifeMultimode::SwitchToIntermission()
 		return;
 
 	m_State = State::Intermission;
-	m_flIntermEndTime = gpGlobals->time + mp_mm_interm_time.Get();
+	m_flIntermEndTime = gpGlobals->time + m_ParsedConfig.intermTime;
 
 	m_pCurMode->OnEnd();
 
@@ -285,33 +254,22 @@ void CHalfLifeMultimode::SwitchToNextMode()
 	m_CurModeId = (ModeID)((int)m_CurModeId + 1);
 	if (m_CurModeId == ModeID::ModeCount)
 	{
-		switch ((int)mp_mm_on_end.Get())
+		switch (m_ParsedConfig.onEnd)
 		{
-		case 0:
+		case EndAction::StartOver:
 		{
 			m_CurModeId = (ModeID)1;
 			break;
 		}
-		case 1:
+		case EndAction::Restart:
 		{
 			m_State = State::FinalIntermission;
 			GoToIntermission();
 			return;
 		}
-		case 2:
-		{
-			int votetime = CVAR_GET_FLOAT("amx_multimode_votetime");
-
-			if (votetime <= 0)
-			{
-				GoToIntermission();
-				return;
-			}
-
-			g_engfuncs.pfnCvar_DirectSet(&timelimit, UTIL_VarArgs("%f", (gpGlobals->time + votetime) / 60.0));
-			SwitchToEndgame();
+		default:
+			ASSERT(false);
 			return;
-		}
 		}
 	}
 
@@ -507,8 +465,8 @@ void CHalfLifeMultimode::BeginCurMode(bool bEnableFreezeTime, bool bShowModeInfo
 		if (bEnableFreezeTime)
 		{
 			m_State = State::FreezeTime;
-			m_flFreezeEndTime = gpGlobals->time + mp_mm_freeze_time.Get();
-			m_iFreezeNextSec = mp_mm_freeze_time.Get();
+			m_flFreezeEndTime = gpGlobals->time + m_ParsedConfig.freezeTime;
+			m_iFreezeNextSec = m_ParsedConfig.freezeTime;
 		}
 		else
 		{
@@ -552,7 +510,7 @@ void CHalfLifeMultimode::StartCurMode()
 	if (m_State == State::FreezeTime)
 	{
 		m_State = State::Game;
-		m_flEndTime = gpGlobals->time + mp_mm_game_time.Get();
+		m_flEndTime = gpGlobals->time + GetGameTime();
 	}
 
 	m_pCurMode->OnStart();
@@ -599,13 +557,23 @@ const char *CHalfLifeMultimode::GetGameDescription()
 	return "HL Multimode";
 }
 
+void CHalfLifeMultimode::ThinkInvalidConfig()
+{
+	if (gpGlobals->time >= m_flNextTimerUpdate)
+	{
+		UTIL_ColoredClientPrintAll(HUD_PRINTTALK, "^1[Multimode]: ^6ERROR: ^8Server configuration is invalid.");
+		UTIL_ColoredClientPrintAll(HUD_PRINTTALK, "^1[Multimode]: ^6ERROR: ^8Check server log.");
+		m_flNextTimerUpdate = gpGlobals->time + ERROR_MESSAGE_PERIOD;
+	}
+}
+
 void CHalfLifeMultimode::ThinkWaiting()
 {
 	if (gpGlobals->time >= m_flNextTimerUpdate)
 	{
 		// Count connected players
 		int iPlayerCount = 0;
-		int iMinPlayerCount = mp_mm_min_players.Get();
+		int iMinPlayerCount = m_ParsedConfig.minPlayers;
 		for (int i = 1; i <= gpGlobals->maxClients; i++)
 		{
 			edict_t *pEdict = INDEXENT(i);
@@ -769,9 +737,14 @@ void CHalfLifeMultimode::Think()
 
 	switch (m_State)
 	{
-	case State::Invalid:
+	case State::Initial:
 	{
 		SwitchToWaiting();
+		break;
+	}
+	case State::InvalidConfig:
+	{
+		ThinkInvalidConfig();
 		break;
 	}
 	case State::Waiting:
@@ -1141,6 +1114,120 @@ void CHalfLifeMultimode::ResetTimerUpdate()
 {
 	m_flNextTimerUpdate = gpGlobals->time + 0.0;
 }
+
+float CHalfLifeMultimode::GetGameTime()
+{
+	// TODO:
+	return m_ParsedConfig.gameTime;
+}
+
+nlohmann::json CHalfLifeMultimode::LoadConfigFile()
+{
+	const char *configPath = mp_mm_config_file.GetString();
+	char *pFile = (char *)LOAD_FILE_FOR_ME((char *)configPath, nullptr);
+
+	if (!pFile)
+		throw std::runtime_error(std::string("config file '") + configPath + "' failed to load");
+
+	try
+	{
+		nlohmann::json config = nlohmann::json::parse(pFile);
+
+		if (pFile)
+			FREE_FILE(pFile);
+
+		return config;
+	}
+	catch (const std::exception &)
+	{
+		if (pFile)
+			FREE_FILE(pFile);
+		throw;
+	}
+}
+
+void CHalfLifeMultimode::ApplyConfigFile(const nlohmann::json &config)
+{
+	ParsedConfig mmParsedCfg;
+
+	// Validate "multimode" config
+	try
+	{
+		const nlohmann::json &mm = config.at("multimode");
+		mmParsedCfg.minPlayers = mm.at("min_players").get<int>();
+		mmParsedCfg.warmupTime = mm.at("warmup_time").get<int>();
+		mmParsedCfg.freezeTime = mm.at("freeze_time").get<int>();
+		mmParsedCfg.gameTime = mm.at("game_time").get<int>();
+		mmParsedCfg.intermTime = mm.at("interm_time").get<int>();
+
+		std::string onEnd = mm.at("on_end").get<std::string>();
+		if (onEnd == "start_over")
+			mmParsedCfg.onEnd = EndAction::StartOver;
+		else if (onEnd == "restart")
+			mmParsedCfg.onEnd = EndAction::Restart;
+		else
+			throw std::runtime_error("multimode.on_end contains invalid value '" + onEnd + "'");
+	}
+	catch (const std::exception &e)
+	{
+		throw std::runtime_error(std::string("while parsing 'multimode': ") + e.what());
+	}
+
+	m_ParsedConfig = mmParsedCfg;
+	InitHudTexts();
+}
+
+void CHalfLifeMultimode::InitHudTexts()
+{
+	m_WarmupTextParams.x = -1.0f;
+	m_WarmupTextParams.y = 0.25f;
+	m_WarmupTextParams.effect = 0;
+	m_WarmupTextParams.r1 = 255;
+	m_WarmupTextParams.g1 = 255;
+	m_WarmupTextParams.b1 = 255;
+	m_WarmupTextParams.fadeinTime = 0.1f;
+	m_WarmupTextParams.fadeoutTime = 0.1f;
+	m_WarmupTextParams.holdTime = 0.9f;
+	m_WarmupTextParams.fxTime = 0.9f;
+
+	m_TimerTextParams.x = -1.0f;
+	m_TimerTextParams.y = 0.05f;
+	m_TimerTextParams.effect = 0;
+	m_TimerTextParams.r1 = 0xF2;	// Orange color
+	m_TimerTextParams.g1 = 0x9D;
+	m_TimerTextParams.b1 = 0x35;
+	m_TimerTextParams.fadeinTime = 0.1f;
+	m_TimerTextParams.fadeoutTime = 0.1f;
+	m_TimerTextParams.holdTime = 0.9f;
+	m_TimerTextParams.fxTime = 0.9f;
+
+	m_ModeTitleTextParams.x = -1.0f;
+	m_ModeTitleTextParams.effect = 0;
+	m_ModeTitleTextParams.fadeinTime = 0.3f;
+	m_ModeTitleTextParams.fadeoutTime = 0.6f;
+	m_ModeTitleTextParams.holdTime = m_ParsedConfig.freezeTime - 0.6f;
+	m_ModeTitleTextParams.fxTime = m_ParsedConfig.freezeTime - 0.6f;
+
+	m_ModeTitleTextParams.y = 0.3f;
+
+	m_ModeInfoTextParams = m_ModeTitleTextParams;
+	m_ModeInfoTextParams.y = 0.35f;
+	m_ModeInfoTextParams.r1 = 255;
+	m_ModeInfoTextParams.g1 = 255;
+	m_ModeInfoTextParams.b1 = 255;
+
+	m_IntermStatsTextParams.x = 0.75;
+	m_IntermStatsTextParams.y = 0.4f;
+	m_IntermStatsTextParams.effect = 0;
+	m_IntermStatsTextParams.r1 = 255;
+	m_IntermStatsTextParams.g1 = 255;
+	m_IntermStatsTextParams.b1 = 255;
+	m_IntermStatsTextParams.fadeinTime = 1.f;
+	m_IntermStatsTextParams.fadeoutTime = 0.1f;
+	m_IntermStatsTextParams.holdTime = m_ParsedConfig.intermTime - 0.6f;
+	m_IntermStatsTextParams.fxTime = m_ParsedConfig.intermTime - 0.6f;
+}
+
 
 bool IsRunningMultimode()
 {

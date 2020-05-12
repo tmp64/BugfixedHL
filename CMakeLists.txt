@@ -578,7 +578,8 @@ else()
 endif()
 
 # Link with dependencies
-target_link_libraries( hl 
+target_link_libraries( hl
+	nlohmann_json 
 	${SERVER_PLAT_LIBS}
 	${SHARED_DEPENDENCIES}
 	Threads::Threads

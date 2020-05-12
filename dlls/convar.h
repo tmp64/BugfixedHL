@@ -10,6 +10,7 @@ public:
 	ConVar &operator=(const ConVar &) = delete;
 
 	float Get();
+	const char *GetString();
 	void Set(const char *val);
 	void Set(float val);
 

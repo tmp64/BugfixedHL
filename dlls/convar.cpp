@@ -20,6 +20,11 @@ float ConVar::Get()
 	return m_Cvar.value;
 }
 
+const char *ConVar::GetString()
+{
+	return m_Cvar.string;
+}
+
 void ConVar::Set(const char *val)
 {
 	CVAR_SET_STRING(m_Cvar.name, val);

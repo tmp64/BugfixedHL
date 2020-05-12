@@ -1,6 +1,8 @@
 #ifndef MULTIMODE_GAMERULES_H
 #define MULTIMODE_GAMERULES_H
 #include <cassert>
+#include <string>
+#include <json.hpp>
 #include "cdll_dll.h"
 #include "skill.h"
 #include "multimode.h"
@@ -13,7 +15,8 @@ public:
 
 	enum class State
 	{
-		Invalid = 0,
+		Initial = 0,
+		InvalidConfig,
 		Waiting,
 		Warmup,
 		FreezeTime,
@@ -28,6 +31,7 @@ public:
 
 	State GetState();
 
+	void SwitchToInvalidConfig();
 	void SwitchToWaiting();
 	void SwitchToWarmup();
 	void SwitchToIntermission();
@@ -40,6 +44,7 @@ public:
 
 	virtual const char *GetGameDescription();
 
+	void ThinkInvalidConfig();
 	void ThinkWaiting();
 	void ThinkWarmup();
 	void ThinkFreezeTime();
@@ -63,39 +68,101 @@ public:
 	void OnPrimaryAttack(CBasePlayer *pPlayer, CBasePlayerItem *pWeapon);
 
 private:
+	//-------------------------------------------------------------------
+	// Type definitions
+	//-------------------------------------------------------------------
+	enum class EndAction
+	{
+		StartOver,
+		Restart
+	};
+
+	struct ParsedConfig
+	{
+		int minPlayers = 1;
+		int warmupTime = 60;
+		int freezeTime = 5;
+		int gameTime = 60;
+		int intermTime = 5;
+		EndAction onEnd = EndAction::StartOver;
+	};
+
+	//-------------------------------------------------------------------
+	// Const data (not changed during runtime)
+	//-------------------------------------------------------------------
 	CBaseMode *m_pModes[(int)ModeID::ModeCount] = {};
 	skilldata_t m_DefSkillData;
+
+	//-------------------------------------------------------------------
+	// Configuration
+	//-------------------------------------------------------------------
 	hudtextparms_t m_WarmupTextParams;
 	hudtextparms_t m_TimerTextParams;
 	hudtextparms_t m_ModeTitleTextParams;
 	hudtextparms_t m_ModeInfoTextParams;
 	hudtextparms_t m_IntermStatsTextParams;
 
-	State m_State = State::Invalid;
+	ParsedConfig m_ParsedConfig;
+
+	//-------------------------------------------------------------------
+	// States
+	//-------------------------------------------------------------------
+	State m_State = State::Initial;
 	float m_flNextTimerUpdate = 0;
 
-	// Warmup
+	//-------------------------------------------------------------------
+	// Warmup state
+	//-------------------------------------------------------------------
 	CBaseMode *m_pWarmupMode = nullptr;
 	float m_flWarmupEndTime = 0;
 
-	// Freeze time
+	//-------------------------------------------------------------------
+	// Freeze time state
+	//-------------------------------------------------------------------
 	float m_flFreezeEndTime = 0;
 	int m_iFreezeNextSec = 0;
 	bool m_bFreezeOnSpawn = false;
 
-	// Game time
+	//-------------------------------------------------------------------
+	// Game state
+	//-------------------------------------------------------------------
 	CBaseMode *m_pCurMode = nullptr;
 	ModeID m_CurModeId = ModeID::None;
 	float m_flEndTime = 0;
 
-	// Intermission
+	//-------------------------------------------------------------------
+	// Intermission state
+	//-------------------------------------------------------------------
 	float m_flIntermEndTime = 0;
 
-	CHalfLifeMultimode(const CHalfLifeMultimode &&) = delete;
-	CHalfLifeMultimode &operator=(const CHalfLifeMultimode &&) = delete;
+	//-------------------------------------------------------------------
+	// Non-copyable
+	//-------------------------------------------------------------------
+	CHalfLifeMultimode(const CHalfLifeMultimode &) = delete;
+	CHalfLifeMultimode &operator=(const CHalfLifeMultimode &) = delete;
 
-	void ResetTimerUpdate();
+	//-------------------------------------------------------------------
+	// Intialization
+	//-------------------------------------------------------------------
+	/**
+	 * Loads config file or throws an exception.
+	 */
+	nlohmann::json LoadConfigFile();
 
+	/**
+	 * Applies config file or throws an exception.
+	 * In case of exception, no changes.
+	 */
+	void ApplyConfigFile(const nlohmann::json &config);
+
+	/**
+	 * Populates hudtextparms_t with config data.
+	 */
+	void InitHudTexts();
+
+	/**
+	 * Registes mode of type T.
+	 */
 	template <typename T>
 	inline T *RegisterMode()
 	{
@@ -112,6 +179,10 @@ private:
 
 		return pMode;
 	}
+
+	//-------------------------------------------------------------------
+	void ResetTimerUpdate();
+	float GetGameTime();
 
 	friend bool IsRunningMultimode(ModeID mode);
 
