@@ -9,13 +9,13 @@
 #include "wpn_drop_mode.h"
 
 // Period in seconds in which weapons are regiven to players
-ConVar mp_mm_wpndrop_respawn("mp_mm_wpndrop_respawn", "4.5");
+static MMConfigVar<CWpnDropMode, float> mp_mm_wpndrop_respawn("respawn", 4.5f);
 
 // Should revolver have infinite ammo
-ConVar mp_mm_wpndrop_infammo("mp_mm_wpndrop_infammo", "1");
+static MMConfigVar<CWpnDropMode, bool> mp_mm_wpndrop_infammo("infammo", true);
 
 // Random angle variation
-ConVar mp_mm_wpndrop_rndangle("mp_mm_wpndrop_rndangle", "60");
+static MMConfigVar<CWpnDropMode, float> mp_mm_wpndrop_rndangle("rndangle", 60);
 
 CWpnDropMode::CWpnDropMode() : CBaseMode()
 {
@@ -59,7 +59,7 @@ bool CWpnDropMode::ShouldRespawnAmmo()
 void CWpnDropMode::OnPrimaryAttack(CBasePlayer *pPlayer, CBasePlayerItem *pWeapon)
 {
 	// Infinite 357 ammo
-	if (mp_mm_wpndrop_infammo && pPlayer->m_pActiveItem &&
+	if (mp_mm_wpndrop_infammo.Get() && pPlayer->m_pActiveItem &&
 		pPlayer->m_pActiveItem->m_iId == WEAPON_PYTHON)
 	{
 		CPython *pWeapon = (CPython *)pPlayer->m_pActiveItem;
@@ -78,7 +78,7 @@ void CWpnDropMode::OnPrimaryAttack(CBasePlayer *pPlayer, CBasePlayerItem *pWeapo
 	pWeaponBox->PackWeapon(pWeapon);
 
 	Vector drop_dir = pPlayer->pev->angles;
-	drop_dir.y += RANDOM_FLOAT(-1.0f, 1.0f) * mp_mm_wpndrop_rndangle.Get();
+	drop_dir.y += RANDOM_FLOAT(-1.0f, 1.0f) * mp_mm_wpndrop_rndangle.Get() / 2;
 	if (drop_dir.y >= 360)
 		drop_dir.y -= 360;
 	else if (drop_dir.y < 0)

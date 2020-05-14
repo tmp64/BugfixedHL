@@ -11,7 +11,7 @@
 EHANDLE GetSnarkOwner(CBaseEntity *pEnt);
 
 // Maximum count of snarks a player can have deployed
-ConVar mp_mm_biohaz_snark_count("mp_mm_biohaz_snark_count", "10");
+static MMConfigVar<CBiohazardMode, int> cfg_snark_count("snark_count", 10);
 
 CBiohazardMode::CBiohazardMode() : CBaseMode()
 {
@@ -100,7 +100,7 @@ void CBiohazardMode::GivePlayerWeapons(CBasePlayer *pPlayer)
 	if (newWpnType == WeaponType::Snark && oldWpnType != WeaponType::Snark)
 	{
 		// Reset snark counter
-		plInfo.snarkCount = mp_mm_biohaz_snark_count.Get();
+		plInfo.snarkCount = cfg_snark_count.Get();
 	}
 
 	plInfo.wpnType = newWpnType;

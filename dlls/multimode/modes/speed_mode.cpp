@@ -8,8 +8,8 @@
 #include "game.h"
 #include "speed_mode.h"
 
-ConVar mp_mm_speed_maxspeed("mp_mm_speed_maxspeed", "600", 0);
-ConVar mp_mm_speed_accel("mp_mm_speed_accel", "50", 0);
+static MMConfigVar<CSpeedMode, float> mp_mm_speed_maxspeed("maxspeed", 600);
+static MMConfigVar<CSpeedMode, float> mp_mm_speed_accel("accel", 50);
 
 CSpeedMode::CSpeedMode() : CBaseMode()
 {

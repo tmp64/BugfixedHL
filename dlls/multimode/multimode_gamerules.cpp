@@ -68,6 +68,7 @@ CHalfLifeMultimode::CHalfLifeMultimode() : CHalfLifeMultiplay()
 	RegisterMode<CDmMode>();
 	RegisterMode<COneshotMode>();
 	RegisterMode<CRecoilMode>();
+	RegisterMode<CWpnDropMode>();
 	RegisterMode<CBiohazardMode>();
 	RegisterMode<CSlowRocketsMode>();
 	RegisterMode<CSpeedMode>();
@@ -91,12 +92,16 @@ CHalfLifeMultimode::CHalfLifeMultimode() : CHalfLifeMultiplay()
 		SwitchToInvalidConfig();
 	}
 
+	for (CBaseMode *mode : m_ModeList)
+	{
+		mode->OnPostInit();
+	}
 }
 
 CHalfLifeMultimode::~CHalfLifeMultimode()
 {
-	for (int i = (int)ModeID::ModeCount - 1; i >= 0; i--)
-		delete m_pModes[i];
+	for (CBaseMode *mode : m_ModeList)
+		delete mode;
 }
 
 CHalfLifeMultimode::State CHalfLifeMultimode::GetState()
@@ -1170,7 +1175,72 @@ void CHalfLifeMultimode::ApplyConfigFile(const nlohmann::json &config)
 	}
 	catch (const std::exception &e)
 	{
-		throw std::runtime_error(std::string("while parsing 'multimode': ") + e.what());
+		throw std::runtime_error(std::string("while validating 'multimode': ") + e.what());
+	}
+
+	// Validate mode config
+	const nlohmann::json &mode_configs = config.at("modes");
+	for (CBaseMode *mode : m_ModeList)
+	{
+		// FIXME: HACK
+		if (!mode)
+			continue;
+		try
+		{
+			auto it = mode_configs.find(mode->GetModeName());
+			if (it != mode_configs.end())
+			{
+				const nlohmann::json &item = *it;
+
+				// Validate vars
+				for (MMConfigVarBase *var : MMConfigVarBase::GetModeVars(mode->GetModeID()))
+				{
+					auto it2 = item.find(var->GetName());
+					if (it2 != item.end() && !var->ValidateValue(*it2))
+					{
+						throw std::runtime_error(std::string("'") + var->GetName() + "': invalid value type");
+					}
+				}
+
+				mode->ValidateConfig(item);
+			}
+		}
+		catch (const std::exception & e)
+		{
+			throw std::runtime_error(std::string("while validating mode '") + mode->GetModeName() + "': " + e.what());
+		}
+	}
+
+	// Apply mode config
+	try {
+		for (CBaseMode *mode : m_ModeList)
+		{
+			// FIXME: HACK
+			if (!mode)
+				continue;
+			auto it = mode_configs.find(mode->GetModeName());
+			if (it != mode_configs.end())
+			{
+				const nlohmann::json &item = *it;
+
+				// Apply vars
+				for (MMConfigVarBase *var : MMConfigVarBase::GetModeVars(mode->GetModeID()))
+				{
+					auto it2 = item.find(var->GetName());
+					if (it2 != item.end())
+					{
+						var->SetJSON(*it2);
+					}
+				}
+
+				mode->ApplyConfig(item);
+			}
+		}
+	}
+	catch (const std::exception &e)
+	{
+		UTIL_LogPrintf("ERROR: Unexpected exception while applying mode config: %s\n", e.what());
+		abort();
 	}
 
 	m_ParsedConfig = mmParsedCfg;

@@ -1,0 +1,166 @@
+{
+    "multimode": {
+        "#min_players_comment": "Minimum number of players required to start the game",
+        "min_players": 1,
+        "#warmup_time_comment": "Duration of warmup in seconds",
+        "warmup_time": 5,
+        "#freeze_time_comment": "Duration of freezetime in seconds",
+        "freeze_time": 5,
+        "#game_time_comment": "How long should a mode play for",
+        "game_time": 10,
+        "#interm_time_comment": "Duration of intermission between modes",
+        "interm_time": 5,
+        "#on_end_comment1": "Selects behavior when all modes have been played:",
+        "#on_end_comment2": " - start_over: the game will continue from the first mode",
+        "#on_end_comment3": " - restart: the game will go into final intermission and restart the map",
+        "on_end": "start_over"
+    },
+    "modes": {
+        "#example_mode_name": {
+            "#enabled_comment": "Whether or not this mode will be added to the playlist",
+            "enabled": true,
+            "#game_time_comment": "Override game_time for this mode",
+            "game_time": null
+        },
+
+        "deathmatch": {
+            "#enabled_comment": "Whether or not this mode will be added to the playlist",
+            "enabled": false,
+            "#game_time_comment": "Override game_time for this mode",
+            "game_time": null
+        },
+
+        "one_shot": {
+            "#enabled_comment": "Whether or not this mode will be added to the playlist",
+            "enabled": true,
+            "#game_time_comment": "Override game_time for this mode",
+            "game_time": null
+        },
+
+        "recoil": {
+            "#enabled_comment": "Whether or not this mode will be added to the playlist",
+            "enabled": true,
+            "#game_time_comment": "Override game_time for this mode",
+            "game_time": null,
+            "#spawn_weapons_comment": "List of weapons to give during spawn. Sum of probabilities must be 1.0, null prob - give always",
+            "spawn_weapons": [
+                {
+                    "entity": "weapon_crowbar",
+                    "probability": null
+                },
+                {
+                    "entity": "weapon_glock",
+                    "probability": 0.05
+                },
+                {
+                    "entity": "weapon_357",
+                    "probability": 0.15
+                },
+                {
+                    "entity": "weapon_shotgun",
+                    "probability": 0.4
+                },
+                {
+                    "entity": "weapon_mp5",
+                    "probability": 0.4
+                }
+            ],
+            "#spawn_ammo_comment": "List of ammo to give during spawn",
+            "spawn_ammo": [
+                {
+                    "ammo": "buckshot",
+                    "count": 125
+                },
+                {
+                    "ammo": "9mm",
+                    "count": 250
+                },
+                {
+                    "ammo": "357",
+                    "count": 36
+                }
+            ],
+            "#allowed_weapons_comment1": "List of weapons that should be on the map",
+            "#allowed_weapons_comment2": "Note: some weapons have multiple names",
+            "allowed_weapons": [
+                "weapon_crowbar",
+                "weapon_glock",
+                "weapon_9mmhandgun",
+                "weapon_357",
+                "weapon_python",
+                "weapon_shotgun",
+                "weapon_mp5",
+                "weapon_9mmAR"
+            ]
+        },
+
+        "wpn_drop": {
+            "#enabled_comment": "Whether or not this mode will be added to the playlist",
+            "enabled": true,
+            "#game_time_comment": "Override game_time for this mode",
+            "game_time": null,
+            "#respawn_comment": "Period in seconds in which weapons are regiven to players",
+            "respawn": 4.5,
+            "#infammo_comment": "Should revolver have infinite ammo",
+            "infammo": true,
+            "#rndangle_comment": "Random angle variation",
+            "rndangle": 120
+        },
+
+        "biohazard": {
+            "#enabled_comment": "Whether or not this mode will be added to the playlist",
+            "enabled": true,
+            "#game_time_comment": "Override game_time for this mode",
+            "game_time": null,
+            "#snark_count_comment": "Maximum count of snarks a player can have deployed",
+            "snark_count": 10
+        },
+
+        "slow_rockets": {
+            "#enabled_comment": "Whether or not this mode will be added to the playlist",
+            "enabled": true,
+            "#game_time_comment": "Override game_time for this mode",
+            "game_time": null,
+            "#rocket_respawn_comment": "Period in seconds in which rockets are given to players",
+            "rocket_respawn": 10,
+            "#rocket_speed_comment": "Max speed of the rockets",
+            "rocket_speed": 120
+        },
+
+        "speed": {
+            "#enabled_comment": "Whether or not this mode will be added to the playlist",
+            "enabled": true,
+            "#game_time_comment": "Override game_time for this mode",
+            "game_time": null,
+            "#maxspeed_comment": "Max horizontal speed of the players",
+            "maxspeed": 600,
+            "#accel_comment": "At which rate the speed increases (units per second per tick)",
+            "accel": 50
+        },
+
+        "boss_fight": {
+            "#enabled_comment": "Whether or not this mode will be added to the playlist",
+            "enabled": true,
+            "#game_time_comment": "Override game_time for this mode",
+            "game_time": null,
+            "#boss_hp_comment": "Health of the boss",
+            "boss_hp": 300,
+            "#boss_ap_comment": "Armor of the boss",
+            "boss_ap": 350,
+            "#player_num_comment": "Number of players shown in the stats",
+            "player_num": 5,
+            "#stats_channel_comment": "HUD message channel to use for stats",
+            "stats_channel": 1,
+            "#ban_egon_comment": "Egon won't be available to anyone",
+            "ban_egon": true,
+            "#pl_score_comment": "How many points to award the player who dealt the most damage",
+            "pl_score": 10,
+            "#win_min_score_comment": "How many points the boss gets after win with 0 EffHP left (excluding kills)",
+            "win_min_score": 5,
+            "#win_max_score_comment": "How many points the boss gets after win with max EffHP left (excluding kills)",
+            "win_max_score": 10,
+            "#lose_score_comment": "How many points the boss gets after loss (excluding kills)",
+            "lose_score": 3
+        }
+    }
+}

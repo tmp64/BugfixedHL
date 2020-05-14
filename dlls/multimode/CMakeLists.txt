@@ -5,6 +5,8 @@ add_sources(
     multimode_gamerules.cpp
 	basemode.h
 	basemode.cpp
+	config_var.h
+	config_var.cpp
 	
 	modes/dm_mode.h
 	modes/dm_mode.cpp

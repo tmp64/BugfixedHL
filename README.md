@@ -36,34 +36,15 @@ The mod is fully compatible with Metamod and partially with AMXX.
 
 
 ## Configuration
+Almost all configuration is located in *hl_multimode.json* along with comments. Some options are configured with convars.
+
 | Convar | Value | Description |
 | ------ | ----- | ----------- |
+| mp_multimode | 0/**1** | Enable Multimode gamemode. |
 | mp_fix_mp5_ammo | 0/**1** | MP5 wil have full magazine (50) on pick up (instead of 25) |
-| mp_mm_min_players | integer **(1)** | Minimum count of player for game to switch to warm-up. |
-| mp_mm_warmup_time | seconds **(45)** | Time it takes for warm-up to end. |
-| mp_mm_freeze_time | seconds **(5)** | Time after players have been spawned but before the mode begins. |
-| mp_mm_game_time | seconds **(60)** | Time of each round. |
+| mp_mm_config_file | string **hl_multimode.json** | Name of the config file for Multimode. |
 | mp_mm_skip_warmup | 0/1 | If 1, the warm-up will end immediately and cvar will be reset to 0. (for debugging) |
 | mp_mm_skip_mode | 0/1 | If 1, the game will skip current mode and go to the next, cvar will be reset to 0. (for debugging) |
-| mp_mm_on_end | **0**/1/2 | 0: the game will continue from the first mode;<br>1: the game will go in intermission;<br>2: the game will go in "endgame" state to choose a new map using mapchooser_multimode AMXX plugin (based on mapchooser.sma, not yet released). |
-| mp_mm_wpndrop_respawn | seconds **(7)** | Heavy Weapons: How long it takes for revolver to be regiven. |
-| mp_mm_wpndrop_infammo | 0/**1** | Heavy Weapons: Should revolver have infinite ammo |
-| mp_mm_wpndrop_rndangle | 0-180 **(60)** | Heavy Weapons: Random angle variation |
-| mp_mm_biohaz_snark_count | integer **(10)** | Biohazard: Maximum number of snarks a player can have. |
-| mp_mm_rocket_respawn | seconds **(10)** | Slow Rockets: How long it takes for rockets to be regiven. |
-| mp_mm_rocket_speed | u/s **(120)** | Slow Rockets: Speed of the rockets. |
-| mp_mm_speed_maxspeed | u/s **(600)** | Ludicrous Speed: Max horizontal speed of the players. |
-| mp_mm_speed_accel | u/s/t **(50)** | Ludicrous Speed: At which rate the speed increases (units per second per tick) |
-| mp_mm_boss_hp | integer **(350)** | Boss Fight: Health of the boss |
-| mp_mm_boss_ap | integer **(300)** | Boss Fight: Armor of the boss |
-| mp_mm_boss_player_num | integer **(5)** | Boss Fight: Number of players shown in the stats |
-| mp_mm_boss_stats_channel | integer **(1)** | Boss Fight: HUD message channel to use for stats |
-| mp_mm_boss_ban_egon | boolean **(1)** | Boss Fight: Egon won't be available to anyone |
-| mp_mm_boss_pl_score | integer **(10)** | Boss Fight: How many points to award the player who dealt the most damage. |
-| mp_mm_boss_win_min_score | integer **(5)** | Boss Fight: How many points the boss gets after win with 0 EffHP left (excluding kills) |
-| mp_mm_boss_win_max_score | integer **(10)** | Boss Fight: How many points the boss gets after win with max EffHP left (excluding kills) |
-| mp_mm_boss_lose_score | integer **(3)** | Boss Fight: How many points the boss gets after loss (excluding kills) |
-
 
 ## Thanks
 - Lev for creating [the original BFAIHLSDK](https://github.com/LevShisterov/BugfixedHL).

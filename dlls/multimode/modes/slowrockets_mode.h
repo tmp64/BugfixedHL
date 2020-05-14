@@ -38,6 +38,8 @@ public:
 	virtual int DeadPlayerWeapons(CBasePlayer *pPlayer);
 	virtual int DeadPlayerAmmo(CBasePlayer *pPlayer);
 
+    float GetMaxRocketSpeed();
+
 private:
     float m_flNextCheckTime[MAX_PLAYERS];
 };

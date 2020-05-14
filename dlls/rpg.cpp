@@ -26,8 +26,8 @@
 #ifdef SERVER_DLL
 #include "convar.h"
 #include "multimode/multimode.h"
-
-extern ConVar mp_mm_rocket_speed;
+#include "multimode/multimode_gamerules.h"
+#include "multimode/modes/slowrockets_mode.h"
 #endif
 
 
@@ -271,7 +271,7 @@ void CRpgRocket :: FollowThink( void  )
 
 		if (IsRunningMultimode(ModeID::SlowRockets))
 		{
-			float maxVel = mp_mm_rocket_speed.Get();
+			float maxVel = GetMultimodeGR()->GetMode<CSlowRocketsMode>()->GetMaxRocketSpeed();
 			if (pev->velocity.Length() > maxVel)
 				pev->velocity = pev->velocity.Normalize() * maxVel;
 		}

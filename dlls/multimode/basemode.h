@@ -1,6 +1,7 @@
 #ifndef MULTIMODE_BASEMODE_H
 #define MULTIMODE_BASEMODE_H
 #include "multimode.h"
+#include "config_var.h"
 
 class CBaseMode
 {
@@ -44,9 +45,31 @@ protected:
 	// CHalfLifeMultimode callbacks
 	//-----------------------------------------------------------------
 	/**
-	 * Called once at the start of the map.
+	 * Called once at the start of the map, before config has been loaded.
 	 */
 	virtual void OnInit();
+
+	/**
+	 * Called once at the start of the map, after config has been loaded.
+	 */
+	virtual void OnPostInit();
+
+	/**
+	 * Validates custom config properties of the mode. On error, throws exception.
+	 * At the time of call, config hasn't been applied yet.
+	 * NOTE: Make sure to call CBaseMode::ValidateConfig(json);
+	 * @param json Object config.mode_name
+	 */
+	virtual void ValidateConfig(const nlohmann::json &json);
+
+	/**
+	 * Called after MMConfigVars value have been set to apply any other properties.
+	 * Only called if ValidateConfig succseeded.
+	 * NOTE: Make sure to call CBaseMode::ApplyConfig(json);
+	 * @param json Object config.mode_name
+	 */
+	virtual void ApplyConfig(const nlohmann::json &json);
+
 	/**
 	 * Called at the start of the freeze time before start
 	 * You can change gSkillData, it will be restored automatically later.

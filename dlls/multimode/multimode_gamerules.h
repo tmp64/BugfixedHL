@@ -2,6 +2,7 @@
 #define MULTIMODE_GAMERULES_H
 #include <cassert>
 #include <string>
+#include <vector>
 #include <json.hpp>
 #include "cdll_dll.h"
 #include "skill.h"
@@ -91,6 +92,7 @@ private:
 	// Const data (not changed during runtime)
 	//-------------------------------------------------------------------
 	CBaseMode *m_pModes[(int)ModeID::ModeCount] = {};
+	std::vector<CBaseMode *> m_ModeList;
 	skilldata_t m_DefSkillData;
 
 	//-------------------------------------------------------------------
@@ -170,6 +172,7 @@ private:
 
 		T *pMode = new T();
 		m_pModes[(int)T::MODE_ID] = pMode;
+		m_ModeList.push_back(pMode);
 
 		// Sanity checks
 		ASSERT(pMode->GetModeID() == T::MODE_ID);

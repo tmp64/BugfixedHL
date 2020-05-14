@@ -10,10 +10,10 @@
 #include "skill.h"
 
 // Period in seconds in which rockets are given to players
-ConVar mp_mm_rocket_respawn("mp_mm_rocket_respawn", "10");
+static MMConfigVar<CSlowRocketsMode, int> mp_mm_rocket_respawn("rocket_respawn", 10);
 
 // Max speed of the rockets
-ConVar mp_mm_rocket_speed("mp_mm_rocket_speed", "120");
+static MMConfigVar<CSlowRocketsMode, float> mp_mm_rocket_speed("rocket_speed", 120.f);
 
 CSlowRocketsMode::CSlowRocketsMode() : CBaseMode()
 {
@@ -94,4 +94,9 @@ int CSlowRocketsMode::DeadPlayerWeapons(CBasePlayer *pPlayer)
 int CSlowRocketsMode::DeadPlayerAmmo(CBasePlayer *pPlayer)
 {
 	return GR_PLR_DROP_AMMO_NO;
+}
+
+float CSlowRocketsMode::GetMaxRocketSpeed()
+{
+	return mp_mm_rocket_speed.Get();
 }

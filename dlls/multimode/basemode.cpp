@@ -22,6 +22,18 @@ void CBaseMode::OnInit()
 {
 }
 
+void CBaseMode::OnPostInit()
+{
+}
+
+void CBaseMode::ValidateConfig(const nlohmann::json &json)
+{
+}
+
+void CBaseMode::ApplyConfig(const nlohmann::json &json)
+{
+}
+
 void CBaseMode::OnFreezeStart()
 {
 }

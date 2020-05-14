@@ -9,15 +9,15 @@
 #include "game.h"
 #include "boss_mode.h"
 
-ConVar mp_mm_boss_hp("mp_mm_boss_hp", "350");
-ConVar mp_mm_boss_ap("mp_mm_boss_ap", "300");
-ConVar mp_mm_boss_player_num("mp_mm_boss_player_num", "5");
-ConVar mp_mm_boss_stats_channel("mp_mm_boss_stats_channel", "1");
-ConVar mp_mm_boss_ban_egon("mp_mm_boss_ban_egon", "1");
-ConVar mp_mm_boss_pl_score("mp_mm_boss_pl_score", "10");
-ConVar mp_mm_boss_win_min_score("mp_mm_boss_win_min_score", "5");
-ConVar mp_mm_boss_win_max_score("mp_mm_boss_win_max_score", "10");
-ConVar mp_mm_boss_lose_score("mp_mm_boss_lose_score", "3");
+static MMConfigVar<CBossMode, int> mp_mm_boss_hp("boss_hp", 350);
+static MMConfigVar<CBossMode, int> mp_mm_boss_ap("boss_ap", 300);
+static MMConfigVar<CBossMode, int> mp_mm_boss_player_num("player_num", 5);
+static MMConfigVar<CBossMode, int> mp_mm_boss_stats_channel("stats_channel", 1);
+static MMConfigVar<CBossMode, bool> mp_mm_boss_ban_egon("ban_egon", true);
+static MMConfigVar<CBossMode, int> mp_mm_boss_pl_score("pl_score", 10);
+static MMConfigVar<CBossMode, int> mp_mm_boss_win_min_score("win_min_score", 5);
+static MMConfigVar<CBossMode, int> mp_mm_boss_win_max_score("win_max_score", 10);
+static MMConfigVar<CBossMode, int> mp_mm_boss_lose_score("lose_score", 3);
 
 struct BossSpawnInv
 {
@@ -289,7 +289,7 @@ float CBossMode::PlayerFallDamage(CBasePlayer *pPlayer)
 
 bool CBossMode::CanHaveWeapon(CBasePlayer *pPlayer, CBasePlayerItem *pWeapon)
 {
-	if (pWeapon->m_iId == WEAPON_EGON && mp_mm_boss_ban_egon)
+	if (pWeapon->m_iId == WEAPON_EGON && mp_mm_boss_ban_egon.Get())
 		return false;
 
 	if (pPlayer == m_pBoss)
