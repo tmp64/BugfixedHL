@@ -40,4 +40,16 @@ bool IsRunningMultimode(ModeID mode);
  */
 CHalfLifeMultimode *GetMultimodeGR();
 
+/**
+ * Returns GetMultimodeGR()->GetBaseMode().
+ * MUST only be called if IsRunningMultimode() == true.
+ */
+CBaseMode *GetRunningMultimodeBase();
+
+template <typename T>
+inline T *GetRunningMultimode()
+{
+    return static_cast<T *>(GetRunningMultimodeBase());
+}
+
 #endif

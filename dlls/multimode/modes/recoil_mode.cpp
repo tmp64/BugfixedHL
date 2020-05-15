@@ -1,3 +1,4 @@
+#include <unordered_map>
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
@@ -11,6 +12,14 @@
 static MMConfigVar<CRecoilMode, nlohmann::json> mp_mm_recoil_spawn_weapons("spawn_weapons", nullptr);
 static MMConfigVar<CRecoilMode, nlohmann::json> mp_mm_recoil_spawn_ammo("spawn_ammo", nullptr);
 static MMConfigVar<CRecoilMode, nlohmann::json> mp_mm_recoil_allowed_weapons("allowed_weapons", nullptr);
+static MMConfigVar<CRecoilMode, nlohmann::json> mp_mm_recoil_knockback("knockback", nullptr);
+
+static const std::unordered_map<std::string, CRecoilMode::WeaponType> s_BulletTypes = {
+	{ "glock", CRecoilMode::WeaponType::WPNTYPE_GLOCK },
+	{ "python", CRecoilMode::WeaponType::WPNTYPE_PYTHON },
+	{ "shotgun", CRecoilMode::WeaponType::WPNTYPE_SHOTGUN },
+	{ "mp5", CRecoilMode::WeaponType::WPNTYPE_MP5 }
+};
 
 CRecoilMode::CRecoilMode() : CBaseMode()
 {
@@ -83,6 +92,27 @@ void CRecoilMode::ValidateConfig(const nlohmann::json &json)
 		if (!item.is_string())
 			throw std::runtime_error("allowed_weapons[x] is not a string");
 	}
+
+	// Check mp_mm_recoil_knockback
+	nlohmann::json knockback = json.at("knockback");
+
+	if (!knockback.is_object())
+		throw std::runtime_error("'knockback' is not an array");
+
+	for (auto it = knockback.begin(); it != knockback.end(); ++it)
+	{
+		if (!it.value().is_object())
+			throw std::runtime_error("knockback." + it.key() + " is not an object");
+
+		auto it2 = s_BulletTypes.find(it.key());
+		if (it2 == s_BulletTypes.end())
+			throw std::runtime_error("knockback." + it.key() + ": unknown weapon type");
+
+		if (!it.value().at("shooter").is_number())
+			throw std::runtime_error("knockback." + it.key() + ".shooter is not a number");
+		if (!it.value().at("victim").is_number())
+			throw std::runtime_error("knockback." + it.key() + ".victim is not a number");
+	}
 }
 
 void CRecoilMode::ApplyConfig(const nlohmann::json &json)
@@ -134,6 +164,19 @@ void CRecoilMode::ApplyConfig(const nlohmann::json &json)
 	{
 		m_AllowedWeapons.push_back(item.get<std::string>());
 	}
+
+	//
+	for (auto it = mp_mm_recoil_knockback.Get().begin(); it != mp_mm_recoil_knockback.Get().end(); ++it)
+	{
+		auto it2 = s_BulletTypes.find(it.key());
+		if (it2 == s_BulletTypes.end())
+			throw std::runtime_error("knockback." + it.key() + ": unknown weapon type");
+
+		m_WeaponInfo[it2->second] = {
+			it.value().at("shooter").get<float>(),
+			it.value().at("victim").get<float>()
+		};
+	}
 }
 
 void CRecoilMode::GivePlayerWeapons(CBasePlayer *pPlayer)
@@ -174,4 +217,52 @@ bool CRecoilMode::ShouldRespawnWeapon(const char *classname)
 	}
 
 	return false;
+}
+
+float CRecoilMode::GetWeaponKnockback(Bullet bullet)
+{
+	if (GetMultimodeGR()->GetState() != CHalfLifeMultimode::State::Game)
+		return 0;
+
+	switch (bullet)
+	{
+	case BULLET_PLAYER_9MM:
+		return m_WeaponInfo[WPNTYPE_GLOCK].shooter;
+		break;
+	case BULLET_PLAYER_MP5:
+		return m_WeaponInfo[WPNTYPE_MP5].shooter;
+		break;
+	case BULLET_PLAYER_357:
+		return m_WeaponInfo[WPNTYPE_PYTHON].shooter;
+		break;
+	case BULLET_PLAYER_BUCKSHOT:
+		return m_WeaponInfo[WPNTYPE_SHOTGUN].shooter;
+		break;
+	}
+
+	return 0;
+}
+
+float CRecoilMode::GetVictimKnockback(Bullet bullet)
+{
+	if (GetMultimodeGR()->GetState() != CHalfLifeMultimode::State::Game)
+		return 0;
+
+	switch (bullet)
+	{
+	case BULLET_PLAYER_9MM:
+		return m_WeaponInfo[WPNTYPE_GLOCK].victim;
+		break;
+	case BULLET_PLAYER_MP5:
+		return m_WeaponInfo[WPNTYPE_MP5].victim;
+		break;
+	case BULLET_PLAYER_357:
+		return m_WeaponInfo[WPNTYPE_PYTHON].victim;
+		break;
+	case BULLET_PLAYER_BUCKSHOT:
+		return m_WeaponInfo[WPNTYPE_SHOTGUN].victim;
+		break;
+	}
+
+	return 0;
 }

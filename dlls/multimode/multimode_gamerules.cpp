@@ -1314,3 +1314,8 @@ CHalfLifeMultimode *GetMultimodeGR()
 	ASSERT(g_multimode);
 	return static_cast<CHalfLifeMultimode *>(g_pGameRules);
 }
+
+CBaseMode *GetRunningMultimodeBase()
+{
+	return GetMultimodeGR()->GetModeBase();
+}

@@ -91,7 +91,28 @@
                 "weapon_shotgun",
                 "weapon_mp5",
                 "weapon_9mmAR"
-            ]
+            ],
+            "#knockback_comment1": "How much velocity player and their victim gain on shot/hit",
+            "#knockback_comment2": "Player gains [`shooter` * (number of pellets shot)] u/s (shotgun shoots 4/8 on prim/sec attack)",
+            "#knockback_comment3": "Victim gains [`victim` * (number of pellets hit)] u/s",
+            "knockback": {
+                "glock": {
+                    "shooter": 150,
+                    "victim": 75
+                },
+                "python": {
+                    "shooter": 800,
+                    "victim": 200
+                },
+                "shotgun": {
+                    "shooter": 200,
+                    "victim": 75
+                },
+                "mp5": {
+                    "shooter": 150,
+                    "victim": 75
+                }
+            }
         },
 
         "wpn_drop": {

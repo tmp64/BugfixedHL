@@ -3,6 +3,8 @@
 #include "multimode.h"
 #include "config_var.h"
 
+class CItem;
+
 class CBaseMode
 {
 public:
