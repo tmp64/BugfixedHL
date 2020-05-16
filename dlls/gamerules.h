@@ -162,6 +162,10 @@ public:
 	// Immediately end a multiplayer game
 	virtual void EndMultiplayerGame( void ) {}
 
+// Critical hits
+	virtual int GetCritDamage(CBasePlayer *pAttacker, CBaseEntity *pVictim, int iOrigDmg, int iWeapon) { return iOrigDmg; }
+	virtual void OnCritHit(CBasePlayer *pAttacker, CBaseEntity *pVictim, int iOrigDmg, int iCritDmg, int iWeapon) {}
+
 	virtual ~CGameRules() {}
 };
 

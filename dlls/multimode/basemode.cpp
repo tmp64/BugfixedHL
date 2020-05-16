@@ -199,6 +199,22 @@ int CBaseMode::DeadPlayerAmmo(CBasePlayer *pPlayer)
 	return GR_PLR_DROP_AMMO_ACTIVE;
 }
 
+int CBaseMode::GetCritDamage(CBasePlayer *pAttacker, CBaseEntity *pVictim, int iOrigDmg, int iWeapon)
+{
+	return iOrigDmg;
+}
+
+void CBaseMode::OnCritHit(CBasePlayer *pAttacker, CBaseEntity *pVictim, int iOrigDmg, int iCritDmg, int iWeapon)
+{
+	if (pVictim && pVictim->IsPlayer())
+	{
+		if (!pAttacker->m_bIsBot)
+			CLIENT_COMMAND(pAttacker->edict(), "spk hl_multimode/crit_hit.wav\n");
+		if (!((CBasePlayer *)pVictim)->m_bIsBot)
+			CLIENT_COMMAND(pVictim->edict(), "spk hl_multimode/crit_received.wav\n");
+	}
+}
+
 CBaseMode::CBaseMode()
 {
 }

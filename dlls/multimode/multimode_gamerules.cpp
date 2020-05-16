@@ -63,6 +63,10 @@ CHalfLifeMultimode::CHalfLifeMultimode() : CHalfLifeMultiplay()
 	// Back up skill data
 	m_DefSkillData = gSkillData;
 
+	// Precache resources
+	PRECACHE_SOUND("hl_multimode/crit_hit.wav");
+	PRECACHE_SOUND("hl_multimode/crit_received.wav");
+
 	// Register all modes
 	m_pWarmupMode = RegisterMode<CWarmupMode>();
 	RegisterMode<CDmMode>();
@@ -1107,11 +1111,30 @@ int CHalfLifeMultimode::DeadPlayerAmmo(CBasePlayer *pPlayer)
 	return BaseClass::DeadPlayerAmmo(pPlayer);
 }
 
+int CHalfLifeMultimode::GetCritDamage(CBasePlayer *pAttacker, CBaseEntity *pVictim, int iOrigDmg, int iWeapon)
+{
+	if (m_pCurMode)
+	{
+		return m_pCurMode->GetCritDamage(pAttacker, pVictim, iOrigDmg, iWeapon);
+	}
+
+	return BaseClass::GetCritDamage(pAttacker, pVictim, iOrigDmg, iWeapon);}
+
+void CHalfLifeMultimode::OnCritHit(CBasePlayer *pAttacker, CBaseEntity *pVictim, int iOrigDmg, int iCritDmg, int iWeapon)
+{
+	BaseClass::OnCritHit(pAttacker, pVictim, iOrigDmg, iCritDmg, iWeapon);
+
+	if (m_pCurMode)
+	{
+		m_pCurMode->OnCritHit(pAttacker, pVictim, iOrigDmg, iCritDmg, iWeapon);
+	}
+}
+
 void CHalfLifeMultimode::OnPrimaryAttack(CBasePlayer *pPlayer, CBasePlayerItem *pWeapon)
 {
 	if (m_pCurMode)
 	{
-		return m_pCurMode->OnPrimaryAttack(pPlayer, pWeapon);
+		m_pCurMode->OnPrimaryAttack(pPlayer, pWeapon);
 	}
 }
 

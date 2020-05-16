@@ -240,6 +240,10 @@ public:
 
 	// What happens to a dead player's ammo	
 	virtual int DeadPlayerAmmo(CBasePlayer *pPlayer);// Do I drop ammo when the player dies? How much?
+
+	// Critical hits
+	virtual int GetCritDamage(CBasePlayer *pAttacker, CBaseEntity *pVictim, int iOrigDmg, int iWeapon);
+	virtual void OnCritHit(CBasePlayer *pAttacker, CBaseEntity *pVictim, int iOrigDmg, int iCritDmg, int iWeapon);
 };
 
 #endif

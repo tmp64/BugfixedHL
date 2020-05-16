@@ -29,6 +29,7 @@
 #include "animation.h"
 #include "weapons.h"
 #include "func_break.h"
+#include "gamerules.h"
 #include "multimode/multimode.h"
 #include "multimode/modes/recoil_mode.h"
 
@@ -1516,6 +1517,28 @@ Vector CBaseEntity::FireBulletsPlayer ( ULONG cShots, Vector vecSrc, Vector vecD
 	if ( pevAttacker == NULL )
 		pevAttacker = pev;  // the default attacker is ourselves
 
+	// For crits
+	CBasePlayer *pEntAttacker = (CBasePlayer *)CBaseEntity::Instance(pevAttacker);
+	int iWeapon = WEAPON_NONE;
+	switch (iBulletType)
+	{
+	case BULLET_PLAYER_9MM:
+		iWeapon = WEAPON_GLOCK;
+		break;
+
+	case BULLET_PLAYER_MP5:
+		iWeapon = WEAPON_MP5;
+		break;
+
+	case BULLET_PLAYER_BUCKSHOT:
+		iWeapon = WEAPON_SHOTGUN;
+		break;
+
+	case BULLET_PLAYER_357:
+		iWeapon = WEAPON_PYTHON;
+		break;
+	}
+
 	ClearMultiDamage();
 	gMultiDamage.type = DMG_BULLET | DMG_NEVERGIB;
 
@@ -1540,9 +1563,19 @@ Vector CBaseEntity::FireBulletsPlayer ( ULONG cShots, Vector vecSrc, Vector vecD
 		{
 			CBaseEntity *pEntity = CBaseEntity::Instance(tr.pHit);
 
+			auto fnGetCrit = [&](int oldDmg) {
+				int newDmg = g_pGameRules->GetCritDamage(pEntAttacker, pEntity, oldDmg, iWeapon);
+				if (newDmg != oldDmg)
+				{
+					g_pGameRules->OnCritHit(pEntAttacker, pEntity, oldDmg, newDmg, iWeapon);
+				}
+				return newDmg;
+			};
+
 			if ( iDamage )
 			{
-				pEntity->TraceAttack(pevAttacker, iDamage, vecDir, &tr, DMG_BULLET | ((iDamage > 16) ? DMG_ALWAYSGIB : DMG_NEVERGIB) );
+				int newDmg = fnGetCrit(iDamage);
+				pEntity->TraceAttack(pevAttacker, newDmg, vecDir, &tr, DMG_BULLET | ((newDmg > 16) ? DMG_ALWAYSGIB : DMG_NEVERGIB) );
 				
 				TEXTURETYPE_PlaySound(&tr, vecSrc, vecEnd, iBulletType);
 				DecalGunshot( &tr, iBulletType );
@@ -1551,23 +1584,23 @@ Vector CBaseEntity::FireBulletsPlayer ( ULONG cShots, Vector vecSrc, Vector vecD
 			{
 			default:
 			case BULLET_PLAYER_9MM:		
-				pEntity->TraceAttack(pevAttacker, gSkillData.plrDmg9MM, vecDir, &tr, DMG_BULLET); 
+				pEntity->TraceAttack(pevAttacker, fnGetCrit(gSkillData.plrDmg9MM), vecDir, &tr, DMG_BULLET);
 				break;
 
 			case BULLET_PLAYER_MP5:		
-				pEntity->TraceAttack(pevAttacker, gSkillData.plrDmgMP5, vecDir, &tr, DMG_BULLET); 
+				pEntity->TraceAttack(pevAttacker, fnGetCrit(gSkillData.plrDmgMP5), vecDir, &tr, DMG_BULLET);
 				break;
 
 			case BULLET_PLAYER_BUCKSHOT:	
 				 // make distance based!
 				if (IsRunningMultimode(ModeID::OneShot))
-					pEntity->TraceAttack(pevAttacker, gSkillData.plrDmgBuckshot, vecDir, &tr, DMG_BULLET | DMG_ALWAYSGIB);
+					pEntity->TraceAttack(pevAttacker, fnGetCrit(gSkillData.plrDmgBuckshot), vecDir, &tr, DMG_BULLET | DMG_ALWAYSGIB);
 				else
-					pEntity->TraceAttack(pevAttacker, gSkillData.plrDmgBuckshot, vecDir, &tr, DMG_BULLET);
+					pEntity->TraceAttack(pevAttacker, fnGetCrit(gSkillData.plrDmgBuckshot), vecDir, &tr, DMG_BULLET);
 				break;
 			
 			case BULLET_PLAYER_357:		
-				pEntity->TraceAttack(pevAttacker, gSkillData.plrDmg357, vecDir, &tr, DMG_BULLET); 
+				pEntity->TraceAttack(pevAttacker, fnGetCrit(gSkillData.plrDmg357), vecDir, &tr, DMG_BULLET);
 				break;
 				
 			case BULLET_NONE: // FIX 
@@ -1595,6 +1628,15 @@ Vector CBaseEntity::FireBulletsPlayer ( ULONG cShots, Vector vecSrc, Vector vecD
 					pEntity->pev->velocity = pEntity->pev->velocity.Normalize() * 1999;
 			}
 		}
+		else
+		{
+			int newDmg = g_pGameRules->GetCritDamage(pEntAttacker, nullptr, iDamage, iWeapon);
+			if (newDmg != iDamage)
+			{
+				g_pGameRules->OnCritHit(pEntAttacker, nullptr, iDamage, newDmg, iWeapon);
+			}
+		}
+
 		// make bullet trails
 		UTIL_BubbleTrail( vecSrc, tr.vecEndPos, (flDistance * tr.flFraction) / 64.0 );
 	}

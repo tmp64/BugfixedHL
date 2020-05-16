@@ -278,6 +278,23 @@ protected:
 	 */
 	virtual int DeadPlayerAmmo(CBasePlayer *pPlayer);
 
+	//-----------------------------------------------------------------
+	// Critical Hits
+	//-----------------------------------------------------------------
+	/**
+	 * Allows mode to change amount of damage.
+	 * pVictim may be nullptr
+	 */
+	virtual int GetCritDamage(CBasePlayer *pAttacker, CBaseEntity *pVictim, int iOrigDmg, int iWeapon);
+
+	/**
+	 * Called if GetCritDamage(...) != flOrigDmg.
+	 * pVictim may be nullptr or CWorld
+	 *
+	 * NOTE: CBaseMode::OnCritHit plays crit sounds so make sure to call that when overriding.
+	 */
+	virtual void OnCritHit(CBasePlayer *pAttacker, CBaseEntity *pVictim, int iOrigDmg, int iCritDmg, int iWeapon);
+
 private:
 	CBaseMode(const CBaseMode &) = delete;
 	CBaseMode &operator=(const CBaseMode &) = delete;
