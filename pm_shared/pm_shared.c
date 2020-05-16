@@ -3077,6 +3077,10 @@ void PM_PlayerMove ( qboolean server )
 		break;
 
 	case MOVETYPE_WALK:
+#ifdef SERVER_DLL
+		SV_OnMoveWalk(pmove->player_index + 1, pmove->onground, pmove->waterlevel);
+#endif
+
 		if ( !PM_InWater() )
 		{
 			PM_AddCorrectGravity();

@@ -43,6 +43,12 @@ public:
 	float GetWeaponKnockback(Bullet bullet);
 	float GetVictimKnockback(Bullet bullet);
 
+	virtual void PlayerSpawn(CBasePlayer *pPlayer);
+	virtual void PlayerThink(CBasePlayer *pPlayer);
+	void OnMoveWalk(CBasePlayer *pPlayer, int onground, int waterlevel);
+
+	virtual int GetCritDamage(CBasePlayer *pAttacker, CBaseEntity *pVictim, int iOrigDmg, int iWeapon);
+
 private:
 	struct WeaponInfo
 	{
@@ -62,7 +68,16 @@ private:
 		int count;
 	};
 
+	struct PlayerInfo
+	{
+		bool bCritsActive = false;
+		float flLastWalkTime = 0;
+		float flNextMsg = 0;
+	};
+
+	hudtextparms_t m_CritTextParams;
 	WeaponInfo m_WeaponInfo[WPNTYPE_COUNT] = {};
+	PlayerInfo m_PlayerInfo[MAX_PLAYERS + 1] = {};
 
 	std::vector<Wpn> m_RandomWeapons;
 	std::vector<std::string> m_SpawnWeapons;

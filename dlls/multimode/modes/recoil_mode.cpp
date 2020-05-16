@@ -13,6 +13,14 @@ static MMConfigVar<CRecoilMode, nlohmann::json> mp_mm_recoil_spawn_weapons("spaw
 static MMConfigVar<CRecoilMode, nlohmann::json> mp_mm_recoil_spawn_ammo("spawn_ammo", nullptr);
 static MMConfigVar<CRecoilMode, nlohmann::json> mp_mm_recoil_allowed_weapons("allowed_weapons", nullptr);
 static MMConfigVar<CRecoilMode, nlohmann::json> mp_mm_recoil_knockback("knockback", nullptr);
+static MMConfigVar<CRecoilMode, bool> mp_mm_recoil_enable_crits("enable_crits", true);
+static MMConfigVar<CRecoilMode, float> mp_mm_recoil_air_time("air_time", 0.8f);
+static MMConfigVar<CRecoilMode, float> mp_mm_recoil_crit_dmg("crit_dmg", 2.f);
+static MMConfigVar<CRecoilMode, int> mp_mm_recoil_msg_channel("msg_channel", 1);
+
+static const int s_CritColor[3] = { 245, 229, 12 };
+static const int s_NoCritColor[3] = { 209, 8, 8 };
+constexpr float MSG_PERIOD = 0.3f;
 
 static const std::unordered_map<std::string, CRecoilMode::WeaponType> s_BulletTypes = {
 	{ "glock", CRecoilMode::WeaponType::WPNTYPE_GLOCK },
@@ -21,8 +29,25 @@ static const std::unordered_map<std::string, CRecoilMode::WeaponType> s_BulletTy
 	{ "mp5", CRecoilMode::WeaponType::WPNTYPE_MP5 }
 };
 
+extern "C" void SV_OnMoveWalk(int entidx, int onground, int waterlevel)
+{
+	if (!IsRunningMultimode(ModeID::Recoil))
+		return;
+	CBasePlayer *pPlayer = (CBasePlayer *)UTIL_PlayerByIndex(entidx);
+	if (pPlayer)
+		GetRunningMultimode<CRecoilMode>()->OnMoveWalk(pPlayer, onground, waterlevel);
+}
+
 CRecoilMode::CRecoilMode() : CBaseMode()
 {
+	m_CritTextParams.x = -1.0f;
+	m_CritTextParams.y = 0.6f;
+	m_CritTextParams.effect = 0;
+	m_CritTextParams.fadeinTime = 0.05f;
+	m_CritTextParams.fadeoutTime = 0.05f;
+	m_CritTextParams.holdTime = 4.f;
+	m_CritTextParams.fxTime = 4.f;
+	m_CritTextParams.channel = mp_mm_recoil_msg_channel.Get();
 }
 
 ModeID CRecoilMode::GetModeID()
@@ -265,4 +290,85 @@ float CRecoilMode::GetVictimKnockback(Bullet bullet)
 	}
 
 	return 0;
+}
+
+void CRecoilMode::PlayerSpawn(CBasePlayer *pPlayer)
+{
+	if (mp_mm_recoil_enable_crits.Get())
+	{
+		m_PlayerInfo[pPlayer->entindex()] = PlayerInfo();
+		PlayerThink(pPlayer);
+	}
+}
+
+void CRecoilMode::PlayerThink(CBasePlayer *pPlayer)
+{
+	if (mp_mm_recoil_enable_crits.Get() && GetMultimodeGR()->GetState() == CHalfLifeMultimode::State::Game)
+	{
+		int idx = pPlayer->entindex();
+		PlayerInfo &pi = m_PlayerInfo[idx];
+		if (!pi.bCritsActive)
+		{
+			if (pi.flLastWalkTime + mp_mm_recoil_air_time.Get() <= gpGlobals->time)
+			{
+				pi.bCritsActive = true;
+				pi.flNextMsg = gpGlobals->time;
+			}
+		}
+
+		if (pi.flNextMsg <= gpGlobals->time)
+		{
+			if (pi.bCritsActive)
+			{
+				m_CritTextParams.r1 = s_CritColor[0];
+				m_CritTextParams.g1 = s_CritColor[1];
+				m_CritTextParams.b1 = s_CritColor[2];
+				UTIL_HudMessage(pPlayer, m_CritTextParams, "CRITS ACTIVE");
+			}
+			else
+			{
+				m_CritTextParams.r1 = s_NoCritColor[0];
+				m_CritTextParams.g1 = s_NoCritColor[1];
+				m_CritTextParams.b1 = s_NoCritColor[2];
+				UTIL_HudMessage(pPlayer, m_CritTextParams, "NO CRITS");
+			}
+
+			pi.flNextMsg = gpGlobals->time + MSG_PERIOD;
+		}
+	}
+}
+
+void CRecoilMode::OnMoveWalk(CBasePlayer *pPlayer, int onground, int waterlevel)
+{
+	if (mp_mm_recoil_enable_crits.Get())
+	{
+		int idx = pPlayer->entindex();
+		PlayerInfo &pi = m_PlayerInfo[idx];
+		if (pi.bCritsActive)
+		{
+			if (!(onground == -1 && waterlevel == 0))
+			{
+				// Touched the ground
+				pi.flLastWalkTime = gpGlobals->time;
+				pi.bCritsActive = false;
+				pi.flNextMsg = gpGlobals->time;
+			}
+		}
+		else
+		{
+			if (!(onground == -1 && waterlevel == 0))
+			{
+				// Still walking
+				pi.flLastWalkTime = gpGlobals->time;
+			}
+		}
+	}
+}
+
+int CRecoilMode::GetCritDamage(CBasePlayer *pAttacker, CBaseEntity *pVictim, int iOrigDmg, int iWeapon)
+{
+	if (m_PlayerInfo[pAttacker->entindex()].bCritsActive)
+		return (int)((float)iOrigDmg * mp_mm_recoil_crit_dmg.Get());
+	else
+		return iOrigDmg;
 }

@@ -112,7 +112,15 @@
                     "shooter": 150,
                     "victim": 75
                 }
-            }
+            },
+			"#enable_crits_comment": "Enable crits when in air",
+            "enable_crits": true,
+            "#air_time_comment": "How long should the player be in the air",
+            "air_time": 0.8,
+            "#crit_dmg_comment": "Crit damage multiplier",
+            "crit_dmg": 2.0,
+            "#msg_channel_comment": "HUD message channel for crit msg",
+            "msg_channel": 1
         },
 
         "wpn_drop": {
