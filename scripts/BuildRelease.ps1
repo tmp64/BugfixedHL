@@ -34,7 +34,7 @@ trap {
 # Version info
 # Should be the same as in CMakeLists.txt
 $VERSION_MAJOR = 1
-$VERSION_MINOR = 4
+$VERSION_MINOR = 5
 $VERSION_PATCH = 0
 $VERSION_TAG = 'dev'
 
