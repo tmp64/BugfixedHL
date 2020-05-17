@@ -41,6 +41,8 @@
 #define PING_LOSS "Ping/Loss"
 #define SPECTATOR_TEAM (MAX_TEAMS + 1)
 
+constexpr float HIGHLIGHT_KILLER_TIME = 10;
+
 void IN_ResetMouse(void);
 
 //--------------------------------------------------------------
@@ -135,11 +137,24 @@ void CScorePanel::ApplySchemeSettings(vgui2::IScheme * pScheme)
 	m_pPlayerList->SetVisible(true);
 	m_iMutedIconIndex = m_pImageList->AddImage(m_pMutedIcon);
 	EnableMousePointer(false);
+
+	m_ThisPlayerBgColor = pScheme->GetColor("ThisPlayerBgColor", SDK_Color(0, 0, 0, 0));
+	m_KillerBgColor = pScheme->GetColor("KillerBgColor", SDK_Color(0, 0, 0, 0));
 }
 
 void CScorePanel::OnKeyCodeTyped(vgui2::KeyCode code)
 {
 	BaseClass::OnKeyCodeTyped(code);
+}
+
+void CScorePanel::OnThink()
+{
+	BaseClass::OnThink();
+
+	if (m_iKillerIndex != -1 && m_pClientItems[m_iKillerIndex] != -1)
+	{
+		UpdateClientInfo(m_iKillerIndex);
+	}
 }
 
 void CScorePanel::ShowPanel(bool state)
@@ -443,7 +458,10 @@ void CScorePanel::UpdateClientInfo(int client, bool autoUpdate)
 		playerData->SetString("ping", buf);
 	}
 	else playerData->SetInt("ping", g_PlayerInfoList[client].ping);
-	if (g_PlayerInfoList[client].thisplayer) playerData->SetInt("thisPlayer", 1);
+	if (g_PlayerInfoList[client].thisplayer)
+		playerData->SetColor("_bgcolor", m_ThisPlayerBgColor);
+	else
+		playerData->SetColor("_bgcolor", GetPlayerBgColor(client));
 
 	int iSectionId = team;
 	if (m_iSpectatorSection != -1 && g_PlayerExtraInfo[client].teamname[0] == '\0')
@@ -497,6 +515,16 @@ void CScorePanel::UpdateServerName()
 		wchar_t str[64];
 		vgui2::localize()->ConvertANSIToUnicode(gHUD.GetServerName(), str, sizeof(str));
 		m_pServerNameLabel->SetText(str);
+	}
+}
+
+void CScorePanel::DeathMsg(int killer, int victim)
+{
+	if (victim == gViewPort->m_pScoreBoard->m_iPlayerNum)
+	{
+		// if we were the one killed, set the scoreboard to indicate killer
+		m_flKillerHighlightStart = gHUD.m_flTime;
+		m_iKillerIndex = killer;
 	}
 }
 
@@ -1061,6 +1089,34 @@ void CScorePanel::SetSortByEff()
 		// Comapre idx if everything is equal
 		return lhs > rhs;
 	};
+}
+
+SDK_Color CScorePanel::GetPlayerBgColor(int idx)
+{
+	if (m_iKillerIndex == idx)
+	{
+		SDK_Color color = m_KillerBgColor;
+		float t = m_flKillerHighlightStart;
+		float dt = HIGHLIGHT_KILLER_TIME;
+		float k = -color.a() / dt;
+		float b = -k * (t + dt);
+		float a = k * gHUD.m_flTime + b;
+		if (a > color.a() || a <= 0)
+		{
+			m_iKillerIndex = -1;
+			m_flKillerHighlightStart = 0;
+			return SDK_Color(0, 0, 0, 0);
+		}
+		else
+		{
+			color[3] = (int)a;
+			return color;
+		}
+	}
+	else
+	{
+		return SDK_Color(0, 0, 0, 0);
+	}
 }
 
 bool CScorePanel::StaticPlayerSortFuncByFrags(CPlayerListPanel *list, int itemID1, int itemID2)

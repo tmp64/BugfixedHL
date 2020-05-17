@@ -2449,6 +2449,10 @@ int TeamFortressViewport::MsgFunc_TeamInfo( const char *pszName, int iSize, void
 void TeamFortressViewport::DeathMsg( int killer, int victim )
 {
 	m_pScoreBoard->DeathMsg(killer,victim);
+
+#ifdef USE_VGUI2
+	gHUD.m_ScoreBoard->m_pScorePanel->DeathMsg(killer, victim);
+#endif
 }
 
 int TeamFortressViewport::MsgFunc_Spectator( const char *pszName, int iSize, void *pbuf )

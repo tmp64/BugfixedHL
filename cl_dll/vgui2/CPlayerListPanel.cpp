@@ -276,8 +276,8 @@ public:
 		}
 
 		m_pData = data->MakeCopy();
-		m_bThisPlayer = (bool)m_pData->GetInt("thisPlayer", 0);
-		SetPaintBackgroundEnabled(m_bThisPlayer || m_bSelected);
+		m_DataBgColor = m_pData->GetColor("_bgcolor");
+		SetPaintBackgroundEnabled(m_DataBgColor.a() != 0 || m_bSelected);
 		InvalidateLayout();
 	}
 
@@ -463,7 +463,6 @@ public:
 		m_ArmedFgColor2 = GetSchemeColor("SectionedListPanel.SelectedTextColor", pScheme);
 		m_OutOfFocusSelectedTextColor = GetSchemeColor("SectionedListPanel.OutOfFocusSelectedTextColor", pScheme);
 		m_ArmedBgColor = GetSchemeColor("SectionedListPanel.SelectedBgColor", pScheme);
-		m_ThisPlayerBgColor = GetSchemeColor("SectionedListPanel.ThisPlayerBgColor", pScheme);
 
 		m_FgColor2 = GetSchemeColor("SectionedListPanel.TextColor", pScheme);
 
@@ -493,8 +492,10 @@ public:
 		}
 		else
 		{
-			if (m_bThisPlayer) surface()->DrawSetColor(m_ThisPlayerBgColor);
-			else surface()->DrawSetColor(GetBgColor());
+			if (m_DataBgColor.a() != 0)
+				surface()->DrawSetColor(m_DataBgColor);
+			else
+				surface()->DrawSetColor(GetBgColor());
 		}
 		surface()->DrawFilledRect(0, 0, wide, tall);
 	}
@@ -524,7 +525,7 @@ public:
 				RequestFocus();
 			}
 			m_bSelected = state;
-			SetPaintBackgroundEnabled(m_bThisPlayer || state);
+			SetPaintBackgroundEnabled(m_DataBgColor.a() != 0 || state);
 			InvalidateLayout();
 			Repaint();
 		}
@@ -611,13 +612,12 @@ private:
 	SDK_Color m_ArmedFgColor2;
 	SDK_Color m_OutOfFocusSelectedTextColor;
 	SDK_Color m_ArmedBgColor;
-	SDK_Color m_ThisPlayerBgColor;
 	SDK_Color m_SelectionBG2Color;
 	CUtlVector<vgui2::TextImage *> m_TextImages;
 
 	bool m_bSelected;
 	bool m_bOverrideColors;
-	bool m_bThisPlayer = false;
+	SDK_Color m_DataBgColor = SDK_Color(0, 0, 0, 0);
 };
 
 //-----------------------------------------------------------------------------
