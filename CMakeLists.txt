@@ -398,6 +398,18 @@ set( UPDATER_DEFINES "" )
 if( USE_UPDATER )
 	option( CURL_STATICLIB "Enable if cURL was built as a static library" 0 )
 
+	if( WIN32 )
+		option( CURL_REPO_LIBS "Use static curl from external/curl on Windows" 1 )
+		
+		if( CURL_REPO_LIBS )
+			set( CURL_STATICLIB 1 CACHE BOOL "" FORCE )
+			set( CURL_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external/curl/include" CACHE PATH "" FORCE )
+			set( CURL_LIBRARY "" CACHE FILEPATH "" FORCE )
+			set( CURL_LIBRARY_DEBUG "${CMAKE_CURRENT_SOURCE_DIR}/external/curl/lib/libcurl_static_debug.lib" CACHE FILEPATH "" FORCE )
+			set( CURL_LIBRARY_RELEASE "${CMAKE_CURRENT_SOURCE_DIR}/external/curl/lib/libcurl_static.lib" CACHE FILEPATH "" FORCE )
+		endif()
+	endif()
+
 	find_package( CURL MODULE REQUIRED )
 	set( UPDATER_LIBS
 		${CURL_LIBRARIES}
@@ -421,6 +433,8 @@ if( USE_UPDATER )
 			set( UPDATER_LIBS
 				${UPDATER_LIBS}
 				wldap32.lib
+				Crypt32.lib
+				Ws2_32.lib
 			)
 		endif()
 	endif()
