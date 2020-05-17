@@ -156,7 +156,11 @@ public:
 
 			curl_easy_setopt(m_hCurl, CURLOPT_WRITEFUNCTION, WriteData);
 			curl_easy_setopt(m_hCurl, CURLOPT_ERRORBUFFER, m_szCurlError);
-			curl_easy_setopt(m_hCurl, CURLOPT_SSL_VERIFYPEER, 0);
+			if (gEngfuncs.CheckParm("-bhl_no_ssl_check", nullptr))
+			{
+				curl_easy_setopt(m_hCurl, CURLOPT_SSL_VERIFYPEER, 0);
+				logf("Warning! SSL certificate check disabled with -bhl_no_ssl_check");
+			}
 			curl_easy_setopt(m_hCurl, CURLOPT_HTTPHEADER, headers);
 			curl_easy_setopt(m_hCurl, CURLOPT_FOLLOWLOCATION, 1);
 
