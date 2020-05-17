@@ -20,7 +20,7 @@ matrix:
 install:
   - sh: sudo dpkg --add-architecture i386
   - sh: sudo apt-get update > /dev/null
-  - sh: sudo apt-get install -y libc6:i386 cmake gcc g++ gcc-multilib g++-multilib patchelf ninja-build > /dev/null
+  - sh: sudo apt-get install -y libc6:i386 cmake gcc g++ gcc-multilib g++-multilib patchelf ninja-build libcurl4-openssl-dev:i386 > /dev/null
   - sh: git submodule update --init --recursive
   
   - ps: |
