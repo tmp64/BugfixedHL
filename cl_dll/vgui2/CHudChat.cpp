@@ -62,8 +62,10 @@ static void (*gfnEngineMsgMode)(void) = nullptr;
 static void (*gfnEngineMsgMode2)(void) = nullptr;
 static void MessageModeVgui2()
 {
-	if (gHUD.m_SayText->m_pCvarOldChat->value)
+	if (gHUD.m_SayText->m_pCvarOldChat->value || gEngfuncs.Cmd_Argc() != 1)
+	{
 		gfnEngineMsgMode();
+	}
 	else
 	{
 		if (gEngfuncs.GetMaxClients() == 1)
@@ -74,8 +76,10 @@ static void MessageModeVgui2()
 
 static void MessageMode2Vgui2()
 {
-	if (gHUD.m_SayText->m_pCvarOldChat->value)
+	if (gHUD.m_SayText->m_pCvarOldChat->value || gEngfuncs.Cmd_Argc() != 1)
+	{
 		gfnEngineMsgMode2();
+	}
 	else
 	{
 		if (gEngfuncs.GetMaxClients() == 1)
