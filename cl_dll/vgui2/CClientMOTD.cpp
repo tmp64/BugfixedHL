@@ -133,7 +133,12 @@ void CClientMOTD::Activate( const char* title, const char* msg )
 	SetTitle( title, false );
 	//SetControlString( "serverName", title );
 
-	m_pMessage->SetText(msg);
+	// Replace \r\n with \n
+	static char buf[2048];
+	static wchar_t wbuf[2048];
+	V_StrSubst(msg, "\r\n", "\n", buf, sizeof(buf));
+	vgui2::localize()->ConvertANSIToUnicode(buf, wbuf, sizeof(wbuf));
+	m_pMessage->SetText(wbuf);
 }
 
 #ifndef VGUI2_BUILD_4554
