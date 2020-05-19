@@ -1758,6 +1758,12 @@ void CBaseHudChatEntry::OnKeyCodeTyped(vgui2::KeyCode code)
 			{
 				PostMessage(m_pHudChat, new KeyValues("ChatEntrySend"));
 			}
+
+			// HACK: Pressing ENTER key for some reason sometimes bugs the mouse:
+			// it stays on even after SetMouseInputEnabled(false)
+			gHUD.CallOnNextFrame([]() {
+				vgui2::surface()->CalculateMouseVisible();
+			});
 		}
 
 		// End message mode.
