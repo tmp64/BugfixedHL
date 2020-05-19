@@ -1120,9 +1120,10 @@ void CBaseHudChat::StartMessageMode( int iMessageModeType )
 	m_pChatInput->SetMouseInputEnabled( true );
 
 	//Place the mouse cursor near the text so people notice it.
-	int x, y, w, h;
-	GetChatHistory()->GetBounds( x, y, w, h );
-	vgui2::input()->SetCursorPos( x + ( w/2), y + (h/2) );
+	int x, y, w, h, chatx, chaty;
+	GetPos(chatx, chaty);
+	GetChatHistory()->GetBounds(x, y, w, h);
+	vgui2::input()->SetCursorPos(chatx + x + (w / 2), chaty + y + (h / 2));
 
 	m_flHistoryFadeTime = vgui2::system()->GetCurrentTime() + CHAT_HISTORY_FADE_TIME;
 
