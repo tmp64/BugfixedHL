@@ -14,7 +14,8 @@ Param (
     [string]$VMajor = "0",
     [string]$VMinor = "0",
     [string]$VPatch = "0",
-    [string]$VTag = "__UNSPECIFIED"
+    [string]$VTag = "__UNSPECIFIED",
+    [switch]$DryDebug = $false
 )
 
 $THIS_IS_BUILD_SCRIPT = $true;   # For checking in includes
@@ -66,6 +67,7 @@ if ($Target -eq "Help")
     Write-Host "`t`t-VMinor";
     Write-Host "`t`t-VPatch";
     Write-Host "`t`t-VTag";
+    Write-Host "`t-DryDebug`tdo not build anything, only print debug data";
     exit 0;
 }
 
@@ -217,6 +219,17 @@ Set-Location $CMAKE_BUILD_DIR;
 
 $CMAKE_ARGS = "-DAUTO_DEPLOY=0 -DBHL_VERSION_MAJOR=${VERSION_MAJOR} -DBHL_VERSION_MINOR=${VERSION_MINOR} -DBHL_VERSION_PATCH=${VERSION_PATCH} -DBHL_VERSION_TAG=${VERSION_TAG} ${CMAKE_UPDATER_FLAG} ${PLATFORM_ARGS} ${TARGET_FLAGS} ${CMakeArgs} `"${ROOT_DIR}`"";
 Write-Host "Running cmake ${CMAKE_ARGS}";
+
+if ($DryDebug)
+{
+    Pop-Location;
+    Write-Host "VERSION_MAJOR ${VERSION_MAJOR}";
+    Write-Host "VERSION_MINOR ${VERSION_MINOR}";
+    Write-Host "VERSION_PATCH ${VERSION_PATCH}";
+    Write-Host "VERSION_TAG ${VERSION_TAG}";
+    exit 0;
+}
+
 $CMAKE_CMD = "& `"$CMAKE`" $CMAKE_ARGS";
 Invoke-Expression $CMAKE_CMD;
 
