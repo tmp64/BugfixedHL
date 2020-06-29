@@ -245,8 +245,7 @@ void CBossMode::PlayerKilled(CBasePlayer *pVictim, entvars_t *pKiller, entvars_t
 	if (pVictim == m_pBoss)
 	{
 		m_bIsBossDead = true;
-		// TODO: Replace with something like EndMode after refactoring
-		GetMultimodeGR()->SwitchToIntermission();
+		GetMultimodeGR()->FinishMode();
 	}
 }
 

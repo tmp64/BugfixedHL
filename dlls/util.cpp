@@ -331,7 +331,7 @@ edict_t *DBG_EntOfVars( const entvars_t *pev )
 #ifdef	DEBUG
 	void
 DBG_AssertFunction(
-	BOOL		fExpr,
+	bool		fExpr,
 	const char*	szExpr,
 	const char*	szFile,
 	int			szLine,

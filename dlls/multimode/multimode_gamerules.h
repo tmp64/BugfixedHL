@@ -24,45 +24,355 @@ public:
 		Game,
 		Intermission,
 		Endgame,
-		FinalIntermission
+		FinalIntermission,
+		StateCount
 	};
+
+	//-------------------------------------------------------------------
+	// CModeManager
+	//-------------------------------------------------------------------
+	/**
+	 * Controls mode initialization and correct swithing.
+	 */
+	class CModeManager
+	{
+	public:
+		CModeManager();
+		CModeManager(const CModeManager &) = delete;
+		CModeManager &operator=(const CModeManager &) = delete;
+		~CModeManager();
+
+		/**
+		 * Returns an active mode or nullptr if none is running.
+		 */
+		inline CBaseMode *GetBaseMode()
+		{
+			return m_pActiveMode;
+		}
+
+		/**
+		 * If no mode is running, returns nullptr.
+		 * If mode T is running, returns GetBaseMode() casted to T.
+		 * If other mode is running, behavior is undefined.
+		 */
+		template <typename T>
+		inline T *GetMode()
+		{
+			ASSERT(GetBaseMode()->GetModeID() == T::MODE_ID);
+			return static_cast<T *>(GetBaseMode());
+		}
+
+		/**
+		 * Returns ID of active mode.
+		 */
+		inline ModeID GetModeID()
+		{
+			return m_ActiveModeID;
+		}
+
+		/**
+		 * Returns list of all modes.
+		 */
+		const std::vector<CBaseMode *> &GetModeList()
+		{
+			return m_ModeList;
+		}
+
+		/**
+		 * Prepares the mode for freezetime, shows mode info.
+		 * If any mode was running before, it is switched off.
+		 */
+		void PrepareMode(ModeID mode, bool bShowModeInfo);
+
+		/**
+		 * Begins the mode.
+		 */
+		void StartMode();
+
+		/**
+		 * Finishes the mode (intermission).
+		 */
+		void FinishMode();
+
+		/**
+		 * Disables active mode.
+		 */
+		void SwitchOffMode();
+
+	private:
+		CBaseMode *m_pActiveMode = nullptr;
+		ModeID m_ActiveModeID = ModeID::None;
+
+		CBaseMode *m_pModes[(int)ModeID::ModeCount] = {};
+		std::vector<CBaseMode *> m_ModeList;
+
+		/**
+		 * Respawns items, etc.
+		 */
+		void PrepareWorld();
+
+		/**
+		 * Registes mode of type T.
+		 */
+		template <typename T>
+		inline T *RegisterMode()
+		{
+			static_assert((int)T::MODE_ID < (int)ModeID::ModeCount, "mode ID is invalid");
+
+			T *pMode = new T();
+			m_pModes[(int)T::MODE_ID] = pMode;
+			m_ModeList.push_back(pMode);
+
+			// Sanity checks
+			ASSERT(pMode->GetModeID() == T::MODE_ID);
+			ASSERT(!strcmp(pMode->GetModeName(), T::MODE_NAME));
+
+			pMode->OnInit();
+
+			return pMode;
+		}
+
+		inline CBaseMode *GetModeForID(ModeID id)
+		{
+			return m_pModes[(int)id];
+		}
+	};
+
+	//-------------------------------------------------------------------
+	// CStateMachine
+	//-------------------------------------------------------------------
+	/**
+	 * An implementation of finite state machine.
+	 */
+	class CStateMachine
+	{
+	public:
+		class CBaseState
+		{
+		public:
+			CBaseState() = default;
+			CBaseState(const CBaseState &) = delete;
+			CBaseState &operator=(const CBaseState &) = delete;
+
+			/**
+			 * Called every server frame when state is active.
+			 */
+			virtual void Think() = 0;
+
+			/**
+			 * Called when this state is activated.
+			 */
+			virtual void OnSwitchTo(State oldState);
+
+			/**
+			 * Called when this state is deactivated.
+			 */
+			virtual void OnSwitchFrom(State newState);
+
+			/**
+			 * Causes timer to update next tick.
+			 * Called automatically before OnSwitchTo.
+			 */
+			inline void ResetTimerUpdate()
+			{
+				m_flNextTimerUpdate = 0;
+			}
+
+		protected:
+			/**
+			 * Time of next timer update (common var used in nearly all states).
+			 */
+			float m_flNextTimerUpdate = 0;
+		};
+
+		CStateMachine();
+		CStateMachine(const CStateMachine &) = delete;
+		CStateMachine &operator=(const CStateMachine &) = delete;
+		~CStateMachine();
+
+		/**
+		 * Adds a new state with specified state ID.
+		 */
+		void AddState(State stateId, CBaseState *stateObj);
+
+		/**
+		 * Switches state machine to a new state.
+		 */
+		void SwitchTo(State newStateId);
+
+		/**
+		 * Think the active state.
+		 */
+		void Think();
+
+		/**
+		 * Returns active state.
+		 */
+		inline State GetState()
+		{
+			return m_ActiveStateID;
+		}
+
+	private:
+		CBaseState *m_States[(int)State::StateCount] = {};
+		CBaseState *m_pActiveState = nullptr;
+		State m_ActiveStateID = State::Initial;
+
+		inline CBaseState *GetStateObj(State stateId)
+		{
+			return m_States[(int)stateId];
+		}
+	};
+
+	//-------------------------------------------------------------------
+	// States
+	//-------------------------------------------------------------------
+	class CInitialState : public CStateMachine::CBaseState
+	{
+	public:
+		virtual void Think() override;
+	};
+	//-------------------------------------------------------------------
+	class CInvalidConfigState : public CStateMachine::CBaseState
+	{
+	public:
+		virtual void Think() override;
+		virtual void OnSwitchTo(State oldState) override;
+	};
+	//-------------------------------------------------------------------
+	class CWaitingState : public CStateMachine::CBaseState
+	{
+	public:
+		virtual void Think() override;
+		virtual void OnSwitchTo(State oldState) override;
+	};
+	//-------------------------------------------------------------------
+	class CWarmupState : public CStateMachine::CBaseState
+	{
+	public:
+		virtual void Think() override;
+		virtual void OnSwitchTo(State oldState) override;
+
+	private:
+		float m_flWarmupEndTime = 0;
+	};
+	//-------------------------------------------------------------------
+	class CFreezeTimeState : public CStateMachine::CBaseState
+	{
+	public:
+		virtual void Think() override;
+		virtual void OnSwitchTo(State oldState) override;
+
+	private:
+		float m_flFreezeEndTime = 0;
+		int m_iFreezeNextSec = 0;
+	};
+	//-------------------------------------------------------------------
+	class CGameState : public CStateMachine::CBaseState
+	{
+	public:
+		virtual void Think() override;
+		virtual void OnSwitchTo(State oldState) override;
+
+	private:
+		float m_flEndTime = 0;
+	};
+	//-------------------------------------------------------------------
+	class CIntermissionState : public CStateMachine::CBaseState
+	{
+	public:
+		virtual void Think() override;
+		virtual void OnSwitchTo(State oldState) override;
+		virtual void OnSwitchFrom(State newState) override;
+
+	private:
+		float m_flIntermEndTime = 0;
+	};
+	//-------------------------------------------------------------------
+	class CEndgameState : public CStateMachine::CBaseState
+	{
+	public:
+		virtual void Think() override;
+		virtual void OnSwitchTo(State oldState) override;
+	};
+	//-------------------------------------------------------------------
+	class CFinalIntermissionState : public CStateMachine::CBaseState
+	{
+	public:
+		virtual void Think() override;
+	};
+	//-------------------------------------------------------------------
 
 	CHalfLifeMultimode();
 	virtual ~CHalfLifeMultimode();
 
-	State GetState();
+	/**
+	 * Prepares next mode in the queue.
+	 * Resets world, respawns and freezes players.
+	 * Switches state to FreezeTime
+	 */
+	void PrepareNextMode(bool bShowModeInfo = true);
 
-	void SwitchToInvalidConfig();
-	void SwitchToWaiting();
-	void SwitchToWarmup();
-	void SwitchToIntermission();
-	void SwitchToNextMode();
-	void SwitchToEndgame();
+	/**
+	 * Prepares specific mode.
+	 * State is not changed.
+	 */
+	void PrepareMode(ModeID modeId, bool bShowModeInfo = true);
 
-	void BeginCurMode(bool bEnableFreezeTime, bool bShowModeInfo);
-	void StartCurMode();
-	void FinishCurMode();
+	/**
+	 * Unfreezes players, the main game period.
+	 * Switches state to Game.
+	 */
+	void StartMode();
 
-	virtual const char *GetGameDescription();
+	/**
+	 * Freezes players again, shows stats on the screen.
+	 * Switches state to Intermission
+	 */
+	void FinishMode();
 
-	void ThinkInvalidConfig();
-	void ThinkWaiting();
-	void ThinkWarmup();
-	void ThinkFreezeTime();
-	void ThinkGame();
-	void ThinkIntermission();
-	
-	virtual void Think();
+	/**
+	 * Disables active mode.
+	 * State is not changed.
+	 */
+	void SwitchOffMode();
 
-	inline CBaseMode *GetModeBase()
+	/**
+	 * Returns current state.
+	 */
+	inline State GetState()
 	{
-		return m_pCurMode;
+		return m_StateMachine.GetState();
 	}
 
+	virtual const char *GetGameDescription();
+	virtual void Think();
+
+	/**
+	 * Returns an active mode or nullptr if none is running.
+	 */
+	inline CBaseMode *GetBaseMode()
+	{
+		return m_ModeManager.GetBaseMode();
+	}
+
+	/**
+	 * If no mode is running, return nullptr.
+	 * If mode T is running, returns GetBaseMode() casted to T.
+	 * If other mode is running, behavior is undefined.
+	 */
 	template <typename T>
 	inline T *GetMode()
 	{
-		return static_cast<T *>(GetModeBase());
+		return m_ModeManager.GetMode<T>();
+	}
+
+	/**
+	 * Returns iD of running mode.
+	 */
+	inline ModeID GetModeID()
+	{
+		return m_ModeManager.GetModeID();
 	}
 
 	// After primary attack
@@ -88,15 +398,17 @@ private:
 		EndAction onEnd = EndAction::StartOver;
 	};
 
+	CStateMachine m_StateMachine;
+	CModeManager m_ModeManager;
+	bool m_bFreezeOnSpawn = false;
+
 	//-------------------------------------------------------------------
 	// Const data (not changed during runtime)
 	//-------------------------------------------------------------------
-	CBaseMode *m_pModes[(int)ModeID::ModeCount] = {};
-	std::vector<CBaseMode *> m_ModeList;
 	skilldata_t m_DefSkillData;
 
 	//-------------------------------------------------------------------
-	// Configuration
+	// HUD Texts
 	//-------------------------------------------------------------------
 	hudtextparms_t m_WarmupTextParams;
 	hudtextparms_t m_TimerTextParams;
@@ -104,38 +416,10 @@ private:
 	hudtextparms_t m_ModeInfoTextParams;
 	hudtextparms_t m_IntermStatsTextParams;
 
+	//-------------------------------------------------------------------
+	// Configuration
+	//-------------------------------------------------------------------
 	ParsedConfig m_ParsedConfig;
-
-	//-------------------------------------------------------------------
-	// States
-	//-------------------------------------------------------------------
-	State m_State = State::Initial;
-	float m_flNextTimerUpdate = 0;
-
-	//-------------------------------------------------------------------
-	// Warmup state
-	//-------------------------------------------------------------------
-	CBaseMode *m_pWarmupMode = nullptr;
-	float m_flWarmupEndTime = 0;
-
-	//-------------------------------------------------------------------
-	// Freeze time state
-	//-------------------------------------------------------------------
-	float m_flFreezeEndTime = 0;
-	int m_iFreezeNextSec = 0;
-	bool m_bFreezeOnSpawn = false;
-
-	//-------------------------------------------------------------------
-	// Game state
-	//-------------------------------------------------------------------
-	CBaseMode *m_pCurMode = nullptr;
-	ModeID m_CurModeId = ModeID::None;
-	float m_flEndTime = 0;
-
-	//-------------------------------------------------------------------
-	// Intermission state
-	//-------------------------------------------------------------------
-	float m_flIntermEndTime = 0;
 
 	//-------------------------------------------------------------------
 	// Non-copyable
@@ -162,29 +446,7 @@ private:
 	 */
 	void InitHudTexts();
 
-	/**
-	 * Registes mode of type T.
-	 */
-	template <typename T>
-	inline T *RegisterMode()
-	{
-		static_assert((int)T::MODE_ID < (int)ModeID::ModeCount, "mode ID is invalid");
-
-		T *pMode = new T();
-		m_pModes[(int)T::MODE_ID] = pMode;
-		m_ModeList.push_back(pMode);
-
-		// Sanity checks
-		ASSERT(pMode->GetModeID() == T::MODE_ID);
-		ASSERT(!strcmp(pMode->GetModeName(), T::MODE_NAME));
-
-		pMode->OnInit();
-
-		return pMode;
-	}
-
 	//-------------------------------------------------------------------
-	void ResetTimerUpdate();
 	float GetGameTime();
 
 	friend bool IsRunningMultimode(ModeID mode);
