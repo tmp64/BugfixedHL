@@ -96,6 +96,11 @@ void CHudScoreBoard::UpdateServerName()
 	m_pScorePanel->UpdateServerName();
 }
 
+void CHudScoreBoard::InitHUDData()
+{
+	m_pScorePanel->InitHudData();
+}
+
 bool CHudScoreBoard::HandleKeyEvent(int down, int keynum, const char * pszCurrentBinding)
 {
 	int constexpr WHEEL_DELTA = 20;

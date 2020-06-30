@@ -469,9 +469,7 @@ private:
 	int			m_iNumberOfTeams;
 	int			m_iBuildState;
 	int			m_iRandomPC;
-public:	// Hack!
 	char		m_sTeamNames[MAX_TEAMS + 1][MAX_TEAM_NAME];
-private:
 
 	// Localisation strings
 	char		m_sDetpackStrings[3][MAX_BUTTON_SIZE];

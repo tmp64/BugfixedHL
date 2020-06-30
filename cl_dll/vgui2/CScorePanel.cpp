@@ -108,7 +108,6 @@ void CScorePanel::Reset()
 {
 	if (IsVisible())
 		ShowPanel(false);
-	m_mTeamNameToScore.clear();
 }
 
 void CScorePanel::ApplySchemeSettings(vgui2::IScheme * pScheme)
@@ -192,6 +191,11 @@ void CScorePanel::MsgFunc_TeamScore(const char *teamName, int frags, int deaths)
 	m_mTeamNameToScore[std::string(teamName)] = score;
 	if (IsVisible())
 		UpdateTeamScores();
+}
+
+void CScorePanel::InitHudData()
+{
+	m_mTeamNameToScore.clear();
 }
 
 //--------------------------------------------------------------
@@ -300,14 +304,6 @@ void CScorePanel::RecalcItems()
 		if (!g_PlayerInfoList[i].name) continue; // Player is not connected
 		int team = g_PlayerExtraInfo[i].teamnumber;
 		m_pClientTeams[i] = team;
-		if (!m_pTeamInfo[team].name[0])
-		{
-			if (gViewPort->m_sTeamNames[team][0])
-				strncpy(m_pTeamInfo[team].name, gViewPort->m_sTeamNames[team], MAX_TEAM_NAME);	// Use team name from MsgFunc_TeamNames
-			else
-				strncpy(m_pTeamInfo[team].name, g_PlayerExtraInfo[i].teamname, MAX_TEAM_NAME);	// Use team name from player info
-		}
-		m_pTeamInfo[team].name[MAX_TEAM_NAME - 1] = '\0';
 		m_pTeamInfo[team].players++;
 		m_pTeamInfo[team].kills += g_PlayerExtraInfo[i].frags;
 		m_pTeamInfo[team].deaths += g_PlayerExtraInfo[i].deaths;
@@ -349,7 +345,7 @@ void CScorePanel::RecalcItems()
 
 		m_pPlayerList->AddSection(team, "", m_pPlayerSortFunction);
 		m_pPlayerList->AddColumnToSection(team, "avatar", "", CPlayerListPanel::COLUMN_IMAGE, m_iAvatarWidth + m_iAvatarPaddingLeft + m_iAvatarPaddingRight);
-		snprintf(buf, sizeof(buf), "%s (%d/%d, %.0f%%)", m_pTeamInfo[team].name, m_pTeamInfo[team].players, totalPlayerCount, (double)m_pTeamInfo[team].players / totalPlayerCount * 100.0);
+		snprintf(buf, sizeof(buf), "%s (%d/%d, %.0f%%)", gViewPort->GetTeamName(team), m_pTeamInfo[team].players, totalPlayerCount, (double)m_pTeamInfo[team].players / totalPlayerCount * 100.0);
 		m_pPlayerList->AddColumnToSection(team, "name", buf, CPlayerListPanel::COLUMN_BRIGHT | CPlayerListPanel::COLUMN_COLORED, nameWidth);
 		
 		if (gHUD.m_ScoreBoard->m_CvarShowSteamId->value)
@@ -374,7 +370,7 @@ void CScorePanel::RecalcItems()
 		m_pPlayerList->AddColumnToSection(team, "ping", "", CPlayerListPanel::COLUMN_BRIGHT, vgui2::scheme()->GetProportionalScaledValueEx(GetScheme(), PING_WIDTH));
 		m_pPlayerList->SetSectionFgColor(team, gHUD.GetTeamColor(team));
 		UpdateTeamScore(team);
-		DebugPrintf("CScorePanel::RecalItems Team '%s' is %d\n", m_pTeamInfo[team].name, team);
+		DebugPrintf("CScorePanel::RecalItems Team '%s' is %d\n", gViewPort->GetTeamName(team), team);
 	}
 
 	if (iEmptyTeamNum > 0 && iNonEmptyTeamNum > 0)
@@ -712,7 +708,7 @@ void CScorePanel::UpdateTeamScores()
 {
 	for (int i = 1; i <= MAX_TEAMS; i++)
 	{
-		if (!m_pTeamInfo[i].name[0] || m_pTeamInfo[i].players <= 0)
+		if (m_pTeamInfo[i].players <= 0)
 			continue;	// Team is empty
 		UpdateTeamScore(i);
 	}
@@ -720,7 +716,7 @@ void CScorePanel::UpdateTeamScores()
 
 void CScorePanel::UpdateTeamScore(int i)
 {
-	auto it = m_mTeamNameToScore.find(std::string(m_pTeamInfo[i].name));
+	auto it = m_mTeamNameToScore.find(std::string(g_TeamInfo[i].name));
 	team_score_t score;
 	if (it != m_mTeamNameToScore.end())
 		score = it->second;

@@ -49,6 +49,7 @@ public:
 	CScorePanel(IViewport *pParent);
 	virtual ~CScorePanel();
 
+	void InitHudData();
 	void FullUpdate();
 	void UpdateClientInfo(int client, bool autoUpdate = true);	// autoUpdate - whether to update player count and resize at the end of client update
 	void UpdateAllClients();
@@ -109,7 +110,6 @@ public:
 private:
 	struct team_info_t
 	{
-		char name[MAX_TEAM_NAME] = { 0 };
 		int kills = 0;	// Calculated kills
 		int deaths = 0;	// Calculated deaths
 		int players = 0;// Number of players

@@ -32,6 +32,7 @@ public:
 	void EnableMousePointer(bool enable);
 	bool IsVisible();
 	void UpdateServerName();
+	void InitHUDData();
 
 	// Sends the key event to the scoreboard
 	// Returns true if event was handled and should not be passed to the engine (HUD_Key_Event returns 0)
