@@ -41,7 +41,7 @@ private:
 		int snarkCount = 0;
 	};
 
-	PlayerInfo m_Players[MAX_PLAYERS];
+	PlayerInfo m_Players[MAX_PLAYERS + 1];
 
 	void KillAllSnarks(CBasePlayer *pPlayer);
 };
