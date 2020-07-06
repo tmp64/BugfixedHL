@@ -1,4 +1,6 @@
+#include <ctime>
 #include <string>
+#include <random>
 
 #include "extdll.h"
 #include "util.h"
@@ -37,6 +39,8 @@ struct MultimodePlayerScore
 };
 
 static MultimodePlayerScore s_PlayerScores[MAX_PLAYERS + 1];
+
+static CHalfLifeMultimode *s_pMultimode = nullptr;
 
 static int SortMultimodePlayerScore(const void *plhs, const void *prhs)
 {
@@ -545,7 +549,7 @@ void CHalfLifeMultimode::CGameState::OnSwitchTo(State oldState)
 {
 	GetMultimodeGR()->m_ModeManager.StartMode();
 
-	m_flEndTime = gpGlobals->time + GetMultimodeGR()->GetGameTime();
+	m_flEndTime = gpGlobals->time + GetMultimodeGR()->GetBaseMode()->GetGameTime();
 
 	// Unfreeze players and play sound on all clients
 	for (int i = 1; i <= gpGlobals->maxClients; i++)
@@ -733,11 +737,62 @@ void CHalfLifeMultimode::CFinalIntermissionState::Think()
 {
 }
 
+void CHalfLifeMultimode::CFinalIntermissionState::OnSwitchTo(State oldState)
+{
+	GetMultimodeGR()->GoToIntermission();
+}
+
+//-------------------------------------------------------------------
+// Playlist
+//-------------------------------------------------------------------
+ModeID CHalfLifeMultimode::CPlaylist::GetNextModeID()
+{
+	if (m_iPos >= (int)m_Queue.size())
+	{
+		return ModeID::None;
+	}
+	else
+	{
+		return m_Queue[m_iPos];
+	}
+}
+
+void CHalfLifeMultimode::CPlaylist::OnModeFinished()
+{
+	m_iPos++;
+}
+
+void CHalfLifeMultimode::CPlaylist::ResetPos()
+{
+	m_iPos = 0;
+}
+
+void CHalfLifeMultimode::CPlaylist::AddAllModes()
+{
+	m_Queue.clear();
+
+	for (CBaseMode *pMode : GetMultimodeGR()->GetModeList())
+	{
+		if (pMode->IsEnabled() && pMode->CanBePlayedOnTheMap() && !pMode->IsInternalMode())
+		{
+			m_Queue.push_back(pMode->GetModeID());
+		}
+	}
+}
+
+void CHalfLifeMultimode::CPlaylist::Shuffle()
+{
+	std::shuffle(m_Queue.begin(), m_Queue.end(), std::default_random_engine(std::time(nullptr)));
+}
+
 //-------------------------------------------------------------------
 // Game Rules
 //-------------------------------------------------------------------
 CHalfLifeMultimode::CHalfLifeMultimode() : CHalfLifeMultiplay()
 {
+	ASSERT(!s_pMultimode);
+	s_pMultimode = this;
+
 	// Do not give crowbar and glock
 	m_bGiveDefaultWeapons = false;
 
@@ -774,21 +829,39 @@ CHalfLifeMultimode::CHalfLifeMultimode() : CHalfLifeMultiplay()
 
 CHalfLifeMultimode::~CHalfLifeMultimode()
 {
+	ASSERT(s_pMultimode);
+	s_pMultimode = nullptr;
 }
 
 void CHalfLifeMultimode::PrepareNextMode(bool bShowModeInfo)
 {
 	m_ModeManager.SwitchOffMode();
 
-	// TODO: Implement queue
-	static int iNextModeIdx = 0;
-	auto &list = m_ModeManager.GetModeList();
-	PrepareMode(list[iNextModeIdx]->GetModeID(), bShowModeInfo);
-	iNextModeIdx++;
-	if (iNextModeIdx == list.size())
+	m_Playlist.OnModeFinished();
+	m_iRoundsFinished++;
+
+	ModeID nextMode = m_Playlist.GetNextModeID();
+
+	if (nextMode == ModeID::None)
 	{
-		iNextModeIdx = 0;
+		if (m_iRoundsFinished >= m_ParsedConfig.rounds)
+		{
+			FinishGame();
+			return;
+		}
+		else
+		{
+			m_Playlist.ResetPos();
+
+			if (m_ParsedConfig.playlistAllRandom)
+				m_Playlist.Shuffle();
+
+			// TODO: Update round info
+			nextMode = m_Playlist.GetNextModeID();
+		}
 	}
+
+	PrepareMode(nextMode, bShowModeInfo);
 
 	m_StateMachine.SwitchTo(State::FreezeTime);
 }
@@ -811,6 +884,29 @@ void CHalfLifeMultimode::FinishMode()
 void CHalfLifeMultimode::SwitchOffMode()
 {
 	m_ModeManager.SwitchOffMode();
+}
+
+void CHalfLifeMultimode::FinishGame()
+{
+	switch (m_ParsedConfig.onEnd)
+	{
+	case EndAction::StartOver:
+	{
+		m_Playlist.Shuffle();
+		m_Playlist.ResetPos();
+		PrepareNextMode();
+		return;
+	}
+	case EndAction::Restart:
+	{
+		m_StateMachine.SwitchTo(State::FinalIntermission);
+		GoToIntermission();
+		return;
+	}
+	default:
+		ASSERT(false);
+		return;
+	}
 }
 
 const char *CHalfLifeMultimode::GetGameDescription()
@@ -841,12 +937,6 @@ void CHalfLifeMultimode::Think()
 	}
 
 	m_StateMachine.Think();
-}
-
-float CHalfLifeMultimode::GetGameTime()
-{
-	// TODO:
-	return m_ParsedConfig.gameTime;
 }
 
 nlohmann::json CHalfLifeMultimode::LoadConfigFile()
@@ -895,6 +985,14 @@ void CHalfLifeMultimode::ApplyConfigFile(const nlohmann::json &config)
 			mmParsedCfg.onEnd = EndAction::Restart;
 		else
 			throw std::runtime_error("multimode.on_end contains invalid value '" + onEnd + "'");
+
+		std::string playlist = mm.at("playlist").get<std::string>();
+		if (playlist == "all")
+			mmParsedCfg.playlistType = PlaylistType::All;
+		else
+			throw std::runtime_error("multimode.playlist contains invalid value '" + playlist + "'");
+
+		mmParsedCfg.rounds = mm.at("rounds").get<int>();
 	}
 	catch (const std::exception &e)
 	{
@@ -905,9 +1003,6 @@ void CHalfLifeMultimode::ApplyConfigFile(const nlohmann::json &config)
 	const nlohmann::json &mode_configs = config.at("modes");
 	for (CBaseMode *mode : m_ModeManager.GetModeList())
 	{
-		// FIXME: HACK
-		if (!mode)
-			continue;
 		try
 		{
 			auto it = mode_configs.find(mode->GetModeName());
@@ -938,9 +1033,6 @@ void CHalfLifeMultimode::ApplyConfigFile(const nlohmann::json &config)
 	try {
 		for (CBaseMode *mode : m_ModeManager.GetModeList())
 		{
-			// FIXME: HACK
-			if (!mode)
-				continue;
 			auto it = mode_configs.find(mode->GetModeName());
 			if (it != mode_configs.end())
 			{
@@ -968,6 +1060,15 @@ void CHalfLifeMultimode::ApplyConfigFile(const nlohmann::json &config)
 
 	m_ParsedConfig = mmParsedCfg;
 	InitHudTexts();
+
+	// Load playlist
+	if (m_ParsedConfig.playlistType == PlaylistType::All)
+	{
+		m_Playlist.AddAllModes();
+
+		if (m_ParsedConfig.playlistAllRandom)
+			m_Playlist.Shuffle();
+	}
 }
 
 void CHalfLifeMultimode::InitHudTexts()
@@ -1035,7 +1136,7 @@ bool IsRunningMultimode(ModeID mode)
 CHalfLifeMultimode *GetMultimodeGR()
 {
 	ASSERT(g_multimode);
-	return static_cast<CHalfLifeMultimode *>(g_pGameRules);
+	return s_pMultimode;
 }
 
 CBaseMode *GetRunningMultimodeBase()

@@ -40,6 +40,26 @@ public:
 	 */
 	virtual const char *GetDescription() = 0;
 
+	/**
+	 * Whether or not mode is enabled in the config.
+	 */
+	bool IsEnabled();
+
+	/**
+	 * Get configured length ofthe mode.
+	 */
+	int GetGameTime();
+
+	/**
+	 * If true, the mode won't be added to the playlist.
+	 */
+	virtual bool IsInternalMode();
+
+	/**
+	 * If false, the mode won't be added to the playlist.
+	 */
+	virtual bool CanBePlayedOnTheMap();
+
 protected:
 	CBaseMode();
 
@@ -298,6 +318,9 @@ protected:
 private:
 	CBaseMode(const CBaseMode &) = delete;
 	CBaseMode &operator=(const CBaseMode &) = delete;
+
+	bool m_bIsEnabled = false;
+	int m_iGameTime = 0;
 
 	friend class CHalfLifeMultimode;
 };

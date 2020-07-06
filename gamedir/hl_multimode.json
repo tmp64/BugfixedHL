@@ -13,7 +13,17 @@
         "#on_end_comment1": "Selects behavior when all modes have been played:",
         "#on_end_comment2": " - start_over: the game will continue from the first mode",
         "#on_end_comment3": " - restart: the game will go into final intermission and restart the map",
-        "on_end": "start_over"
+        "on_end": "start_over",
+
+        "#playlist_comment1": "Selection of modes which are going to be played:",
+        "#playlist_comment2": " - all: all enabled modes are added to the playlist",
+        "playlist": "all",
+
+        "#playlist_all_random_comment": "(for playlist == all) Randomize mode order",
+        "playlist_all_random": true,
+
+        "#rounds_comment": "How many rounds to play",
+        "rounds": 1
     },
     "modes": {
         "#example_mode_name": {
@@ -113,7 +123,7 @@
                     "victim": 75
                 }
             },
-			"#enable_crits_comment": "Enable crits when in air",
+            "#enable_crits_comment": "Enable crits when in air",
             "enable_crits": true,
             "#air_time_comment": "How long should the player be in the air",
             "air_time": 0.8,

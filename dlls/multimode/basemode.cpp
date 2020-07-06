@@ -5,6 +5,7 @@
 #include "weapons.h"
 #include "gamerules.h"
 #include "basemode.h"
+#include "multimode_gamerules.h"
 
 CBaseMode::~CBaseMode()
 {
@@ -28,10 +29,21 @@ void CBaseMode::OnPostInit()
 
 void CBaseMode::ValidateConfig(const nlohmann::json &json)
 {
+	if (!json.at("enabled").is_boolean())
+		throw std::runtime_error("'enabled' is not a bool");
+
+	if (!(json.at("game_time").is_number_integer() && json.at("game_time").get<int>() > 0) && !json.at("game_time").is_null())
+		throw std::runtime_error("'game_time' is not an int > 0 or null");
 }
 
 void CBaseMode::ApplyConfig(const nlohmann::json &json)
 {
+	m_bIsEnabled = json.at("enabled").get<bool>();
+
+	if (json.at("game_time").is_number_integer())
+		m_iGameTime = json.at("game_time").get<int>();
+	else if (json.at("game_time").is_null())
+		m_iGameTime = 0;
 }
 
 void CBaseMode::OnFreezeStart()
@@ -213,6 +225,33 @@ void CBaseMode::OnCritHit(CBasePlayer *pAttacker, CBaseEntity *pVictim, int iOri
 		if (!((CBasePlayer *)pVictim)->m_bIsBot)
 			CLIENT_COMMAND(pVictim->edict(), "spk hl_multimode/crit_received.wav\n");
 	}
+}
+
+bool CBaseMode::IsEnabled()
+{
+	return m_bIsEnabled;
+}
+
+int CBaseMode::GetGameTime()
+{
+	if (m_iGameTime == 0)
+	{
+		return GetMultimodeGR()->GetDefaultGameTime();
+	}
+	else
+	{
+		return m_iGameTime;
+	}
+}
+
+bool CBaseMode::IsInternalMode()
+{
+	return false;
+}
+
+bool CBaseMode::CanBePlayedOnTheMap()
+{
+	return true;
 }
 
 CBaseMode::CBaseMode()

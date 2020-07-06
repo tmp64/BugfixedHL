@@ -73,7 +73,7 @@ public:
 		/**
 		 * Returns list of all modes.
 		 */
-		const std::vector<CBaseMode *> &GetModeList()
+		inline const std::vector<CBaseMode *> &GetModeList()
 		{
 			return m_ModeList;
 		}
@@ -153,6 +153,7 @@ public:
 			CBaseState() = default;
 			CBaseState(const CBaseState &) = delete;
 			CBaseState &operator=(const CBaseState &) = delete;
+			virtual ~CBaseState() = default;
 
 			/**
 			 * Called every server frame when state is active.
@@ -300,8 +301,44 @@ public:
 	{
 	public:
 		virtual void Think() override;
+		virtual void OnSwitchTo(State oldState) override;
 	};
 	//-------------------------------------------------------------------
+
+	//-------------------------------------------------------------------
+	// Playlist
+	//-------------------------------------------------------------------
+	class CPlaylist
+	{
+	public:
+		/**
+		 * Returns ID of the next mode in the playlist or ModeID::None if it's the end.
+		 */
+		ModeID GetNextModeID();
+
+		/**
+		 * Call after active mode has finished to update internal mode counter.
+		 */
+		void OnModeFinished();
+
+		/**
+		 * Restarts playlist from beginning.
+		 */
+		void ResetPos();
+
+		/**
+		 * Adds all enabled modes to the playlist.
+		 */
+		void AddAllModes();
+
+		/**
+		 * Shuffles contents of the playlist.
+		 */
+		void Shuffle();
+	private:
+		std::vector<ModeID> m_Queue;
+		int m_iPos = 0;
+	};
 
 	CHalfLifeMultimode();
 	virtual ~CHalfLifeMultimode();
@@ -309,7 +346,7 @@ public:
 	/**
 	 * Prepares next mode in the queue.
 	 * Resets world, respawns and freezes players.
-	 * Switches state to FreezeTime
+	 * Switches state to FreezeTime or finishes the game.
 	 */
 	void PrepareNextMode(bool bShowModeInfo = true);
 
@@ -336,6 +373,11 @@ public:
 	 * State is not changed.
 	 */
 	void SwitchOffMode();
+
+	/**
+	 * Finish the game - go to map vote or restart
+	 */
+	void FinishGame();
 
 	/**
 	 * Returns current state.
@@ -375,6 +417,22 @@ public:
 		return m_ModeManager.GetModeID();
 	}
 
+	/**
+	 * Returns list of all modes.
+	 */
+	inline const std::vector<CBaseMode *> &GetModeList()
+	{
+		return m_ModeManager.GetModeList();
+	}
+
+	/**
+	 * Returns game time frm the config (not overriden by modes).
+	 */
+	inline int GetDefaultGameTime()
+	{
+		return m_ParsedConfig.gameTime;
+	}
+
 	// After primary attack
 	void OnPrimaryAttack(CBasePlayer *pPlayer, CBasePlayerItem *pWeapon);
 
@@ -388,6 +446,11 @@ private:
 		Restart
 	};
 
+	enum class PlaylistType
+	{
+		All,	// All enabled modes are added to the playlist
+	};
+
 	struct ParsedConfig
 	{
 		int minPlayers = 1;
@@ -396,11 +459,16 @@ private:
 		int gameTime = 60;
 		int intermTime = 5;
 		EndAction onEnd = EndAction::StartOver;
+		PlaylistType playlistType = PlaylistType::All;
+		bool playlistAllRandom = true;
+		int rounds = 1;
 	};
 
 	CStateMachine m_StateMachine;
 	CModeManager m_ModeManager;
+	CPlaylist m_Playlist;
 	bool m_bFreezeOnSpawn = false;
+	int m_iRoundsFinished = 0;
 
 	//-------------------------------------------------------------------
 	// Const data (not changed during runtime)
@@ -447,7 +515,6 @@ private:
 	void InitHudTexts();
 
 	//-------------------------------------------------------------------
-	float GetGameTime();
 
 	friend bool IsRunningMultimode(ModeID mode);
 
