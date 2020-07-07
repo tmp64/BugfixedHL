@@ -1010,7 +1010,7 @@ void CHalfLifeMultimode::ApplyConfigFile(const nlohmann::json &config)
 		else
 			throw std::runtime_error("multimode.playlist contains invalid value '" + playlist + "'");
 
-		mmParsedCfg.playlistAllRandom = mm.at("playlist_all_random").get<bool>();
+		mmParsedCfg.playlistAllShuffle = mm.at("playlist_all_shuffle").get<bool>();
 
 		mmParsedCfg.rounds = mm.at("rounds").get<int>();
 		mmParsedCfg.roundsShuffle = mm.at("rounds_shuffle").get<bool>();
@@ -1087,7 +1087,7 @@ void CHalfLifeMultimode::ApplyConfigFile(const nlohmann::json &config)
 	{
 		m_Playlist.AddAllModes();
 
-		if (m_ParsedConfig.playlistAllRandom)
+		if (m_ParsedConfig.playlistAllShuffle)
 			m_Playlist.Shuffle();
 	}
 }

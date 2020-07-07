@@ -19,11 +19,13 @@
         "#playlist_comment2": " - all: all enabled modes are added to the playlist",
         "playlist": "all",
 
-        "#playlist_all_random_comment": "(for playlist == all) Randomize mode order",
-        "playlist_all_random": true,
+        "#playlist_all_shuffle_comment": "(for playlist == all) Randomize mode order",
+        "playlist_all_shuffle": true,
 
         "#rounds_comment": "How many rounds to play",
-        "rounds": 1
+        "rounds": 3,
+        "#rounds_shuffle_comment": "Shuffle playlist after each round",
+        "rounds_shuffle": true
     },
     "modes": {
         "#example_mode_name": {

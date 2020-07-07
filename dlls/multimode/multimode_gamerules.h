@@ -460,7 +460,7 @@ private:
 		int intermTime = 5;
 		EndAction onEnd = EndAction::StartOver;
 		PlaylistType playlistType = PlaylistType::All;
-		bool playlistAllRandom = true;
+		bool playlistAllShuffle = true;
 		int rounds = 1;
 		bool roundsShuffle = true;
 	};
