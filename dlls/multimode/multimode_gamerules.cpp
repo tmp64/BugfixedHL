@@ -1014,6 +1014,9 @@ void CHalfLifeMultimode::ApplyConfigFile(const nlohmann::json &config)
 
 		mmParsedCfg.rounds = mm.at("rounds").get<int>();
 		mmParsedCfg.roundsShuffle = mm.at("rounds_shuffle").get<bool>();
+
+		if (mmParsedCfg.onEnd == EndAction::StartOver)
+			UTIL_LogPrintf("Multimode Warning: onEnd = start_over is deprecated. It may not work as expected.\n");
 	}
 	catch (const std::exception &e)
 	{
