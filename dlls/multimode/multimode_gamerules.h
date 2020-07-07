@@ -462,6 +462,7 @@ private:
 		PlaylistType playlistType = PlaylistType::All;
 		bool playlistAllRandom = true;
 		int rounds = 1;
+		bool roundsShuffle = true;
 	};
 
 	CStateMachine m_StateMachine;

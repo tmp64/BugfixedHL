@@ -489,6 +489,17 @@ void CHalfLifeMultimode::CFreezeTimeState::Think()
 			}
 		}
 
+		// Show round count
+		int maxRounds = GetMultimodeGR()->m_ParsedConfig.rounds;
+
+		if (maxRounds > 1)
+		{
+			char buf[128];
+			int roundCount = GetMultimodeGR()->m_iRoundsFinished + 1;
+			snprintf(buf, sizeof(buf), "Round %d/%d", roundCount, maxRounds);
+			UTIL_DirectorHudMessageAll(GetMultimodeGR()->m_TimerTextParams, buf, false);
+		}
+
 		m_iFreezeNextSec--;
 		m_flNextTimerUpdate = gpGlobals->time + 1;
 	}
@@ -510,7 +521,14 @@ void CHalfLifeMultimode::CGameState::Think()
 	{
 		char buf[128];
 		int seconds = m_flEndTime - gpGlobals->time;
-		snprintf(buf, sizeof(buf), "%d:%02d", seconds / 60, seconds % 60);
+		int roundCount = GetMultimodeGR()->m_iRoundsFinished + 1;
+		int maxRounds = GetMultimodeGR()->m_ParsedConfig.rounds;
+
+		if (maxRounds > 1)
+			snprintf(buf, sizeof(buf), "Round %d/%d\n%d:%02d", roundCount, maxRounds, seconds / 60, seconds % 60);
+		else
+			snprintf(buf, sizeof(buf), "%d:%02d", seconds / 60, seconds % 60);
+
 		UTIL_DirectorHudMessageAll(GetMultimodeGR()->m_TimerTextParams, buf, false);
 
 		if (seconds <= 4)
@@ -838,12 +856,13 @@ void CHalfLifeMultimode::PrepareNextMode(bool bShowModeInfo)
 	m_ModeManager.SwitchOffMode();
 
 	m_Playlist.OnModeFinished();
-	m_iRoundsFinished++;
 
 	ModeID nextMode = m_Playlist.GetNextModeID();
 
 	if (nextMode == ModeID::None)
 	{
+		m_iRoundsFinished++;
+
 		if (m_iRoundsFinished >= m_ParsedConfig.rounds)
 		{
 			FinishGame();
@@ -853,10 +872,9 @@ void CHalfLifeMultimode::PrepareNextMode(bool bShowModeInfo)
 		{
 			m_Playlist.ResetPos();
 
-			if (m_ParsedConfig.playlistAllRandom)
+			if (m_ParsedConfig.roundsShuffle)
 				m_Playlist.Shuffle();
 
-			// TODO: Update round info
 			nextMode = m_Playlist.GetNextModeID();
 		}
 	}
@@ -892,6 +910,7 @@ void CHalfLifeMultimode::FinishGame()
 	{
 	case EndAction::StartOver:
 	{
+		m_iRoundsFinished = 0;
 		m_Playlist.Shuffle();
 		m_Playlist.ResetPos();
 		PrepareNextMode();
@@ -900,7 +919,6 @@ void CHalfLifeMultimode::FinishGame()
 	case EndAction::Restart:
 	{
 		m_StateMachine.SwitchTo(State::FinalIntermission);
-		GoToIntermission();
 		return;
 	}
 	default:
@@ -992,7 +1010,10 @@ void CHalfLifeMultimode::ApplyConfigFile(const nlohmann::json &config)
 		else
 			throw std::runtime_error("multimode.playlist contains invalid value '" + playlist + "'");
 
+		mmParsedCfg.playlistAllRandom = mm.at("playlist_all_random").get<bool>();
+
 		mmParsedCfg.rounds = mm.at("rounds").get<int>();
+		mmParsedCfg.roundsShuffle = mm.at("rounds_shuffle").get<bool>();
 	}
 	catch (const std::exception &e)
 	{
