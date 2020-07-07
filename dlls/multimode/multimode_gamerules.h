@@ -327,14 +327,18 @@ public:
 		void ResetPos();
 
 		/**
-		 * Adds all enabled modes to the playlist.
-		 */
-		void AddAllModes();
-
-		/**
 		 * Shuffles contents of the playlist.
 		 */
 		void Shuffle();
+
+		/**
+		 * Returns a reference to the queue.
+		 * ResetPos() must be called after any modifications.
+		 */
+		inline std::vector<ModeID> &GetQueue()
+		{
+			return m_Queue;
+		}
 	private:
 		std::vector<ModeID> m_Queue;
 		int m_iPos = 0;
@@ -449,6 +453,7 @@ private:
 	enum class PlaylistType
 	{
 		All,	// All enabled modes are added to the playlist
+		Random,	// Select N random modes in a random order
 	};
 
 	struct ParsedConfig
@@ -461,6 +466,7 @@ private:
 		EndAction onEnd = EndAction::StartOver;
 		PlaylistType playlistType = PlaylistType::All;
 		bool playlistAllShuffle = true;
+		int playlistRandomCount = 1;
 		int rounds = 1;
 		bool roundsShuffle = true;
 	};

@@ -17,10 +17,14 @@
 
         "#playlist_comment1": "Selection of modes which are going to be played:",
         "#playlist_comment2": " - all: all enabled modes are added to the playlist",
+        "#playlist_comment3": " - random: select N random modes in a random order",
         "playlist": "all",
 
         "#playlist_all_shuffle_comment": "(for playlist == all) Randomize mode order",
         "playlist_all_shuffle": true,
+
+        "#playlist_random_count_comment": "(for playlist == random) How many modes to use",
+        "playlist_random_count": 3,
 
         "#rounds_comment": "How many rounds to play",
         "rounds": 3,

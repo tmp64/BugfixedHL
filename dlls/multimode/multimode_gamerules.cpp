@@ -154,6 +154,7 @@ void CHalfLifeMultimode::CModeManager::SwitchOffMode()
 	}
 
 	m_pActiveMode = nullptr;
+	m_ActiveModeID = ModeID::None;
 }
 
 void CHalfLifeMultimode::CModeManager::PrepareWorld()
@@ -603,6 +604,7 @@ void CHalfLifeMultimode::CIntermissionState::Think()
 {
 	if (gpGlobals->time >= m_flIntermEndTime)
 	{
+		GetMultimodeGR()->m_Playlist.OnModeFinished();
 		GetMultimodeGR()->PrepareNextMode();
 	}
 }
@@ -785,19 +787,6 @@ void CHalfLifeMultimode::CPlaylist::ResetPos()
 	m_iPos = 0;
 }
 
-void CHalfLifeMultimode::CPlaylist::AddAllModes()
-{
-	m_Queue.clear();
-
-	for (CBaseMode *pMode : GetMultimodeGR()->GetModeList())
-	{
-		if (pMode->IsEnabled() && pMode->CanBePlayedOnTheMap() && !pMode->IsInternalMode())
-		{
-			m_Queue.push_back(pMode->GetModeID());
-		}
-	}
-}
-
 void CHalfLifeMultimode::CPlaylist::Shuffle()
 {
 	std::shuffle(m_Queue.begin(), m_Queue.end(), std::default_random_engine(std::time(nullptr)));
@@ -854,8 +843,6 @@ CHalfLifeMultimode::~CHalfLifeMultimode()
 void CHalfLifeMultimode::PrepareNextMode(bool bShowModeInfo)
 {
 	m_ModeManager.SwitchOffMode();
-
-	m_Playlist.OnModeFinished();
 
 	ModeID nextMode = m_Playlist.GetNextModeID();
 
@@ -951,6 +938,7 @@ void CHalfLifeMultimode::Think()
 	else if (mp_mm_skip_mode.Get() > 0)
 	{
 		mp_mm_skip_mode.Set(mp_mm_skip_mode.Get() - 1);
+		m_Playlist.OnModeFinished();
 		PrepareNextMode();
 	}
 
@@ -1007,10 +995,13 @@ void CHalfLifeMultimode::ApplyConfigFile(const nlohmann::json &config)
 		std::string playlist = mm.at("playlist").get<std::string>();
 		if (playlist == "all")
 			mmParsedCfg.playlistType = PlaylistType::All;
+		else if (playlist == "random")
+			mmParsedCfg.playlistType = PlaylistType::Random;
 		else
 			throw std::runtime_error("multimode.playlist contains invalid value '" + playlist + "'");
 
 		mmParsedCfg.playlistAllShuffle = mm.at("playlist_all_shuffle").get<bool>();
+		mmParsedCfg.playlistRandomCount = mm.at("playlist_random_count").get<int>();
 
 		mmParsedCfg.rounds = mm.at("rounds").get<int>();
 		mmParsedCfg.roundsShuffle = mm.at("rounds_shuffle").get<bool>();
@@ -1085,14 +1076,52 @@ void CHalfLifeMultimode::ApplyConfigFile(const nlohmann::json &config)
 	m_ParsedConfig = mmParsedCfg;
 	InitHudTexts();
 
-	// Load playlist
-	if (m_ParsedConfig.playlistType == PlaylistType::All)
+	// Prepare list of available modes
+	std::vector<CBaseMode *> availModeList;
+	for (CBaseMode *pMode : GetModeList())
 	{
-		m_Playlist.AddAllModes();
+		if (pMode->IsEnabled() && pMode->CanBePlayedOnTheMap() && !pMode->IsInternalMode())
+		{
+			availModeList.push_back(pMode);
+		}
+	}
+
+	// Load playlist
+	switch (m_ParsedConfig.playlistType)
+	{
+	case PlaylistType::All:
+	{
+		m_Playlist.GetQueue().clear();
+
+		for (CBaseMode *pMode : availModeList)
+		{
+			m_Playlist.GetQueue().push_back(pMode->GetModeID());
+		}
 
 		if (m_ParsedConfig.playlistAllShuffle)
 			m_Playlist.Shuffle();
+
+		break;
 	}
+	case PlaylistType::Random:
+	{
+		int count = std::min(m_ParsedConfig.playlistRandomCount, (int)availModeList.size());
+		std::vector<CBaseMode *> modeList = availModeList;
+
+		for (int i = 0; i < count; i++)
+		{
+			auto it = modeList.begin() + RANDOM_LONG(0, modeList.size() - 1);
+			m_Playlist.GetQueue().push_back((*it)->GetModeID());
+			modeList.erase(it);
+		}
+
+		m_Playlist.Shuffle();
+
+		break;
+	}
+	}
+
+	m_Playlist.ResetPos();
 }
 
 void CHalfLifeMultimode::InitHudTexts()
