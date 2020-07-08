@@ -144,6 +144,13 @@ void CBossMode::OnEnd()
 void CBossMode::OnSwitchOff()
 {
 	SetBoss(nullptr);
+
+	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	{
+		CBasePlayer *pPlayer = (CBasePlayer *)UTIL_PlayerByIndex(i);
+		if (pPlayer)
+			DisableTeamDmgGlow(pPlayer);
+	}
 }
 
 void CBossMode::Think()
