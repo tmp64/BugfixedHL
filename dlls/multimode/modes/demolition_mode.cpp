@@ -33,7 +33,7 @@ const char *CDemolitionMode::GetShortTitle()
 const char *CDemolitionMode::GetDescription()
 {
 	if (RANDOM_FLOAT(0, 1) <= 0.00007)
-		return "Waht makes me a good demoman? If I were a bad demoman, I wouldn't be sittin' here discussin' it with ya now, would I?";
+		return "What makes me a good demoman? If I were a bad demoman, I wouldn't be sittin' here discussin' it with ya now, would I?";
 	else
 		return "Use explosives to eliminate your enemies.\nRocket jumps are encouraged.";
 }
