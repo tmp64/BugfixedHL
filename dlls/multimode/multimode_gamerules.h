@@ -452,8 +452,9 @@ private:
 
 	enum class PlaylistType
 	{
-		All,	// All enabled modes are added to the playlist
-		Random,	// Select N random modes in a random order
+		All,		// All enabled modes are added to the playlist
+		Random,		// Select N random modes in a random order
+		OneMode,	// Selects only one specified mode
 	};
 
 	struct ParsedConfig
@@ -467,6 +468,7 @@ private:
 		PlaylistType playlistType = PlaylistType::All;
 		bool playlistAllShuffle = true;
 		int playlistRandomCount = 1;
+		std::string playlistOneMode = "";
 		int rounds = 1;
 		bool roundsShuffle = true;
 	};

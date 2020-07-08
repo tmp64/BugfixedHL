@@ -26,4 +26,6 @@ add_sources(
 	modes/speed_mode.cpp
 	modes/boss_mode.h
 	modes/boss_mode.cpp
+	modes/demolition_mode.h
+	modes/demolition_mode.cpp
 )

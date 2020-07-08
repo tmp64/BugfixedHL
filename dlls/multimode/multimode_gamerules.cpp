@@ -21,6 +21,7 @@
 #include "modes/slowrockets_mode.h"
 #include "modes/speed_mode.h"
 #include "modes/boss_mode.h"
+#include "modes/demolition_mode.h"
 
 extern int g_multimode;
 
@@ -73,6 +74,7 @@ CHalfLifeMultimode::CModeManager::CModeManager()
 	RegisterMode<CSlowRocketsMode>();
 	RegisterMode<CSpeedMode>();
 	RegisterMode<CBossMode>();
+	RegisterMode<CDemolitionMode>();
 }
 
 CHalfLifeMultimode::CModeManager::~CModeManager()
@@ -997,11 +999,14 @@ void CHalfLifeMultimode::ApplyConfigFile(const nlohmann::json &config)
 			mmParsedCfg.playlistType = PlaylistType::All;
 		else if (playlist == "random")
 			mmParsedCfg.playlistType = PlaylistType::Random;
+		else if (playlist == "one_mode")
+			mmParsedCfg.playlistType = PlaylistType::OneMode;
 		else
 			throw std::runtime_error("multimode.playlist contains invalid value '" + playlist + "'");
 
 		mmParsedCfg.playlistAllShuffle = mm.at("playlist_all_shuffle").get<bool>();
 		mmParsedCfg.playlistRandomCount = mm.at("playlist_random_count").get<int>();
+		mmParsedCfg.playlistOneMode = mm.at("playlist_one_mode").get<std::string>();
 
 		mmParsedCfg.rounds = mm.at("rounds").get<int>();
 		mmParsedCfg.roundsShuffle = mm.at("rounds_shuffle").get<bool>();
@@ -1116,6 +1121,26 @@ void CHalfLifeMultimode::ApplyConfigFile(const nlohmann::json &config)
 		}
 
 		m_Playlist.Shuffle();
+
+		break;
+	}
+	case PlaylistType::OneMode:
+	{
+		ModeID id = ModeID::None;
+		
+		for (CBaseMode *pMode : availModeList)
+		{
+			if (pMode->GetModeName() == m_ParsedConfig.playlistOneMode)
+			{
+				id = pMode->GetModeID();
+				break;
+			}
+		}
+
+		if (id == ModeID::None)
+			throw std::runtime_error("multimode.playlist_one_mode: unknown mode " + m_ParsedConfig.playlistOneMode);
+
+		m_Playlist.GetQueue().push_back(id);
 
 		break;
 	}

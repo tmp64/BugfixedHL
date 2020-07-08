@@ -18,6 +18,7 @@
         "#playlist_comment1": "Selection of modes which are going to be played:",
         "#playlist_comment2": " - all: all enabled modes are added to the playlist",
         "#playlist_comment3": " - random: select N random modes in a random order",
+        "#playlist_comment4": " - one_mode: selects only one specified mode",
         "playlist": "all",
 
         "#playlist_all_shuffle_comment": "(for playlist == all) Randomize mode order",
@@ -25,6 +26,9 @@
 
         "#playlist_random_count_comment": "(for playlist == random) How many modes to use",
         "playlist_random_count": 3,
+
+        "#playlist_one_mode_comment": "(for playlist == one_mode) The mode",
+        "playlist_one_mode": "demolition",
 
         "#rounds_comment": "How many rounds to play",
         "rounds": 3,
@@ -206,6 +210,17 @@
             "win_max_score": 10,
             "#lose_score_comment": "How many points the boss gets after loss (excluding kills)",
             "lose_score": 3
+        },
+
+        "demolition": {
+            "#enabled_comment": "Whether or not this mode will be added to the playlist",
+            "enabled": true,
+            "#game_time_comment": "Override game_time for this mode",
+            "game_time": null,
+            "#hp_comment": "Health of the players",
+            "hp": 150,
+            "#satchel_limit_comment": "Maximum number of satchels carried (max 5)",
+            "satchel_limit": 5
         }
     }
 }

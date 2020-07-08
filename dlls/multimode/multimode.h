@@ -16,6 +16,7 @@ enum class ModeID : int
 	SlowRockets,
 	Speed,
 	BossFight,
+	Demolition,
 	ModeCount
 };
 
