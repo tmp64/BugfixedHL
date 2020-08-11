@@ -220,7 +220,9 @@ void SvcPrint(void)
 		if (!strncmp(str, "\"mp_timelimit\" changed to \"", 27) ||
 			!strncmp(str, "\"amx_nextmap\" changed to \"", 26))
 		{
-			//gHUD.m_Timer->DoResync();
+#ifdef _WIN32
+			gHUD.m_Timer->DoResync();
+#endif
 		}
 		else if (gViewPort && gViewPort->m_pScoreBoard && gViewPort->m_pScoreBoard->m_iStatusRequestState != STATUS_REQUEST_IDLE)
 		{
