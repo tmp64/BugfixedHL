@@ -4,6 +4,16 @@
 // https://github.com/tmp64/BugfixedHL
 //------------------------------------
 
+#if defined _bugfixedapi_included
+	#endinput
+#endif
+#define _bugfixedapi_included
+
+#pragma reqlib bugfixedapi
+#if !defined AMXMODX_NOAUTOLOAD
+	#pragma loadlib bugfixedapi
+#endif
+
 enum E_ClientSupports
 {
 	AGHL_SUPPORTS_NONE = 0,
