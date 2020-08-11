@@ -545,7 +545,6 @@ void CHud :: Init( void )
 	m_pCvarBunnyHop = CVAR_CREATE( "cl_bunnyhop", "1", 0 );		// controls client-side bunnyhop enabling
 	CVAR_CREATE( "cl_autowepswitch", "1", FCVAR_BHL_ARCHIVE | FCVAR_USERINFO );		// controls autoswitching to best weapon on pickup
 	m_pCvarHideCorpses = CVAR_CREATE("cl_hidecorpses", "0", FCVAR_ARCHIVE);
-	m_pCvarFixStandingCorpses = CVAR_CREATE("cl_fix_standing_corpses", "0", FCVAR_ARCHIVE);
 
 	default_fov = CVAR_CREATE( "default_fov", "90", FCVAR_BHL_ARCHIVE);
 	m_pCvarStealMouse = CVAR_CREATE( "hud_capturemouse", "1", FCVAR_ARCHIVE );
