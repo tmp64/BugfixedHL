@@ -24,6 +24,9 @@ if ($target -eq 'Client')
     $TARGET_BINARY_DIR = 'cl_dlls';
 
     $TARGET_GAME_FILES += $TARGET_COMMON_FILES;
+    $TARGET_GAME_FILES += @(
+        ,@('gamedir/sprites', 'sprites')
+    );
 }
 elseif ($target -eq 'ClientVGUI2')
 {
@@ -33,8 +36,9 @@ elseif ($target -eq 'ClientVGUI2')
 
     $TARGET_GAME_FILES += $TARGET_COMMON_FILES;
     $TARGET_GAME_FILES += @(
-        ,@('gamedir/ui', 'ui')
         ,@('gamedir/resource', 'resource')
+        ,@('gamedir/sprites', 'sprites')
+        ,@('gamedir/ui', 'ui')
     );
 }
 elseif ($target -eq 'Client4554')
@@ -45,8 +49,9 @@ elseif ($target -eq 'Client4554')
 
     $TARGET_GAME_FILES += $TARGET_COMMON_FILES;
     $TARGET_GAME_FILES += @(
-        ,@('gamedir/ui', 'ui')
         ,@('gamedir/resource', 'resource')
+        ,@('gamedir/sprites', 'sprites')
+        ,@('gamedir/ui', 'ui')
     );
 }
 elseif ($target -eq 'Server')
