@@ -26,6 +26,7 @@ private:
 	struct cvar_s *	m_HUD_saytext_time;
 	cvar_t	*m_pCvarConSayColor;
 	cvar_t	*m_pCvarOldInputPos = nullptr;
+	cvar_t  *m_pCvarSound = nullptr;
 
 	friend void ChatInputPosition(int *x, int *y);
 	friend class CBaseHudChat;
