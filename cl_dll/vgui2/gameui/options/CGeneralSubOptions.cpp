@@ -99,7 +99,10 @@ void CGeneralSubOptions::SetRawInputVal(bool state)
 	else
 		str = "m_input 1";
 	gEngfuncs.pfnClientCmd((char *)str);
+
+#ifndef VGUI2_BUILD_4554
 	gEngfuncs.pfnClientCmd("m_rawinput 0");
+#endif
 }
 
 bool CGeneralSubOptions::GetRawInputVal()
