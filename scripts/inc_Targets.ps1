@@ -71,7 +71,7 @@ elseif ($target -eq 'Amxx')
     $TARGET_HAS_LIB_SUFFIX = $true;
 
     $TARGET_GAME_FILES += @(
-        ,@('gamedir/addons/amxmodx/scripting/bugfixedapi.inc', 'addons/amxmodx/scripting/bugfixedapi.inc')
+        ,@('gamedir/addons/amxmodx/scripting/include/bugfixedapi.inc', 'addons/amxmodx/scripting/include/bugfixedapi.inc')
     );
 }
 else
